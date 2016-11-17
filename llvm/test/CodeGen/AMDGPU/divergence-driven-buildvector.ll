@@ -362,15 +362,15 @@ define amdgpu_kernel void @uniform_vec_i16_LH(ptr addrspace(1) %out, i16 %a, i32
 ; GCN-LABEL: uniform_vec_i16_LH:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
-; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_and_b32 s3, s3, 0xffff0000
-; GCN-NEXT:    s_and_b32 s2, s2, 0xffff
-; GCN-NEXT:    s_or_b32 s2, s2, s3
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
-; GCN-NEXT:    v_mov_b32_e32 v0, s2
+; GCN-NEXT:    s_and_b32 s0, s3, 0xffff0000
+; GCN-NEXT:    s_and_b32 s1, s2, 0xffff
+; GCN-NEXT:    s_or_b32 s0, s1, s0
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
+; GCN-NEXT:    v_mov_b32_e32 v0, s0
 ; GCN-NEXT:    buffer_store_dword v0, off, s[4:7], 0
 ; GCN-NEXT:    s_endpgm
 ;
@@ -453,15 +453,13 @@ define amdgpu_kernel void @uniform_vec_i16_HH(ptr addrspace(1) %out, i32 %a, i32
 ; GCN-LABEL: uniform_vec_i16_HH:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
-; GCN-NEXT:    s_mov_b32 s6, -1
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s4, s0
-; GCN-NEXT:    s_mov_b32 s5, s1
-; GCN-NEXT:    s_lshr_b32 s0, s3, 16
+; GCN-NEXT:    s_lshr_b32 s4, s3, 16
 ; GCN-NEXT:    v_mov_b32_e32 v0, s2
-; GCN-NEXT:    v_alignbit_b32 v0, s0, v0, 16
-; GCN-NEXT:    buffer_store_dword v0, off, s[4:7], 0
+; GCN-NEXT:    s_mov_b32 s3, 0xf000
+; GCN-NEXT:    s_mov_b32 s2, -1
+; GCN-NEXT:    v_alignbit_b32 v0, s4, v0, 16
+; GCN-NEXT:    buffer_store_dword v0, off, s[0:3], 0
 ; GCN-NEXT:    s_endpgm
 ;
 ; GFX9-LABEL: uniform_vec_i16_HH:

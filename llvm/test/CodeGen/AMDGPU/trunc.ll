@@ -39,12 +39,19 @@ define amdgpu_kernel void @trunc_load_shl_i64(ptr addrspace(1) %out, [8 x i32], 
 ; SI: s_load_dwordx2 s[[[LO_SREG:[0-9]+]]:{{[0-9]+\]}}, s{{\[[0-9]+:[0-9]+\]}}, 0xd
 ; VI: s_load_dwordx2 s[[[LO_SREG:[0-9]+]]:{{[0-9]+\]}}, s{{\[[0-9]+:[0-9]+\]}}, 0x34
 ; GCN: s_lshl_b64 s[[[LO_SHL:[0-9]+]]:{{[0-9]+\]}}, s[[[LO_SREG]]:{{[0-9]+\]}}, 2
-; GCN: s_add_u32 s[[LO_SREG2:[0-9]+]], s[[LO_SHL]],
-; GCN: v_mov_b32_e32 v[[LO_VREG:[0-9]+]], s[[LO_SREG2]]
-; SI: buffer_store_dword v[[LO_VREG]],
-; VI: flat_store_dword v[{{[0-9:]+}}], v[[LO_VREG]]
-; GCN: v_mov_b32_e32
-; GCN: v_mov_b32_e32
+; GCN: s_add_u32 s[[LO_SREG2:[0-9]+]], s[[LO_SHL]], 0x3a8
+; SI: v_mov_b32_e32 v[[LO_VREG_1:[0-9]+]], s[[LO_SREG2]]
+; SI: v_mov_b32_e32 v[[LO_VREG_0:[0-9]+]], s[[LO_SREG2]]
+
+
+; VI: v_mov_b32_e32 v[[LO_VREG_0:[0-9]+]], s[[LO_SREG2]]
+; VI: v_mov_b32_e32 v[[LO_VREG_1:[0-9]+]], s[[LO_SREG2]]
+
+; SI: buffer_store_dword v[[LO_VREG_0]],
+; SI: buffer_store_dwordx2 v[[[LO_VREG_1]]:
+
+; VI: flat_store_dword v[{{[0-9:]+}}], v[[LO_VREG_0]]
+; VI: flat_store_dwordx2 v[{{[0-9:]+}}], v[[[LO_VREG_1]]
 define amdgpu_kernel void @trunc_shl_i64(ptr addrspace(1) %out2, ptr addrspace(1) %out, i64 %a) {
   %aa = add i64 %a, 234 ; Prevent shrinking store.
   %b = shl i64 %aa, 2

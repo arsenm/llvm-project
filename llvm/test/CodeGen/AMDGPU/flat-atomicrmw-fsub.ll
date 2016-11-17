@@ -4844,8 +4844,8 @@ define half @flat_agent_atomic_fsub_ret_f16__offset12b_pos(ptr %ptr, half %val) 
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[6:7], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v7
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    flat_load_dword v4, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v6
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -5144,8 +5144,8 @@ define half @flat_agent_atomic_fsub_ret_f16__offset12b_neg(ptr %ptr, half %val) 
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[6:7], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v7
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    flat_load_dword v4, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v6
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -5719,8 +5719,8 @@ define void @flat_agent_atomic_fsub_noret_f16__offset12b_pos(ptr %ptr, half %val
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -6008,8 +6008,8 @@ define void @flat_agent_atomic_fsub_noret_f16__offset12b_neg(ptr %ptr, half %val
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -6737,8 +6737,8 @@ define half @flat_system_atomic_fsub_ret_f16__offset12b_pos(ptr %ptr, half %val)
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[6:7], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v7
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v6
 ; GFX940-NEXT:    flat_load_dword v4, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v6
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -7037,8 +7037,8 @@ define void @flat_system_atomic_fsub_noret_f16__offset12b_pos(ptr %ptr, half %va
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -7684,8 +7684,8 @@ define bfloat @flat_agent_atomic_fsub_ret_bf16__offset12b_pos(ptr %ptr, bfloat %
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -8039,8 +8039,8 @@ define bfloat @flat_agent_atomic_fsub_ret_bf16__offset12b_neg(ptr %ptr, bfloat %
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -8722,8 +8722,8 @@ define void @flat_agent_atomic_fsub_noret_bf16__offset12b_pos(ptr %ptr, bfloat %
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v3, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -9066,8 +9066,8 @@ define void @flat_agent_atomic_fsub_noret_bf16__offset12b_neg(ptr %ptr, bfloat %
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v3, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -9974,8 +9974,8 @@ define bfloat @flat_system_atomic_fsub_ret_bf16__offset12b_pos(ptr %ptr, bfloat 
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v5, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -10329,8 +10329,8 @@ define void @flat_system_atomic_fsub_noret_bf16__offset12b_pos(ptr %ptr, bfloat 
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    flat_load_dword v3, v[0:1]
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4

@@ -197,8 +197,8 @@ define amdgpu_kernel void @v_pack_v2i16(ptr addrspace(1) %in0, ptr addrspace(1) 
 ; GFX7-LABEL: v_pack_v2i16:
 ; GFX7:       ; %bb.0:
 ; GFX7-NEXT:    s_load_dwordx4 s[0:3], s[6:7], 0x0
-; GFX7-NEXT:    s_mov_b32 s7, 0x100f000
 ; GFX7-NEXT:    s_mov_b32 s6, 0
+; GFX7-NEXT:    s_mov_b32 s7, 0x100f000
 ; GFX7-NEXT:    v_lshlrev_b32_e32 v0, 2, v0
 ; GFX7-NEXT:    v_mov_b32_e32 v1, 0
 ; GFX7-NEXT:    s_waitcnt lgkmcnt(0)
@@ -277,8 +277,8 @@ define amdgpu_kernel void @v_pack_v2i16_user(ptr addrspace(1) %in0, ptr addrspac
 ; GFX7-LABEL: v_pack_v2i16_user:
 ; GFX7:       ; %bb.0:
 ; GFX7-NEXT:    s_load_dwordx4 s[0:3], s[6:7], 0x0
-; GFX7-NEXT:    s_mov_b32 s6, 0
 ; GFX7-NEXT:    s_mov_b32 s7, 0x100f000
+; GFX7-NEXT:    s_mov_b32 s6, 0
 ; GFX7-NEXT:    v_lshlrev_b32_e32 v0, 2, v0
 ; GFX7-NEXT:    v_mov_b32_e32 v1, 0
 ; GFX7-NEXT:    s_waitcnt lgkmcnt(0)

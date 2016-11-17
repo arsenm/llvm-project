@@ -671,11 +671,8 @@ define amdgpu_kernel void @call_i64(ptr addrspace(8) inreg %tmp14, i64 inreg %ar
 ; GFX9-O3-NEXT:    s_load_dwordx2 s[4:5], s[2:3], 0x34
 ; GFX9-O3-NEXT:    s_load_dwordx4 s[16:19], s[2:3], 0x24
 ; GFX9-O3-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-O3-NEXT:    v_mov_b32_e32 v0, s5
-; GFX9-O3-NEXT:    s_or_saveexec_b64 s[8:9], -1
-; GFX9-O3-NEXT:    v_cndmask_b32_e64 v6, 0, v0, s[8:9]
-; GFX9-O3-NEXT:    s_mov_b64 exec, s[8:9]
 ; GFX9-O3-NEXT:    v_mov_b32_e32 v0, s4
+; GFX9-O3-NEXT:    v_mov_b32_e32 v1, s5
 ; GFX9-O3-NEXT:    s_or_saveexec_b64 s[20:21], -1
 ; GFX9-O3-NEXT:    s_add_u32 s8, s2, 60
 ; GFX9-O3-NEXT:    s_addc_u32 s9, s3, 0
@@ -685,6 +682,7 @@ define amdgpu_kernel void @call_i64(ptr addrspace(8) inreg %tmp14, i64 inreg %ar
 ; GFX9-O3-NEXT:    s_load_dwordx2 s[22:23], s[2:3], 0x0
 ; GFX9-O3-NEXT:    v_lshlrev_b32_e32 v3, 20, v3
 ; GFX9-O3-NEXT:    v_lshlrev_b32_e32 v4, 10, v4
+; GFX9-O3-NEXT:    v_cndmask_b32_e64 v6, 0, v1, s[20:21]
 ; GFX9-O3-NEXT:    v_cndmask_b32_e64 v7, 0, v0, s[20:21]
 ; GFX9-O3-NEXT:    v_or3_b32 v3, v5, v4, v3
 ; GFX9-O3-NEXT:    s_mov_b64 s[4:5], s[0:1]
@@ -1523,11 +1521,8 @@ define amdgpu_kernel void @strict_wwm_call_i64(ptr addrspace(8) inreg %tmp14, i6
 ; GFX9-O3-NEXT:    s_load_dwordx2 s[4:5], s[2:3], 0x34
 ; GFX9-O3-NEXT:    s_load_dwordx4 s[16:19], s[2:3], 0x24
 ; GFX9-O3-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-O3-NEXT:    v_mov_b32_e32 v0, s5
-; GFX9-O3-NEXT:    s_or_saveexec_b64 s[8:9], -1
-; GFX9-O3-NEXT:    v_cndmask_b32_e64 v6, 0, v0, s[8:9]
-; GFX9-O3-NEXT:    s_mov_b64 exec, s[8:9]
 ; GFX9-O3-NEXT:    v_mov_b32_e32 v0, s4
+; GFX9-O3-NEXT:    v_mov_b32_e32 v1, s5
 ; GFX9-O3-NEXT:    s_or_saveexec_b64 s[20:21], -1
 ; GFX9-O3-NEXT:    s_add_u32 s8, s2, 60
 ; GFX9-O3-NEXT:    s_addc_u32 s9, s3, 0
@@ -1537,6 +1532,7 @@ define amdgpu_kernel void @strict_wwm_call_i64(ptr addrspace(8) inreg %tmp14, i6
 ; GFX9-O3-NEXT:    s_load_dwordx2 s[22:23], s[2:3], 0x0
 ; GFX9-O3-NEXT:    v_lshlrev_b32_e32 v3, 20, v3
 ; GFX9-O3-NEXT:    v_lshlrev_b32_e32 v4, 10, v4
+; GFX9-O3-NEXT:    v_cndmask_b32_e64 v6, 0, v1, s[20:21]
 ; GFX9-O3-NEXT:    v_cndmask_b32_e64 v7, 0, v0, s[20:21]
 ; GFX9-O3-NEXT:    v_or3_b32 v3, v5, v4, v3
 ; GFX9-O3-NEXT:    s_mov_b64 s[4:5], s[0:1]

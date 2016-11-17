@@ -212,12 +212,12 @@ define amdgpu_kernel void @local_size_yz(ptr addrspace(1) %out) {
 ; SI-LABEL: local_size_yz:
 ; SI:       ; %bb.0: ; %entry
 ; SI-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x7
-; SI-NEXT:    s_mov_b32 s7, 0xf000
-; SI-NEXT:    s_waitcnt lgkmcnt(0)
-; SI-NEXT:    s_mul_i32 s0, s0, s1
 ; SI-NEXT:    s_mov_b32 s6, -1
+; SI-NEXT:    s_waitcnt lgkmcnt(0)
 ; SI-NEXT:    s_mov_b32 s4, s2
 ; SI-NEXT:    s_mov_b32 s5, s3
+; SI-NEXT:    s_mul_i32 s0, s0, s1
+; SI-NEXT:    s_mov_b32 s7, 0xf000
 ; SI-NEXT:    v_mov_b32_e32 v0, s0
 ; SI-NEXT:    buffer_store_dword v0, off, s[4:7], 0
 ; SI-NEXT:    s_endpgm

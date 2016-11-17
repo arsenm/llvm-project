@@ -120,8 +120,8 @@ define amdgpu_kernel void @local_address_gep_store(ptr addrspace(3) %out, i32, i
 }
 
 ; FUNC-LABEL: {{^}}local_address_gep_const_offset_store:
-; SI: v_mov_b32_e32 [[VPTR:v[0-9]+]], s{{[0-9]+}}
 ; SI: v_mov_b32_e32 [[VAL:v[0-9]+]], s{{[0-9]+}}
+; SI: v_mov_b32_e32 [[VPTR:v[0-9]+]], s{{[0-9]+}}
 ; SI: ds_write_b32 [[VPTR]], [[VAL]] offset:4
 define amdgpu_kernel void @local_address_gep_const_offset_store(ptr addrspace(3) %out, i32 %val) {
   %gep = getelementptr i32, ptr addrspace(3) %out, i32 1

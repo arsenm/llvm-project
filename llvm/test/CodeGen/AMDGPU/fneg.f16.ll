@@ -192,8 +192,8 @@ define amdgpu_kernel void @v_fneg_fold_f16(ptr addrspace(1) %out, ptr addrspace(
 ; CI-NEXT:    v_cvt_f32_f16_e64 v0, -v0
 ; CI-NEXT:    v_mul_f32_e32 v0, v0, v1
 ; CI-NEXT:    v_cvt_f16_f32_e32 v2, v0
-; CI-NEXT:    v_mov_b32_e32 v0, s0
 ; CI-NEXT:    v_mov_b32_e32 v1, s1
+; CI-NEXT:    v_mov_b32_e32 v0, s0
 ; CI-NEXT:    flat_store_short v[0:1], v2
 ; CI-NEXT:    s_endpgm
 ;
@@ -204,8 +204,8 @@ define amdgpu_kernel void @v_fneg_fold_f16(ptr addrspace(1) %out, ptr addrspace(
 ; GFX8-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s3
 ; GFX8-NEXT:    flat_load_ushort v2, v[0:1]
-; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    s_waitcnt vmcnt(0)
 ; GFX8-NEXT:    v_mul_f16_e64 v2, -v2, v2
 ; GFX8-NEXT:    flat_store_short v[0:1], v2
@@ -482,9 +482,9 @@ define amdgpu_kernel void @v_fneg_fold_v2f16(ptr addrspace(1) %out, ptr addrspac
 ; CI-NEXT:    v_cvt_f16_f32_e32 v3, v1
 ; CI-NEXT:    v_mul_f32_e32 v0, v2, v0
 ; CI-NEXT:    v_cvt_f16_f32_e32 v2, v0
-; CI-NEXT:    v_mov_b32_e32 v0, s0
-; CI-NEXT:    v_lshlrev_b32_e32 v3, 16, v3
 ; CI-NEXT:    v_mov_b32_e32 v1, s1
+; CI-NEXT:    v_lshlrev_b32_e32 v3, 16, v3
+; CI-NEXT:    v_mov_b32_e32 v0, s0
 ; CI-NEXT:    v_or_b32_e32 v2, v2, v3
 ; CI-NEXT:    flat_store_dword v[0:1], v2
 ; CI-NEXT:    s_endpgm
@@ -496,8 +496,8 @@ define amdgpu_kernel void @v_fneg_fold_v2f16(ptr addrspace(1) %out, ptr addrspac
 ; GFX8-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s3
 ; GFX8-NEXT:    flat_load_dword v2, v[0:1]
-; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    s_waitcnt vmcnt(0)
 ; GFX8-NEXT:    v_mul_f16_sdwa v3, -v2, v2 dst_sel:WORD_1 dst_unused:UNUSED_PAD src0_sel:WORD_1 src1_sel:WORD_1
 ; GFX8-NEXT:    v_mul_f16_e64 v2, -v2, v2

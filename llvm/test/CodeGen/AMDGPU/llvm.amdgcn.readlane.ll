@@ -287,14 +287,14 @@ define amdgpu_kernel void @test_readlane_vregs_i32(ptr addrspace(1) %out, ptr ad
 ; CHECK-GISEL-NEXT:    v_add_u32_e32 v0, vcc, v0, v2
 ; CHECK-GISEL-NEXT:    v_addc_u32_e32 v1, vcc, 0, v1, vcc
 ; CHECK-GISEL-NEXT:    flat_load_dwordx2 v[0:1], v[0:1]
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v3, s1
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v2, s0
 ; CHECK-GISEL-NEXT:    s_waitcnt vmcnt(0)
-; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s2, v1
+; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s0, v1
 ; CHECK-GISEL-NEXT:    s_nop 3
-; CHECK-GISEL-NEXT:    v_readlane_b32 s2, v0, s2
+; CHECK-GISEL-NEXT:    v_readlane_b32 s0, v0, s0
 ; CHECK-GISEL-NEXT:    v_mov_b32_e32 v0, s0
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v2, s2
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v1, s1
-; CHECK-GISEL-NEXT:    flat_store_dword v[0:1], v2
+; CHECK-GISEL-NEXT:    flat_store_dword v[2:3], v0
 ; CHECK-GISEL-NEXT:    s_endpgm
   %tid = call i32 @llvm.amdgcn.workitem.id.x()
   %gep.in = getelementptr <2 x i32>, ptr addrspace(1) %in, i32 %tid
@@ -323,8 +323,8 @@ define amdgpu_kernel void @test_readlane_vregs_i64(ptr addrspace(1) %out, ptr ad
 ; CHECK-SDAG-NEXT:    s_nop 3
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s1, v1, s0
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s0, v0, s0
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s1
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[3:4], v[0:1]
 ; CHECK-SDAG-NEXT:    s_endpgm
 ;
@@ -339,15 +339,15 @@ define amdgpu_kernel void @test_readlane_vregs_i64(ptr addrspace(1) %out, ptr ad
 ; CHECK-GISEL-NEXT:    v_addc_u32_e32 v1, vcc, 0, v1, vcc
 ; CHECK-GISEL-NEXT:    flat_load_dwordx4 v[0:3], v[0:1]
 ; CHECK-GISEL-NEXT:    s_waitcnt vmcnt(0)
-; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s3, v2
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v4, s1
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v3, s0
+; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s1, v2
 ; CHECK-GISEL-NEXT:    s_nop 3
-; CHECK-GISEL-NEXT:    v_readlane_b32 s2, v0, s3
-; CHECK-GISEL-NEXT:    v_readlane_b32 s3, v1, s3
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v0, s2
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v3, s1
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v1, s3
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v2, s0
-; CHECK-GISEL-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
+; CHECK-GISEL-NEXT:    v_readlane_b32 s0, v0, s1
+; CHECK-GISEL-NEXT:    v_readlane_b32 s1, v1, s1
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v0, s0
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v1, s1
+; CHECK-GISEL-NEXT:    flat_store_dwordx2 v[3:4], v[0:1]
 ; CHECK-GISEL-NEXT:    s_endpgm
   %tid = call i32 @llvm.amdgcn.workitem.id.x()
   %gep.in = getelementptr <2 x i64>, ptr addrspace(1) %in, i32 %tid
@@ -377,8 +377,8 @@ define amdgpu_kernel void @test_readlane_vregs_f64(ptr addrspace(1) %out, ptr ad
 ; CHECK-SDAG-NEXT:    s_nop 3
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s1, v1, s0
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s0, v0, s0
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s1
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[3:4], v[0:1]
 ; CHECK-SDAG-NEXT:    s_endpgm
 ;
@@ -393,15 +393,15 @@ define amdgpu_kernel void @test_readlane_vregs_f64(ptr addrspace(1) %out, ptr ad
 ; CHECK-GISEL-NEXT:    v_addc_u32_e32 v1, vcc, 0, v1, vcc
 ; CHECK-GISEL-NEXT:    flat_load_dwordx4 v[0:3], v[0:1]
 ; CHECK-GISEL-NEXT:    s_waitcnt vmcnt(0)
-; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s3, v2
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v4, s1
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v3, s0
+; CHECK-GISEL-NEXT:    v_readfirstlane_b32 s1, v2
 ; CHECK-GISEL-NEXT:    s_nop 3
-; CHECK-GISEL-NEXT:    v_readlane_b32 s2, v0, s3
-; CHECK-GISEL-NEXT:    v_readlane_b32 s3, v1, s3
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v0, s2
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v3, s1
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v1, s3
-; CHECK-GISEL-NEXT:    v_mov_b32_e32 v2, s0
-; CHECK-GISEL-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
+; CHECK-GISEL-NEXT:    v_readlane_b32 s0, v0, s1
+; CHECK-GISEL-NEXT:    v_readlane_b32 s1, v1, s1
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v0, s0
+; CHECK-GISEL-NEXT:    v_mov_b32_e32 v1, s1
+; CHECK-GISEL-NEXT:    flat_store_dwordx2 v[3:4], v[0:1]
 ; CHECK-GISEL-NEXT:    s_endpgm
   %tid = call i32 @llvm.amdgcn.workitem.id.x()
   %gep.in = getelementptr <2 x double>, ptr addrspace(1) %in, i32 %tid
@@ -490,10 +490,10 @@ define amdgpu_kernel void @test_readlane_vgpr_imm_i64(ptr addrspace(1) %out) #1 
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s2, v1, 32
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s3, v0, 32
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s2
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s3
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
 ; CHECK-SDAG-NEXT:    s_endpgm
@@ -528,10 +528,10 @@ define amdgpu_kernel void @test_readlane_vgpr_imm_f64(ptr addrspace(1) %out) #1 
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s2, v1, 32
 ; CHECK-SDAG-NEXT:    v_readlane_b32 s3, v0, 32
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s2
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s3
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
 ; CHECK-SDAG-NEXT:    s_endpgm
@@ -596,8 +596,8 @@ define amdgpu_kernel void @test_readlane_copy_from_sgpr_i64(ptr addrspace(1) %ou
 ; CHECK-SDAG-NEXT:    ;;#ASMSTART
 ; CHECK-SDAG-NEXT:    s_mov_b64 s[2:3], 0
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0
@@ -630,8 +630,8 @@ define amdgpu_kernel void @test_readlane_copy_from_sgpr_f64(ptr addrspace(1) %ou
 ; CHECK-SDAG-NEXT:    ;;#ASMSTART
 ; CHECK-SDAG-NEXT:    s_mov_b64 s[2:3], 0
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0

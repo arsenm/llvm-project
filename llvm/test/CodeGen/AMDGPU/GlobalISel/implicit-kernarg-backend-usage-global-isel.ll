@@ -10,25 +10,24 @@
 define amdgpu_kernel void @addrspacecast(ptr addrspace(5) %ptr.private, ptr addrspace(3) %ptr.local) {
 ; GFX8V4-LABEL: addrspacecast:
 ; GFX8V4:       ; %bb.0:
-; GFX8V4-NEXT:    s_load_dwordx2 s[0:1], s[8:9], 0x0
-; GFX8V4-NEXT:    s_load_dwordx2 s[2:3], s[6:7], 0x40
+; GFX8V4-NEXT:    s_load_dwordx2 s[0:1], s[6:7], 0x40
+; GFX8V4-NEXT:    s_load_dwordx2 s[2:3], s[8:9], 0x0
 ; GFX8V4-NEXT:    v_mov_b32_e32 v2, 1
 ; GFX8V4-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX8V4-NEXT:    s_mov_b32 s4, s0
-; GFX8V4-NEXT:    s_mov_b32 s5, s3
-; GFX8V4-NEXT:    s_cmp_lg_u32 s0, -1
-; GFX8V4-NEXT:    s_cselect_b64 s[4:5], s[4:5], 0
-; GFX8V4-NEXT:    s_mov_b32 s6, s1
-; GFX8V4-NEXT:    s_mov_b32 s7, s2
-; GFX8V4-NEXT:    s_cmp_lg_u32 s1, -1
-; GFX8V4-NEXT:    v_mov_b32_e32 v0, s4
-; GFX8V4-NEXT:    s_cselect_b64 s[0:1], s[6:7], 0
-; GFX8V4-NEXT:    v_mov_b32_e32 v1, s5
+; GFX8V4-NEXT:    s_mov_b32 s5, s0
+; GFX8V4-NEXT:    s_mov_b32 s0, s2
+; GFX8V4-NEXT:    s_cmp_lg_u32 s2, -1
+; GFX8V4-NEXT:    s_cselect_b64 s[0:1], s[0:1], 0
+; GFX8V4-NEXT:    s_cmp_lg_u32 s3, -1
+; GFX8V4-NEXT:    s_mov_b32 s4, s3
+; GFX8V4-NEXT:    v_mov_b32_e32 v0, s0
+; GFX8V4-NEXT:    s_cselect_b64 s[2:3], s[4:5], 0
+; GFX8V4-NEXT:    v_mov_b32_e32 v1, s1
 ; GFX8V4-NEXT:    flat_store_dword v[0:1], v2
 ; GFX8V4-NEXT:    s_waitcnt vmcnt(0)
-; GFX8V4-NEXT:    v_mov_b32_e32 v0, s0
+; GFX8V4-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX8V4-NEXT:    v_mov_b32_e32 v2, 2
-; GFX8V4-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8V4-NEXT:    v_mov_b32_e32 v1, s3
 ; GFX8V4-NEXT:    flat_store_dword v[0:1], v2
 ; GFX8V4-NEXT:    s_waitcnt vmcnt(0)
 ; GFX8V4-NEXT:    s_endpgm

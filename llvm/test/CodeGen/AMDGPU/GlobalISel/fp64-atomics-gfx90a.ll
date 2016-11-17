@@ -1638,18 +1638,18 @@ define amdgpu_kernel void @flat_atomic_fmin_f64_noret(ptr %ptr, double %data) {
 ; GFX90A:       ; %bb.0: ; %main_body
 ; GFX90A-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
 ; GFX90A-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], s[4:5], s[4:5] op_sel:[0,1]
-; GFX90A-NEXT:    v_pk_mov_b32 v[2:3], s[6:7], s[6:7] op_sel:[0,1]
-; GFX90A-NEXT:    flat_atomic_min_f64 v[0:1], v[2:3]
+; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], s[6:7], s[6:7] op_sel:[0,1]
+; GFX90A-NEXT:    v_pk_mov_b32 v[2:3], s[4:5], s[4:5] op_sel:[0,1]
+; GFX90A-NEXT:    flat_atomic_min_f64 v[2:3], v[0:1]
 ; GFX90A-NEXT:    s_endpgm
 ;
 ; GFX940-LABEL: flat_atomic_fmin_f64_noret:
 ; GFX940:       ; %bb.0: ; %main_body
 ; GFX940-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
 ; GFX940-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX940-NEXT:    v_mov_b64_e32 v[0:1], s[4:5]
-; GFX940-NEXT:    v_mov_b64_e32 v[2:3], s[6:7]
-; GFX940-NEXT:    flat_atomic_min_f64 v[0:1], v[2:3]
+; GFX940-NEXT:    v_mov_b64_e32 v[0:1], s[6:7]
+; GFX940-NEXT:    v_mov_b64_e32 v[2:3], s[4:5]
+; GFX940-NEXT:    flat_atomic_min_f64 v[2:3], v[0:1]
 ; GFX940-NEXT:    s_endpgm
 main_body:
   %ret = call double @llvm.amdgcn.flat.atomic.fmin.f64.p0.f64(ptr %ptr, double %data)
@@ -1680,18 +1680,18 @@ define amdgpu_kernel void @flat_atomic_fmax_f64_noret(ptr %ptr, double %data) {
 ; GFX90A:       ; %bb.0: ; %main_body
 ; GFX90A-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
 ; GFX90A-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], s[4:5], s[4:5] op_sel:[0,1]
-; GFX90A-NEXT:    v_pk_mov_b32 v[2:3], s[6:7], s[6:7] op_sel:[0,1]
-; GFX90A-NEXT:    flat_atomic_max_f64 v[0:1], v[2:3]
+; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], s[6:7], s[6:7] op_sel:[0,1]
+; GFX90A-NEXT:    v_pk_mov_b32 v[2:3], s[4:5], s[4:5] op_sel:[0,1]
+; GFX90A-NEXT:    flat_atomic_max_f64 v[2:3], v[0:1]
 ; GFX90A-NEXT:    s_endpgm
 ;
 ; GFX940-LABEL: flat_atomic_fmax_f64_noret:
 ; GFX940:       ; %bb.0: ; %main_body
 ; GFX940-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
 ; GFX940-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX940-NEXT:    v_mov_b64_e32 v[0:1], s[4:5]
-; GFX940-NEXT:    v_mov_b64_e32 v[2:3], s[6:7]
-; GFX940-NEXT:    flat_atomic_max_f64 v[0:1], v[2:3]
+; GFX940-NEXT:    v_mov_b64_e32 v[0:1], s[6:7]
+; GFX940-NEXT:    v_mov_b64_e32 v[2:3], s[4:5]
+; GFX940-NEXT:    flat_atomic_max_f64 v[2:3], v[0:1]
 ; GFX940-NEXT:    s_endpgm
 main_body:
   %ret = call double @llvm.amdgcn.flat.atomic.fmax.f64.p0.f64(ptr %ptr, double %data)

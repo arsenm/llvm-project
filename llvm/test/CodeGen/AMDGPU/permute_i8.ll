@@ -629,14 +629,14 @@ define amdgpu_kernel void @shuffle8i8(ptr addrspace(1) %in0, ptr addrspace(1) %i
 ; GFX10-NEXT:    s_or_b32 s4, s4, s6
 ; GFX10-NEXT:    s_or_b32 s6, s8, s7
 ; GFX10-NEXT:    s_or_b32 s2, s2, s5
-; GFX10-NEXT:    s_and_b32 s4, s4, 0xffff
-; GFX10-NEXT:    s_lshl_b32 s3, s3, 16
-; GFX10-NEXT:    s_and_b32 s2, s2, 0xffff
 ; GFX10-NEXT:    s_lshl_b32 s5, s6, 16
-; GFX10-NEXT:    s_or_b32 s3, s4, s3
+; GFX10-NEXT:    s_and_b32 s4, s4, 0xffff
+; GFX10-NEXT:    s_and_b32 s2, s2, 0xffff
+; GFX10-NEXT:    s_lshl_b32 s3, s3, 16
 ; GFX10-NEXT:    s_or_b32 s2, s2, s5
-; GFX10-NEXT:    v_mov_b32_e32 v0, s3
+; GFX10-NEXT:    s_or_b32 s3, s4, s3
 ; GFX10-NEXT:    v_mov_b32_e32 v1, s2
+; GFX10-NEXT:    v_mov_b32_e32 v0, s3
 ; GFX10-NEXT:    global_store_dwordx2 v2, v[0:1], s[0:1]
 ; GFX10-NEXT:    s_endpgm
 ;
@@ -668,8 +668,8 @@ define amdgpu_kernel void @shuffle8i8(ptr addrspace(1) %in0, ptr addrspace(1) %i
 ; GFX9-NEXT:    s_lshl_b32 s3, s3, 16
 ; GFX9-NEXT:    s_or_b32 s2, s2, s5
 ; GFX9-NEXT:    s_or_b32 s3, s4, s3
-; GFX9-NEXT:    v_mov_b32_e32 v0, s3
 ; GFX9-NEXT:    v_mov_b32_e32 v1, s2
+; GFX9-NEXT:    v_mov_b32_e32 v0, s3
 ; GFX9-NEXT:    global_store_dwordx2 v2, v[0:1], s[0:1]
 ; GFX9-NEXT:    s_endpgm
 bb:

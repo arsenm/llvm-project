@@ -6347,12 +6347,12 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX6-NEXT:    v_cndmask_b32_e32 v6, 0, v6, vcc
 ; GFX6-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
 ; GFX6-NEXT:    v_cndmask_b32_e32 v2, v2, v4, vcc
-; GFX6-NEXT:    v_mov_b32_e32 v3, s0
-; GFX6-NEXT:    v_mov_b32_e32 v4, s1
+; GFX6-NEXT:    v_mov_b32_e32 v3, s1
+; GFX6-NEXT:    v_mov_b32_e32 v4, s0
 ; GFX6-NEXT:    v_cmp_eq_u32_e32 vcc, 0, v7
 ; GFX6-NEXT:    v_and_b32_e32 v10, 0x7f, v0
-; GFX6-NEXT:    v_cndmask_b32_e32 v7, v1, v3, vcc
-; GFX6-NEXT:    v_cndmask_b32_e32 v9, v2, v4, vcc
+; GFX6-NEXT:    v_cndmask_b32_e32 v7, v1, v4, vcc
+; GFX6-NEXT:    v_cndmask_b32_e32 v9, v2, v3, vcc
 ; GFX6-NEXT:    v_sub_i32_e32 v2, vcc, 64, v10
 ; GFX6-NEXT:    v_lshr_b64 v[0:1], s[4:5], v10
 ; GFX6-NEXT:    v_lshl_b64 v[2:3], s[6:7], v2
@@ -6364,11 +6364,11 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX6-NEXT:    v_cmp_gt_u32_e32 vcc, 64, v10
 ; GFX6-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
 ; GFX6-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
-; GFX6-NEXT:    v_mov_b32_e32 v2, s4
-; GFX6-NEXT:    v_mov_b32_e32 v3, s5
+; GFX6-NEXT:    v_mov_b32_e32 v2, s5
+; GFX6-NEXT:    v_mov_b32_e32 v3, s4
 ; GFX6-NEXT:    v_cmp_eq_u32_e64 s[0:1], 0, v10
-; GFX6-NEXT:    v_cndmask_b32_e64 v0, v0, v2, s[0:1]
-; GFX6-NEXT:    v_cndmask_b32_e64 v1, v1, v3, s[0:1]
+; GFX6-NEXT:    v_cndmask_b32_e64 v0, v0, v3, s[0:1]
+; GFX6-NEXT:    v_cndmask_b32_e64 v1, v1, v2, s[0:1]
 ; GFX6-NEXT:    v_cndmask_b32_e32 v2, 0, v4, vcc
 ; GFX6-NEXT:    v_cndmask_b32_e32 v3, 0, v5, vcc
 ; GFX6-NEXT:    v_or_b32_e32 v0, v8, v0
@@ -6399,12 +6399,12 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX8-NEXT:    v_cndmask_b32_e32 v6, 0, v6, vcc
 ; GFX8-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
 ; GFX8-NEXT:    v_cndmask_b32_e32 v2, v2, v4, vcc
-; GFX8-NEXT:    v_mov_b32_e32 v3, s0
-; GFX8-NEXT:    v_mov_b32_e32 v4, s1
+; GFX8-NEXT:    v_mov_b32_e32 v3, s1
+; GFX8-NEXT:    v_mov_b32_e32 v4, s0
 ; GFX8-NEXT:    v_cmp_eq_u32_e32 vcc, 0, v7
 ; GFX8-NEXT:    v_and_b32_e32 v10, 0x7f, v0
-; GFX8-NEXT:    v_cndmask_b32_e32 v7, v1, v3, vcc
-; GFX8-NEXT:    v_cndmask_b32_e32 v9, v2, v4, vcc
+; GFX8-NEXT:    v_cndmask_b32_e32 v7, v1, v4, vcc
+; GFX8-NEXT:    v_cndmask_b32_e32 v9, v2, v3, vcc
 ; GFX8-NEXT:    v_sub_u32_e32 v2, vcc, 64, v10
 ; GFX8-NEXT:    v_lshrrev_b64 v[0:1], v10, s[4:5]
 ; GFX8-NEXT:    v_lshlrev_b64 v[2:3], v2, s[6:7]
@@ -6416,11 +6416,11 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX8-NEXT:    v_cmp_gt_u32_e32 vcc, 64, v10
 ; GFX8-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
 ; GFX8-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
-; GFX8-NEXT:    v_mov_b32_e32 v2, s4
-; GFX8-NEXT:    v_mov_b32_e32 v3, s5
+; GFX8-NEXT:    v_mov_b32_e32 v2, s5
+; GFX8-NEXT:    v_mov_b32_e32 v3, s4
 ; GFX8-NEXT:    v_cmp_eq_u32_e64 s[0:1], 0, v10
-; GFX8-NEXT:    v_cndmask_b32_e64 v0, v0, v2, s[0:1]
-; GFX8-NEXT:    v_cndmask_b32_e64 v1, v1, v3, s[0:1]
+; GFX8-NEXT:    v_cndmask_b32_e64 v0, v0, v3, s[0:1]
+; GFX8-NEXT:    v_cndmask_b32_e64 v1, v1, v2, s[0:1]
 ; GFX8-NEXT:    v_cndmask_b32_e32 v2, 0, v4, vcc
 ; GFX8-NEXT:    v_cndmask_b32_e32 v3, 0, v5, vcc
 ; GFX8-NEXT:    v_or_b32_e32 v0, v8, v0
@@ -6451,13 +6451,13 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX9-NEXT:    v_cndmask_b32_e32 v6, 0, v6, vcc
 ; GFX9-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
 ; GFX9-NEXT:    v_cndmask_b32_e32 v2, v2, v4, vcc
-; GFX9-NEXT:    v_mov_b32_e32 v4, s1
+; GFX9-NEXT:    v_mov_b32_e32 v3, s1
 ; GFX9-NEXT:    v_cmp_eq_u32_e32 vcc, 0, v7
 ; GFX9-NEXT:    v_and_b32_e32 v10, 0x7f, v0
-; GFX9-NEXT:    v_mov_b32_e32 v3, s0
-; GFX9-NEXT:    v_cndmask_b32_e32 v9, v2, v4, vcc
+; GFX9-NEXT:    v_mov_b32_e32 v4, s0
+; GFX9-NEXT:    v_cndmask_b32_e32 v9, v2, v3, vcc
 ; GFX9-NEXT:    v_sub_u32_e32 v2, 64, v10
-; GFX9-NEXT:    v_cndmask_b32_e32 v7, v1, v3, vcc
+; GFX9-NEXT:    v_cndmask_b32_e32 v7, v1, v4, vcc
 ; GFX9-NEXT:    v_lshrrev_b64 v[0:1], v10, s[4:5]
 ; GFX9-NEXT:    v_lshlrev_b64 v[2:3], v2, s[6:7]
 ; GFX9-NEXT:    v_subrev_u32_e32 v11, 64, v10
@@ -6468,11 +6468,11 @@ define amdgpu_ps <4 x float> @v_fshr_i128_ssv(i128 inreg %lhs, i128 inreg %rhs, 
 ; GFX9-NEXT:    v_cmp_gt_u32_e32 vcc, 64, v10
 ; GFX9-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
 ; GFX9-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
-; GFX9-NEXT:    v_mov_b32_e32 v2, s4
-; GFX9-NEXT:    v_mov_b32_e32 v3, s5
+; GFX9-NEXT:    v_mov_b32_e32 v2, s5
+; GFX9-NEXT:    v_mov_b32_e32 v3, s4
 ; GFX9-NEXT:    v_cmp_eq_u32_e64 s[0:1], 0, v10
-; GFX9-NEXT:    v_cndmask_b32_e64 v0, v0, v2, s[0:1]
-; GFX9-NEXT:    v_cndmask_b32_e64 v1, v1, v3, s[0:1]
+; GFX9-NEXT:    v_cndmask_b32_e64 v0, v0, v3, s[0:1]
+; GFX9-NEXT:    v_cndmask_b32_e64 v1, v1, v2, s[0:1]
 ; GFX9-NEXT:    v_cndmask_b32_e32 v2, 0, v4, vcc
 ; GFX9-NEXT:    v_cndmask_b32_e32 v3, 0, v5, vcc
 ; GFX9-NEXT:    v_or_b32_e32 v0, v8, v0
@@ -7134,62 +7134,68 @@ define amdgpu_ps <4 x float> @v_fshr_i128_vss(i128 %lhs, i128 inreg %rhs, i128 i
 define amdgpu_ps i128 @s_fshr_i128_65(i128 inreg %lhs, i128 inreg %rhs) {
 ; GFX6-LABEL: s_fshr_i128_65:
 ; GFX6:       ; %bb.0:
-; GFX6-NEXT:    s_mov_b32 s4, 0
 ; GFX6-NEXT:    s_lshl_b32 s5, s0, 31
-; GFX6-NEXT:    s_lshl_b32 s3, s2, 31
-; GFX6-NEXT:    s_mov_b32 s2, s4
+; GFX6-NEXT:    s_mov_b32 s4, 0
+; GFX6-NEXT:    s_lshr_b64 s[6:7], s[6:7], 1
+; GFX6-NEXT:    s_mov_b32 s8, s4
+; GFX6-NEXT:    s_or_b64 s[4:5], s[4:5], s[6:7]
+; GFX6-NEXT:    s_lshl_b32 s9, s2, 31
 ; GFX6-NEXT:    s_lshr_b64 s[0:1], s[0:1], 1
-; GFX6-NEXT:    s_or_b64 s[2:3], s[2:3], s[0:1]
-; GFX6-NEXT:    s_lshr_b64 s[0:1], s[6:7], 1
-; GFX6-NEXT:    s_or_b64 s[0:1], s[4:5], s[0:1]
+; GFX6-NEXT:    s_or_b64 s[2:3], s[8:9], s[0:1]
+; GFX6-NEXT:    s_mov_b32 s0, s4
+; GFX6-NEXT:    s_mov_b32 s1, s5
 ; GFX6-NEXT:    ; return to shader part epilog
 ;
 ; GFX8-LABEL: s_fshr_i128_65:
 ; GFX8:       ; %bb.0:
-; GFX8-NEXT:    s_mov_b32 s4, 0
 ; GFX8-NEXT:    s_lshl_b32 s5, s0, 31
-; GFX8-NEXT:    s_lshl_b32 s3, s2, 31
-; GFX8-NEXT:    s_mov_b32 s2, s4
+; GFX8-NEXT:    s_mov_b32 s4, 0
+; GFX8-NEXT:    s_lshr_b64 s[6:7], s[6:7], 1
+; GFX8-NEXT:    s_mov_b32 s8, s4
+; GFX8-NEXT:    s_or_b64 s[4:5], s[4:5], s[6:7]
+; GFX8-NEXT:    s_lshl_b32 s9, s2, 31
 ; GFX8-NEXT:    s_lshr_b64 s[0:1], s[0:1], 1
-; GFX8-NEXT:    s_or_b64 s[2:3], s[2:3], s[0:1]
-; GFX8-NEXT:    s_lshr_b64 s[0:1], s[6:7], 1
-; GFX8-NEXT:    s_or_b64 s[0:1], s[4:5], s[0:1]
+; GFX8-NEXT:    s_or_b64 s[2:3], s[8:9], s[0:1]
+; GFX8-NEXT:    s_mov_b32 s0, s4
+; GFX8-NEXT:    s_mov_b32 s1, s5
 ; GFX8-NEXT:    ; return to shader part epilog
 ;
 ; GFX9-LABEL: s_fshr_i128_65:
 ; GFX9:       ; %bb.0:
-; GFX9-NEXT:    s_mov_b32 s4, 0
 ; GFX9-NEXT:    s_lshl_b32 s5, s0, 31
-; GFX9-NEXT:    s_lshl_b32 s3, s2, 31
-; GFX9-NEXT:    s_mov_b32 s2, s4
+; GFX9-NEXT:    s_mov_b32 s4, 0
+; GFX9-NEXT:    s_lshr_b64 s[6:7], s[6:7], 1
+; GFX9-NEXT:    s_mov_b32 s8, s4
+; GFX9-NEXT:    s_or_b64 s[4:5], s[4:5], s[6:7]
+; GFX9-NEXT:    s_lshl_b32 s9, s2, 31
 ; GFX9-NEXT:    s_lshr_b64 s[0:1], s[0:1], 1
-; GFX9-NEXT:    s_or_b64 s[2:3], s[2:3], s[0:1]
-; GFX9-NEXT:    s_lshr_b64 s[0:1], s[6:7], 1
-; GFX9-NEXT:    s_or_b64 s[0:1], s[4:5], s[0:1]
+; GFX9-NEXT:    s_or_b64 s[2:3], s[8:9], s[0:1]
+; GFX9-NEXT:    s_mov_b32 s0, s4
+; GFX9-NEXT:    s_mov_b32 s1, s5
 ; GFX9-NEXT:    ; return to shader part epilog
 ;
 ; GFX10-LABEL: s_fshr_i128_65:
 ; GFX10:       ; %bb.0:
 ; GFX10-NEXT:    s_mov_b32 s4, 0
 ; GFX10-NEXT:    s_lshl_b32 s5, s0, 31
-; GFX10-NEXT:    s_lshl_b32 s3, s2, 31
-; GFX10-NEXT:    s_mov_b32 s2, s4
-; GFX10-NEXT:    s_lshr_b64 s[6:7], s[6:7], 1
-; GFX10-NEXT:    s_lshr_b64 s[8:9], s[0:1], 1
-; GFX10-NEXT:    s_or_b64 s[0:1], s[4:5], s[6:7]
-; GFX10-NEXT:    s_or_b64 s[2:3], s[2:3], s[8:9]
+; GFX10-NEXT:    s_mov_b32 s8, s4
+; GFX10-NEXT:    s_lshl_b32 s9, s2, 31
+; GFX10-NEXT:    s_lshr_b64 s[2:3], s[6:7], 1
+; GFX10-NEXT:    s_lshr_b64 s[6:7], s[0:1], 1
+; GFX10-NEXT:    s_or_b64 s[0:1], s[4:5], s[2:3]
+; GFX10-NEXT:    s_or_b64 s[2:3], s[8:9], s[6:7]
 ; GFX10-NEXT:    ; return to shader part epilog
 ;
 ; GFX11-LABEL: s_fshr_i128_65:
 ; GFX11:       ; %bb.0:
 ; GFX11-NEXT:    s_mov_b32 s4, 0
 ; GFX11-NEXT:    s_lshl_b32 s5, s0, 31
-; GFX11-NEXT:    s_lshl_b32 s3, s2, 31
-; GFX11-NEXT:    s_mov_b32 s2, s4
-; GFX11-NEXT:    s_lshr_b64 s[6:7], s[6:7], 1
-; GFX11-NEXT:    s_lshr_b64 s[8:9], s[0:1], 1
-; GFX11-NEXT:    s_or_b64 s[0:1], s[4:5], s[6:7]
-; GFX11-NEXT:    s_or_b64 s[2:3], s[2:3], s[8:9]
+; GFX11-NEXT:    s_mov_b32 s8, s4
+; GFX11-NEXT:    s_lshl_b32 s9, s2, 31
+; GFX11-NEXT:    s_lshr_b64 s[2:3], s[6:7], 1
+; GFX11-NEXT:    s_lshr_b64 s[6:7], s[0:1], 1
+; GFX11-NEXT:    s_or_b64 s[0:1], s[4:5], s[2:3]
+; GFX11-NEXT:    s_or_b64 s[2:3], s[8:9], s[6:7]
 ; GFX11-NEXT:    ; return to shader part epilog
   %result = call i128 @llvm.fshr.i128(i128 %lhs, i128 %rhs, i128 65)
   ret i128 %result

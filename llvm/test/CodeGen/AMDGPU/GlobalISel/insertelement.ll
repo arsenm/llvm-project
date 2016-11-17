@@ -2303,29 +2303,29 @@ define amdgpu_ps void @dyn_insertelement_v8f64_s_s_s_add_1(<8 x double> inreg %v
 ; GPRIDX-NEXT:    s_mov_b32 m0, s20
 ; GPRIDX-NEXT:    s_nop 0
 ; GPRIDX-NEXT:    s_movreld_b64 s[2:3], s[18:19]
-; GPRIDX-NEXT:    v_mov_b32_e32 v0, s0
-; GPRIDX-NEXT:    v_mov_b32_e32 v1, s1
-; GPRIDX-NEXT:    v_mov_b32_e32 v2, s2
-; GPRIDX-NEXT:    v_mov_b32_e32 v3, s3
-; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[0:3], off
-; GPRIDX-NEXT:    s_waitcnt vmcnt(0)
 ; GPRIDX-NEXT:    v_mov_b32_e32 v0, s4
+; GPRIDX-NEXT:    v_mov_b32_e32 v15, s3
 ; GPRIDX-NEXT:    v_mov_b32_e32 v1, s5
 ; GPRIDX-NEXT:    v_mov_b32_e32 v2, s6
 ; GPRIDX-NEXT:    v_mov_b32_e32 v3, s7
+; GPRIDX-NEXT:    v_mov_b32_e32 v4, s8
+; GPRIDX-NEXT:    v_mov_b32_e32 v8, s12
+; GPRIDX-NEXT:    v_mov_b32_e32 v14, s2
+; GPRIDX-NEXT:    v_mov_b32_e32 v13, s1
+; GPRIDX-NEXT:    v_mov_b32_e32 v12, s0
+; GPRIDX-NEXT:    v_mov_b32_e32 v5, s9
+; GPRIDX-NEXT:    v_mov_b32_e32 v6, s10
+; GPRIDX-NEXT:    v_mov_b32_e32 v7, s11
+; GPRIDX-NEXT:    v_mov_b32_e32 v9, s13
+; GPRIDX-NEXT:    v_mov_b32_e32 v10, s14
+; GPRIDX-NEXT:    v_mov_b32_e32 v11, s15
+; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[12:15], off
+; GPRIDX-NEXT:    s_waitcnt vmcnt(0)
 ; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[0:3], off
 ; GPRIDX-NEXT:    s_waitcnt vmcnt(0)
-; GPRIDX-NEXT:    v_mov_b32_e32 v0, s8
-; GPRIDX-NEXT:    v_mov_b32_e32 v1, s9
-; GPRIDX-NEXT:    v_mov_b32_e32 v2, s10
-; GPRIDX-NEXT:    v_mov_b32_e32 v3, s11
-; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[0:3], off
+; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off
 ; GPRIDX-NEXT:    s_waitcnt vmcnt(0)
-; GPRIDX-NEXT:    v_mov_b32_e32 v0, s12
-; GPRIDX-NEXT:    v_mov_b32_e32 v1, s13
-; GPRIDX-NEXT:    v_mov_b32_e32 v2, s14
-; GPRIDX-NEXT:    v_mov_b32_e32 v3, s15
-; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[0:3], off
+; GPRIDX-NEXT:    global_store_dwordx4 v[0:1], v[8:11], off
 ; GPRIDX-NEXT:    s_waitcnt vmcnt(0)
 ; GPRIDX-NEXT:    s_endpgm
 ;

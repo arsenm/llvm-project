@@ -111,8 +111,8 @@ define amdgpu_kernel void @fptrunc(
 ; GCN-NEXT:    s_mov_b32 s10, s2
 ; GCN-NEXT:    s_mov_b32 s11, s3
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    s_mov_b32 s9, s7
+; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    s_mov_b32 s0, s4
 ; GCN-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s1, s5

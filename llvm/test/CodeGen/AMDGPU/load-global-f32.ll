@@ -73,8 +73,9 @@ entry:
 ; GCN-NOHSA: buffer_load_dword
 ; GCN-NOHSA: buffer_load_dwordx4
 ; GCN-NOHSA: buffer_load_dwordx4
-; GCN-HSA: flat_load_dwordx4
+
 ; GCN-HSA: flat_load_dword
+; GCN-HSA: flat_load_dwordx4
 ; GCN-HSA: flat_load_dwordx4
 
 ; R600: VTX_READ_128

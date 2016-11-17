@@ -24,8 +24,8 @@ define amdgpu_kernel void @extract_vector_elt_v2i16(ptr addrspace(1) %out, ptr a
 
 ; GCN-LABEL: {{^}}extract_vector_elt_v2i16_dynamic_sgpr:
 ; GCN: s_load_dword [[IDX:s[0-9]+]]
-; GCN: s_load_dword [[VEC:s[0-9]+]]
-; GCN: s_lshl_b32 [[IDX_SCALED:s[0-9]+]], [[IDX]], 4
+; GCN-DAG: s_load_dword [[VEC:s[0-9]+]]
+; GCN-DAG: s_lshl_b32 [[IDX_SCALED:s[0-9]+]], [[IDX]], 4
 ; GCN: s_lshr_b32 [[ELT1:s[0-9]+]], [[VEC]], [[IDX_SCALED]]
 ; GCN: v_mov_b32_e32 [[VELT1:v[0-9]+]], [[ELT1]]
 ; GCN: buffer_store_short [[VELT1]]

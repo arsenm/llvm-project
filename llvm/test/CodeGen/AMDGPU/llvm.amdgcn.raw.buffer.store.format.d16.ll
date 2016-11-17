@@ -41,8 +41,8 @@ main_body:
 ; UNPACKED: buffer_store_format_d16_xyz v[[[LO]]:[[HI]]], v{{[0-9]+}}, s[{{[0-9]+:[0-9]+}}], 0 offen
 
 ; PACKED: s_and_b32 [[MASKED0:s[0-9]+]], s[[S_DATA_1]], 0xffff{{$}}
-; PACKED: v_mov_b32_e32 v[[LO:[0-9]+]], s[[S_DATA_0]]
-; PACKED: v_mov_b32_e32 v[[HI:[0-9]+]], [[MASKED0]]
+; PACKED-DAG: v_mov_b32_e32 v[[LO:[0-9]+]], s[[S_DATA_0]]
+; PACKED-DAG: v_mov_b32_e32 v[[HI:[0-9]+]], [[MASKED0]]
 
 ; PACKED: buffer_store_format_d16_xyz v[[[LO]]:[[HI]]], v{{[0-9]+}}, s[{{[0-9]+:[0-9]+}}], 0 offen
 define amdgpu_kernel void @buffer_store_format_d16_xyz(<4 x i32> %rsrc, <4 x half> %data, i32 %voffset) {

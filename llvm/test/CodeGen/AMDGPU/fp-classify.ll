@@ -347,7 +347,6 @@ define amdgpu_kernel void @test_isfinite_not_pattern_2(ptr addrspace(1) nocaptur
 ; SI-LABEL: test_isfinite_not_pattern_2:
 ; SI:       ; %bb.0:
 ; SI-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; SI-NEXT:    s_mov_b32 s7, 0xf000
 ; SI-NEXT:    s_mov_b32 s6, -1
 ; SI-NEXT:    v_mov_b32_e32 v0, 0x7f800000
 ; SI-NEXT:    s_waitcnt lgkmcnt(0)
@@ -355,6 +354,7 @@ define amdgpu_kernel void @test_isfinite_not_pattern_2(ptr addrspace(1) nocaptur
 ; SI-NEXT:    s_mov_b32 s5, s1
 ; SI-NEXT:    v_cmp_o_f32_e64 s[0:1], s2, s2
 ; SI-NEXT:    v_cmp_neq_f32_e64 s[2:3], |s3|, v0
+; SI-NEXT:    s_mov_b32 s7, 0xf000
 ; SI-NEXT:    s_and_b64 s[0:1], s[0:1], s[2:3]
 ; SI-NEXT:    v_cndmask_b32_e64 v0, 0, 1, s[0:1]
 ; SI-NEXT:    buffer_store_dword v0, off, s[4:7], 0

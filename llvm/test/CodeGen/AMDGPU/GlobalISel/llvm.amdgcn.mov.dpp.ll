@@ -52,13 +52,13 @@ define amdgpu_kernel void @mov_dpp64_test(ptr addrspace(1) %out, i64 %in1) {
 ; GFX8:       ; %bb.0:
 ; GFX8-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
 ; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX8-NEXT:    v_mov_b32_e32 v0, s2
-; GFX8-NEXT:    v_mov_b32_e32 v1, s3
-; GFX8-NEXT:    v_mov_b32_e32 v3, s1
-; GFX8-NEXT:    v_mov_b32_dpp v0, v0 quad_perm:[1,0,0,0] row_mask:0x1 bank_mask:0x1
-; GFX8-NEXT:    v_mov_b32_dpp v1, v1 quad_perm:[1,0,0,0] row_mask:0x1 bank_mask:0x1
-; GFX8-NEXT:    v_mov_b32_e32 v2, s0
-; GFX8-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
+; GFX8-NEXT:    v_mov_b32_e32 v2, s2
+; GFX8-NEXT:    v_mov_b32_e32 v0, s0
+; GFX8-NEXT:    v_mov_b32_e32 v3, s3
+; GFX8-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8-NEXT:    v_mov_b32_dpp v2, v2 quad_perm:[1,0,0,0] row_mask:0x1 bank_mask:0x1
+; GFX8-NEXT:    v_mov_b32_dpp v3, v3 quad_perm:[1,0,0,0] row_mask:0x1 bank_mask:0x1
+; GFX8-NEXT:    flat_store_dwordx2 v[0:1], v[2:3]
 ; GFX8-NEXT:    s_endpgm
 ;
 ; GFX10-LABEL: mov_dpp64_test:

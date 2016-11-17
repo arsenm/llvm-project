@@ -528,12 +528,12 @@ define amdgpu_ps half @fneg_fadd_0_f16(half inreg %tmp2, half inreg %tmp6, <4 x 
 ; VI-SAFE-LABEL: fneg_fadd_0_f16:
 ; VI-SAFE:       ; %bb.0: ; %.entry
 ; VI-SAFE-NEXT:    v_rcp_f16_e32 v0, s1
-; VI-SAFE-NEXT:    v_mov_b32_e32 v1, s0
+; VI-SAFE-NEXT:    v_mov_b32_e32 v2, s0
 ; VI-SAFE-NEXT:    v_mul_f16_e32 v0, 0, v0
 ; VI-SAFE-NEXT:    v_add_f16_e32 v0, 0, v0
-; VI-SAFE-NEXT:    v_xor_b32_e32 v2, 0x8000, v0
+; VI-SAFE-NEXT:    v_xor_b32_e32 v1, 0x8000, v0
 ; VI-SAFE-NEXT:    v_cmp_ngt_f16_e32 vcc, s0, v0
-; VI-SAFE-NEXT:    v_cndmask_b32_e32 v0, v2, v1, vcc
+; VI-SAFE-NEXT:    v_cndmask_b32_e32 v0, v1, v2, vcc
 ; VI-SAFE-NEXT:    v_mov_b32_e32 v1, 0x7e00
 ; VI-SAFE-NEXT:    v_cmp_nlt_f16_e32 vcc, 0, v0
 ; VI-SAFE-NEXT:    v_cndmask_b32_e64 v0, v1, 0, vcc
@@ -542,11 +542,11 @@ define amdgpu_ps half @fneg_fadd_0_f16(half inreg %tmp2, half inreg %tmp6, <4 x 
 ; VI-NSZ-LABEL: fneg_fadd_0_f16:
 ; VI-NSZ:       ; %bb.0: ; %.entry
 ; VI-NSZ-NEXT:    v_rcp_f16_e32 v0, s1
-; VI-NSZ-NEXT:    v_mov_b32_e32 v1, s0
+; VI-NSZ-NEXT:    v_mov_b32_e32 v2, s0
+; VI-NSZ-NEXT:    v_mov_b32_e32 v1, 0x7e00
 ; VI-NSZ-NEXT:    v_mul_f16_e32 v0, 0x8000, v0
 ; VI-NSZ-NEXT:    v_cmp_nlt_f16_e64 vcc, -v0, s0
-; VI-NSZ-NEXT:    v_cndmask_b32_e32 v0, v0, v1, vcc
-; VI-NSZ-NEXT:    v_mov_b32_e32 v1, 0x7e00
+; VI-NSZ-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
 ; VI-NSZ-NEXT:    v_cmp_nlt_f16_e32 vcc, 0, v0
 ; VI-NSZ-NEXT:    v_cndmask_b32_e64 v0, v1, 0, vcc
 ; VI-NSZ-NEXT:    ; return to shader part epilog
@@ -635,11 +635,11 @@ define amdgpu_ps half @fneg_fadd_0_nsz_f16(half inreg %tmp2, half inreg %tmp6, <
 ; VI-NSZ-LABEL: fneg_fadd_0_nsz_f16:
 ; VI-NSZ:       ; %bb.0: ; %.entry
 ; VI-NSZ-NEXT:    v_rcp_f16_e32 v0, s1
-; VI-NSZ-NEXT:    v_mov_b32_e32 v1, s0
+; VI-NSZ-NEXT:    v_mov_b32_e32 v2, s0
+; VI-NSZ-NEXT:    v_mov_b32_e32 v1, 0x7e00
 ; VI-NSZ-NEXT:    v_mul_f16_e32 v0, 0x8000, v0
 ; VI-NSZ-NEXT:    v_cmp_nlt_f16_e64 vcc, -v0, s0
-; VI-NSZ-NEXT:    v_cndmask_b32_e32 v0, v0, v1, vcc
-; VI-NSZ-NEXT:    v_mov_b32_e32 v1, 0x7e00
+; VI-NSZ-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
 ; VI-NSZ-NEXT:    v_cmp_nlt_f16_e32 vcc, 0, v0
 ; VI-NSZ-NEXT:    v_cndmask_b32_e64 v0, v1, 0, vcc
 ; VI-NSZ-NEXT:    ; return to shader part epilog

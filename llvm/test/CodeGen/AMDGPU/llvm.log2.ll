@@ -220,7 +220,6 @@ define amdgpu_kernel void @s_log2_v2f32(ptr addrspace(1) %out, <2 x float> %in) 
 ; SI-SDAG-NEXT:    v_mov_b32_e32 v0, 0x800000
 ; SI-SDAG-NEXT:    v_mov_b32_e32 v1, 0x42000000
 ; SI-SDAG-NEXT:    v_mov_b32_e32 v3, 0x4f800000
-; SI-SDAG-NEXT:    s_mov_b32 s7, 0xf000
 ; SI-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; SI-SDAG-NEXT:    v_cmp_lt_f32_e32 vcc, s3, v0
 ; SI-SDAG-NEXT:    v_cndmask_b32_e32 v2, 0, v1, vcc
@@ -232,12 +231,11 @@ define amdgpu_kernel void @s_log2_v2f32(ptr addrspace(1) %out, <2 x float> %in) 
 ; SI-SDAG-NEXT:    v_mul_f32_e32 v1, s2, v1
 ; SI-SDAG-NEXT:    v_log_f32_e32 v4, v4
 ; SI-SDAG-NEXT:    v_log_f32_e32 v3, v1
-; SI-SDAG-NEXT:    s_mov_b32 s6, -1
-; SI-SDAG-NEXT:    s_mov_b32 s4, s0
-; SI-SDAG-NEXT:    s_mov_b32 s5, s1
+; SI-SDAG-NEXT:    s_mov_b32 s3, 0xf000
+; SI-SDAG-NEXT:    s_mov_b32 s2, -1
 ; SI-SDAG-NEXT:    v_sub_f32_e32 v1, v4, v2
 ; SI-SDAG-NEXT:    v_sub_f32_e32 v0, v3, v0
-; SI-SDAG-NEXT:    buffer_store_dwordx2 v[0:1], off, s[4:7], 0
+; SI-SDAG-NEXT:    buffer_store_dwordx2 v[0:1], off, s[0:3], 0
 ; SI-SDAG-NEXT:    s_endpgm
 ;
 ; SI-GISEL-LABEL: s_log2_v2f32:

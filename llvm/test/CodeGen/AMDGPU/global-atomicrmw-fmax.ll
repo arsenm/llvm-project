@@ -4831,8 +4831,8 @@ define half @global_agent_atomic_fmax_ret_f16__offset12b_pos__amdgpu_no_fine_gra
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -5197,8 +5197,8 @@ define half @global_agent_atomic_fmax_ret_f16__offset12b_neg__amdgpu_no_fine_gra
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -5904,8 +5904,8 @@ define void @global_agent_atomic_fmax_noret_f16__offset12b_pos__amdgpu_no_fine_g
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -6259,8 +6259,8 @@ define void @global_agent_atomic_fmax_noret_f16__offset12b_neg__amdgpu_no_fine_g
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -7159,8 +7159,8 @@ define half @global_system_atomic_fmax_ret_f16__offset12b_pos__amdgpu_no_fine_gr
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -7526,8 +7526,8 @@ define void @global_system_atomic_fmax_noret_f16__offset12b_pos__amdgpu_no_fine_
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -8288,8 +8288,8 @@ define bfloat @global_agent_atomic_fmax_ret_bf16__offset12b_pos__amdgpu_no_fine_
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -8697,8 +8697,8 @@ define bfloat @global_agent_atomic_fmax_ret_bf16__offset12b_neg__amdgpu_no_fine_
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -9485,8 +9485,8 @@ define void @global_agent_atomic_fmax_noret_bf16__offset12b_pos__amdgpu_no_fine_
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -9881,8 +9881,8 @@ define void @global_agent_atomic_fmax_noret_bf16__offset12b_neg__amdgpu_no_fine_
 ; GFX940-NEXT:    s_movk_i32 s0, 0xf800
 ; GFX940-NEXT:    s_mov_b32 s1, -1
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4
@@ -10921,8 +10921,8 @@ define bfloat @global_system_atomic_fmax_ret_bf16__offset12b_pos__amdgpu_no_fine
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v5, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v3, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v3, 3, v3
@@ -11330,8 +11330,8 @@ define void @global_system_atomic_fmax_noret_bf16__offset12b_pos__amdgpu_no_fine
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    s_mov_b64 s[0:1], 0x7fe
 ; GFX940-NEXT:    v_lshl_add_u64 v[4:5], v[0:1], 0, s[0:1]
-; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, v5
+; GFX940-NEXT:    v_and_b32_e32 v0, -4, v4
 ; GFX940-NEXT:    global_load_dword v3, v[0:1], off
 ; GFX940-NEXT:    v_and_b32_e32 v4, 3, v4
 ; GFX940-NEXT:    v_lshlrev_b32_e32 v4, 3, v4

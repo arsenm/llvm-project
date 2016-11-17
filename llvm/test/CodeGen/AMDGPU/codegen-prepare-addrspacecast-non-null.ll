@@ -100,8 +100,8 @@ define void @private_alloca_to_flat(ptr %ptr) {
 ; DAGISEL-ASM:       ; %bb.0:
 ; DAGISEL-ASM-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; DAGISEL-ASM-NEXT:    s_mov_b64 s[4:5], src_private_base
-; DAGISEL-ASM-NEXT:    v_lshrrev_b32_e64 v0, 6, s32
 ; DAGISEL-ASM-NEXT:    v_mov_b32_e32 v1, s5
+; DAGISEL-ASM-NEXT:    v_lshrrev_b32_e64 v0, 6, s32
 ; DAGISEL-ASM-NEXT:    v_mov_b32_e32 v2, 7
 ; DAGISEL-ASM-NEXT:    flat_store_dword v[0:1], v2
 ; DAGISEL-ASM-NEXT:    s_waitcnt vmcnt(0) lgkmcnt(0)

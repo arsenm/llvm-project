@@ -50,25 +50,25 @@ define amdgpu_kernel void @extract_insert_different_dynelt_v4i32(ptr addrspace(1
 ; GCN-NEXT:    s_mov_b64 s[10:11], s[2:3]
 ; GCN-NEXT:    s_cselect_b64 s[2:3], -1, 0
 ; GCN-NEXT:    s_cmp_eq_u32 s13, 0
-; GCN-NEXT:    v_lshlrev_b32_e32 v6, 2, v0
-; GCN-NEXT:    v_mov_b32_e32 v0, s12
+; GCN-NEXT:    v_mov_b32_e32 v7, s12
 ; GCN-NEXT:    s_cselect_b64 s[4:5], -1, 0
 ; GCN-NEXT:    s_cmp_eq_u32 s14, 1
-; GCN-NEXT:    v_mov_b32_e32 v7, v5
+; GCN-NEXT:    v_mov_b32_e32 v6, v5
+; GCN-NEXT:    v_lshlrev_b32_e32 v5, 2, v0
 ; GCN-NEXT:    s_waitcnt vmcnt(0)
-; GCN-NEXT:    v_cndmask_b32_e32 v4, v4, v0, vcc
-; GCN-NEXT:    v_cndmask_b32_e64 v3, v3, v0, s[0:1]
-; GCN-NEXT:    v_cndmask_b32_e64 v2, v2, v0, s[2:3]
-; GCN-NEXT:    v_cndmask_b32_e64 v0, v1, v0, s[4:5]
+; GCN-NEXT:    v_cndmask_b32_e32 v0, v4, v7, vcc
+; GCN-NEXT:    v_cndmask_b32_e64 v2, v2, v7, s[2:3]
+; GCN-NEXT:    v_cndmask_b32_e64 v1, v1, v7, s[4:5]
 ; GCN-NEXT:    s_cselect_b64 vcc, -1, 0
 ; GCN-NEXT:    s_cmp_eq_u32 s14, 2
-; GCN-NEXT:    v_cndmask_b32_e32 v0, v0, v2, vcc
+; GCN-NEXT:    v_cndmask_b32_e64 v3, v3, v7, s[0:1]
+; GCN-NEXT:    v_cndmask_b32_e32 v1, v1, v2, vcc
 ; GCN-NEXT:    s_cselect_b64 vcc, -1, 0
 ; GCN-NEXT:    s_cmp_eq_u32 s14, 3
-; GCN-NEXT:    v_cndmask_b32_e32 v0, v0, v3, vcc
+; GCN-NEXT:    v_cndmask_b32_e32 v1, v1, v3, vcc
 ; GCN-NEXT:    s_cselect_b64 vcc, -1, 0
-; GCN-NEXT:    v_cndmask_b32_e32 v0, v0, v4, vcc
-; GCN-NEXT:    buffer_store_dword v0, v[6:7], s[8:11], 0 addr64
+; GCN-NEXT:    v_cndmask_b32_e32 v0, v1, v0, vcc
+; GCN-NEXT:    buffer_store_dword v0, v[5:6], s[8:11], 0 addr64
 ; GCN-NEXT:    s_endpgm
   %id = call i32 @llvm.amdgcn.workitem.id.x()
   %id.ext = sext i32 %id to i64

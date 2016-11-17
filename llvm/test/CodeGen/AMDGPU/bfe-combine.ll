@@ -93,11 +93,11 @@ define amdgpu_kernel void @bfe_combine16(ptr addrspace(1) nocapture %arg, i32 %x
 ; VI-SDWA:       ; %bb.0:
 ; VI-SDWA-NEXT:    s_load_dword s4, s[2:3], 0x2c
 ; VI-SDWA-NEXT:    s_load_dwordx2 s[0:1], s[2:3], 0x24
-; VI-SDWA-NEXT:    v_mov_b32_e32 v1, 15
+; VI-SDWA-NEXT:    v_mov_b32_e32 v2, 15
+; VI-SDWA-NEXT:    v_mov_b32_e32 v1, 0
 ; VI-SDWA-NEXT:    s_waitcnt lgkmcnt(0)
 ; VI-SDWA-NEXT:    v_add_u32_e32 v0, vcc, s4, v0
-; VI-SDWA-NEXT:    v_lshlrev_b32_sdwa v0, v1, v0 dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:DWORD src1_sel:WORD_1
-; VI-SDWA-NEXT:    v_mov_b32_e32 v1, 0
+; VI-SDWA-NEXT:    v_lshlrev_b32_sdwa v0, v2, v0 dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:DWORD src1_sel:WORD_1
 ; VI-SDWA-NEXT:    v_lshlrev_b64 v[0:1], 2, v[0:1]
 ; VI-SDWA-NEXT:    v_mov_b32_e32 v2, s1
 ; VI-SDWA-NEXT:    v_add_u32_e32 v0, vcc, s0, v0

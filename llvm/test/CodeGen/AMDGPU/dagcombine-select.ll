@@ -44,10 +44,10 @@ define amdgpu_kernel void @select_and3(ptr addrspace(1) %p, i32 %x, i32 %y) {
 ; GCN:     s_cselect_b32 s[[SEL1:[0-9]+]], s{{[0-9]+}}, 0
 ; GCN:     s_cselect_b32 s[[SEL2:[0-9]+]], s{{[0-9]+}}, 0
 ; GCN:     s_cselect_b32 s[[SEL3:[0-9]+]], s{{[0-9]+}}, 0
-; GCN:     v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
-; GCN:     v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
-; GCN:     v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
-; GCN:     v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
+; GCN-DAG: v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
+; GCN-DAG: v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
+; GCN-DAG: v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
+; GCN-DAG: v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
 ; GCN-NOT: v_and_b32
 ; GCN:     global_store_dwordx4 v{{[0-9]+}}, v[[[V0]]:[[V3]]]
 define amdgpu_kernel void @select_and_v4(ptr addrspace(1) %p, i32 %x, <4 x i32> %y) {
@@ -103,10 +103,10 @@ define amdgpu_kernel void @select_or3(ptr addrspace(1) %p, i32 %x, i32 %y) {
 ; GCN:     s_cselect_b32 s[[SEL2:[0-9]+]], s{{[0-9]+}}, -1
 ; GCN:     s_cselect_b32 s[[SEL3:[0-9]+]], s{{[0-9]+}}, -1
 ; GCN-NOT: v_or_b32
-; GCN:     v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
-; GCN:     v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
-; GCN:     v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
-; GCN:     v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
+; GCN-DAG: v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
+; GCN-DAG: v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
+; GCN-DAG: v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
+; GCN-DAG: v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
 ; GCN:     global_store_dwordx4 v{{[0-9]+}}, v[[[V0]]:[[V3]]]
 define amdgpu_kernel void @select_or_v4(ptr addrspace(1) %p, i32 %x, <4 x i32> %y) {
   %c = icmp slt i32 %x, 11
@@ -158,10 +158,10 @@ define amdgpu_kernel void @sel_constants_sub_constant_sel_constants_v2i16(ptr ad
 ; GCN:     s_cselect_b32 s[[SEL1:[0-9]+]], 6, 10
 ; GCN:     s_cselect_b32 s[[SEL2:[0-9]+]], 5, 6
 ; GCN:     s_cselect_b32 s[[SEL3:[0-9]+]], 9, 2
-; GCN:     v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
-; GCN:     v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
-; GCN:     v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
-; GCN:     v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
+; GCN-DAG: v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
+; GCN-DAG: v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
+; GCN-DAG: v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
+; GCN-DAG: v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
 ; GCN:     global_store_dwordx4 v{{[0-9]+}}, v[[[V0]]:[[V3]]]
 define amdgpu_kernel void @sel_constants_sub_constant_sel_constants_v4i32(ptr addrspace(1) %p, i1 %cond) {
   %sel = select i1 %cond, <4 x i32> <i32 -4, i32 2, i32 3, i32 4>, <4 x i32> <i32 3, i32 1, i32 -1, i32 -3>
@@ -278,10 +278,10 @@ define amdgpu_kernel void @fsub_constant_sel_constants_v2f16(ptr addrspace(1) %p
 ; GCN:     s_cselect_b32 s[[SEL1:[0-9]+]], 0x41100000, 4.0
 ; GCN:     s_cselect_b32 s[[SEL2:[0-9]+]], 0x40a00000, 2.0
 ; GCN:     s_cselect_b32 s[[SEL3:[0-9]+]], 1.0, 0
-; GCN:     v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
-; GCN:     v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
-; GCN:     v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
-; GCN:     v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
+; GCN-DAG: v_mov_b32_e32 v[[V0:[0-9]+]], s[[SEL3]]
+; GCN-DAG: v_mov_b32_e32 v[[V1:[0-9]+]], s[[SEL2]]
+; GCN-DAG: v_mov_b32_e32 v[[V2:[0-9]+]], s[[SEL1]]
+; GCN-DAG: v_mov_b32_e32 v[[V3:[0-9]+]], s[[SEL0]]
 ; GCN:     global_store_dwordx4 v{{[0-9]+}}, v[[[V0]]:[[V3]]]
 define amdgpu_kernel void @fsub_constant_sel_constants_v4f32(ptr addrspace(1) %p, i1 %cond) {
   %sel = select i1 %cond, <4 x float> <float -2.0, float -3.0, float -4.0, float -5.0>, <4 x float> <float -1.0, float 0.0, float 1.0, float 2.0>

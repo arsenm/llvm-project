@@ -129,13 +129,6 @@ define <3 x double> @v_constained_fsub_v3f64_fpexcept_strict(<3 x double> %x, <3
 }
 
 define amdgpu_ps <2 x float> @s_constained_fsub_f64_fpexcept_strict(double inreg %x, double inreg %y) #0 {
-; GCN-LABEL: s_constained_fsub_f64_fpexcept_strict:
-; GCN:       ; %bb.0:
-; GCN-NEXT:    v_mov_b32_e32 v0, s4
-; GCN-NEXT:    v_mov_b32_e32 v1, s5
-; GCN-NEXT:    v_add_f64 v[0:1], s[2:3], -v[0:1]
-; GCN-NEXT:    ; return to shader part epilog
-;
 ; GFX10-LABEL: s_constained_fsub_f64_fpexcept_strict:
 ; GFX10:       ; %bb.0:
 ; GFX10-NEXT:    v_add_f64 v[0:1], s[2:3], -s[4:5]

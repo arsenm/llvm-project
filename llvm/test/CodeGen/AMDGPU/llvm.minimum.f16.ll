@@ -733,19 +733,19 @@ define void @s_minimum_v2f16(<2 x half> inreg %src0, <2 x half> inreg %src1) {
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX9-NEXT:    v_mov_b32_e32 v0, s7
-; GFX9-NEXT:    v_mov_b32_e32 v1, s7
 ; GFX9-NEXT:    s_lshr_b32 s4, s7, 16
-; GFX9-NEXT:    v_pk_min_f16 v1, s6, v1
+; GFX9-NEXT:    v_mov_b32_e32 v1, s7
+; GFX9-NEXT:    v_pk_min_f16 v0, s6, v0
 ; GFX9-NEXT:    v_mov_b32_e32 v2, 0x7e00
-; GFX9-NEXT:    v_cmp_o_f16_e32 vcc, s6, v0
+; GFX9-NEXT:    v_cmp_o_f16_e32 vcc, s6, v1
 ; GFX9-NEXT:    s_lshr_b32 s5, s6, 16
 ; GFX9-NEXT:    v_mov_b32_e32 v3, s4
-; GFX9-NEXT:    v_cndmask_b32_e32 v0, v2, v1, vcc
-; GFX9-NEXT:    v_lshrrev_b32_e32 v1, 16, v1
+; GFX9-NEXT:    v_cndmask_b32_e32 v1, v2, v0, vcc
+; GFX9-NEXT:    v_lshrrev_b32_e32 v0, 16, v0
 ; GFX9-NEXT:    v_cmp_o_f16_e32 vcc, s5, v3
-; GFX9-NEXT:    v_cndmask_b32_e32 v1, v2, v1, vcc
-; GFX9-NEXT:    v_and_b32_e32 v0, 0xffff, v0
-; GFX9-NEXT:    v_lshl_or_b32 v0, v1, 16, v0
+; GFX9-NEXT:    v_cndmask_b32_e32 v0, v2, v0, vcc
+; GFX9-NEXT:    v_and_b32_e32 v1, 0xffff, v1
+; GFX9-NEXT:    v_lshl_or_b32 v0, v0, 16, v1
 ; GFX9-NEXT:    ;;#ASMSTART
 ; GFX9-NEXT:    ; use v0
 ; GFX9-NEXT:    ;;#ASMEND
@@ -755,20 +755,20 @@ define void @s_minimum_v2f16(<2 x half> inreg %src0, <2 x half> inreg %src1) {
 ; GFX940:       ; %bb.0:
 ; GFX940-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; GFX940-NEXT:    v_mov_b32_e32 v0, s1
+; GFX940-NEXT:    s_lshr_b32 s2, s1, 16
 ; GFX940-NEXT:    v_mov_b32_e32 v1, s1
-; GFX940-NEXT:    s_lshr_b32 s1, s1, 16
-; GFX940-NEXT:    v_pk_min_f16 v1, s0, v1
+; GFX940-NEXT:    v_pk_min_f16 v0, s0, v0
 ; GFX940-NEXT:    v_mov_b32_e32 v2, 0x7e00
-; GFX940-NEXT:    v_cmp_o_f16_e32 vcc, s0, v0
+; GFX940-NEXT:    v_cmp_o_f16_e32 vcc, s0, v1
 ; GFX940-NEXT:    s_lshr_b32 s0, s0, 16
-; GFX940-NEXT:    v_mov_b32_e32 v3, s1
-; GFX940-NEXT:    v_cndmask_b32_e32 v0, v2, v1, vcc
-; GFX940-NEXT:    v_lshrrev_b32_e32 v1, 16, v1
+; GFX940-NEXT:    v_mov_b32_e32 v3, s2
+; GFX940-NEXT:    v_cndmask_b32_e32 v1, v2, v0, vcc
+; GFX940-NEXT:    v_lshrrev_b32_e32 v0, 16, v0
 ; GFX940-NEXT:    v_cmp_o_f16_e32 vcc, s0, v3
-; GFX940-NEXT:    v_and_b32_e32 v0, 0xffff, v0
+; GFX940-NEXT:    v_and_b32_e32 v1, 0xffff, v1
 ; GFX940-NEXT:    s_nop 0
-; GFX940-NEXT:    v_cndmask_b32_e32 v1, v2, v1, vcc
-; GFX940-NEXT:    v_lshl_or_b32 v0, v1, 16, v0
+; GFX940-NEXT:    v_cndmask_b32_e32 v0, v2, v0, vcc
+; GFX940-NEXT:    v_lshl_or_b32 v0, v0, 16, v1
 ; GFX940-NEXT:    ;;#ASMSTART
 ; GFX940-NEXT:    ; use v0
 ; GFX940-NEXT:    ;;#ASMEND

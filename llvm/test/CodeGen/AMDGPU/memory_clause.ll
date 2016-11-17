@@ -74,10 +74,10 @@ define amdgpu_kernel void @scalar_clause(ptr addrspace(1) noalias nocapture read
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:    s_load_dwordx16 s[0:15], s[16:17], 0x0
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    v_mov_b32_e32 v0, s0
 ; GCN-NEXT:    v_mov_b32_e32 v1, s1
 ; GCN-NEXT:    v_mov_b32_e32 v2, s2
 ; GCN-NEXT:    v_mov_b32_e32 v3, s3
+; GCN-NEXT:    v_mov_b32_e32 v0, s0
 ; GCN-NEXT:    v_mov_b32_e32 v4, s4
 ; GCN-NEXT:    v_mov_b32_e32 v5, s5
 ; GCN-NEXT:    v_mov_b32_e32 v6, s6
@@ -103,10 +103,10 @@ define amdgpu_kernel void @scalar_clause(ptr addrspace(1) noalias nocapture read
 ; GCN-SCRATCH-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-SCRATCH-NEXT:    s_load_dwordx16 s[0:15], s[16:17], 0x0
 ; GCN-SCRATCH-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v0, s0
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v1, s1
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v2, s2
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v3, s3
+; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v0, s0
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v4, s4
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v5, s5
 ; GCN-SCRATCH-NEXT:    v_mov_b32_e32 v6, s6

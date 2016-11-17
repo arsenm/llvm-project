@@ -65,11 +65,11 @@
 ; GFX9-FLATSCR: s_mov_b32 [[SP:[^,]+]], 0
 ; GFX9-FLATSCR: scratch_store_dwordx4 off, v[{{[0-9:]+}}], [[SP]] offset:
 
-; GFX10-FLATSCR: scratch_store_dwordx4 off, v[{{[0-9:]+}}], off offset:
+; GFX10-FLATSCR-DAG: scratch_store_dwordx4 off, v[{{[0-9:]+}}], off offset:
 
 ; MUBUF-DAG:     v_lshlrev_b32_e32 [[BYTES:v[0-9]+]], 2, v0
 ; MUBUF-DAG:     v_and_b32_e32 [[CLAMP_IDX:v[0-9]+]], 0x1fc, [[BYTES]]
-; GFX10-FLATSCR: v_and_b32_e32 [[CLAMP_IDX:v[0-9]+]], 0x1fc, v0
+; GFX10-FLATSCR-DAG: v_and_b32_e32 [[CLAMP_IDX:v[0-9]+]], 0x1fc, v0
 ; GFX10-FLATSCR-PAL: v_and_b32_e32 [[CLAMP_IDX:v[0-9]+]], 0x1fc, v0
 ; GFX11-FLATSCR: v_and_b32_e32 [[CLAMP_IDX:v[0-9]+]], 0x1fc, v0
 

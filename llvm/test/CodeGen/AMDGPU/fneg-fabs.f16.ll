@@ -253,8 +253,8 @@ define amdgpu_kernel void @v_fneg_fabs_f16(ptr addrspace(1) %out, ptr addrspace(
 ; CIVI-NEXT:    v_mov_b32_e32 v0, s2
 ; CIVI-NEXT:    v_mov_b32_e32 v1, s3
 ; CIVI-NEXT:    flat_load_ushort v2, v[0:1]
-; CIVI-NEXT:    v_mov_b32_e32 v0, s0
 ; CIVI-NEXT:    v_mov_b32_e32 v1, s1
+; CIVI-NEXT:    v_mov_b32_e32 v0, s0
 ; CIVI-NEXT:    s_waitcnt vmcnt(0)
 ; CIVI-NEXT:    v_or_b32_e32 v2, 0x8000, v2
 ; CIVI-NEXT:    flat_store_short v[0:1], v2
@@ -427,8 +427,8 @@ define amdgpu_kernel void @fneg_fabs_v4f16(ptr addrspace(1) %out, <4 x half> %in
 ; CIVI-NEXT:    s_or_b32 s3, s3, 0x80008000
 ; CIVI-NEXT:    s_or_b32 s2, s2, 0x80008000
 ; CIVI-NEXT:    v_mov_b32_e32 v3, s1
-; CIVI-NEXT:    v_mov_b32_e32 v0, s2
 ; CIVI-NEXT:    v_mov_b32_e32 v1, s3
+; CIVI-NEXT:    v_mov_b32_e32 v0, s2
 ; CIVI-NEXT:    v_mov_b32_e32 v2, s0
 ; CIVI-NEXT:    flat_store_dwordx2 v[2:3], v[0:1]
 ; CIVI-NEXT:    s_endpgm
@@ -440,8 +440,8 @@ define amdgpu_kernel void @fneg_fabs_v4f16(ptr addrspace(1) %out, <4 x half> %in
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX9-NEXT:    s_or_b32 s3, s3, 0x80008000
 ; GFX9-NEXT:    s_or_b32 s2, s2, 0x80008000
-; GFX9-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX9-NEXT:    v_mov_b32_e32 v1, s3
+; GFX9-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX9-NEXT:    global_store_dwordx2 v2, v[0:1], s[0:1]
 ; GFX9-NEXT:    s_endpgm
 ;
@@ -449,9 +449,8 @@ define amdgpu_kernel void @fneg_fabs_v4f16(ptr addrspace(1) %out, <4 x half> %in
 ; GFX11:       ; %bb.0:
 ; GFX11-NEXT:    s_load_b128 s[0:3], s[2:3], 0x0
 ; GFX11-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX11-NEXT:    s_or_b32 s2, s2, 0x80008000
 ; GFX11-NEXT:    s_or_b32 s3, s3, 0x80008000
-; GFX11-NEXT:    s_delay_alu instid0(SALU_CYCLE_1)
+; GFX11-NEXT:    s_or_b32 s2, s2, 0x80008000
 ; GFX11-NEXT:    v_dual_mov_b32 v2, 0 :: v_dual_mov_b32 v1, s3
 ; GFX11-NEXT:    v_mov_b32_e32 v0, s2
 ; GFX11-NEXT:    global_store_b64 v2, v[0:1], s[0:1]
@@ -612,12 +611,12 @@ define amdgpu_kernel void @s_fneg_multi_use_fabs_foldable_neg_v2f16(ptr addrspac
 ; CI-NEXT:    s_load_dwordx4 s[0:3], s[6:7], 0x0
 ; CI-NEXT:    s_load_dword s4, s[6:7], 0x4
 ; CI-NEXT:    s_waitcnt lgkmcnt(0)
-; CI-NEXT:    v_mov_b32_e32 v0, s0
-; CI-NEXT:    s_bfe_u32 s0, s4, 0xf0010
-; CI-NEXT:    v_cvt_f32_f16_e32 v5, s0
-; CI-NEXT:    v_cvt_f32_f16_e64 v4, |s4|
-; CI-NEXT:    s_and_b32 s0, s4, 0x7fff7fff
 ; CI-NEXT:    v_mov_b32_e32 v1, s1
+; CI-NEXT:    s_bfe_u32 s1, s4, 0xf0010
+; CI-NEXT:    v_cvt_f32_f16_e32 v5, s1
+; CI-NEXT:    v_cvt_f32_f16_e64 v4, |s4|
+; CI-NEXT:    v_mov_b32_e32 v0, s0
+; CI-NEXT:    s_and_b32 s0, s4, 0x7fff7fff
 ; CI-NEXT:    v_mul_f32_e32 v5, -4.0, v5
 ; CI-NEXT:    v_mul_f32_e32 v4, -4.0, v4
 ; CI-NEXT:    v_cvt_f16_f32_e32 v5, v5

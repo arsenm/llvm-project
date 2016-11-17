@@ -54,8 +54,8 @@ define amdgpu_kernel void @buffers_from_flat_dont_alias(ptr noalias %a.flat, ptr
 ; SDAG-NEXT:    s_mov_b32 s3, 0
 ; SDAG-NEXT:    s_mov_b32 s2, 16
 ; SDAG-NEXT:    s_waitcnt lgkmcnt(0)
-; SDAG-NEXT:    s_and_b32 s1, s5, 0xffff
 ; SDAG-NEXT:    s_mov_b32 s0, s4
+; SDAG-NEXT:    s_and_b32 s1, s5, 0xffff
 ; SDAG-NEXT:    buffer_load_dwordx4 v[0:3], off, s[0:3], 0
 ; SDAG-NEXT:    s_and_b32 s1, s7, 0xffff
 ; SDAG-NEXT:    s_mov_b32 s0, s6
@@ -70,14 +70,14 @@ define amdgpu_kernel void @buffers_from_flat_dont_alias(ptr noalias %a.flat, ptr
 ; GISEL-LABEL: buffers_from_flat_dont_alias:
 ; GISEL:       ; %bb.0:
 ; GISEL-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GISEL-NEXT:    s_mov_b32 s3, 0
 ; GISEL-NEXT:    s_mov_b32 s2, 16
+; GISEL-NEXT:    s_mov_b32 s3, 0
 ; GISEL-NEXT:    s_waitcnt lgkmcnt(0)
 ; GISEL-NEXT:    s_and_b32 s1, s5, 0xffff
 ; GISEL-NEXT:    s_mov_b32 s0, s4
 ; GISEL-NEXT:    buffer_load_dwordx4 v[0:3], off, s[0:3], 0
-; GISEL-NEXT:    s_and_b32 s1, s7, 0xffff
 ; GISEL-NEXT:    s_mov_b32 s0, s6
+; GISEL-NEXT:    s_and_b32 s1, s7, 0xffff
 ; GISEL-NEXT:    s_waitcnt vmcnt(0)
 ; GISEL-NEXT:    v_mul_f32_e32 v0, v0, v0
 ; GISEL-NEXT:    v_mul_f32_e32 v1, v1, v1

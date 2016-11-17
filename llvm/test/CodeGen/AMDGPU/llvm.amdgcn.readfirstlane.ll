@@ -142,8 +142,8 @@ define void @test_readfirstlane_i64(ptr addrspace(1) %out, i64 %src) {
 ; CHECK-SDAG-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_readfirstlane_b32 s4, v3
 ; CHECK-SDAG-NEXT:    v_readfirstlane_b32 s5, v2
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s5
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s4
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s5
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[0:1], v[2:3]
 ; CHECK-SDAG-NEXT:    s_waitcnt vmcnt(0)
 ; CHECK-SDAG-NEXT:    s_setpc_b64 s[30:31]
@@ -169,8 +169,8 @@ define void @test_readfirstlane_f64(ptr addrspace(1) %out, double %src) {
 ; CHECK-SDAG-NEXT:    s_waitcnt vmcnt(0) expcnt(0) lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_readfirstlane_b32 s4, v3
 ; CHECK-SDAG-NEXT:    v_readfirstlane_b32 s5, v2
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s5
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s4
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s5
 ; CHECK-SDAG-NEXT:    flat_store_dwordx2 v[0:1], v[2:3]
 ; CHECK-SDAG-NEXT:    s_waitcnt vmcnt(0)
 ; CHECK-SDAG-NEXT:    s_setpc_b64 s[30:31]
@@ -408,8 +408,8 @@ define amdgpu_kernel void @test_readfirstlane_copy_from_sgpr_i64(ptr addrspace(1
 ; CHECK-SDAG-NEXT:    ;;#ASMSTART
 ; CHECK-SDAG-NEXT:    s_mov_b64 s[2:3], 0
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0
@@ -442,8 +442,8 @@ define amdgpu_kernel void @test_readfirstlane_copy_from_sgpr_f64(ptr addrspace(1
 ; CHECK-SDAG-NEXT:    ;;#ASMSTART
 ; CHECK-SDAG-NEXT:    s_mov_b64 s[2:3], 0
 ; CHECK-SDAG-NEXT:    ;;#ASMEND
-; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v1, s3
+; CHECK-SDAG-NEXT:    v_mov_b32_e32 v0, s2
 ; CHECK-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v3, s1
 ; CHECK-SDAG-NEXT:    v_mov_b32_e32 v2, s0

@@ -306,9 +306,9 @@ define amdgpu_kernel void @preload_block_count_xyz(ptr addrspace(1) inreg %out) 
 ; GFX940-NEXT:    .fill 63, 4, 0xbf800000 ; s_nop 0
 ; GFX940-NEXT:  ; %bb.0:
 ; GFX940-NEXT:    v_mov_b32_e32 v3, 0
-; GFX940-NEXT:    v_mov_b32_e32 v0, s4
 ; GFX940-NEXT:    v_mov_b32_e32 v1, s5
 ; GFX940-NEXT:    v_mov_b32_e32 v2, s6
+; GFX940-NEXT:    v_mov_b32_e32 v0, s4
 ; GFX940-NEXT:    global_store_dwordx3 v3, v[0:2], s[2:3] sc0 sc1
 ; GFX940-NEXT:    s_endpgm
 ;
@@ -317,9 +317,9 @@ define amdgpu_kernel void @preload_block_count_xyz(ptr addrspace(1) inreg %out) 
 ; GFX90a-NEXT:    .fill 63, 4, 0xbf800000 ; s_nop 0
 ; GFX90a-NEXT:  ; %bb.0:
 ; GFX90a-NEXT:    v_mov_b32_e32 v3, 0
-; GFX90a-NEXT:    v_mov_b32_e32 v0, s8
 ; GFX90a-NEXT:    v_mov_b32_e32 v1, s9
 ; GFX90a-NEXT:    v_mov_b32_e32 v2, s10
+; GFX90a-NEXT:    v_mov_b32_e32 v0, s8
 ; GFX90a-NEXT:    global_store_dwordx3 v3, v[0:2], s[6:7]
 ; GFX90a-NEXT:    s_endpgm
   %imp_arg_ptr = call ptr addrspace(4) @llvm.amdgcn.implicitarg.ptr()
@@ -429,9 +429,9 @@ define amdgpu_kernel void @preload_workgroup_size_xyz(ptr addrspace(1) inreg %ou
 ; GFX940-NEXT:    s_and_b32 s1, s7, 0xffff
 ; GFX940-NEXT:    s_and_b32 s4, s8, 0xffff
 ; GFX940-NEXT:    v_mov_b32_e32 v3, 0
-; GFX940-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX940-NEXT:    v_mov_b32_e32 v1, s0
 ; GFX940-NEXT:    v_mov_b32_e32 v2, s4
+; GFX940-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX940-NEXT:    global_store_dwordx3 v3, v[0:2], s[2:3] sc0 sc1
 ; GFX940-NEXT:    s_endpgm
 ;
@@ -443,9 +443,9 @@ define amdgpu_kernel void @preload_workgroup_size_xyz(ptr addrspace(1) inreg %ou
 ; GFX90a-NEXT:    s_and_b32 s1, s11, 0xffff
 ; GFX90a-NEXT:    s_and_b32 s2, s12, 0xffff
 ; GFX90a-NEXT:    v_mov_b32_e32 v3, 0
-; GFX90a-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX90a-NEXT:    v_mov_b32_e32 v1, s0
 ; GFX90a-NEXT:    v_mov_b32_e32 v2, s2
+; GFX90a-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX90a-NEXT:    global_store_dwordx3 v3, v[0:2], s[6:7]
 ; GFX90a-NEXT:    s_endpgm
   %imp_arg_ptr = call ptr addrspace(4) @llvm.amdgcn.implicitarg.ptr()
@@ -558,9 +558,9 @@ define amdgpu_kernel void @preloadremainder_xyz(ptr addrspace(1) inreg %out) #0 
 ; GFX940-NEXT:    s_lshr_b32 s1, s8, 16
 ; GFX940-NEXT:    s_and_b32 s4, s9, 0xffff
 ; GFX940-NEXT:    v_mov_b32_e32 v3, 0
-; GFX940-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX940-NEXT:    v_mov_b32_e32 v1, s4
 ; GFX940-NEXT:    v_mov_b32_e32 v2, s0
+; GFX940-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX940-NEXT:    global_store_dwordx3 v3, v[0:2], s[2:3] sc0 sc1
 ; GFX940-NEXT:    s_endpgm
 ;
@@ -572,9 +572,9 @@ define amdgpu_kernel void @preloadremainder_xyz(ptr addrspace(1) inreg %out) #0 
 ; GFX90a-NEXT:    s_lshr_b32 s1, s12, 16
 ; GFX90a-NEXT:    s_and_b32 s2, s13, 0xffff
 ; GFX90a-NEXT:    v_mov_b32_e32 v3, 0
-; GFX90a-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX90a-NEXT:    v_mov_b32_e32 v1, s2
 ; GFX90a-NEXT:    v_mov_b32_e32 v2, s0
+; GFX90a-NEXT:    v_mov_b32_e32 v0, s1
 ; GFX90a-NEXT:    global_store_dwordx3 v3, v[0:2], s[6:7]
 ; GFX90a-NEXT:    s_endpgm
   %imp_arg_ptr = call ptr addrspace(4) @llvm.amdgcn.implicitarg.ptr()

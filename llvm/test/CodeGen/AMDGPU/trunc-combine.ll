@@ -108,8 +108,8 @@ define amdgpu_kernel void @truncate_high_elt_extract_vector(ptr addrspace(1) noc
 ; VI-NEXT:    s_waitcnt lgkmcnt(0)
 ; VI-NEXT:    s_load_dword s2, s[4:5], 0x0
 ; VI-NEXT:    s_load_dword s3, s[6:7], 0x0
-; VI-NEXT:    v_mov_b32_e32 v0, s0
 ; VI-NEXT:    v_mov_b32_e32 v1, s1
+; VI-NEXT:    v_mov_b32_e32 v0, s0
 ; VI-NEXT:    s_waitcnt lgkmcnt(0)
 ; VI-NEXT:    s_sext_i32_i16 s0, s2
 ; VI-NEXT:    s_sext_i32_i16 s1, s3

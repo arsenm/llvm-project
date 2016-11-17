@@ -72,8 +72,8 @@ define amdgpu_kernel void @tbuffer_store_d16_xy(<4 x i32> %rsrc, <2 x half> %dat
 ; PREGFX10-UNPACKED-NEXT:    s_waitcnt lgkmcnt(0)
 ; PREGFX10-UNPACKED-NEXT:    s_lshr_b32 s5, s4, 16
 ; PREGFX10-UNPACKED-NEXT:    s_and_b32 s4, s4, 0xffff
-; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v1, s5
+; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    tbuffer_store_format_d16_xy v[0:1], off, s[0:3], 0 format:[BUF_NUM_FORMAT_USCALED]
 ; PREGFX10-UNPACKED-NEXT:    s_endpgm
 ;
@@ -133,9 +133,9 @@ define amdgpu_kernel void @tbuffer_store_d16_xyz(<4 x i32> %rsrc, <4 x half> %da
 ; PREGFX10-UNPACKED-NEXT:    s_and_b32 s5, s5, 0xffff
 ; PREGFX10-UNPACKED-NEXT:    s_lshr_b32 s6, s4, 16
 ; PREGFX10-UNPACKED-NEXT:    s_and_b32 s4, s4, 0xffff
-; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v1, s6
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v2, s5
+; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    tbuffer_store_format_d16_xyz v[0:2], off, s[0:3], 0 format:[BUF_NUM_FORMAT_USCALED]
 ; PREGFX10-UNPACKED-NEXT:    s_endpgm
 ;
@@ -145,8 +145,8 @@ define amdgpu_kernel void @tbuffer_store_d16_xyz(<4 x i32> %rsrc, <4 x half> %da
 ; PREGFX10-PACKED-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
 ; PREGFX10-PACKED-NEXT:    s_waitcnt lgkmcnt(0)
 ; PREGFX10-PACKED-NEXT:    s_and_b32 s1, s1, 0xffff
-; PREGFX10-PACKED-NEXT:    v_mov_b32_e32 v0, s0
 ; PREGFX10-PACKED-NEXT:    v_mov_b32_e32 v1, s1
+; PREGFX10-PACKED-NEXT:    v_mov_b32_e32 v0, s0
 ; PREGFX10-PACKED-NEXT:    tbuffer_store_format_d16_xyz v[0:1], off, s[4:7], 0 format:[BUF_NUM_FORMAT_USCALED]
 ; PREGFX10-PACKED-NEXT:    s_endpgm
 ;
@@ -220,10 +220,10 @@ define amdgpu_kernel void @tbuffer_store_d16_xyzw(<4 x i32> %rsrc, <4 x half> %d
 ; PREGFX10-UNPACKED-NEXT:    s_and_b32 s5, s5, 0xffff
 ; PREGFX10-UNPACKED-NEXT:    s_lshr_b32 s7, s4, 16
 ; PREGFX10-UNPACKED-NEXT:    s_and_b32 s4, s4, 0xffff
-; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v1, s7
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v2, s5
 ; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v3, s6
+; PREGFX10-UNPACKED-NEXT:    v_mov_b32_e32 v0, s4
 ; PREGFX10-UNPACKED-NEXT:    tbuffer_store_format_d16_xyzw v[0:3], off, s[0:3], 0 format:[BUF_NUM_FORMAT_USCALED]
 ; PREGFX10-UNPACKED-NEXT:    s_endpgm
 ;

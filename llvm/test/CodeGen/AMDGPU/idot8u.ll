@@ -3168,34 +3168,34 @@ define amdgpu_kernel void @udot8_variant1(ptr addrspace(1) %v1addr,
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s5
 ; GFX8-NEXT:    v_add_u32_e32 v0, vcc, s4, v2
 ; GFX8-NEXT:    v_addc_u32_e32 v1, vcc, 0, v1, vcc
-; GFX8-NEXT:    flat_load_dword v3, v[0:1]
-; GFX8-NEXT:    v_mov_b32_e32 v1, s7
+; GFX8-NEXT:    v_mov_b32_e32 v3, s7
+; GFX8-NEXT:    flat_load_dword v4, v[0:1]
 ; GFX8-NEXT:    v_add_u32_e32 v0, vcc, s6, v2
-; GFX8-NEXT:    v_addc_u32_e32 v1, vcc, 0, v1, vcc
+; GFX8-NEXT:    v_addc_u32_e32 v1, vcc, 0, v3, vcc
 ; GFX8-NEXT:    flat_load_dword v0, v[0:1]
 ; GFX8-NEXT:    s_load_dword s2, s[0:1], 0x0
 ; GFX8-NEXT:    s_waitcnt vmcnt(1)
-; GFX8-NEXT:    v_and_b32_e32 v1, 15, v3
-; GFX8-NEXT:    v_bfe_u32 v4, v3, 4, 4
-; GFX8-NEXT:    v_bfe_u32 v6, v3, 8, 4
-; GFX8-NEXT:    v_bfe_u32 v8, v3, 12, 4
-; GFX8-NEXT:    v_bfe_u32 v10, v3, 16, 4
-; GFX8-NEXT:    v_bfe_u32 v12, v3, 20, 4
+; GFX8-NEXT:    v_and_b32_e32 v1, 15, v4
+; GFX8-NEXT:    v_bfe_u32 v3, v4, 4, 4
+; GFX8-NEXT:    v_bfe_u32 v6, v4, 8, 4
+; GFX8-NEXT:    v_bfe_u32 v8, v4, 12, 4
+; GFX8-NEXT:    v_bfe_u32 v10, v4, 16, 4
 ; GFX8-NEXT:    s_waitcnt vmcnt(0)
 ; GFX8-NEXT:    v_and_b32_e32 v2, 15, v0
 ; GFX8-NEXT:    v_bfe_u32 v5, v0, 4, 4
 ; GFX8-NEXT:    v_bfe_u32 v7, v0, 8, 4
 ; GFX8-NEXT:    v_bfe_u32 v9, v0, 12, 4
 ; GFX8-NEXT:    v_bfe_u32 v11, v0, 16, 4
+; GFX8-NEXT:    v_bfe_u32 v12, v4, 20, 4
 ; GFX8-NEXT:    v_bfe_u32 v13, v0, 20, 4
-; GFX8-NEXT:    v_bfe_u32 v14, v3, 24, 4
+; GFX8-NEXT:    v_bfe_u32 v14, v4, 24, 4
 ; GFX8-NEXT:    v_bfe_u32 v15, v0, 24, 4
-; GFX8-NEXT:    v_lshrrev_b32_e32 v3, 28, v3
+; GFX8-NEXT:    v_lshrrev_b32_e32 v4, 28, v4
 ; GFX8-NEXT:    v_lshrrev_b32_e32 v0, 28, v0
 ; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX8-NEXT:    v_mad_u32_u24 v1, v2, v1, s2
-; GFX8-NEXT:    v_mad_u32_u24 v0, v0, v3, v1
-; GFX8-NEXT:    v_mad_u32_u24 v0, v5, v4, v0
+; GFX8-NEXT:    v_mad_u32_u24 v0, v0, v4, v1
+; GFX8-NEXT:    v_mad_u32_u24 v0, v5, v3, v0
 ; GFX8-NEXT:    v_mad_u32_u24 v0, v7, v6, v0
 ; GFX8-NEXT:    v_mad_u32_u24 v0, v9, v8, v0
 ; GFX8-NEXT:    v_mad_u32_u24 v0, v11, v10, v0

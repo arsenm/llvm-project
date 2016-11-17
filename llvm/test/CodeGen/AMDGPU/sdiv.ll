@@ -17,13 +17,13 @@ define amdgpu_kernel void @sdiv_i32(ptr addrspace(1) %out, ptr addrspace(1) %in)
 ; GCN-LABEL: sdiv_i32:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s3, 0xf000
 ; GCN-NEXT:    s_mov_b32 s2, -1
+; GCN-NEXT:    s_mov_b32 s3, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s2
 ; GCN-NEXT:    s_mov_b32 s11, s3
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    s_mov_b32 s9, s7
+; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s0, s4
 ; GCN-NEXT:    s_mov_b32 s1, s5
@@ -61,13 +61,13 @@ define amdgpu_kernel void @sdiv_i32(ptr addrspace(1) %out, ptr addrspace(1) %in)
 ; TONGA-LABEL: sdiv_i32:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s2, -1
+; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s2
 ; TONGA-NEXT:    s_mov_b32 s11, s3
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    s_mov_b32 s9, s7
+; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s0, s4
 ; TONGA-NEXT:    s_mov_b32 s1, s5
@@ -105,13 +105,13 @@ define amdgpu_kernel void @sdiv_i32(ptr addrspace(1) %out, ptr addrspace(1) %in)
 ; GFX9-LABEL: sdiv_i32:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, s4
 ; GFX9-NEXT:    s_mov_b32 s1, s5
@@ -200,13 +200,13 @@ define amdgpu_kernel void @sdiv_i32_4(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: sdiv_i32_4:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
@@ -221,13 +221,13 @@ define amdgpu_kernel void @sdiv_i32_4(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: sdiv_i32_4:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s6
 ; TONGA-NEXT:    s_mov_b32 s11, s7
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    s_mov_b32 s9, s3
+; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s4, s0
 ; TONGA-NEXT:    s_mov_b32 s5, s1
@@ -242,13 +242,13 @@ define amdgpu_kernel void @sdiv_i32_4(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: sdiv_i32_4:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, s4
 ; GFX9-NEXT:    s_mov_b32 s1, s5
@@ -294,13 +294,13 @@ define amdgpu_kernel void @slow_sdiv_i32_3435(ptr addrspace(1) %out, ptr addrspa
 ; GCN-LABEL: slow_sdiv_i32_3435:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s2, 0x98a1930b
 ; GCN-NEXT:    s_mov_b32 s4, s0
@@ -317,13 +317,13 @@ define amdgpu_kernel void @slow_sdiv_i32_3435(ptr addrspace(1) %out, ptr addrspa
 ; TONGA-LABEL: slow_sdiv_i32_3435:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s6
 ; TONGA-NEXT:    s_mov_b32 s11, s7
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    s_mov_b32 s9, s3
+; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s2, 0x98a1930b
 ; TONGA-NEXT:    s_mov_b32 s4, s0
@@ -340,13 +340,13 @@ define amdgpu_kernel void @slow_sdiv_i32_3435(ptr addrspace(1) %out, ptr addrspa
 ; GFX9-LABEL: slow_sdiv_i32_3435:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, 0x98a1930b
 ; GFX9-NEXT:    s_mov_b32 s1, s5
@@ -392,13 +392,13 @@ define amdgpu_kernel void @sdiv_v2i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: sdiv_v2i32:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
@@ -463,13 +463,13 @@ define amdgpu_kernel void @sdiv_v2i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: sdiv_v2i32:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s6
 ; TONGA-NEXT:    s_mov_b32 s11, s7
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    s_mov_b32 s9, s3
+; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s4, s0
 ; TONGA-NEXT:    s_mov_b32 s5, s1
@@ -534,13 +534,13 @@ define amdgpu_kernel void @sdiv_v2i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: sdiv_v2i32:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; GFX9-NEXT:    s_waitcnt vmcnt(0)
 ; GFX9-NEXT:    v_readfirstlane_b32 s0, v2
@@ -601,8 +601,8 @@ define amdgpu_kernel void @sdiv_v2i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-NEXT:    s_cselect_b32 s4, s8, s7
 ; GFX9-NEXT:    s_xor_b32 s4, s4, s5
 ; GFX9-NEXT:    s_sub_i32 s4, s4, s5
-; GFX9-NEXT:    v_mov_b32_e32 v0, s6
 ; GFX9-NEXT:    v_mov_b32_e32 v1, s4
+; GFX9-NEXT:    v_mov_b32_e32 v0, s6
 ; GFX9-NEXT:    buffer_store_dwordx2 v[0:1], off, s[0:3], 0
 ; GFX9-NEXT:    s_endpgm
 ;
@@ -683,13 +683,13 @@ define amdgpu_kernel void @sdiv_v2i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; GCN-LABEL: sdiv_v2i32_4:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
@@ -708,13 +708,13 @@ define amdgpu_kernel void @sdiv_v2i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; TONGA-LABEL: sdiv_v2i32_4:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s6
 ; TONGA-NEXT:    s_mov_b32 s11, s7
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    s_mov_b32 s9, s3
+; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s4, s0
 ; TONGA-NEXT:    s_mov_b32 s5, s1
@@ -733,13 +733,13 @@ define amdgpu_kernel void @sdiv_v2i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; GFX9-LABEL: sdiv_v2i32_4:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, s4
 ; GFX9-NEXT:    s_mov_b32 s1, s5
@@ -792,13 +792,13 @@ define amdgpu_kernel void @sdiv_v4i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: sdiv_v4i32:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s11, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, -1
+; GCN-NEXT:    s_mov_b32 s11, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, s10
 ; GCN-NEXT:    s_mov_b32 s7, s11
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s4, s2
 ; GCN-NEXT:    s_mov_b32 s5, s3
+; GCN-NEXT:    s_mov_b32 s4, s2
 ; GCN-NEXT:    buffer_load_dwordx4 v[0:3], off, s[4:7], 0
 ; GCN-NEXT:    buffer_load_dwordx4 v[4:7], off, s[4:7], 0 offset:16
 ; GCN-NEXT:    s_mov_b32 s8, s0
@@ -919,13 +919,13 @@ define amdgpu_kernel void @sdiv_v4i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: sdiv_v4i32:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s11, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, -1
+; TONGA-NEXT:    s_mov_b32 s11, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, s10
 ; TONGA-NEXT:    s_mov_b32 s7, s11
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s4, s2
 ; TONGA-NEXT:    s_mov_b32 s5, s3
+; TONGA-NEXT:    s_mov_b32 s4, s2
 ; TONGA-NEXT:    buffer_load_dwordx4 v[0:3], off, s[4:7], 0
 ; TONGA-NEXT:    buffer_load_dwordx4 v[4:7], off, s[4:7], 0 offset:16
 ; TONGA-NEXT:    s_mov_b32 s8, s0
@@ -1046,13 +1046,13 @@ define amdgpu_kernel void @sdiv_v4i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: sdiv_v4i32:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0 offset:16
 ; GFX9-NEXT:    buffer_load_dwordx4 v[4:7], off, s[8:11], 0
 ; GFX9-NEXT:    s_waitcnt vmcnt(1)
@@ -1143,38 +1143,38 @@ define amdgpu_kernel void @sdiv_v4i32(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-NEXT:    s_cmp_ge_u32 s10, s9
 ; GFX9-NEXT:    s_cselect_b32 s7, s11, s7
 ; GFX9-NEXT:    s_abs_i32 s9, s5
-; GFX9-NEXT:    v_cvt_f32_u32_e32 v2, s9
+; GFX9-NEXT:    v_cvt_f32_u32_e32 v0, s9
 ; GFX9-NEXT:    s_xor_b32 s7, s7, s4
-; GFX9-NEXT:    v_mov_b32_e32 v0, s8
-; GFX9-NEXT:    s_sub_i32 s8, 0, s9
-; GFX9-NEXT:    v_rcp_iflag_f32_e32 v2, v2
-; GFX9-NEXT:    s_sub_i32 s4, s7, s4
 ; GFX9-NEXT:    v_readfirstlane_b32 s10, v7
+; GFX9-NEXT:    s_sub_i32 s4, s7, s4
+; GFX9-NEXT:    v_rcp_iflag_f32_e32 v0, v0
 ; GFX9-NEXT:    v_mov_b32_e32 v1, s6
-; GFX9-NEXT:    v_mul_f32_e32 v2, 0x4f7ffffe, v2
-; GFX9-NEXT:    v_cvt_u32_f32_e32 v2, v2
-; GFX9-NEXT:    s_abs_i32 s6, s10
 ; GFX9-NEXT:    s_xor_b32 s5, s10, s5
-; GFX9-NEXT:    s_ashr_i32 s5, s5, 31
-; GFX9-NEXT:    v_readfirstlane_b32 s7, v2
-; GFX9-NEXT:    s_mul_i32 s8, s8, s7
-; GFX9-NEXT:    s_mul_hi_u32 s8, s7, s8
-; GFX9-NEXT:    s_add_i32 s7, s7, s8
-; GFX9-NEXT:    s_mul_hi_u32 s7, s6, s7
-; GFX9-NEXT:    s_mul_i32 s8, s7, s9
-; GFX9-NEXT:    s_sub_i32 s6, s6, s8
-; GFX9-NEXT:    s_add_i32 s10, s7, 1
-; GFX9-NEXT:    s_sub_i32 s8, s6, s9
-; GFX9-NEXT:    s_cmp_ge_u32 s6, s9
-; GFX9-NEXT:    s_cselect_b32 s7, s10, s7
-; GFX9-NEXT:    s_cselect_b32 s6, s8, s6
-; GFX9-NEXT:    s_add_i32 s8, s7, 1
-; GFX9-NEXT:    s_cmp_ge_u32 s6, s9
-; GFX9-NEXT:    s_cselect_b32 s6, s8, s7
-; GFX9-NEXT:    s_xor_b32 s6, s6, s5
-; GFX9-NEXT:    s_sub_i32 s5, s6, s5
+; GFX9-NEXT:    s_abs_i32 s6, s10
+; GFX9-NEXT:    v_mul_f32_e32 v0, 0x4f7ffffe, v0
+; GFX9-NEXT:    v_cvt_u32_f32_e32 v0, v0
+; GFX9-NEXT:    s_sub_i32 s10, 0, s9
 ; GFX9-NEXT:    v_mov_b32_e32 v2, s4
-; GFX9-NEXT:    v_mov_b32_e32 v3, s5
+; GFX9-NEXT:    s_ashr_i32 s5, s5, 31
+; GFX9-NEXT:    v_readfirstlane_b32 s4, v0
+; GFX9-NEXT:    s_mul_i32 s10, s10, s4
+; GFX9-NEXT:    s_mul_hi_u32 s7, s4, s10
+; GFX9-NEXT:    s_add_i32 s4, s4, s7
+; GFX9-NEXT:    s_mul_hi_u32 s4, s6, s4
+; GFX9-NEXT:    s_mul_i32 s7, s4, s9
+; GFX9-NEXT:    s_sub_i32 s6, s6, s7
+; GFX9-NEXT:    s_add_i32 s10, s4, 1
+; GFX9-NEXT:    s_sub_i32 s7, s6, s9
+; GFX9-NEXT:    s_cmp_ge_u32 s6, s9
+; GFX9-NEXT:    s_cselect_b32 s4, s10, s4
+; GFX9-NEXT:    s_cselect_b32 s6, s7, s6
+; GFX9-NEXT:    s_add_i32 s7, s4, 1
+; GFX9-NEXT:    s_cmp_ge_u32 s6, s9
+; GFX9-NEXT:    s_cselect_b32 s4, s7, s4
+; GFX9-NEXT:    s_xor_b32 s4, s4, s5
+; GFX9-NEXT:    s_sub_i32 s4, s4, s5
+; GFX9-NEXT:    v_mov_b32_e32 v3, s4
+; GFX9-NEXT:    v_mov_b32_e32 v0, s8
 ; GFX9-NEXT:    buffer_store_dwordx4 v[0:3], off, s[0:3], 0
 ; GFX9-NEXT:    s_endpgm
 ;
@@ -1306,13 +1306,13 @@ define amdgpu_kernel void @sdiv_v4i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; GCN-LABEL: sdiv_v4i32_4:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
@@ -1339,13 +1339,13 @@ define amdgpu_kernel void @sdiv_v4i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; TONGA-LABEL: sdiv_v4i32_4:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s2, -1
+; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s2
 ; TONGA-NEXT:    s_mov_b32 s11, s3
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    s_mov_b32 s9, s7
+; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s0, s4
 ; TONGA-NEXT:    s_mov_b32 s1, s5
@@ -1372,13 +1372,13 @@ define amdgpu_kernel void @sdiv_v4i32_4(ptr addrspace(1) %out, ptr addrspace(1) 
 ; GFX9-LABEL: sdiv_v4i32_4:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx4 v[0:3], off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, s4
 ; GFX9-NEXT:    s_mov_b32 s1, s5
@@ -1450,13 +1450,13 @@ define amdgpu_kernel void @v_sdiv_i8(ptr addrspace(1) %out, ptr addrspace(1) %in
 ; GCN-LABEL: v_sdiv_i8:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:1
 ; GCN-NEXT:    buffer_load_sbyte v1, off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s4, s0
@@ -1483,13 +1483,13 @@ define amdgpu_kernel void @v_sdiv_i8(ptr addrspace(1) %out, ptr addrspace(1) %in
 ; TONGA-LABEL: v_sdiv_i8:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s6
 ; TONGA-NEXT:    s_mov_b32 s11, s7
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    s_mov_b32 s9, s3
+; TONGA-NEXT:    s_mov_b32 s8, s2
 ; TONGA-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:1
 ; TONGA-NEXT:    buffer_load_sbyte v1, off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s4, s0
@@ -1516,13 +1516,13 @@ define amdgpu_kernel void @v_sdiv_i8(ptr addrspace(1) %out, ptr addrspace(1) %in
 ; GFX9-LABEL: v_sdiv_i8:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:1
 ; GFX9-NEXT:    buffer_load_sbyte v1, off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s0, s4
@@ -1595,13 +1595,13 @@ define amdgpu_kernel void @v_sdiv_i23(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: v_sdiv_i23:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_ubyte v0, off, s[8:11], 0 offset:2
 ; GCN-NEXT:    buffer_load_ubyte v1, off, s[8:11], 0 offset:6
 ; GCN-NEXT:    buffer_load_ushort v2, off, s[8:11], 0 offset:4
@@ -1638,13 +1638,13 @@ define amdgpu_kernel void @v_sdiv_i23(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: v_sdiv_i23:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s2, -1
+; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s2
 ; TONGA-NEXT:    s_mov_b32 s11, s3
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    s_mov_b32 s9, s7
+; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    buffer_load_ubyte v0, off, s[8:11], 0 offset:2
 ; TONGA-NEXT:    buffer_load_ubyte v1, off, s[8:11], 0 offset:6
 ; TONGA-NEXT:    buffer_load_ushort v2, off, s[8:11], 0 offset:4
@@ -1681,13 +1681,13 @@ define amdgpu_kernel void @v_sdiv_i23(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: v_sdiv_i23:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_ubyte v0, off, s[8:11], 0 offset:2
 ; GFX9-NEXT:    buffer_load_ubyte v1, off, s[8:11], 0 offset:6
 ; GFX9-NEXT:    buffer_load_ushort v2, off, s[8:11], 0 offset:4
@@ -1784,13 +1784,13 @@ define amdgpu_kernel void @v_sdiv_i24(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: v_sdiv_i24:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s6
 ; GCN-NEXT:    s_mov_b32 s11, s7
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    s_mov_b32 s9, s3
+; GCN-NEXT:    s_mov_b32 s8, s2
 ; GCN-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:6
 ; GCN-NEXT:    buffer_load_ushort v1, off, s[8:11], 0 offset:4
 ; GCN-NEXT:    buffer_load_sbyte v2, off, s[8:11], 0 offset:2
@@ -1825,13 +1825,13 @@ define amdgpu_kernel void @v_sdiv_i24(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: v_sdiv_i24:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s2, -1
+; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s2
 ; TONGA-NEXT:    s_mov_b32 s11, s3
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    s_mov_b32 s9, s7
+; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:6
 ; TONGA-NEXT:    buffer_load_ushort v1, off, s[8:11], 0 offset:4
 ; TONGA-NEXT:    buffer_load_sbyte v2, off, s[8:11], 0 offset:2
@@ -1866,13 +1866,13 @@ define amdgpu_kernel void @v_sdiv_i24(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: v_sdiv_i24:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_sbyte v0, off, s[8:11], 0 offset:6
 ; GFX9-NEXT:    buffer_load_ushort v1, off, s[8:11], 0 offset:4
 ; GFX9-NEXT:    buffer_load_sbyte v2, off, s[8:11], 0 offset:2
@@ -1963,13 +1963,13 @@ define amdgpu_kernel void @v_sdiv_i25(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GCN-LABEL: v_sdiv_i25:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s3, 0xf000
 ; GCN-NEXT:    s_mov_b32 s2, -1
+; GCN-NEXT:    s_mov_b32 s3, 0xf000
 ; GCN-NEXT:    s_mov_b32 s10, s2
 ; GCN-NEXT:    s_mov_b32 s11, s3
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
-; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    s_mov_b32 s9, s7
+; GCN-NEXT:    s_mov_b32 s8, s6
 ; GCN-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GCN-NEXT:    s_mov_b32 s0, s4
 ; GCN-NEXT:    s_mov_b32 s1, s5
@@ -2010,13 +2010,13 @@ define amdgpu_kernel void @v_sdiv_i25(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; TONGA-LABEL: v_sdiv_i25:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s2, -1
+; TONGA-NEXT:    s_mov_b32 s3, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s10, s2
 ; TONGA-NEXT:    s_mov_b32 s11, s3
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
-; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    s_mov_b32 s9, s7
+; TONGA-NEXT:    s_mov_b32 s8, s6
 ; TONGA-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; TONGA-NEXT:    s_mov_b32 s0, s4
 ; TONGA-NEXT:    s_mov_b32 s1, s5
@@ -2057,13 +2057,13 @@ define amdgpu_kernel void @v_sdiv_i25(ptr addrspace(1) %out, ptr addrspace(1) %i
 ; GFX9-LABEL: v_sdiv_i25:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s10, s2
 ; GFX9-NEXT:    s_mov_b32 s11, s3
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    s_mov_b32 s9, s7
+; GFX9-NEXT:    s_mov_b32 s8, s6
 ; GFX9-NEXT:    buffer_load_dwordx2 v[0:1], off, s[8:11], 0
 ; GFX9-NEXT:    s_mov_b32 s1, s5
 ; GFX9-NEXT:    s_waitcnt vmcnt(0)
@@ -2190,15 +2190,15 @@ define amdgpu_kernel void @scalarize_mulhs_4xi32(ptr addrspace(1) nocapture read
 ; GCN-LABEL: scalarize_mulhs_4xi32:
 ; GCN:       ; %bb.0:
 ; GCN-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_mov_b32 s6, -1
+; GCN-NEXT:    s_mov_b32 s7, 0xf000
 ; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:    s_mov_b32 s4, s0
 ; GCN-NEXT:    s_mov_b32 s5, s1
 ; GCN-NEXT:    buffer_load_dwordx4 v[0:3], off, s[4:7], 0
 ; GCN-NEXT:    s_mov_b32 s0, 0x1389c755
-; GCN-NEXT:    s_mov_b32 s4, s2
 ; GCN-NEXT:    s_mov_b32 s5, s3
+; GCN-NEXT:    s_mov_b32 s4, s2
 ; GCN-NEXT:    s_waitcnt vmcnt(0)
 ; GCN-NEXT:    v_mul_hi_i32 v0, v0, s0
 ; GCN-NEXT:    v_mul_hi_i32 v1, v1, s0
@@ -2222,15 +2222,15 @@ define amdgpu_kernel void @scalarize_mulhs_4xi32(ptr addrspace(1) nocapture read
 ; TONGA-LABEL: scalarize_mulhs_4xi32:
 ; TONGA:       ; %bb.0:
 ; TONGA-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
-; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_mov_b32 s6, -1
+; TONGA-NEXT:    s_mov_b32 s7, 0xf000
 ; TONGA-NEXT:    s_waitcnt lgkmcnt(0)
 ; TONGA-NEXT:    s_mov_b32 s4, s0
 ; TONGA-NEXT:    s_mov_b32 s5, s1
 ; TONGA-NEXT:    buffer_load_dwordx4 v[0:3], off, s[4:7], 0
 ; TONGA-NEXT:    s_mov_b32 s0, 0x1389c755
-; TONGA-NEXT:    s_mov_b32 s4, s2
 ; TONGA-NEXT:    s_mov_b32 s5, s3
+; TONGA-NEXT:    s_mov_b32 s4, s2
 ; TONGA-NEXT:    s_waitcnt vmcnt(0)
 ; TONGA-NEXT:    v_mul_hi_i32 v0, v0, s0
 ; TONGA-NEXT:    v_mul_hi_i32 v1, v1, s0
@@ -2254,15 +2254,15 @@ define amdgpu_kernel void @scalarize_mulhs_4xi32(ptr addrspace(1) nocapture read
 ; GFX9-LABEL: scalarize_mulhs_4xi32:
 ; GFX9:       ; %bb.0:
 ; GFX9-NEXT:    s_load_dwordx4 s[4:7], s[2:3], 0x24
-; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_mov_b32 s2, -1
+; GFX9-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX9-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX9-NEXT:    s_mov_b32 s0, s4
 ; GFX9-NEXT:    s_mov_b32 s1, s5
 ; GFX9-NEXT:    buffer_load_dwordx4 v[0:3], off, s[0:3], 0
 ; GFX9-NEXT:    s_mov_b32 s4, 0x1389c755
-; GFX9-NEXT:    s_mov_b32 s0, s6
 ; GFX9-NEXT:    s_mov_b32 s1, s7
+; GFX9-NEXT:    s_mov_b32 s0, s6
 ; GFX9-NEXT:    s_waitcnt vmcnt(0)
 ; GFX9-NEXT:    v_mul_hi_i32 v0, v0, s4
 ; GFX9-NEXT:    v_mul_hi_i32 v1, v1, s4

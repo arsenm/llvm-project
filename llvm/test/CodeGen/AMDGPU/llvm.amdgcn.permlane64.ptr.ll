@@ -28,20 +28,20 @@ define amdgpu_kernel void @test_v3p0(ptr addrspace(1) %out, <3 x ptr> %src0) {
 ; GFX11-SDAG-NEXT:    s_load_b64 s[0:1], s[2:3], 0x54
 ; GFX11-SDAG-NEXT:    s_load_b64 s[2:3], s[2:3], 0x24
 ; GFX11-SDAG-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX11-SDAG-NEXT:    v_dual_mov_b32 v6, 0 :: v_dual_mov_b32 v1, s6
-; GFX11-SDAG-NEXT:    v_dual_mov_b32 v4, s5 :: v_dual_mov_b32 v5, s1
-; GFX11-SDAG-NEXT:    v_mov_b32_e32 v8, s0
-; GFX11-SDAG-NEXT:    v_dual_mov_b32 v0, s7 :: v_dual_mov_b32 v7, s4
-; GFX11-SDAG-NEXT:    s_delay_alu instid0(VALU_DEP_4) | instskip(NEXT) | instid1(VALU_DEP_4)
-; GFX11-SDAG-NEXT:    v_permlane64_b32 v2, v1
-; GFX11-SDAG-NEXT:    v_permlane64_b32 v1, v4
+; GFX11-SDAG-NEXT:    v_dual_mov_b32 v7, 0 :: v_dual_mov_b32 v2, s7
+; GFX11-SDAG-NEXT:    v_dual_mov_b32 v5, s1 :: v_dual_mov_b32 v4, s0
+; GFX11-SDAG-NEXT:    v_dual_mov_b32 v0, s6 :: v_dual_mov_b32 v1, s5
+; GFX11-SDAG-NEXT:    v_mov_b32_e32 v6, s4
+; GFX11-SDAG-NEXT:    s_delay_alu instid0(VALU_DEP_3) | instskip(NEXT) | instid1(VALU_DEP_4)
 ; GFX11-SDAG-NEXT:    v_permlane64_b32 v5, v5
-; GFX11-SDAG-NEXT:    v_permlane64_b32 v4, v8
-; GFX11-SDAG-NEXT:    v_permlane64_b32 v3, v0
-; GFX11-SDAG-NEXT:    v_permlane64_b32 v0, v7
+; GFX11-SDAG-NEXT:    v_permlane64_b32 v4, v4
+; GFX11-SDAG-NEXT:    v_permlane64_b32 v3, v2
+; GFX11-SDAG-NEXT:    v_permlane64_b32 v2, v0
+; GFX11-SDAG-NEXT:    v_permlane64_b32 v1, v1
+; GFX11-SDAG-NEXT:    v_permlane64_b32 v0, v6
 ; GFX11-SDAG-NEXT:    s_clause 0x1
-; GFX11-SDAG-NEXT:    global_store_b64 v6, v[4:5], s[2:3] offset:16
-; GFX11-SDAG-NEXT:    global_store_b128 v6, v[0:3], s[2:3]
+; GFX11-SDAG-NEXT:    global_store_b64 v7, v[4:5], s[2:3] offset:16
+; GFX11-SDAG-NEXT:    global_store_b128 v7, v[0:3], s[2:3]
 ; GFX11-SDAG-NEXT:    s_nop 0
 ; GFX11-SDAG-NEXT:    s_sendmsg sendmsg(MSG_DEALLOC_VGPRS)
 ; GFX11-SDAG-NEXT:    s_endpgm

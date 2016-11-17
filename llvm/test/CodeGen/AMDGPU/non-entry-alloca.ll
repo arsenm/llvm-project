@@ -32,16 +32,16 @@ define amdgpu_kernel void @kernel_non_entry_block_static_alloca_uniformly_reache
 ; MUBUF-NEXT:  ; %bb.2: ; %bb.1
 ; MUBUF-NEXT:    s_add_i32 s6, s32, 0x1000
 ; MUBUF-NEXT:    s_lshl_b32 s7, s10, 2
-; MUBUF-NEXT:    s_mov_b32 s32, s6
 ; MUBUF-NEXT:    v_mov_b32_e32 v1, 0
+; MUBUF-NEXT:    s_add_i32 s7, s6, s7
 ; MUBUF-NEXT:    v_mov_b32_e32 v2, s6
 ; MUBUF-NEXT:    v_mov_b32_e32 v3, 1
-; MUBUF-NEXT:    s_add_i32 s6, s6, s7
 ; MUBUF-NEXT:    buffer_store_dword v1, v2, s[0:3], 0 offen
 ; MUBUF-NEXT:    buffer_store_dword v3, v2, s[0:3], 0 offen offset:4
-; MUBUF-NEXT:    v_mov_b32_e32 v2, s6
+; MUBUF-NEXT:    v_mov_b32_e32 v2, s7
 ; MUBUF-NEXT:    buffer_load_dword v2, v2, s[0:3], 0 offen
 ; MUBUF-NEXT:    s_load_dwordx2 s[4:5], s[4:5], 0x0
+; MUBUF-NEXT:    s_mov_b32 s32, s6
 ; MUBUF-NEXT:    s_waitcnt vmcnt(0)
 ; MUBUF-NEXT:    v_add_u32_e32 v0, v2, v0
 ; MUBUF-NEXT:    s_waitcnt lgkmcnt(0)
@@ -134,15 +134,15 @@ define amdgpu_kernel void @kernel_non_entry_block_static_alloca_uniformly_reache
 ; DEFAULTSIZE-V5-NEXT:    s_add_i32 s4, s32, 0x1000
 ; DEFAULTSIZE-V5-NEXT:    s_and_b32 s4, s4, 0xfffff000
 ; DEFAULTSIZE-V5-NEXT:    s_lshl_b32 s5, s5, 2
-; DEFAULTSIZE-V5-NEXT:    s_mov_b32 s32, s4
 ; DEFAULTSIZE-V5-NEXT:    v_mov_b32_e32 v1, 0
+; DEFAULTSIZE-V5-NEXT:    s_add_i32 s5, s4, s5
 ; DEFAULTSIZE-V5-NEXT:    v_mov_b32_e32 v2, s4
 ; DEFAULTSIZE-V5-NEXT:    v_mov_b32_e32 v3, 1
-; DEFAULTSIZE-V5-NEXT:    s_add_i32 s4, s4, s5
 ; DEFAULTSIZE-V5-NEXT:    buffer_store_dword v1, v2, s[0:3], 0 offen
 ; DEFAULTSIZE-V5-NEXT:    buffer_store_dword v3, v2, s[0:3], 0 offen offset:4
-; DEFAULTSIZE-V5-NEXT:    v_mov_b32_e32 v2, s4
+; DEFAULTSIZE-V5-NEXT:    v_mov_b32_e32 v2, s5
 ; DEFAULTSIZE-V5-NEXT:    buffer_load_dword v2, v2, s[0:3], 0 offen
+; DEFAULTSIZE-V5-NEXT:    s_mov_b32 s32, s4
 ; DEFAULTSIZE-V5-NEXT:    s_load_dwordx2 s[4:5], s[6:7], 0x0
 ; DEFAULTSIZE-V5-NEXT:    s_waitcnt vmcnt(0)
 ; DEFAULTSIZE-V5-NEXT:    v_add_u32_e32 v0, v2, v0
@@ -232,12 +232,12 @@ define void @func_non_entry_block_static_alloca_align4(ptr addrspace(1) %out, i3
 ; MUBUF-NEXT:  ; %bb.2: ; %bb.1
 ; MUBUF-NEXT:    s_add_i32 s6, s32, 0x1000
 ; MUBUF-NEXT:    v_mov_b32_e32 v2, 0
-; MUBUF-NEXT:    v_mov_b32_e32 v3, s6
-; MUBUF-NEXT:    buffer_store_dword v2, v3, s[0:3], 0 offen
+; MUBUF-NEXT:    v_lshl_add_u32 v3, v4, 2, s6
+; MUBUF-NEXT:    v_mov_b32_e32 v4, s6
+; MUBUF-NEXT:    buffer_store_dword v2, v4, s[0:3], 0 offen
 ; MUBUF-NEXT:    v_mov_b32_e32 v2, 1
-; MUBUF-NEXT:    buffer_store_dword v2, v3, s[0:3], 0 offen offset:4
-; MUBUF-NEXT:    v_lshl_add_u32 v2, v4, 2, s6
-; MUBUF-NEXT:    buffer_load_dword v2, v2, s[0:3], 0 offen
+; MUBUF-NEXT:    buffer_store_dword v2, v4, s[0:3], 0 offen offset:4
+; MUBUF-NEXT:    buffer_load_dword v2, v3, s[0:3], 0 offen
 ; MUBUF-NEXT:    v_and_b32_e32 v3, 0x3ff, v31
 ; MUBUF-NEXT:    s_mov_b32 s32, s6
 ; MUBUF-NEXT:    s_waitcnt vmcnt(0)
@@ -330,9 +330,9 @@ define void @func_non_entry_block_static_alloca_align64(ptr addrspace(1) %out, i
 ; MUBUF-NEXT:    v_mov_b32_e32 v4, s6
 ; MUBUF-NEXT:    buffer_store_dword v2, v4, s[0:3], 0 offen
 ; MUBUF-NEXT:    v_mov_b32_e32 v2, 1
+; MUBUF-NEXT:    v_lshl_add_u32 v3, v3, 2, s6
 ; MUBUF-NEXT:    buffer_store_dword v2, v4, s[0:3], 0 offen offset:4
-; MUBUF-NEXT:    v_lshl_add_u32 v2, v3, 2, s6
-; MUBUF-NEXT:    buffer_load_dword v2, v2, s[0:3], 0 offen
+; MUBUF-NEXT:    buffer_load_dword v2, v3, s[0:3], 0 offen
 ; MUBUF-NEXT:    v_and_b32_e32 v3, 0x3ff, v31
 ; MUBUF-NEXT:    s_mov_b32 s32, s6
 ; MUBUF-NEXT:    s_waitcnt vmcnt(0)

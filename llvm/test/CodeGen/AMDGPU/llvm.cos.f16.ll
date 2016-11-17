@@ -9,13 +9,13 @@ define amdgpu_kernel void @cos_f16(ptr addrspace(1) %r, ptr addrspace(1) %a) {
 ; GFX6-LABEL: cos_f16:
 ; GFX6:       ; %bb.0:
 ; GFX6-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GFX6-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX6-NEXT:    s_mov_b32 s6, -1
+; GFX6-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX6-NEXT:    s_mov_b32 s10, s6
 ; GFX6-NEXT:    s_mov_b32 s11, s7
 ; GFX6-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX6-NEXT:    s_mov_b32 s8, s2
 ; GFX6-NEXT:    s_mov_b32 s9, s3
+; GFX6-NEXT:    s_mov_b32 s8, s2
 ; GFX6-NEXT:    buffer_load_ushort v0, off, s[8:11], 0
 ; GFX6-NEXT:    s_mov_b32 s4, s0
 ; GFX6-NEXT:    s_mov_b32 s5, s1
@@ -92,13 +92,13 @@ define amdgpu_kernel void @cos_v2f16(ptr addrspace(1) %r, ptr addrspace(1) %a) {
 ; GFX6-LABEL: cos_v2f16:
 ; GFX6:       ; %bb.0:
 ; GFX6-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GFX6-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX6-NEXT:    s_mov_b32 s6, -1
+; GFX6-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX6-NEXT:    s_mov_b32 s10, s6
 ; GFX6-NEXT:    s_mov_b32 s11, s7
 ; GFX6-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX6-NEXT:    s_mov_b32 s8, s2
 ; GFX6-NEXT:    s_mov_b32 s9, s3
+; GFX6-NEXT:    s_mov_b32 s8, s2
 ; GFX6-NEXT:    buffer_load_dword v0, off, s[8:11], 0
 ; GFX6-NEXT:    s_mov_b32 s4, s0
 ; GFX6-NEXT:    s_mov_b32 s5, s1
@@ -134,8 +134,8 @@ define amdgpu_kernel void @cos_v2f16(ptr addrspace(1) %r, ptr addrspace(1) %a) {
 ; GFX8-NEXT:    v_fract_f16_e32 v0, v0
 ; GFX8-NEXT:    v_cos_f16_sdwa v2, v1 dst_sel:WORD_1 dst_unused:UNUSED_PAD src0_sel:DWORD
 ; GFX8-NEXT:    v_cos_f16_e32 v3, v0
-; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8-NEXT:    v_or_b32_e32 v2, v3, v2
 ; GFX8-NEXT:    flat_store_dword v[0:1], v2
 ; GFX8-NEXT:    s_endpgm

@@ -39,8 +39,8 @@ define amdgpu_kernel void @global_atomic_fadd_ret_f32_wrong_subtarget(ptr addrsp
 ; GCN-NEXT:    s_or_b64 exec, exec, s[4:5]
 ; GCN-NEXT:    v_readfirstlane_b32 s0, v1
 ; GCN-NEXT:    v_cvt_f32_ubyte0_e32 v0, v0
-; GCN-NEXT:    v_mov_b32_e32 v1, s0
 ; GCN-NEXT:    v_mad_f32 v0, v0, 4.0, s0
+; GCN-NEXT:    v_mov_b32_e32 v1, s0
 ; GCN-NEXT:    v_cndmask_b32_e32 v0, v0, v1, vcc
 ; GCN-NEXT:    global_store_dword v[0:1], v0, off
 ; GCN-NEXT:    s_endpgm

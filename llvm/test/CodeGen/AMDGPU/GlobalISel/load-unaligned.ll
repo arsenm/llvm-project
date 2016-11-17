@@ -291,8 +291,8 @@ define amdgpu_ps void @test_s_load_constant_v8i32_align1(ptr addrspace(4) inreg 
 ;
 ; GFX7-LABEL: test_s_load_constant_v8i32_align1:
 ; GFX7:       ; %bb.0:
-; GFX7-NEXT:    s_mov_b32 s4, s2
 ; GFX7-NEXT:    s_mov_b32 s5, s3
+; GFX7-NEXT:    s_mov_b32 s4, s2
 ; GFX7-NEXT:    s_mov_b32 s2, -1
 ; GFX7-NEXT:    s_mov_b32 s3, 0xf000
 ; GFX7-NEXT:    buffer_load_dwordx4 v[0:3], off, s[0:3], 0

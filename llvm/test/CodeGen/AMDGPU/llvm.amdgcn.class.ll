@@ -378,7 +378,7 @@ define amdgpu_kernel void @test_fold_or3_class_f32_0(ptr addrspace(1) %out, ptr 
 ; SI-LABEL: {{^}}test_fold_or_all_tests_class_f32_0:
 ; SI-NOT: v_cmp_class
 ; SI: s_movk_i32 [[MASK:s[0-9]+]], 0x3ff{{$}}
-; SI: v_cmp_class_f32_e64 s[0:1], v{{[0-9]+}}, [[MASK]]{{$}}
+; SI: v_cmp_class_f32_e64 s{{\[[0-9]+:[0-9]+\]}}, v{{[0-9]+}}, [[MASK]]{{$}}
 ; SI-NOT: v_cmp_class
 ; SI: s_endpgm
 define amdgpu_kernel void @test_fold_or_all_tests_class_f32_0(ptr addrspace(1) %out, ptr addrspace(1) %in) #0 {

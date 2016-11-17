@@ -94,8 +94,8 @@ define amdgpu_kernel void @sgpr_isnan_f64(ptr addrspace(1) %out, double %x) {
 ; GFX7SELDAG-LABEL: sgpr_isnan_f64:
 ; GFX7SELDAG:       ; %bb.0:
 ; GFX7SELDAG-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x9
-; GFX7SELDAG-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX7SELDAG-NEXT:    s_mov_b32 s6, -1
+; GFX7SELDAG-NEXT:    s_mov_b32 s7, 0xf000
 ; GFX7SELDAG-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX7SELDAG-NEXT:    s_mov_b32 s4, s0
 ; GFX7SELDAG-NEXT:    s_mov_b32 s5, s1
@@ -119,8 +119,8 @@ define amdgpu_kernel void @sgpr_isnan_f64(ptr addrspace(1) %out, double %x) {
 ; GFX8SELDAG:       ; %bb.0:
 ; GFX8SELDAG-NEXT:    s_load_dwordx4 s[0:3], s[2:3], 0x24
 ; GFX8SELDAG-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX8SELDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8SELDAG-NEXT:    v_mov_b32_e32 v1, s1
+; GFX8SELDAG-NEXT:    v_mov_b32_e32 v0, s0
 ; GFX8SELDAG-NEXT:    v_cmp_class_f64_e64 s[0:1], s[2:3], 3
 ; GFX8SELDAG-NEXT:    v_cndmask_b32_e64 v2, 0, -1, s[0:1]
 ; GFX8SELDAG-NEXT:    flat_store_dword v[0:1], v2
