@@ -1571,6 +1571,7 @@ unsigned getRegBitWidth(unsigned RCID) {
   case AMDGPU::AV_32RegClassID:
   case AMDGPU::SReg_32RegClassID:
   case AMDGPU::SReg_32_XM0RegClassID:
+  case AMDGPU::SReg_32_XM0_XEXECRegClassID:
   case AMDGPU::SRegOrLds_32RegClassID:
     return 32;
   case AMDGPU::SGPR_64RegClassID:
