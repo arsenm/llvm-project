@@ -76,6 +76,7 @@
 //  r -> noreturn
 //  U -> pure
 //  c -> const
+//  x -> noconvergent
 //  t -> signature is meaningless, use custom typechecking
 //  T -> type is not important to semantic analysis and codegen; recognize as
 //       builtin even if type doesn't match signature, and don't warn if we
