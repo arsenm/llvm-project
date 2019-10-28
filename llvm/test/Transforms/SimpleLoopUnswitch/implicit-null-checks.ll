@@ -2,8 +2,8 @@
 ; RUN: opt -passes='simple-loop-unswitch<nontrivial>' -S < %s | FileCheck %s
 ; RUN: opt -passes='loop(simple-loop-unswitch<nontrivial>),verify<loops>' -S < %s | FileCheck %s
 
-declare void @may_exit()
-declare void @throw_npe()
+declare void @may_exit() noconvergent
+declare void @throw_npe() noconvergent
 
 ; It is illegal to preserve make_implicit notion of the condition being
 ; unswitched because we may exit loop before we reach the condition, so

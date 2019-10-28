@@ -26,4 +26,4 @@ define amdgpu_kernel void @dpp8_wait_states(ptr addrspace(1) %out, i32 %in) {
 
 declare i32 @llvm.amdgcn.mov.dpp8.i32(i32, i32) #0
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

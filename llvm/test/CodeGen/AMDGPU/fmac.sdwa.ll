@@ -95,5 +95,5 @@ bb:
 
 declare half @llvm.fmuladd.f16(half, half, half)
 
-attributes #0 = { convergent nounwind readonly}
+attributes #0 = { nounwind readonly}
 attributes #1 = { norecurse nounwind readnone }

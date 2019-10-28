@@ -77,8 +77,8 @@ error:
   ret void
 }
 
-declare void @f(i1)
-declare void @exit()
+declare void @f(i1) noconvergent
+declare void @exit() noconvergent
 ; We can fold the assume but not the uses before the assume.
 define void @cannot_fold_use_before_assume(ptr %array) {
 ; CHECK-LABEL:@cannot_fold_use_before_assume
@@ -100,7 +100,7 @@ error:
   ret void
 }
 
-declare void @dummy(i1) nounwind willreturn
+declare void @dummy(i1) noconvergent nounwind willreturn
 define void @can_fold_some_use_before_assume(ptr %array) {
 
 ; CHECK-LABEL:@can_fold_some_use_before_assume
@@ -149,7 +149,7 @@ error:
   ret void
 }
 
-declare void @fz(i8)
+declare void @fz(i8) noconvergent
 ; FIXME: We can fold assume to true, and the use after assume, but we do not do so
 ; currently, because of the function call after the assume.
 define void @can_fold_assume2(ptr %array) {
@@ -179,7 +179,7 @@ error:
   ret void
 }
 
-declare void @llvm.experimental.guard(i1, ...)
+declare void @llvm.experimental.guard(i1, ...) noconvergent
 ; FIXME: We can fold assume to true, but we do not do so
 ; because of the guard following the assume.
 define void @can_fold_assume3(ptr %array){
@@ -232,10 +232,10 @@ error:
 ; Function Attrs: nounwind
 declare void @llvm.assume(i1) #1
 
-declare void @bar(...)
+declare void @bar(...) noconvergent
 
-declare void @car(...)
+declare void @car(...) noconvergent
 
-attributes #0 = { nounwind uwtable }
-attributes #1 = { nounwind }
+attributes #0 = { noconvergent nounwind uwtable }
+attributes #1 = { noconvergent nounwind }
 

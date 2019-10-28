@@ -413,5 +413,5 @@ kernel void device_side_enqueue(global int *a, global int *b, int i) {
 // COMMON: define spir_kernel void [[INVGK10]](ptr addrspace(4){{.*}})
 // COMMON: define spir_kernel void [[INVGK11]](ptr addrspace(4){{.*}})
 
-// COMMON: attributes [[INVG8_INVOKE_FUNC_ATTR]] = { convergent noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-// COMMON: attributes [[INVOKE_KERNEL_ATTR]] = { convergent nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// COMMON: attributes [[INVG8_INVOKE_FUNC_ATTR]] = { noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// COMMON: attributes [[INVOKE_KERNEL_ATTR]] = { nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }

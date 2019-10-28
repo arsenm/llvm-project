@@ -180,7 +180,7 @@ void use_template() {
 // CHECK-LABEL: define {{[^@]+}}@__cxx_global_var_init
 // CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK-NEXT:  entry:
-// CHECK-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1b)
+// CHECK-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1b) #[[ATTR11:[0-9]+]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -190,7 +190,7 @@ void use_template() {
 // CHECK-NEXT:    [[THIS_ADDR:%.*]] = alloca ptr, align 8
 // CHECK-NEXT:    store ptr [[THIS]], ptr [[THIS_ADDR]], align 8
 // CHECK-NEXT:    [[THIS1:%.*]] = load ptr, ptr [[THIS_ADDR]], align 8
-// CHECK-NEXT:    call void @_ZN2S2C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]])
+// CHECK-NEXT:    call void @_ZN2S2C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]]) #[[ATTR11]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -211,7 +211,7 @@ void use_template() {
 // CHECK-NEXT:    br label [[ARRAYCTOR_LOOP:%.*]]
 // CHECK:       arrayctor.loop:
 // CHECK-NEXT:    [[ARRAYCTOR_CUR:%.*]] = phi ptr [ @_ZL2ba, [[ENTRY:%.*]] ], [ [[ARRAYCTOR_NEXT:%.*]], [[ARRAYCTOR_LOOP]] ]
-// CHECK-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]])
+// CHECK-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]]) #[[ATTR11]]
 // CHECK-NEXT:    [[ARRAYCTOR_NEXT]] = getelementptr inbounds [[CLASS_S2:%.*]], ptr [[ARRAYCTOR_CUR]], i64 1
 // CHECK-NEXT:    [[ARRAYCTOR_DONE:%.*]] = icmp eq ptr [[ARRAYCTOR_NEXT]], getelementptr inbounds ([[CLASS_S2]], ptr @_ZL2ba, i64 5)
 // CHECK-NEXT:    br i1 [[ARRAYCTOR_DONE]], label [[ARRAYCTOR_CONT:%.*]], label [[ARRAYCTOR_LOOP]]
@@ -222,7 +222,7 @@ void use_template() {
 // CHECK-LABEL: define {{[^@]+}}@__cxx_global_var_init.2
 // CHECK-SAME: () #[[ATTR0]] {
 // CHECK-NEXT:  entry:
-// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1c)
+// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1c) #[[ATTR11]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -232,7 +232,7 @@ void use_template() {
 // CHECK-NEXT:    [[THIS_ADDR:%.*]] = alloca ptr, align 8
 // CHECK-NEXT:    store ptr [[THIS]], ptr [[THIS_ADDR]], align 8
 // CHECK-NEXT:    [[THIS1:%.*]] = load ptr, ptr [[THIS_ADDR]], align 8
-// CHECK-NEXT:    call void @_ZN2S3C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]])
+// CHECK-NEXT:    call void @_ZN2S3C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]]) #[[ATTR11]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -253,7 +253,7 @@ void use_template() {
 // CHECK-NEXT:    br label [[ARRAYCTOR_LOOP:%.*]]
 // CHECK:       arrayctor.loop:
 // CHECK-NEXT:    [[ARRAYCTOR_CUR:%.*]] = phi ptr [ @_ZL2ca, [[ENTRY:%.*]] ], [ [[ARRAYCTOR_NEXT:%.*]], [[ARRAYCTOR_LOOP]] ]
-// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]])
+// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]]) #[[ATTR11]]
 // CHECK-NEXT:    [[ARRAYCTOR_NEXT]] = getelementptr inbounds [[CLASS_S3:%.*]], ptr [[ARRAYCTOR_CUR]], i64 1
 // CHECK-NEXT:    [[ARRAYCTOR_DONE:%.*]] = icmp eq ptr [[ARRAYCTOR_NEXT]], getelementptr inbounds ([[CLASS_S3]], ptr @_ZL2ca, i64 5)
 // CHECK-NEXT:    br i1 [[ARRAYCTOR_DONE]], label [[ARRAYCTOR_CONT:%.*]], label [[ARRAYCTOR_LOOP]]
@@ -264,7 +264,7 @@ void use_template() {
 // CHECK-LABEL: define {{[^@]+}}@__cxx_global_var_init.4
 // CHECK-SAME: () #[[ATTR0]] {
 // CHECK-NEXT:  entry:
-// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @h)
+// CHECK-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @h) #[[ATTR11]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -572,8 +572,8 @@ void use_template() {
 // CHECK-NEXT:    br label [[OMP_OFFLOAD_CONT31]]
 // CHECK:       omp_offload.cont31:
 // CHECK-NEXT:    [[TMP125:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// CHECK-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_S0_(i32 noundef signext [[TMP125]])
-// CHECK-NEXT:    [[CALL32:%.*]] = call noundef ptr @_Z5tmainIPiET_S1_(ptr noundef [[ARGC_ADDR]])
+// CHECK-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_S0_(i32 noundef signext [[TMP125]]) #[[ATTR11]]
+// CHECK-NEXT:    [[CALL32:%.*]] = call noundef ptr @_Z5tmainIPiET_S1_(ptr noundef [[ARGC_ADDR]]) #[[ATTR11]]
 // CHECK-NEXT:    [[TMP126:%.*]] = load i32, ptr [[CALL32]], align 4
 // CHECK-NEXT:    [[ADD:%.*]] = add nsw i32 [[CALL]], [[TMP126]]
 // CHECK-NEXT:    ret i32 [[ADD]]
@@ -1184,9 +1184,9 @@ void use_template() {
 // CHECK-SAME: () #[[ATTR6]] {
 // CHECK-NEXT:  entry:
 // CHECK-NEXT:    [[AKERN:%.*]] = alloca [[STRUCT_SOMEKERNEL:%.*]], align 4
-// CHECK-NEXT:    call void @_ZN10SomeKernelC1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]])
-// CHECK-NEXT:    call void @_ZN10SomeKernel5applyILj32EEEvv(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]])
-// CHECK-NEXT:    call void @_ZN10SomeKernelD1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR5]]
+// CHECK-NEXT:    call void @_ZN10SomeKernelC1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR11]]
+// CHECK-NEXT:    call void @_ZN10SomeKernel5applyILj32EEEvv(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR11]]
+// CHECK-NEXT:    call void @_ZN10SomeKernelD1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR12:[0-9]+]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -1332,7 +1332,7 @@ void use_template() {
 // SIMD-ONLY0-LABEL: define {{[^@]+}}@__cxx_global_var_init
 // SIMD-ONLY0-SAME: () #[[ATTR0:[0-9]+]] {
 // SIMD-ONLY0-NEXT:  entry:
-// SIMD-ONLY0-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1b)
+// SIMD-ONLY0-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1b) #[[ATTR7:[0-9]+]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //
@@ -1342,7 +1342,7 @@ void use_template() {
 // SIMD-ONLY0-NEXT:    [[THIS_ADDR:%.*]] = alloca ptr, align 8
 // SIMD-ONLY0-NEXT:    store ptr [[THIS]], ptr [[THIS_ADDR]], align 8
 // SIMD-ONLY0-NEXT:    [[THIS1:%.*]] = load ptr, ptr [[THIS_ADDR]], align 8
-// SIMD-ONLY0-NEXT:    call void @_ZN2S2C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]])
+// SIMD-ONLY0-NEXT:    call void @_ZN2S2C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]]) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //
@@ -1352,7 +1352,7 @@ void use_template() {
 // SIMD-ONLY0-NEXT:    br label [[ARRAYCTOR_LOOP:%.*]]
 // SIMD-ONLY0:       arrayctor.loop:
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_CUR:%.*]] = phi ptr [ @_ZL2ba, [[ENTRY:%.*]] ], [ [[ARRAYCTOR_NEXT:%.*]], [[ARRAYCTOR_LOOP]] ]
-// SIMD-ONLY0-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]])
+// SIMD-ONLY0-NEXT:    call void @_ZN2S2C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]]) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_NEXT]] = getelementptr inbounds [[CLASS_S2:%.*]], ptr [[ARRAYCTOR_CUR]], i64 1
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_DONE:%.*]] = icmp eq ptr [[ARRAYCTOR_NEXT]], getelementptr inbounds ([[CLASS_S2]], ptr @_ZL2ba, i64 5)
 // SIMD-ONLY0-NEXT:    br i1 [[ARRAYCTOR_DONE]], label [[ARRAYCTOR_CONT:%.*]], label [[ARRAYCTOR_LOOP]]
@@ -1363,7 +1363,7 @@ void use_template() {
 // SIMD-ONLY0-LABEL: define {{[^@]+}}@__cxx_global_var_init.2
 // SIMD-ONLY0-SAME: () #[[ATTR0]] {
 // SIMD-ONLY0-NEXT:  entry:
-// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1c)
+// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @_ZL1c) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //
@@ -1373,7 +1373,7 @@ void use_template() {
 // SIMD-ONLY0-NEXT:    [[THIS_ADDR:%.*]] = alloca ptr, align 8
 // SIMD-ONLY0-NEXT:    store ptr [[THIS]], ptr [[THIS_ADDR]], align 8
 // SIMD-ONLY0-NEXT:    [[THIS1:%.*]] = load ptr, ptr [[THIS_ADDR]], align 8
-// SIMD-ONLY0-NEXT:    call void @_ZN2S3C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]])
+// SIMD-ONLY0-NEXT:    call void @_ZN2S3C2Ev(ptr noundef nonnull align 4 dereferenceable(4) [[THIS1]]) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //
@@ -1383,7 +1383,7 @@ void use_template() {
 // SIMD-ONLY0-NEXT:    br label [[ARRAYCTOR_LOOP:%.*]]
 // SIMD-ONLY0:       arrayctor.loop:
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_CUR:%.*]] = phi ptr [ @_ZL2ca, [[ENTRY:%.*]] ], [ [[ARRAYCTOR_NEXT:%.*]], [[ARRAYCTOR_LOOP]] ]
-// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]])
+// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) [[ARRAYCTOR_CUR]]) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_NEXT]] = getelementptr inbounds [[CLASS_S3:%.*]], ptr [[ARRAYCTOR_CUR]], i64 1
 // SIMD-ONLY0-NEXT:    [[ARRAYCTOR_DONE:%.*]] = icmp eq ptr [[ARRAYCTOR_NEXT]], getelementptr inbounds ([[CLASS_S3]], ptr @_ZL2ca, i64 5)
 // SIMD-ONLY0-NEXT:    br i1 [[ARRAYCTOR_DONE]], label [[ARRAYCTOR_CONT:%.*]], label [[ARRAYCTOR_LOOP]]
@@ -1394,7 +1394,7 @@ void use_template() {
 // SIMD-ONLY0-LABEL: define {{[^@]+}}@__cxx_global_var_init.4
 // SIMD-ONLY0-SAME: () #[[ATTR0]] {
 // SIMD-ONLY0-NEXT:  entry:
-// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @h)
+// SIMD-ONLY0-NEXT:    call void @_ZN2S3C1Ev(ptr noundef nonnull align 4 dereferenceable(4) @h) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //
@@ -1455,8 +1455,8 @@ void use_template() {
 // SIMD-ONLY0-NEXT:    [[TMP11:%.*]] = load i32, ptr [[ARRAYIDX8]], align 4
 // SIMD-ONLY0-NEXT:    store i32 [[TMP11]], ptr [[A7]], align 4
 // SIMD-ONLY0-NEXT:    [[TMP12:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// SIMD-ONLY0-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_S0_(i32 noundef signext [[TMP12]])
-// SIMD-ONLY0-NEXT:    [[CALL9:%.*]] = call noundef ptr @_Z5tmainIPiET_S1_(ptr noundef [[ARGC_ADDR]])
+// SIMD-ONLY0-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_S0_(i32 noundef signext [[TMP12]]) #[[ATTR7]]
+// SIMD-ONLY0-NEXT:    [[CALL9:%.*]] = call noundef ptr @_Z5tmainIPiET_S1_(ptr noundef [[ARGC_ADDR]]) #[[ATTR7]]
 // SIMD-ONLY0-NEXT:    [[TMP13:%.*]] = load i32, ptr [[CALL9]], align 4
 // SIMD-ONLY0-NEXT:    [[ADD:%.*]] = add nsw i32 [[CALL]], [[TMP13]]
 // SIMD-ONLY0-NEXT:    ret i32 [[ADD]]
@@ -1550,9 +1550,9 @@ void use_template() {
 // SIMD-ONLY0-SAME: () #[[ATTR4]] {
 // SIMD-ONLY0-NEXT:  entry:
 // SIMD-ONLY0-NEXT:    [[AKERN:%.*]] = alloca [[STRUCT_SOMEKERNEL:%.*]], align 4
-// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernelC1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]])
-// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernel5applyILj32EEEvv(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]])
-// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernelD1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR7:[0-9]+]]
+// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernelC1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR7]]
+// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernel5applyILj32EEEvv(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR7]]
+// SIMD-ONLY0-NEXT:    call void @_ZN10SomeKernelD1Ev(ptr noundef nonnull align 4 dereferenceable(8) [[AKERN]]) #[[ATTR8:[0-9]+]]
 // SIMD-ONLY0-NEXT:    ret void
 //
 //

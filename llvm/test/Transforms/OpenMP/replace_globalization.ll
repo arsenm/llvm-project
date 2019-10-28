@@ -219,7 +219,7 @@ declare void @unknown_no_openmp() "llvm.assume"="omp_no_openmp"
 ; CHECK: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind memory(write) }
 ; CHECK: attributes #[[ATTR2]] = { norecurse nosync nounwind allocsize(0) memory(read) }
 ; CHECK: attributes #[[ATTR3]] = { nosync nounwind }
-; CHECK: attributes #[[ATTR4:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; CHECK: attributes #[[ATTR4:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ; CHECK: attributes #[[ATTR5:[0-9]+]] = { "llvm.assume"="omp_no_openmp" }
 ; CHECK: attributes #[[ATTR6]] = { nounwind }
 ;.

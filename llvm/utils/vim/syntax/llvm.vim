@@ -70,6 +70,7 @@ syn keyword llvmKeyword
       \ common
       \ constant
       \ convergent
+      \ noconvergent
       \ datalayout
       \ declare
       \ default

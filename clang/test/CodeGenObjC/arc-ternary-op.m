@@ -125,7 +125,7 @@ void test2(int cond) {
   // CHECK-NEXT: store i1 false, ptr [[RUN_CLEANUP]]
   // CHECK-NEXT: br i1
   //   Within true branch, cleanup enabled.
-  // CHECK:      [[T1:%.*]] = call ptr @test2_producer() [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK:      [[T1:%.*]] = call ptr @test2_producer() #{{[0-9]+}} [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(ptr [[T1]])
   // CHECK-NEXT: store ptr [[T1]], ptr [[CLEANUP_SAVE]]
   // CHECK-NEXT: store i1 true, ptr [[RUN_CLEANUP]]

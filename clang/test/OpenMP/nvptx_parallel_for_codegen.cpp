@@ -156,7 +156,7 @@ int bar(int n){
 //
 //
 // CHECK-LABEL: define {{[^@]+}}@__omp_outlined___wrapper
-// CHECK-SAME: (i16 noundef zeroext [[TMP0:%.*]], i32 noundef [[TMP1:%.*]]) #[[ATTR4:[0-9]+]] {
+// CHECK-SAME: (i16 noundef zeroext [[TMP0:%.*]], i32 noundef [[TMP1:%.*]]) #[[ATTR5:[0-9]+]] {
 // CHECK-NEXT:  entry:
 // CHECK-NEXT:    [[DOTADDR:%.*]] = alloca i16, align 2
 // CHECK-NEXT:    [[DOTADDR1:%.*]] = alloca i32, align 4
@@ -171,6 +171,6 @@ int bar(int n){
 // CHECK-NEXT:    [[TMP4:%.*]] = load ptr, ptr [[TMP3]], align 8
 // CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds ptr, ptr [[TMP2]], i64 1
 // CHECK-NEXT:    [[TMP6:%.*]] = load ptr, ptr [[TMP5]], align 8
-// CHECK-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]], ptr [[TMP4]], ptr [[TMP6]]) #[[ATTR3:[0-9]+]]
+// CHECK-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]], ptr [[TMP4]], ptr [[TMP6]]) #[[ATTR4:[0-9]+]]
 // CHECK-NEXT:    ret void
 //

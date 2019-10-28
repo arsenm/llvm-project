@@ -50,8 +50,16 @@ Update on required toolchains to build LLVM
 Changes to the LLVM IR
 ----------------------
 
+
 * Typed pointers are no longer supported. See the `opaque pointers
   <OpaquePointers.html>`__ documentation for migration instructions.
+
+* Functions are now assumed to potentially have convergent semantics
+  by default. The convergent attribute has been removed, as it is now
+  the default, and the inverse noconvergent attribute introduced.
+  Frontends for languages or targets without convergent semantics
+  should add the new noconvergent attribute to all functions to avoid
+  any impact. This is trivially inferred in most situations.
 
 Changes to building LLVM
 ------------------------

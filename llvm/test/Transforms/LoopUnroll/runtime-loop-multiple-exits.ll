@@ -4932,7 +4932,7 @@ exit:                                              ; preds = %latch
   ret void
 }
 
-declare ptr addrspace(1) @foo(i32)
+declare ptr addrspace(1) @foo(i32) noconvergent
 ; inner loop prolog unrolled
 ; a value from outer loop is used in exit block of inner loop.
 ; Don't create VMap entries for such values (%trip).
@@ -5346,7 +5346,7 @@ outerLatch:                                             ; preds = %latch, %outer
   br label %outerloopHdr
 }
 
-declare void @bar()
+declare void @bar() noconvergent
 
 ; This is a case where we should be able to eliminate N-1 copies
 ; of the early exit test in the main loop when runtime unrolling
@@ -6255,7 +6255,7 @@ exit1:
   ret void
 }
 
-declare i1 @unknown_cond()
+declare i1 @unknown_cond() noconvergent
 
 ; Mix of computable and uncompatable exits
 define void @test13(i64 %trip, i64 %trip2) {

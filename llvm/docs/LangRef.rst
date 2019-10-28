@@ -867,6 +867,16 @@ not be significant within the module.
 If an explicit address space is not given, it will default to the program
 address space from the :ref:`datalayout string<langref_datalayout>`.
 
+  .. _convergence:
+
+Convergence
+---------
+
+In some parallel execution models, there exist operations that cannot
+be made control-dependent on any additional values. We call such
+operations convergent. By default, functions are assumed to have
+convergent semantics.
+
 .. _langref_aliases:
 
 Aliases
@@ -1663,26 +1673,33 @@ example:
     computing edge weights, basic blocks post-dominated by a cold
     function call are also considered to be cold; and, thus, given low
     weight.
-``convergent``
-    In some parallel execution models, there exist operations that cannot be
-    made control-dependent on any additional values.  We call such operations
-    ``convergent``, and mark them with this attribute.
+``noconvergent``
+    This indicates that the function does not call any `convergent
+    <convergence>` operations. The absence of this attributes implies
+    such operations may be called.
 
-    The ``convergent`` attribute may appear on functions or call/invoke
-    instructions.  When it appears on a function, it indicates that calls to
-    this function should not be made control-dependent on additional values.
-    For example, the intrinsic ``llvm.nvvm.barrier0`` is ``convergent``, so
-    calls to this intrinsic cannot be made control-dependent on additional
+    The ``noconvergent`` attribute may appear on functions or
+    call/invoke instructions.  When it appears on a function, it
+    indicates that calls to this function may be made
+    control-dependent on additional values.  For example, the
+    intrinsic ``llvm.nvvm.barrier0`` is not ``noconvergent``, so calls
+    to this intrinsic cannot be made control-dependent on additional
     values.
 
-    When it appears on a call/invoke, the ``convergent`` attribute indicates
-    that we should treat the call as though we're calling a convergent
+    When it appears on a call/invoke, the ``noconvergent`` attribute indicates
+    that we should treat the call as though we're calling a ``noconvergent``
     function.  This is particularly useful on indirect calls; without this we
-    may treat such calls as though the target is non-convergent.
+    may treat such calls as though the target is `convergent <convergence>`.
 
-    The optimizer may remove the ``convergent`` attribute on functions when it
+    The optimizer may add the ``noconvergent`` attribute on functions
+    when it can prove that the function does not execute any
+    convergent operations.  Similarly, the optimizer may add
+    ``noconvergent`` on calls/invokes when it can prove that the
+    call/invoke cannot call a convergent function.
+
+    The optimizer may add the ``noconvergent`` attribute on functions when it
     can prove that the function does not execute any convergent operations.
-    Similarly, the optimizer may remove ``convergent`` on calls/invokes when it
+    Similarly, the optimizer may add ``noconvergent`` on calls/invokes when it
     can prove that the call/invoke cannot call a convergent function.
 ``disable_sanitizer_instrumentation``
     When instrumenting code with sanitizers, it can be important to skip certain
@@ -1907,15 +1924,17 @@ example:
     If an invocation of an annotated function does not return control back
     to a point in the call stack, the behavior is undefined.
 ``nosync``
-    This function attribute indicates that the function does not communicate
-    (synchronize) with another thread through memory or other well-defined means.
-    Synchronization is considered possible in the presence of `atomic` accesses
-    that enforce an order, thus not "unordered" and "monotonic", `volatile` accesses,
-    as well as `convergent` function calls. Note that through `convergent` function calls
-    non-memory communication, e.g., cross-lane operations, are possible and are also
-    considered synchronization. However `convergent` does not contradict `nosync`.
-    If an annotated function does ever synchronize with another thread,
-    the behavior is undefined.
+    This function attribute indicates that the function does not
+    communicate (synchronize) with another thread through memory or
+    other well-defined means.  Synchronization is considered possible
+    in the presence of `atomic` accesses that enforce an order, thus
+    not "unordered" and "monotonic", `volatile` accesses, as well as
+    `convergent` function calls. Note that through `convergent`
+    function calls non-memory communication, e.g., cross-lane
+    operations, are possible and are also considered
+    synchronization. However the abcense of ``noconvergent`` does not
+    contradict `nosync`.  If an annotated function does ever
+    synchronize with another thread, the behavior is undefined.
 ``nounwind``
     This function attribute indicates that the function never raises an
     exception. If the function does raise an exception, its runtime
@@ -10180,11 +10199,11 @@ alignment is not set to a value which is at least the size in bytes of the
 pointee. ``!nontemporal`` does not have any defined semantics for atomic loads.
 
 The optional constant ``align`` argument specifies the alignment of the
-operation (that is, the alignment of the memory address). It is the 
+operation (that is, the alignment of the memory address). It is the
 responsibility of the code emitter to ensure that the alignment information is
-correct. Overestimating the alignment results in undefined behavior. 
+correct. Overestimating the alignment results in undefined behavior.
 Underestimating the alignment may produce less efficient code. An alignment of
-1 is always safe. The maximum possible alignment is ``1 << 32``. An alignment 
+1 is always safe. The maximum possible alignment is ``1 << 32``. An alignment
 value higher than the size of the loaded type implies memory up to the
 alignment value bytes can be safely loaded without trapping in the default
 address space. Access of the high bytes can interfere with debugging tools, so
@@ -10320,11 +10339,11 @@ the alignment is not set to a value which is at least the size in bytes of the
 pointee. ``!nontemporal`` does not have any defined semantics for atomic stores.
 
 The optional constant ``align`` argument specifies the alignment of the
-operation (that is, the alignment of the memory address). It is the 
+operation (that is, the alignment of the memory address). It is the
 responsibility of the code emitter to ensure that the alignment information is
-correct. Overestimating the alignment results in undefined behavior. 
+correct. Overestimating the alignment results in undefined behavior.
 Underestimating the alignment may produce less efficient code. An alignment of
-1 is always safe. The maximum possible alignment is ``1 << 32``. An alignment 
+1 is always safe. The maximum possible alignment is ``1 << 32``. An alignment
 value higher than the size of the loaded type implies memory up to the
 alignment value bytes can be safely loaded without trapping in the default
 address space. Access of the high bytes can interfere with debugging tools, so

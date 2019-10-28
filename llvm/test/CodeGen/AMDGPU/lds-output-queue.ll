@@ -23,7 +23,7 @@ entry:
   ret void
 }
 
-declare void @llvm.r600.group.barrier() nounwind convergent
+declare void @llvm.r600.group.barrier() nounwind
 
 ; The machine scheduler does not do proper alias analysis and assumes that
 ; loads from global values (Note that a global value is different that a

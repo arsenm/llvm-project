@@ -4,7 +4,7 @@
 @g = global i32 20
 
 define void @test_no_read_or_write() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: @test_no_read_or_write(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    ret void
@@ -14,7 +14,7 @@ entry:
 }
 
 define i32 @test_only_read_arg(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: @test_only_read_arg(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L:%.*]] = load i32, ptr [[PTR:%.*]], align 4
@@ -26,7 +26,7 @@ entry:
 }
 
 define i32 @test_only_read_arg_already_has_argmemonly(ptr %ptr) argmemonly {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: @test_only_read_arg_already_has_argmemonly(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L:%.*]] = load i32, ptr [[PTR:%.*]], align 4
@@ -38,7 +38,7 @@ entry:
 }
 
 define i32 @test_read_global() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, argmem: none, inaccessiblemem: none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(read, argmem: none, inaccessiblemem: none)
 ; CHECK-LABEL: @test_read_global(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L:%.*]] = load i32, ptr @g, align 4
@@ -50,7 +50,7 @@ entry:
 }
 
 define i32 @test_read_loaded_ptr(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none)
 ; CHECK-LABEL: @test_read_loaded_ptr(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L:%.*]] = load ptr, ptr [[PTR:%.*]], align 8
@@ -64,7 +64,7 @@ entry:
 }
 
 define void @test_only_write_arg(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write)
 ; CHECK-LABEL: @test_only_write_arg(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    store i32 0, ptr [[PTR:%.*]], align 4
@@ -76,7 +76,7 @@ entry:
 }
 
 define void @test_write_global() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none)
 ; CHECK-LABEL: @test_write_global(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    store i32 0, ptr @g, align 4
@@ -131,7 +131,7 @@ entry:
 }
 
 define i32 @test_call_fn_where_argmemonly_can_be_inferred(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: @test_call_fn_where_argmemonly_can_be_inferred(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[C:%.*]] = call i32 @test_only_read_arg(ptr [[PTR:%.*]])
@@ -143,7 +143,7 @@ entry:
 }
 
 define void @test_memcpy_argonly(ptr %dst, ptr %src) {
-; CHECK: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: readwrite)
+; CHECK: Function Attrs: mustprogress noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite)
 ; CHECK-LABEL: @test_memcpy_argonly(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr [[DST:%.*]], ptr [[SRC:%.*]], i64 32, i1 false)
@@ -159,7 +159,7 @@ declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @arr = global [32 x i8] zeroinitializer
 
 define void @test_memcpy_src_global(ptr %dst) {
-; CHECK: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(readwrite, inaccessiblemem: none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree nosync nounwind willreturn memory(readwrite, inaccessiblemem: none)
 ; CHECK-LABEL: @test_memcpy_src_global(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr [[DST:%.*]], ptr @arr, i64 32, i1 false)
@@ -171,7 +171,7 @@ entry:
 }
 
 define void @test_memcpy_dst_global(ptr %src) {
-; CHECK: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(readwrite, inaccessiblemem: none)
+; CHECK: Function Attrs: mustprogress noconvergent nofree nosync nounwind willreturn memory(readwrite, inaccessiblemem: none)
 ; CHECK-LABEL: @test_memcpy_dst_global(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr @arr, ptr [[SRC:%.*]], i64 32, i1 false)
@@ -183,7 +183,7 @@ entry:
 }
 
 define i32 @test_read_arg_access_alloca(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: @test_read_arg_access_alloca(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[A:%.*]] = alloca i32, align 4

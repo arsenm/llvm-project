@@ -89,7 +89,7 @@ float container2 (float par) {
     return thrice(par);
 }
 // CHECK-DAG: @_Z10container2f{{.*}} [[ATTRCONTAINER2:#[0-9]+]]
-// CHECK-DAG: @_Z6thriceIfET_S0_{{.*}} [[ATTRTHRICEFLOAT:#[0-9]+]]
+// CHECK-DAG: define {{.*}} @_Z6thriceIfET_S0_{{.*}} [[ATTRTHRICEFLOAT:#[0-9]+]]
 
 
 // A template specialization is a new definition and it will not be

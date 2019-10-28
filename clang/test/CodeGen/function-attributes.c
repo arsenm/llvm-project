@@ -109,11 +109,11 @@ void f20(void) {
   _setjmp(0);
 }
 
-// CHECK: attributes [[NUW]] = { nounwind optsize{{.*}} }
-// CHECK: attributes [[AI]] = { alwaysinline nounwind optsize{{.*}} }
-// CHECK: attributes [[NUW_OS_RN]] = { nounwind optsize willreturn memory(none){{.*}} }
-// CHECK: attributes [[SR]] = { nounwind optsize{{.*}} "stackrealign"{{.*}} }
-// CHECK: attributes [[RT]] = { nounwind optsize returns_twice{{.*}} }
-// CHECK: attributes [[NR]] = { noreturn optsize }
-// CHECK: attributes [[NUW_RN]] = { nounwind optsize willreturn memory(none) }
-// CHECK: attributes [[RT_CALL]] = { optsize returns_twice }
+// CHECK: attributes [[NUW]] = { noconvergent nounwind optsize{{.*}} }
+// CHECK: attributes [[AI]] = { alwaysinline noconvergent nounwind optsize{{.*}} }
+// CHECK: attributes [[NUW_OS_RN]] = { noconvergent nounwind optsize willreturn memory(none){{.*}} }
+// CHECK: attributes [[SR]] = { noconvergent nounwind optsize{{.*}} "stackrealign"{{.*}} }
+// CHECK: attributes [[RT]] = { noconvergent nounwind optsize returns_twice{{.*}} }
+// CHECK: attributes [[NR]] = { noconvergent noreturn optsize }
+// CHECK: attributes [[NUW_RN]] = { noconvergent nounwind optsize willreturn memory(none) }
+// CHECK: attributes [[RT_CALL]] = { noconvergent optsize returns_twice }

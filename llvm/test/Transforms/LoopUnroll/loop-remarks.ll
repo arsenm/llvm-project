@@ -45,4 +45,4 @@ for.end:                                          ; preds = %for.body
   ret i32 %add1
 }
 
-declare i32 @baz(i32)
+declare i32 @baz(i32) noconvergent

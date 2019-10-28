@@ -248,6 +248,18 @@ Modeling Memory Effects
 
 #. Mark invariant locations using !invariant.load and TBAA's constant flags
 
+Convergence
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+#. By default functions are assumed to potentially use operations
+   which have data parallel semantics, referred to as
+   convergent. These apply to certain classes of synchronization and
+   parallel communication operations, such as appear in GPUs
+   (e.g. OpenCL barrier or subgroup operations) . For languages that
+   do not have data parallel semantics, the ``noconvergent`` attribute
+   should be added to all functions to avoid pessimizing control flow
+   optimizations that may break convergent operations.
+
 Pass Ordering
 ^^^^^^^^^^^^^
 

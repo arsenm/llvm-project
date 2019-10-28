@@ -3,12 +3,12 @@
 // optnone wins over inlinehint.
 // Test that both func1 and func2 are marked optnone and noinline.
 
-// Definition with both optnone and inlinehint.
+// Definition with both foptnone and inlinehint.
 __attribute__((optnone))
 inline int func1(int a) {
   return a + a + a + a;
 }
-// CHECK: @_Z5func1i({{.*}}) [[OPTNONE:#[0-9]+]]
+// CHECK: dso_local noundef i32 @_Z5func1i({{.*}}) [[OPTNONE:#[0-9]+]]
 
 // optnone declaration, inlinehint definition.
 __attribute__((optnone))
@@ -75,8 +75,8 @@ int exported_optnone_func(int a) {
 // CHECK: declare dllimport {{.*}} @_Z21imported_optnone_funci({{.*}}) [[DLLIMPORT:#[0-9]+]]
 
 
-// CHECK: attributes [[OPTNONE]] = { mustprogress noinline {{.*}} optnone
-// CHECK: attributes [[NORETURN]] = { mustprogress noinline noreturn {{.*}} optnone
+// CHECK: attributes [[OPTNONE]] = { mustprogress noconvergent noinline {{.*}} optnone
+// CHECK: attributes [[NORETURN]] = { mustprogress noconvergent noinline noreturn {{.*}} optnone
 
 // CHECK: attributes [[DLLIMPORT]] =
 // CHECK-NOT: optnone

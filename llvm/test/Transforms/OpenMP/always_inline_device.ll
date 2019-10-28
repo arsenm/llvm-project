@@ -10,7 +10,7 @@
 
 ; Function Attrs: convergent norecurse nounwind
 define weak void @__omp_offloading_fd02_c0934fc2_foo_l4() #0 {
-; CHECK: Function Attrs: convergent norecurse nounwind
+; CHECK: Function Attrs: norecurse nounwind
 ; CHECK-LABEL: @__omp_offloading_fd02_c0934fc2_foo_l4(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = call i32 @__kmpc_target_init(ptr @[[GLOB1:[0-9]+]], i8 2, i1 false)
@@ -41,7 +41,7 @@ user_code.entry:                                  ; preds = %entry
   ;       to only spawn a single thread. Further, we then should not guard any code.
   %isSPMD = call i8 @__kmpc_is_spmd_exec_mode()
   store i8 %isSPMD, ptr @G
-  call void @bar() #2
+  call void @bar()
   call void @__kmpc_target_deinit(ptr @1, i8 1)
   ret void
 
@@ -57,7 +57,7 @@ declare void @__kmpc_target_deinit(ptr, i8)
 
 ; Function Attrs: convergent nounwind
 define hidden void @bar() #1 {
-; CHECK: Function Attrs: alwaysinline convergent nounwind
+; CHECK: Function Attrs: alwaysinline nounwind
 ; CHECK-LABEL: @bar(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    ret void
@@ -66,9 +66,8 @@ entry:
   ret void
 }
 
-attributes #0 = { convergent norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_70" "target-features"="+ptx32,+sm_70" }
-attributes #1 = { convergent nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_70" "target-features"="+ptx32,+sm_70" }
-attributes #2 = { convergent }
+attributes #0 = { norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_70" "target-features"="+ptx32,+sm_70" }
+attributes #1 = { nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_70" "target-features"="+ptx32,+sm_70" }
 
 !omp_offload.info = !{!0}
 !nvvm.annotations = !{!1}

@@ -1207,4 +1207,4 @@ attributes #0 = { nounwind }
 attributes #1 = { nounwind readnone }
 attributes #2 = { nounwind readnone speculatable }
 attributes #3 = { inaccessiblememonly nounwind }
-attributes #4 = { convergent nounwind readnone }
+attributes #4 = { nounwind readnone }

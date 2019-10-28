@@ -4,7 +4,7 @@
 
 // Test with pch.
 // RUN: %clang_cc1 -x objective-c -emit-pch -o %t %S/objc_container.h
-// RUN: %clang_cc1 -include-pch %t -fsyntax-only -verify %s 
+// RUN: %clang_cc1 -include-pch %t -fsyntax-only -verify %s
 // RUN: %clang_cc1 -include-pch %t -ast-print %s | FileCheck -check-prefix=CHECK-PRINT %s
 // RUN: %clang_cc1 -include-pch %t -emit-llvm -o - %s | FileCheck -check-prefix=CHECK-IR %s
 
@@ -22,5 +22,5 @@
 // CHECK-IR: {{call.*objc_msgSend}}
 // CHECK-IR: ret void
 
-// CHECK-IR: attributes #0 = { noinline nounwind {{.*}} }
-// CHECK-IR: attributes #1 = { nonlazybind }
+// CHECK-IR: attributes #0 = { noconvergent noinline nounwind {{.*}} }
+// CHECK-IR: attributes #1 = { noconvergent nonlazybind }

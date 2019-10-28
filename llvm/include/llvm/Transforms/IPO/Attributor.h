@@ -3316,6 +3316,37 @@ struct AANoUnwind
   static const char ID;
 };
 
+struct AANoConvergent
+    : public IRAttribute<Attribute::NoConvergent,
+                         StateWrapper<BooleanState, AbstractAttribute>> {
+  AANoConvergent(const IRPosition &IRP, Attributor &A) : IRAttribute(IRP) {}
+
+  /// Returns true if noconvergent is assumed.
+  bool isAssumedNoConvergent() const { return getAssumed(); }
+
+  /// Returns true if noconvergent is known.
+  bool isKnownNoConvergent() const { return getKnown(); }
+
+  /// Create an abstract attribute view for the position \p IRP.
+  static AANoConvergent &createForPosition(const IRPosition &IRP,
+                                           Attributor &A);
+
+  /// See AbstractAttribute::getName()
+  const std::string getName() const override { return "AANoConvergent"; }
+
+  /// See AbstractAttribute::getIdAddr()
+  const char *getIdAddr() const override { return &ID; }
+
+  /// This function should return true if the type of the \p AA is
+  /// AANoConvergent
+  static bool classof(const AbstractAttribute *AA) {
+    return (AA->getIdAddr() == &ID);
+  }
+
+  /// Unique ID (due to the unique address)
+  static const char ID;
+};
+
 struct AANoSync
     : public IRAttribute<Attribute::NoSync,
                          StateWrapper<BooleanState, AbstractAttribute>> {

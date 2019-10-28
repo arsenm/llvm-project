@@ -14,7 +14,7 @@ void foo() {
 }
 
 #endif
-// CHECK: Function Attrs: mustprogress nounwind
+// CHECK: Function Attrs: mustprogress noconvergent nounwind
 // CHECK-LABEL: define {{[^@]+}}@_Z3foov
 // CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK-NEXT:  entry:
@@ -30,7 +30,7 @@ void foo() {
 // CHECK-NEXT:    ret void
 //
 //
-// CHECK: Function Attrs: noinline norecurse nounwind
+// CHECK: Function Attrs: noconvergent noinline norecurse nounwind
 // CHECK-LABEL: define {{[^@]+}}@.omp_outlined.
 // CHECK-SAME: (ptr noalias noundef [[DOTGLOBAL_TID_:%.*]], ptr noalias noundef [[DOTBOUND_TID_:%.*]]) #[[ATTR1:[0-9]+]] {
 // CHECK-NEXT:  entry:
@@ -41,7 +41,7 @@ void foo() {
 // CHECK-NEXT:    ret void
 //
 //
-// CHECK: Function Attrs: alwaysinline norecurse nounwind
+// CHECK: Function Attrs: alwaysinline noconvergent norecurse nounwind
 // CHECK-LABEL: define {{[^@]+}}@.omp_outlined..1
 // CHECK-SAME: (ptr noalias noundef [[DOTGLOBAL_TID_:%.*]], ptr noalias noundef [[DOTBOUND_TID_:%.*]]) #[[ATTR3:[0-9]+]] {
 // CHECK-NEXT:  entry:
@@ -52,7 +52,7 @@ void foo() {
 // CHECK-NEXT:    ret void
 //
 //
-// CHECK-NOINLINE: Function Attrs: mustprogress noinline nounwind
+// CHECK-NOINLINE: Function Attrs: mustprogress noconvergent noinline nounwind
 // CHECK-NOINLINE-LABEL: define {{[^@]+}}@_Z3foov
 // CHECK-NOINLINE-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK-NOINLINE-NEXT:  entry:
@@ -68,7 +68,7 @@ void foo() {
 // CHECK-NOINLINE-NEXT:    ret void
 //
 //
-// CHECK-NOINLINE: Function Attrs: noinline norecurse nounwind
+// CHECK-NOINLINE: Function Attrs: noconvergent noinline norecurse nounwind
 // CHECK-NOINLINE-LABEL: define {{[^@]+}}@.omp_outlined.
 // CHECK-NOINLINE-SAME: (ptr noalias noundef [[DOTGLOBAL_TID_:%.*]], ptr noalias noundef [[DOTBOUND_TID_:%.*]]) #[[ATTR1:[0-9]+]] {
 // CHECK-NOINLINE-NEXT:  entry:
@@ -79,7 +79,7 @@ void foo() {
 // CHECK-NOINLINE-NEXT:    ret void
 //
 //
-// CHECK-NOINLINE: Function Attrs: alwaysinline norecurse nounwind
+// CHECK-NOINLINE: Function Attrs: alwaysinline noconvergent norecurse nounwind
 // CHECK-NOINLINE-LABEL: define {{[^@]+}}@.omp_outlined..1
 // CHECK-NOINLINE-SAME: (ptr noalias noundef [[DOTGLOBAL_TID_:%.*]], ptr noalias noundef [[DOTBOUND_TID_:%.*]]) #[[ATTR3:[0-9]+]] {
 // CHECK-NOINLINE-NEXT:  entry:

@@ -468,68 +468,66 @@ declare void @f.alwaysinline() alwaysinline
 ; CHECK: declare void @f.alwaysinline() #2
 declare void @f.cold() cold
 ; CHECK: declare void @f.cold() #3
-declare void @f.convergent() convergent
-; CHECK: declare void @f.convergent() #4
 declare void @f.inlinehint() inlinehint
-; CHECK: declare void @f.inlinehint() #5
+; CHECK: declare void @f.inlinehint() #4
 declare void @f.jumptable() unnamed_addr jumptable
-; CHECK: declare void @f.jumptable() unnamed_addr #6
+; CHECK: declare void @f.jumptable() unnamed_addr #5
 declare void @f.minsize() minsize
-; CHECK: declare void @f.minsize() #7
+; CHECK: declare void @f.minsize() #6
 declare void @f.naked() naked
-; CHECK: declare void @f.naked() #8
+; CHECK: declare void @f.naked() #7
 declare void @f.nobuiltin() nobuiltin
-; CHECK: declare void @f.nobuiltin() #9
+; CHECK: declare void @f.nobuiltin() #8
 declare void @f.noduplicate() noduplicate
-; CHECK: declare void @f.noduplicate() #10
+; CHECK: declare void @f.noduplicate() #9
 declare void @f.noimplicitfloat() noimplicitfloat
-; CHECK: declare void @f.noimplicitfloat() #11
+; CHECK: declare void @f.noimplicitfloat() #10
 declare void @f.noinline() noinline
-; CHECK: declare void @f.noinline() #12
+; CHECK: declare void @f.noinline() #11
 declare void @f.nonlazybind() nonlazybind
-; CHECK: declare void @f.nonlazybind() #13
+; CHECK: declare void @f.nonlazybind() #12
 declare void @f.noredzone() noredzone
-; CHECK: declare void @f.noredzone() #14
+; CHECK: declare void @f.noredzone() #13
 declare void @f.noreturn() noreturn
-; CHECK: declare void @f.noreturn() #15
+; CHECK: declare void @f.noreturn() #14
 declare void @f.nounwind() nounwind
-; CHECK: declare void @f.nounwind() #16
+; CHECK: declare void @f.nounwind() #15
 declare void @f.optnone() noinline optnone
-; CHECK: declare void @f.optnone() #17
+; CHECK: declare void @f.optnone() #16
 declare void @f.optsize() optsize
-; CHECK: declare void @f.optsize() #18
+; CHECK: declare void @f.optsize() #17
 declare void @f.readnone() readnone
-; CHECK: declare void @f.readnone() #19
+; CHECK: declare void @f.readnone() #18
 declare void @f.readonly() readonly
-; CHECK: declare void @f.readonly() #20
+; CHECK: declare void @f.readonly() #19
 declare void @f.returns_twice() returns_twice
-; CHECK: declare void @f.returns_twice() #21
+; CHECK: declare void @f.returns_twice() #20
 declare void @f.safestack() safestack
-; CHECK: declare void @f.safestack() #22
+; CHECK: declare void @f.safestack() #21
 declare void @f.sanitize_address() sanitize_address
-; CHECK: declare void @f.sanitize_address() #23
+; CHECK: declare void @f.sanitize_address() #22
 declare void @f.sanitize_memory() sanitize_memory
-; CHECK: declare void @f.sanitize_memory() #24
+; CHECK: declare void @f.sanitize_memory() #23
 declare void @f.sanitize_thread() sanitize_thread
-; CHECK: declare void @f.sanitize_thread() #25
+; CHECK: declare void @f.sanitize_thread() #24
 declare void @f.ssp() ssp
-; CHECK: declare void @f.ssp() #26
+; CHECK: declare void @f.ssp() #25
 declare void @f.sspreq() sspreq
-; CHECK: declare void @f.sspreq() #27
+; CHECK: declare void @f.sspreq() #26
 declare void @f.sspstrong() sspstrong
-; CHECK: declare void @f.sspstrong() #28
+; CHECK: declare void @f.sspstrong() #27
 declare void @f.thunk() "thunk"
-; CHECK: declare void @f.thunk() #29
+; CHECK: declare void @f.thunk() #28
 declare void @f.uwtable() uwtable
-; CHECK: declare void @f.uwtable() #30
+; CHECK: declare void @f.uwtable() #29
 declare void @f.kvpair() "cpu"="cortex-a8"
-; CHECK:declare void @f.kvpair() #31
+; CHECK:declare void @f.kvpair() #30
 declare void @f.norecurse() norecurse
-; CHECK: declare void @f.norecurse() #32
+; CHECK: declare void @f.norecurse() #31
 declare void @f.inaccessiblememonly() inaccessiblememonly
-; CHECK: declare void @f.inaccessiblememonly() #33
+; CHECK: declare void @f.inaccessiblememonly() #32
 declare void @f.inaccessiblemem_or_argmemonly() inaccessiblemem_or_argmemonly
-; CHECK: declare void @f.inaccessiblemem_or_argmemonly() #34
+; CHECK: declare void @f.inaccessiblemem_or_argmemonly() #33
 
 ; Functions -- section
 declare void @f.section() section "80"
@@ -588,7 +586,7 @@ declare void @f.prologuearray() prologue [4 x i32] [i32 0, i32 1, i32 2, i32 3]
 
 ; Functions -- Personality constant
 declare void @llvm.donothing() nounwind readnone
-; CHECK: declare void @llvm.donothing() #35
+; CHECK: declare void @llvm.donothing() #34
 define void @f.no_personality() personality i8 3 {
 ; CHECK: define void @f.no_personality() personality i8 3
   invoke void @llvm.donothing() to label %normal unwind label %exception
@@ -1173,9 +1171,9 @@ exit:
   ; CHECK: call void @f.nobuiltin() #42
 
   call fastcc noalias i32* @f.noalias() noinline
-  ; CHECK: call fastcc noalias ptr @f.noalias() #12
+  ; CHECK: call fastcc noalias ptr @f.noalias() #11
   tail call ghccc nonnull i32* @f.nonnull() minsize
-  ; CHECK: tail call ghccc nonnull ptr @f.nonnull() #7
+  ; CHECK: tail call ghccc nonnull ptr @f.nonnull() #6
 
   ret void
 }
@@ -1521,44 +1519,44 @@ normal:
 ; CHECK: attributes #1 = { alignstack=8 }
 ; CHECK: attributes #2 = { alwaysinline }
 ; CHECK: attributes #3 = { cold }
-; CHECK: attributes #4 = { convergent }
-; CHECK: attributes #5 = { inlinehint }
-; CHECK: attributes #6 = { jumptable }
-; CHECK: attributes #7 = { minsize }
-; CHECK: attributes #8 = { naked }
-; CHECK: attributes #9 = { nobuiltin }
-; CHECK: attributes #10 = { noduplicate }
-; CHECK: attributes #11 = { noimplicitfloat }
-; CHECK: attributes #12 = { noinline }
-; CHECK: attributes #13 = { nonlazybind }
-; CHECK: attributes #14 = { noredzone }
-; CHECK: attributes #15 = { noreturn }
-; CHECK: attributes #16 = { nounwind }
-; CHECK: attributes #17 = { noinline optnone }
-; CHECK: attributes #18 = { optsize }
-; CHECK: attributes #19 = { memory(none) }
-; CHECK: attributes #20 = { memory(read) }
-; CHECK: attributes #21 = { returns_twice }
-; CHECK: attributes #22 = { safestack }
-; CHECK: attributes #23 = { sanitize_address }
-; CHECK: attributes #24 = { sanitize_memory }
-; CHECK: attributes #25 = { sanitize_thread }
-; CHECK: attributes #26 = { ssp }
-; CHECK: attributes #27 = { sspreq }
-; CHECK: attributes #28 = { sspstrong }
-; CHECK: attributes #29 = { "thunk" }
-; CHECK: attributes #30 = { uwtable }
-; CHECK: attributes #31 = { "cpu"="cortex-a8" }
-; CHECK: attributes #32 = { norecurse }
-; CHECK: attributes #33 = { memory(inaccessiblemem: readwrite) }
-; CHECK: attributes #34 = { memory(argmem: readwrite, inaccessiblemem: readwrite) }
-; CHECK: attributes #35 = { nocallback nofree nosync nounwind willreturn memory(none) }
-; CHECK: attributes #36 = { nocallback nofree nosync nounwind willreturn }
-; CHECK: attributes #37 = { nounwind memory(argmem: read) }
-; CHECK: attributes #38 = { nounwind memory(argmem: readwrite) }
-; CHECK: attributes #39 = { nocallback nofree nosync nounwind willreturn memory(read) }
-; CHECK: attributes #40 = { nocallback nounwind }
-; CHECK: attributes #41 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite) }
+; CHECK: attributes #4 = { inlinehint }
+; CHECK: attributes #5 = { jumptable }
+; CHECK: attributes #6 = { minsize }
+; CHECK: attributes #7 = { naked }
+; CHECK: attributes #8 = { nobuiltin }
+; CHECK: attributes #9 = { noduplicate }
+; CHECK: attributes #10 = { noimplicitfloat }
+; CHECK: attributes #11 = { noinline }
+; CHECK: attributes #12 = { nonlazybind }
+; CHECK: attributes #13 = { noredzone }
+; CHECK: attributes #14 = { noreturn }
+; CHECK: attributes #15 = { nounwind }
+; CHECK: attributes #16 = { noinline optnone }
+; CHECK: attributes #17 = { optsize }
+; CHECK: attributes #18 = { memory(none) }
+; CHECK: attributes #19 = { memory(read) }
+; CHECK: attributes #20 = { returns_twice }
+; CHECK: attributes #21 = { safestack }
+; CHECK: attributes #22 = { sanitize_address }
+; CHECK: attributes #23 = { sanitize_memory }
+; CHECK: attributes #24 = { sanitize_thread }
+; CHECK: attributes #25 = { ssp }
+; CHECK: attributes #26 = { sspreq }
+; CHECK: attributes #27 = { sspstrong }
+; CHECK: attributes #28 = { "thunk" }
+; CHECK: attributes #29 = { uwtable }
+; CHECK: attributes #30 = { "cpu"="cortex-a8" }
+; CHECK: attributes #31 = { norecurse }
+; CHECK: attributes #32 = { memory(inaccessiblemem: readwrite) }
+; CHECK: attributes #33 = { memory(argmem: readwrite, inaccessiblemem: readwrite) }
+; CHECK: attributes #34 = { nocallback noconvergent nofree nosync nounwind willreturn memory(none) }
+; CHECK: attributes #35 = { nocallback noconvergent nofree nosync nounwind willreturn }
+; CHECK: attributes #36 = { noconvergent nounwind }
+; CHECK: attributes #37 = { noconvergent nounwind memory(argmem: read) }
+; CHECK: attributes #38 = { noconvergent nounwind memory(argmem: readwrite) }
+; CHECK: attributes #39 = { nocallback noconvergent nofree nosync nounwind willreturn memory(read) }
+; CHECK: attributes #40 = { nocallback noconvergent nounwind }
+; CHECK: attributes #41 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite) }
 ; CHECK: attributes #42 = { builtin }
 
 ;; Metadata

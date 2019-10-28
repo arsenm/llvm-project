@@ -60,15 +60,16 @@ if.end:
   ret void
 }
 
-declare i1 @cond()
-declare void @sideeffect()
-declare void @simple_throw() noreturn
-declare void @destructor()
+declare i1 @cond() noconvergent
+declare void @sideeffect() noconvergent
+declare void @simple_throw() noconvergent noreturn
+declare void @destructor() noconvergent
 
-declare dso_local i32 @__gxx_personality_v0(...)
+declare dso_local i32 @__gxx_personality_v0(...) noconvergent
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { noreturn }
-; CHECK: attributes #[[ATTR1:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { noconvergent }
+; CHECK: attributes #[[ATTR1:[0-9]+]] = { noconvergent noreturn }
+; CHECK: attributes #[[ATTR2:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ;.
 ; CHECK: [[META0:![0-9]+]] = distinct !DICompileUnit(language: DW_LANG_C, file: !1, producer: "debugify", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug)
 ; CHECK: [[META1:![0-9]+]] = !DIFile(filename: "<stdin>", directory: "/")

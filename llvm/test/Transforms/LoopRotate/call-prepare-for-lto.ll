@@ -36,7 +36,7 @@ for.end:                                          ; preds = %for.cond
   ret void
 }
 
-define void @may_be_inlined() {
+define void @may_be_inlined() noconvergent {
   ret void
 }
 

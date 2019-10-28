@@ -43,7 +43,7 @@ return:                                           ; preds = %entry
 }
 
 define internal i32 @vfu2(ptr byval(%struct.MYstr) align 4 %u) nounwind readonly {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: define {{[^@]+}}@vfu2
 ; CHECK-SAME: (i8 [[TMP0:%.*]], i32 [[TMP1:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -69,9 +69,9 @@ entry:
 }
 
 define i32 @unions() nounwind {
-; CHECK: Function Attrs: nounwind
+; CHECK: Function Attrs: noconvergent nounwind
 ; CHECK-LABEL: define {{[^@]+}}@unions
-; CHECK-SAME: () #[[ATTR0]] {
+; CHECK-SAME: () #[[ATTR2:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = load i8, ptr @mystr, align 8
 ; CHECK-NEXT:    [[MYSTR_0_1:%.*]] = getelementptr [[STRUCT_MYSTR:%.*]], ptr @mystr, i64 0, i32 1
@@ -90,7 +90,7 @@ entry:
 }
 
 define internal i32 @vfu2_v2(ptr byval(%struct.MYstr) align 4 %u) nounwind readonly {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CHECK-LABEL: define {{[^@]+}}@vfu2_v2
 ; CHECK-SAME: (i8 [[TMP0:%.*]], i32 [[TMP1:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
@@ -120,9 +120,9 @@ entry:
 }
 
 define i32 @unions_v2() nounwind {
-; TUNIT: Function Attrs: nounwind
+; TUNIT: Function Attrs: noconvergent nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@unions_v2
-; TUNIT-SAME: () #[[ATTR0]] {
+; TUNIT-SAME: () #[[ATTR2]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[TMP0:%.*]] = load i8, ptr @mystr, align 8
 ; TUNIT-NEXT:    [[MYSTR_0_11:%.*]] = getelementptr [[STRUCT_MYSTR:%.*]], ptr @mystr, i64 0, i32 1
@@ -134,9 +134,9 @@ define i32 @unions_v2() nounwind {
 ; TUNIT-NEXT:    [[RESULT:%.*]] = call i32 @vfu2_v2(i8 [[TMP2]], i32 [[TMP3]]) #[[ATTR0]]
 ; TUNIT-NEXT:    ret i32 [[RESULT]]
 ;
-; CGSCC: Function Attrs: nounwind
+; CGSCC: Function Attrs: noconvergent nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@unions_v2
-; CGSCC-SAME: () #[[ATTR0]] {
+; CGSCC-SAME: () #[[ATTR2]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    call void @vfu1(i8 noundef 0, i32 noundef 0) #[[ATTR0]]
 ; CGSCC-NEXT:    [[RESULT:%.*]] = call i32 @vfu2_v2(i8 noundef 0, i32 noundef 0) #[[ATTR0]]
@@ -149,5 +149,6 @@ entry:
 }
 ;.
 ; CHECK: attributes #[[ATTR0]] = { nounwind }
-; CHECK: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind willreturn memory(argmem: read) }
+; CHECK: attributes #[[ATTR1]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read) }
+; CHECK: attributes #[[ATTR2]] = { noconvergent nounwind }
 ;.

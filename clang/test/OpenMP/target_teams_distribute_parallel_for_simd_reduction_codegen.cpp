@@ -138,10 +138,10 @@ int main() {
 // CHECK1-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK1-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l66(ptr @_ZZ4mainE5sivar) #[[ATTR2:[0-9]+]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l66(ptr @_ZZ4mainE5sivar) #[[ATTR3:[0-9]+]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_v()
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_v() #[[ATTR2:[0-9]+]]
 // CHECK1-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -354,7 +354,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func
-// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3:[0-9]+]] {
+// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4:[0-9]+]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -374,7 +374,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.2
-// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -443,7 +443,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK1-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiET_v_l32(ptr [[T_VAR]]) #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiET_v_l32(ptr [[T_VAR]]) #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    ret i32 0
@@ -658,7 +658,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.5
-// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -678,7 +678,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.6
-// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK1-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -752,10 +752,10 @@ int main() {
 // CHECK3-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK3-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l66(ptr @_ZZ4mainE5sivar) #[[ATTR2:[0-9]+]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l66(ptr @_ZZ4mainE5sivar) #[[ATTR3:[0-9]+]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
-// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiET_v()
+// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiET_v() #[[ATTR2:[0-9]+]]
 // CHECK3-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -964,7 +964,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func
-// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3:[0-9]+]] {
+// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4:[0-9]+]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 4
 // CHECK3-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 4
@@ -984,7 +984,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.2
-// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 4
 // CHECK3-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 4
@@ -1053,7 +1053,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK3-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiET_v_l32(ptr [[T_VAR]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiET_v_l32(ptr [[T_VAR]]) #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    ret i32 0
@@ -1264,7 +1264,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.5
-// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 4
 // CHECK3-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 4
@@ -1284,7 +1284,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.6
-// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR3]] {
+// CHECK3-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 4
 // CHECK3-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 4
@@ -1316,7 +1316,7 @@ int main() {
 // CHECK5-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK5-NEXT:    [[REF_TMP:%.*]] = alloca [[CLASS_ANON:%.*]], align 1
 // CHECK5-NEXT:    store i32 0, ptr [[RETVAL]], align 4
-// CHECK5-NEXT:    call void @"_ZZ4mainENK3$_0clEv"(ptr noundef nonnull align 1 dereferenceable(1) [[REF_TMP]])
+// CHECK5-NEXT:    call void @"_ZZ4mainENK3$_0clEv"(ptr noundef nonnull align 1 dereferenceable(1) [[REF_TMP]]) #[[ATTR3:[0-9]+]]
 // CHECK5-NEXT:    ret i32 0
 //
 //
@@ -1490,7 +1490,7 @@ int main() {
 // CHECK5-NEXT:    store i32 [[ADD4]], ptr [[SIVAR2]], align 4, !llvm.access.group [[ACC_GRP8]]
 // CHECK5-NEXT:    [[TMP13:%.*]] = getelementptr inbounds [[CLASS_ANON_0]], ptr [[REF_TMP]], i32 0, i32 0
 // CHECK5-NEXT:    store ptr [[SIVAR2]], ptr [[TMP13]], align 8, !llvm.access.group [[ACC_GRP8]]
-// CHECK5-NEXT:    call void @"_ZZZ4mainENK3$_0clEvENKUlvE_clEv"(ptr noundef nonnull align 8 dereferenceable(8) [[REF_TMP]]), !llvm.access.group [[ACC_GRP8]]
+// CHECK5-NEXT:    call void @"_ZZZ4mainENK3$_0clEvENKUlvE_clEv"(ptr noundef nonnull align 8 dereferenceable(8) [[REF_TMP]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP8]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK5:       omp.body.continue:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1533,7 +1533,7 @@ int main() {
 //
 //
 // CHECK5-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func
-// CHECK5-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4:[0-9]+]] {
+// CHECK5-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR5:[0-9]+]] {
 // CHECK5-NEXT:  entry:
 // CHECK5-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK5-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -1553,7 +1553,7 @@ int main() {
 //
 //
 // CHECK5-LABEL: define {{[^@]+}}@.omp.reduction.reduction_func.2
-// CHECK5-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR4]] {
+// CHECK5-SAME: (ptr noundef [[TMP0:%.*]], ptr noundef [[TMP1:%.*]]) #[[ATTR5]] {
 // CHECK5-NEXT:  entry:
 // CHECK5-NEXT:    [[DOTADDR:%.*]] = alloca ptr, align 8
 // CHECK5-NEXT:    [[DOTADDR1:%.*]] = alloca ptr, align 8
@@ -1624,7 +1624,7 @@ int main() {
 // CHECK7-NEXT:    [[TMP8:%.*]] = load i32, ptr [[SIVAR]], align 4
 // CHECK7-NEXT:    [[ADD3:%.*]] = add nsw i32 [[TMP7]], [[TMP8]]
 // CHECK7-NEXT:    store i32 [[ADD3]], ptr @_ZZ4mainE5sivar, align 4
-// CHECK7-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_v()
+// CHECK7-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiET_v() #[[ATTR3:[0-9]+]]
 // CHECK7-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -1723,7 +1723,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP8:%.*]] = load i32, ptr [[SIVAR]], align 4
 // CHECK9-NEXT:    [[ADD3:%.*]] = add nsw i32 [[TMP7]], [[TMP8]]
 // CHECK9-NEXT:    store i32 [[ADD3]], ptr @_ZZ4mainE5sivar, align 4
-// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiET_v()
+// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiET_v() #[[ATTR3:[0-9]+]]
 // CHECK9-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -1783,6 +1783,6 @@ int main() {
 // CHECK11-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK11-NEXT:    [[REF_TMP:%.*]] = alloca [[CLASS_ANON:%.*]], align 1
 // CHECK11-NEXT:    store i32 0, ptr [[RETVAL]], align 4
-// CHECK11-NEXT:    call void @"_ZZ4mainENK3$_0clEv"(ptr noundef nonnull align 1 dereferenceable(1) [[REF_TMP]])
+// CHECK11-NEXT:    call void @"_ZZ4mainENK3$_0clEv"(ptr noundef nonnull align 1 dereferenceable(1) [[REF_TMP]]) #[[ATTR2:[0-9]+]]
 // CHECK11-NEXT:    ret i32 0
 //

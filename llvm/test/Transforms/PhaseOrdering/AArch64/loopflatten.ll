@@ -61,4 +61,4 @@ for.body4:
   br label %for.cond1
 }
 
-declare dso_local void @_Z1fi(i32) #2
+declare dso_local void @_Z1fi(i32) noconvergent

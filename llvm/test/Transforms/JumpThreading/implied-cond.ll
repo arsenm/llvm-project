@@ -1,6 +1,6 @@
 ; RUN: opt -passes=jump-threading -S < %s | FileCheck %s
 
-declare void @side_effect(i32)
+declare void @side_effect(i32) noconvergent
 
 define void @test0(i32 %i, i32 %len) {
 ; CHECK-LABEL: @test0(
@@ -126,7 +126,7 @@ if.end3:
   ret void
 }
 
-declare void @is(i1)
+declare void @is(i1) noconvergent
 
 ; If A >=s B is false then A <=s B is implied true.
 ; CHECK-LABEL: @test_sge_sle

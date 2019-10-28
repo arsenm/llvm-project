@@ -37,7 +37,7 @@ exit:
   ret void
 }
 
-; Function Attrs: convergent nounwind
+; Function Attrs: nounwind
 define void @test.codegenprepared(i32 %base) #0 {
 ; CHECK-LABEL: @test.codegenprepared(
 ; CHECK-NOT: load i32
@@ -67,7 +67,7 @@ exit:                                             ; preds = %loads, %entry
   ret void
 }
 
-attributes #0 = { convergent nounwind }
+attributes #0 = { nounwind }
 
 !0 = !{!1, !1, i64 0}
 !1 = !{!"float", !2, i64 0}

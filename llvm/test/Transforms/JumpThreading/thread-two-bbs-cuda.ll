@@ -56,7 +56,6 @@ declare void @bar()
 
 declare void @llvm.trap() #3
 
-attributes #1 = { convergent }
-attributes #2 = { readnone }
-attributes #3 = { noreturn }
-attributes #4 = { convergent }
+
+attributes #2 = { noconvergent readnone }
+attributes #3 = { noconvergent noreturn }

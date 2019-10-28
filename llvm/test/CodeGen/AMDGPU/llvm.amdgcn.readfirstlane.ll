@@ -67,5 +67,5 @@ define amdgpu_kernel void @test_readfirstlane_fi(ptr addrspace(1) %out) #1 {
   ret void
 }
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind }

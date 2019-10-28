@@ -22,7 +22,7 @@ for.end:                                          ; preds = %for.body
   ret i32 %add1
 }
 
-declare i32 @baz(i32)
+declare i32 @baz(i32) noconvergent
 
 !0 = !{!"function_entry_count", i64 3}
 !1 = !{!"branch_weights", i32 1, i32 99}

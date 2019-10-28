@@ -37,4 +37,4 @@ bb_else:
 ; Function Attrs: nounwind readnone willreturn
 declare i1 @llvm.is.constant.i64(i64) #0
 
-attributes #0 = { convergent nounwind readnone willreturn }
+attributes #0 = { nounwind readnone willreturn }

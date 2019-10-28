@@ -16,39 +16,39 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 16, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_OFFEN:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_OFFEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 16, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFSET_exact killed [[BUFFER_LOAD_DWORDX4_OFFSET]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 32, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 32, align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFEN_exact killed [[BUFFER_LOAD_DWORDX4_OFFEN]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 32, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 32, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFSET:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFSET [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 48, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 48, align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 48, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFEN:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 48, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFSET_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFSET]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 64, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 64, align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFEN_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFEN]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_IDXEN_exact killed [[BUFFER_LOAD_FORMAT_XYZW_IDXEN]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 64, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_IDXEN_exact killed [[BUFFER_LOAD_FORMAT_XYZW_IDXEN1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 64, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFSET [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 80, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 80, align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFEN [[COPY]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 80, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 80, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[REG_SEQUENCE1:%[0-9]+]]:vreg_64 = REG_SEQUENCE [[COPY]], %subreg.sub0, [[COPY]], %subreg.sub1
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFSET [[REG_SEQUENCE1]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 96, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 96, align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFEN [[REG_SEQUENCE1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 96, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 96, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[V_MOV_B32_e32_1:%[0-9]+]]:vgpr_32 = V_MOV_B32_e32 1065353216, implicit $exec
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_F32_OFFSET [[V_MOV_B32_e32_1]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 112, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 112, align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_F32_OFFEN [[V_MOV_B32_e32_1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 0, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_F32_IDXEN [[V_MOV_B32_e32_1]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 112, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_F32_IDXEN [[V_MOV_B32_e32_1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 112, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_OFFSET1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_OFFSET [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 128, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 128, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_1:%[0-9]+]]:sreg_32 = S_MOV_B32 64
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_OFFSET2:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_OFFSET [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_1]], 64, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 128, align 1, addrspace 7)
@@ -57,7 +57,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_OFFEN1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_OFFEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_2]], 0, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY2:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_OFFSET4:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_OFFSET [[S_LOAD_DWORDX4_IMM]], [[COPY2]], 128, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFSET1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFSET [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 144, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 144, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_3:%[0-9]+]]:sreg_32 = S_MOV_B32 72
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFSET2:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFSET [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_3]], 72, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 144, align 1, addrspace 7)
@@ -66,7 +66,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFEN1:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_4]], 0, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY3:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_OFFSET4:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_OFFSET [[S_LOAD_DWORDX4_IMM]], [[COPY3]], 144, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFSET [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 160, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 160, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_5:%[0-9]+]]:sreg_32 = S_MOV_B32 80
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFSET [[COPY]], [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_5]], 80, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 160, align 1, addrspace 7)
@@ -75,7 +75,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFEN [[COPY]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_6]], 0, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY4:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_OFFSET [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[COPY4]], 160, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFSET [[REG_SEQUENCE1]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 176, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 176, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_7:%[0-9]+]]:sreg_32 = S_MOV_B32 88
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFSET [[REG_SEQUENCE1]], [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_7]], 88, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 176, align 1, addrspace 7)
@@ -84,7 +84,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFEN [[REG_SEQUENCE1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_8]], 0, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY5:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_OFFSET [[REG_SEQUENCE1]], [[S_LOAD_DWORDX4_IMM]], [[COPY5]], 176, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFSET_exact killed [[BUFFER_LOAD_DWORDX4_OFFSET1]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 192, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 192, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_9:%[0-9]+]]:sreg_32 = S_MOV_B32 96
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFSET_exact killed [[BUFFER_LOAD_DWORDX4_OFFSET2]], [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_9]], 96, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 192, align 1, addrspace 7)
@@ -93,7 +93,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFEN_exact killed [[BUFFER_LOAD_DWORDX4_OFFEN1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_10]], 0, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY6:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_OFFSET_exact killed [[BUFFER_LOAD_DWORDX4_OFFSET4]], [[S_LOAD_DWORDX4_IMM]], [[COPY6]], 192, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFSET_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFSET1]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 208, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 208, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_11:%[0-9]+]]:sreg_32 = S_MOV_B32 104
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFSET_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFSET2]], [[S_LOAD_DWORDX4_IMM]], killed [[S_MOV_B32_11]], 104, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 208, align 1, addrspace 7)
@@ -102,7 +102,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFEN_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFEN1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_12]], 0, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY7:%[0-9]+]]:sreg_32 = COPY [[COPY]]
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_OFFSET_exact killed [[BUFFER_LOAD_FORMAT_XYZW_OFFSET4]], [[S_LOAD_DWORDX4_IMM]], [[COPY7]], 208, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY8:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN2:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[COPY8]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 224, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 224, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_13:%[0-9]+]]:sreg_32 = S_MOV_B32 112
@@ -118,7 +118,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN5:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[COPY11]], [[S_LOAD_DWORDX4_IMM]], [[COPY12]], 224, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN6:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 224, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_DWORDX4_IDXEN7:%[0-9]+]]:vreg_128 = BUFFER_LOAD_DWORDX4_IDXEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 224, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY13:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN2:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[COPY13]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 240, 0, 0, implicit $exec :: (dereferenceable load (s128) from unknown-address + 240, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_15:%[0-9]+]]:sreg_32 = S_MOV_B32 120
@@ -133,7 +133,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN5:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[COPY16]], [[S_LOAD_DWORDX4_IMM]], [[COPY17]], 240, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN6:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 240, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
   ; GCN-NEXT:   [[BUFFER_LOAD_FORMAT_XYZW_IDXEN7:%[0-9]+]]:vreg_128 = BUFFER_LOAD_FORMAT_XYZW_IDXEN [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 240, 0, 0, implicit $exec :: (dereferenceable load (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY18:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[COPY18]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 256, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 256, align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY19:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
@@ -147,7 +147,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[COPY21]], [[S_LOAD_DWORDX4_IMM]], [[COPY22]], 256, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 256, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_ADD_IDXEN [[COPY]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 256, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY23:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[COPY23]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 272, 0, implicit $exec :: (volatile dereferenceable load store (s32) on unknown-address + 272, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_18:%[0-9]+]]:sreg_32 = S_MOV_B32 136
@@ -162,7 +162,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[COPY26]], [[S_LOAD_DWORDX4_IMM]], [[COPY27]], 272, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 272, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_ATOMIC_CMPSWAP_IDXEN [[REG_SEQUENCE1]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 272, 0, implicit $exec :: (volatile dereferenceable load store (s32), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY28:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN2]], [[COPY28]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 288, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 288, align 1, addrspace 7)
   ; GCN-NEXT:   [[COPY29:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
@@ -176,7 +176,7 @@ define amdgpu_cs void @mmo_offsets0(ptr addrspace(6) inreg noalias align(16) der
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN5]], [[COPY31]], [[S_LOAD_DWORDX4_IMM]], [[COPY32]], 288, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN6]], [[V_MOV_B32_e32_]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 288, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
   ; GCN-NEXT:   BUFFER_STORE_DWORDX4_IDXEN_exact killed [[BUFFER_LOAD_DWORDX4_IDXEN7]], [[COPY]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 288, 0, 0, implicit $exec :: (dereferenceable store (s128), align 1, addrspace 7)
-  ; GCN-NEXT:   INLINEASM &"", 1 /* sideeffect attdialect */
+  ; GCN-NEXT:   INLINEASM &"", 33 /* sideeffect isconvergent attdialect */
   ; GCN-NEXT:   [[COPY33:%[0-9]+]]:vgpr_32 = COPY [[S_MOV_B32_]]
   ; GCN-NEXT:   BUFFER_STORE_FORMAT_XYZW_IDXEN_exact killed [[BUFFER_LOAD_FORMAT_XYZW_IDXEN2]], [[COPY33]], [[S_LOAD_DWORDX4_IMM]], [[S_MOV_B32_]], 304, 0, 0, implicit $exec :: (dereferenceable store (s128) into unknown-address + 304, align 1, addrspace 7)
   ; GCN-NEXT:   [[S_MOV_B32_21:%[0-9]+]]:sreg_32 = S_MOV_B32 152

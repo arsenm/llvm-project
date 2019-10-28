@@ -85,6 +85,6 @@ endif:
 declare void @noduplicate_external(ptr) #0
 declare void @nonnoduplicate_external(ptr) #1
 
-attributes #0 = { noduplicate nounwind }
-attributes #1 = { nounwind }
+attributes #0 = { noconvergent noduplicate nounwind }
+attributes #1 = { noconvergent nounwind }
 

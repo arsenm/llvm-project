@@ -169,5 +169,5 @@ declare void @llvm.amdgcn.ds.gws.init(i32, i32) #1
 declare i32 @llvm.amdgcn.workitem.id.x() #2
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent inaccessiblememonly nounwind writeonly }
+attributes #1 = { inaccessiblememonly nounwind writeonly }
 attributes #2 = { nounwind readnone speculatable }

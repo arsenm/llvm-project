@@ -73,5 +73,5 @@ void f(int i) {
 // CHECK: call void %[[#E5]](i32 noundef %i) #[[#A2]]
 }
 
-// CHECK: attributes #[[#A1]] = { nounwind }
-// CHECK: attributes #[[#A2]] = { nounwind "cmse_nonsecure_call"
+// CHECK: attributes #[[#A1]] = { noconvergent nounwind }
+// CHECK: attributes #[[#A2]] = { noconvergent nounwind "cmse_nonsecure_call"

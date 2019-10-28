@@ -1,7 +1,8 @@
 ; RUN: opt < %s -passes=simplifycfg -simplifycfg-require-and-preserve-domtree=1 -S | FileCheck %s
 
-; Checks that the SimplifyCFG pass won't duplicate a call to a function marked
-; convergent.
+; Checks that the SimplifyCFG pass won't duplicate a call to a
+; potentially convergent function
+
 ;
 ; CHECK: call void @barrier
 ; CHECK-NOT: call void @barrier
@@ -25,4 +26,4 @@ cond.end:
   ret void
 }
 
-declare void @barrier() convergent
+declare void @barrier()

@@ -101,4 +101,4 @@ declare i32 @llvm.amdgcn.update.dpp.i32(i32, i32, i32 immarg, i32 immarg, i32 im
 declare i64 @llvm.amdgcn.update.dpp.i64(i64, i64, i32 immarg, i32 immarg, i32 immarg, i1 immarg) #1
 
 attributes #0 = { nounwind readnone speculatable }
-attributes #1 = { convergent nounwind readnone }
+attributes #1 = { nounwind readnone }

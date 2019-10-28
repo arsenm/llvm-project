@@ -79,7 +79,7 @@ declare void @_Z10sideeffectv()
 ; REUSE-NEXT:    unreachable
 ;
 ;.
-; REUSE: attributes #[[ATTR0:[0-9]+]] = { cold noreturn nounwind }
+; REUSE: attributes #[[ATTR0:[0-9]+]] = { cold noconvergent noreturn nounwind }
 ; REUSE: attributes #[[ATTR1:[0-9]+]] = { cold minsize noreturn }
 ; REUSE: attributes #[[ATTR2]] = { noinline }
 ;.

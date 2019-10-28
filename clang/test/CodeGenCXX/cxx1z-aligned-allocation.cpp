@@ -54,11 +54,11 @@ void *a0() { return new A; }
 void *a1(long n) { return new A[n]; }
 
 // CHECK-LABEL: define {{.*}} @_Z2a2P1A(
-// CHECK: call void @_ZdlPvmSt11align_val_t(ptr noundef %{{.*}}, i64 noundef 512, i64 noundef 32) #9
+// CHECK: call void @_ZdlPvmSt11align_val_t(ptr noundef %{{.*}}, i64 noundef 512, i64 noundef 32) #{{[0-9]+}}
 void a2(A *p) { delete p; }
 
 // CHECK-LABEL: define {{.*}} @_Z2a3P1A(
-// CHECK: call void @_ZdaPvSt11align_val_t(ptr noundef %{{.*}}, i64 noundef 32) #9
+// CHECK: call void @_ZdaPvSt11align_val_t(ptr noundef %{{.*}}, i64 noundef 32) #{{[0-9]+}}
 void a3(A *p) { delete[] p; }
 
 

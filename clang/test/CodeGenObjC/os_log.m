@@ -26,7 +26,7 @@ void os_log_pack_send(void *);
 // CHECK-O2: %[[V0:.*]] = call i8* @llvm.objc.retain(
 // CHECK-O2: store i8* %[[V0]], i8** %[[A_ADDR]], align 8,
 // CHECK-O0: call void @llvm.objc.storeStrong(i8** %[[A_ADDR]], i8* %{{.*}})
-// CHECK-O2: %[[V4:.*]] = call %{{.*}}* @GenString() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+// CHECK-O2: %[[V4:.*]] = call %{{.*}}* @GenString() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
 // CHECK-O0: %[[CALL:.*]] = call %{{.*}}* @GenString()
 // CHECK-O0: %[[V2:.*]] = bitcast %{{.*}}* %[[CALL]] to i8*
 // CHECK-O0: %[[V3:.*]] = notail call i8* @llvm.objc.retainAutoreleasedReturnValue(i8* %[[V2]])
@@ -72,7 +72,7 @@ void test_builtin_os_log2(void *buf, id __unsafe_unretained a) {
 // CHECK-LABEL: define{{.*}} void @test_builtin_os_log3(
 // CHECK: alloca i8*, align 8
 // CHECK: %[[OS_LOG_ARG:.*]] = alloca i8*, align 8
-// CHECK-O2: %[[V3:.*]] = call %{{.*}}* @GenString() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+// CHECK-O2: %[[V3:.*]] = call %{{.*}}* @GenString() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
 // CHECK-O0: %[[CALL:.*]] = call %{{.*}}* @GenString()
 // CHECK-O0: %[[V1:.*]] = bitcast %{{.*}}* %[[CALL]] to i8*
 // CHECK-O0: %[[V2:.*]] = notail call i8* @llvm.objc.retainAutoreleasedReturnValue(i8* %[[V1]])

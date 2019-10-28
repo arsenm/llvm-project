@@ -17,16 +17,16 @@ entry:
 }
 
 define i32 @main() nounwind  {
-; TUNIT: Function Attrs: norecurse nounwind
+; TUNIT: Function Attrs: noconvergent norecurse nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@main
 ; TUNIT-SAME: () #[[ATTR1:[0-9]+]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[R:%.*]] = call i32 @foo() #[[ATTR0]]
 ; TUNIT-NEXT:    ret i32 [[R]]
 ;
-; CGSCC: Function Attrs: nounwind
+; CGSCC: Function Attrs: noconvergent nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@main
-; CGSCC-SAME: () #[[ATTR0]] {
+; CGSCC-SAME: () #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[R:%.*]] = call i32 @foo() #[[ATTR0]]
 ; CGSCC-NEXT:    ret i32 [[R]]
@@ -38,7 +38,8 @@ entry:
 
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { nounwind }
-; TUNIT: attributes #[[ATTR1]] = { norecurse nounwind }
+; TUNIT: attributes #[[ATTR1]] = { noconvergent norecurse nounwind }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { nounwind }
+; CGSCC: attributes #[[ATTR1]] = { noconvergent nounwind }
 ;.

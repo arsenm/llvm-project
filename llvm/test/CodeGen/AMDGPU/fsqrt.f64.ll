@@ -120,4 +120,4 @@ declare double @llvm.sqrt.f64(double) #0
 declare i32 @llvm.amdgcn.readfirstlane(i32) #1
 
 attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
-attributes #1 = { convergent nounwind willreturn memory(none) }
+attributes #1 = { nounwind willreturn memory(none) }

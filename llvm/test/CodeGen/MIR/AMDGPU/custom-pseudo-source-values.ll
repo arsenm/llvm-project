@@ -31,4 +31,4 @@ declare void @llvm.amdgcn.ds.gws.barrier(i32, i32) #2
 
 attributes #0 = { nounwind willreturn writeonly }
 attributes #1 = { nounwind readonly willreturn }
-attributes #2 = { convergent inaccessiblememonly nounwind }
+attributes #2 = { inaccessiblememonly nounwind }

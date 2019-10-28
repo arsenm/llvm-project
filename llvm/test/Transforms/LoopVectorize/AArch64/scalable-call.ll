@@ -213,16 +213,16 @@ for.cond.cleanup:                                 ; preds = %for.body
 }
 
 
-declare double @foo(double)
-declare i64 @bar(ptr)
-declare double @llvm.sin.f64(double)
-declare float @llvm.sin.f32(float)
-declare float @llvm.sqrt.f32(float)
+declare double @foo(double) noconvergent
+declare i64 @bar(ptr) noconvergent
+declare double @llvm.sin.f64(double) noconvergent
+declare float @llvm.sin.f32(float) noconvergent
+declare float @llvm.sqrt.f32(float) noconvergent
 
-declare <vscale x 2 x double> @foo_vec(<vscale x 2 x double>)
-declare <vscale x 2 x i64> @bar_vec(<vscale x 2 x ptr>)
-declare <vscale x 2 x double> @sin_vec_nxv2f64(<vscale x 2 x double>)
-declare <2 x double> @sin_vec_v2f64(<2 x double>)
+declare <vscale x 2 x double> @foo_vec(<vscale x 2 x double>) noconvergent
+declare <vscale x 2 x i64> @bar_vec(<vscale x 2 x ptr>) noconvergent
+declare <vscale x 2 x double> @sin_vec_nxv2f64(<vscale x 2 x double>) noconvergent
+declare <2 x double> @sin_vec_v2f64(<2 x double>) noconvergent
 
 attributes #0 = { "vector-function-abi-variant"="_ZGV_LLVM_Nxv_foo(foo_vec)" }
 attributes #1 = { "vector-function-abi-variant"="_ZGV_LLVM_Nxv_bar(bar_vec)" }

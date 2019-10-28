@@ -5,8 +5,8 @@
 
 target triple = "nvptx64-nvidia-cuda"
 
-declare void @conv() convergent
-declare void @not_conv()
+declare void @conv()
+declare void @not_conv() noconvergent
 
 define void @test(ptr %f) {
   ; CHECK: ConvergentCallUniPrintCall
@@ -18,10 +18,10 @@ define void @test(ptr %f) {
   call void @not_conv()
 
   ; CHECK: ConvergentCallPrintCall
-  call void %f() convergent
+  call void %f()
 
   ; CHECK: CallPrintCall
-  call void %f()
+  call void %f() noconvergent
 
   ret void
 }

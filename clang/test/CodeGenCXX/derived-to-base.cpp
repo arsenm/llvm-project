@@ -1,17 +1,17 @@
 // RUN: %clang_cc1 %s -triple=x86_64-apple-darwin10 -emit-llvm -o - | FileCheck %s
-struct A { 
-  void f(); 
-  
+struct A {
+  void f();
+
   int a;
 };
 
-struct B : A { 
+struct B : A {
   double b;
 };
 
 void f() {
   B b;
-  
+
   b.f();
 }
 
@@ -46,4 +46,4 @@ namespace test3 {
   }
 }
 
-// CHECK: attributes [[NUW]] = { mustprogress noinline nounwind{{.*}} }
+// CHECK: attributes [[NUW]] = { mustprogress noconvergent noinline nounwind{{.*}} }

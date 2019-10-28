@@ -38,25 +38,16 @@
   ; Function Attrs: argmemonly nofree nounwind willreturn
   declare void @llvm.memcpy.inline.p1i8.p1i8.i64(i8 addrspace(1)* noalias nocapture writeonly, i8 addrspace(1)* noalias nocapture readonly, i64 immarg, i1 immarg) #1
 
-  ; Function Attrs: convergent nounwind willreturn
   declare { i1, i32 } @llvm.amdgcn.if.i32(i1) #2
-
-  ; Function Attrs: convergent nounwind willreturn
   declare { i1, i32 } @llvm.amdgcn.else.i32.i32(i32) #2
-
-  ; Function Attrs: convergent nounwind readnone willreturn
   declare i32 @llvm.amdgcn.if.break.i32(i1, i32) #3
-
-  ; Function Attrs: convergent nounwind willreturn
   declare i1 @llvm.amdgcn.loop.i32(i32) #2
-
-  ; Function Attrs: convergent nounwind willreturn
   declare void @llvm.amdgcn.end.cf.i32(i32) #2
 
   attributes #0 = { "target-cpu"="gfx1010" }
   attributes #1 = { argmemonly nofree nounwind willreturn "target-cpu"="gfx1010" }
-  attributes #2 = { convergent nounwind willreturn }
-  attributes #3 = { convergent nounwind readnone willreturn }
+  attributes #2 = { nounwind willreturn }
+  attributes #3 = { nounwind readnone willreturn }
 
   !0 = !{!1}
   !1 = distinct !{!1, !2, !"bax: %p"}

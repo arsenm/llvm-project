@@ -42,4 +42,4 @@ bb44:		; preds = %bb41, %entry
 	ret i32 %c.01.1
 }
 
-declare i32 @strcspn(ptr, ptr)
+declare i32 @strcspn(ptr, ptr) noconvergent

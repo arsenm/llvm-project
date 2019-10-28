@@ -1698,7 +1698,7 @@ attributes #2 = { nounwind "target-cpu"="tahiti" }
 ; GCN: attributes #[[ATTR0:[0-9]+]] = { nounwind "target-cpu"="kaveri" }
 ; GCN: attributes #[[ATTR1:[0-9]+]] = { nounwind "amdgpu-implicitarg-num-bytes"="40" "target-cpu"="kaveri" }
 ; GCN: attributes #[[ATTR2:[0-9]+]] = { nounwind "target-cpu"="tahiti" }
-; GCN: attributes #[[ATTR3:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; GCN: attributes #[[ATTR3:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ;.
 ; GCN: [[META0:![0-9]+]] = !{}
 ; GCN: [[META1:![0-9]+]] = !{i64 42}

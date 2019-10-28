@@ -63,8 +63,8 @@ void something_else_again() {
 // CHECK: call noundef zeroext i1 @_Z3barv() #[[ATTR0:[0-9]+]]
 // CHECK: call noundef zeroext i1 @_Z3barv() #[[ATTR0]]
 // CHECK: call noundef zeroext i1 @_Z3barv() #[[ATTR0]]
-// CHECK: call noundef zeroext i1 @_Z3barv(){{$}}
-// CHECK: call noundef zeroext i1 @_Z3barv(){{$}}
+// CHECK: call noundef zeroext i1 @_Z3barv() #{{[0-9]+$}}
+// CHECK: call noundef zeroext i1 @_Z3barv() #{{[0-9]+$}}
 // CHECK: call void @_Z1fbb({{.*}}) #[[ATTR0]]
 // CHECK: call void @"_ZZ3fooiP1AP1BENK3$_0clEv"{{.*}} #[[ATTR0]]
 // CHECK: call noundef zeroext i1 @_Z3barv() #[[ATTR0]]
@@ -73,7 +73,7 @@ void something_else_again() {
 // CHECK-LABEL: for.inc:
 // CHECK: call noundef zeroext i1 @_Z3barv() #[[ATTR0]]
 // CHECK: call void asm sideeffect "nop"{{.*}} #[[ATTR1:[0-9]+]]
-// CHECK: call noundef zeroext i1 @_Z3barv(){{$}}
+// CHECK: call noundef zeroext i1 @_Z3barv() #{{[0-9]+$}}
 // CHECK: %[[AG:.*]] = load void (%class.A*)*, void (%class.A*)**
 // CHECK-NEXT: call void %[[AG]](%class.A* {{.*}}) #[[ATTR0]]
 // CHECK: %[[BG:.*]] = load void (%class.B*)*, void (%class.B*)**
@@ -82,9 +82,9 @@ void something_else_again() {
 // CHECK: call void @_ZN1A1fEv({{.*}}) #[[ATTR0]]
 // CHECK: call void @_ZN1A1gEv({{.*}}) #[[ATTR0]]
 // CHECK: call void @_ZN1A2f1Ev() #[[ATTR0]]
-// CHECK: call void @_ZN1BC1Ev({{.*}}){{$}}
-// CHECK: call void @_ZN1B1gEv({{.*}}){{$}}
-// CHECK: call void @_ZN1BC1Ev({{.*}}){{$}}
+// CHECK: call void @_ZN1BC1Ev({{.*}}) #{{[0-9]+$}}
+// CHECK: call void @_ZN1B1gEv({{.*}}) #{{[0-9]+$}}
+// CHECK: call void @_ZN1BC1Ev({{.*}}) #{{[0-9]+$}}
 // CHECK: %[[AG:.*]] = load void (%class.A*)*, void (%class.A*)**
 // CHECK-NEXT: call void %[[AG]](%class.A* {{.*}}) #[[ATTR1]]
 // CHECK: call void  @_ZN1AD1Ev(%class.A* {{.*}}) #[[ATTR1]]

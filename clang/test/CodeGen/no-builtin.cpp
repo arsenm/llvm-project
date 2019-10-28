@@ -42,7 +42,7 @@ extern "C" void call_b_foo(B *b) {
 
 // CHECK-LABEL: define{{.*}} void @call_foo_no_mempcy() #3
 extern "C" void call_foo_no_mempcy() {
-  // CHECK: call void @foo_no_mempcy() #7
+  // CHECK: call void @foo_no_mempcy() #8
   foo_no_mempcy(); // call gets annotated with "no-builtin-memcpy"
 }
 
@@ -61,4 +61,5 @@ B::~B() {} // Anchoring B so B::foo() gets generated
 // CHECK:     attributes #6 = {{{.*}}"no-builtin-memmove"{{.*}}}
 // CHECK-NOT: attributes #5 = {{{.*}}"no-builtin-memcpy"{{.*}}}
 // CHECK-NOT: attributes #5 = {{{.*}}"no-builtin-memset"{{.*}}}
-// CHECK:     attributes #7 = { "no-builtin-memcpy" }
+// CHECK:     attributes #7 = { noconvergent }
+// CHECK:     attributes #8 = { noconvergent "no-builtin-memcpy" }

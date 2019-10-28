@@ -5,4 +5,4 @@ void f0(id x) {
   [x foo];
 }
 
-// CHECK: attributes [[NLB]] = { nonlazybind }
+// CHECK: attributes [[NLB]] = { noconvergent nonlazybind }

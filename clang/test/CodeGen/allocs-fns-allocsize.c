@@ -34,6 +34,6 @@ void *memalign_test(size_t n, size_t a) {
 // CHECK: @aligned_alloc(i64 noundef, i64 noundef) #3
 // CHECK: @memalign(i64 noundef, i64 noundef) #3
 
-// CHECK: attributes #1 = { allocsize(0)
-// CHECK: attributes #2 = { allocsize(0,1)
-// CHECK: attributes #3 = { allocsize(1)
+// CHECK: attributes #1 = { noconvergent allocsize(0)
+// CHECK: attributes #2 = { noconvergent allocsize(0,1)
+// CHECK: attributes #3 = { noconvergent allocsize(1)

@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
 // CHECK1:       arraydestroy.body:
 // CHECK1-NEXT:    [[ARRAYDESTROY_ELEMENTPAST:%.*]] = phi %struct.S* [ [[TMP60]], [[ARRAYCTOR_CONT]] ], [ [[ARRAYDESTROY_ELEMENT:%.*]], [[ARRAYDESTROY_BODY]] ]
 // CHECK1-NEXT:    [[ARRAYDESTROY_ELEMENT]] = getelementptr inbounds [[STRUCT_S]], %struct.S* [[ARRAYDESTROY_ELEMENTPAST]], i64 -1
-// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[ARRAYDESTROY_ELEMENT]]) #[[ATTR3:[0-9]+]]
+// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[ARRAYDESTROY_ELEMENT]])
 // CHECK1-NEXT:    [[ARRAYDESTROY_DONE:%.*]] = icmp eq %struct.S* [[ARRAYDESTROY_ELEMENT]], [[ARRAY_BEGIN7]]
 // CHECK1-NEXT:    br i1 [[ARRAYDESTROY_DONE]], label [[ARRAYDESTROY_DONE8:%.*]], label [[ARRAYDESTROY_BODY]]
 // CHECK1:       arraydestroy.done8:
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
 // CHECK1:       arraydestroy.body:
 // CHECK1-NEXT:    [[ARRAYDESTROY_ELEMENTPAST:%.*]] = phi %struct.S* [ [[TMP3]], [[ENTRY:%.*]] ], [ [[ARRAYDESTROY_ELEMENT:%.*]], [[ARRAYDESTROY_BODY]] ]
 // CHECK1-NEXT:    [[ARRAYDESTROY_ELEMENT]] = getelementptr inbounds [[STRUCT_S]], %struct.S* [[ARRAYDESTROY_ELEMENTPAST]], i64 -1
-// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[ARRAYDESTROY_ELEMENT]]) #3
+// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[ARRAYDESTROY_ELEMENT]])
 // CHECK1-NEXT:    [[ARRAYDESTROY_DONE:%.*]] = icmp eq %struct.S* [[ARRAYDESTROY_ELEMENT]], [[ARRAY_BEGIN]]
 // CHECK1-NEXT:    br i1 [[ARRAYDESTROY_DONE]], label [[ARRAYDESTROY_DONE1:%.*]], label [[ARRAYDESTROY_BODY]]
 // CHECK1:       arraydestroy.done1:
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[THIS_ADDR:%.*]] = alloca %struct.S*, align 8
 // CHECK1-NEXT:    store %struct.S* [[THIS]], %struct.S** [[THIS_ADDR]], align 8
 // CHECK1-NEXT:    [[THIS1:%.*]] = load %struct.S*, %struct.S** [[THIS_ADDR]], align 8
-// CHECK1-NEXT:    call void @_ZN1SD2Ev(%struct.S* nonnull align 4 dereferenceable(4) [[THIS1]]) #3
+// CHECK1-NEXT:    call void @_ZN1SD2Ev(%struct.S* nonnull align 4 dereferenceable(4) [[THIS1]])
 // CHECK1-NEXT:    ret void
 //
 //
@@ -364,7 +364,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[OMP_ARRAYCPY_DESTELEMENTPAST:%.*]] = phi %struct.S* [ [[TMP3]], [[ENTRY]] ], [ [[OMP_ARRAYCPY_DEST_ELEMENT:%.*]], [[OMP_ARRAYCPY_BODY]] ]
 // CHECK1-NEXT:    call void @_ZplRK1SS1_(%struct.S* sret([[STRUCT_S]]) align 4 [[REF_TMP]], %struct.S* nonnull align 4 dereferenceable(4) [[OMP_ARRAYCPY_DESTELEMENTPAST]], %struct.S* nonnull align 4 dereferenceable(4) [[OMP_ARRAYCPY_SRCELEMENTPAST]])
 // CHECK1-NEXT:    [[CALL:%.*]] = call nonnull align 4 dereferenceable(4) %struct.S* @_ZN1SaSERKS_(%struct.S* nonnull align 4 dereferenceable(4) [[OMP_ARRAYCPY_DESTELEMENTPAST]], %struct.S* nonnull align 4 dereferenceable(4) [[REF_TMP]])
-// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[REF_TMP]]) #3
+// CHECK1-NEXT:    call void @_ZN1SD1Ev(%struct.S* nonnull align 4 dereferenceable(4) [[REF_TMP]])
 // CHECK1-NEXT:    [[OMP_ARRAYCPY_DEST_ELEMENT]] = getelementptr [[STRUCT_S]], %struct.S* [[OMP_ARRAYCPY_DESTELEMENTPAST]], i32 1
 // CHECK1-NEXT:    [[OMP_ARRAYCPY_SRC_ELEMENT]] = getelementptr [[STRUCT_S]], %struct.S* [[OMP_ARRAYCPY_SRCELEMENTPAST]], i32 1
 // CHECK1-NEXT:    [[OMP_ARRAYCPY_DONE:%.*]] = icmp eq %struct.S* [[OMP_ARRAYCPY_DEST_ELEMENT]], [[TMP6]]
@@ -506,7 +506,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP21:%.*]] = load i8*, i8** [[TMP3]], align 8
 // CHECK1-NEXT:    store i8* [[TMP21]], i8** [[TMP20]], align 8
 // CHECK1-NEXT:    call void @__kmpc_omp_task_begin_if0(%struct.ident_t* @[[GLOB1]], i32 [[TMP11]], i8* [[TMP12]])
-// CHECK1-NEXT:    [[TMP22:%.*]] = call i32 @.omp_task_entry.(i32 [[TMP11]], %struct.kmp_task_t_with_privates* [[TMP13]]) #[[ATTR3]]
+// CHECK1-NEXT:    [[TMP22:%.*]] = call i32 @.omp_task_entry.(i32 [[TMP11]], %struct.kmp_task_t_with_privates* [[TMP13]])
 // CHECK1-NEXT:    call void @__kmpc_omp_task_complete_if0(%struct.ident_t* @[[GLOB1]], i32 [[TMP11]], i8* [[TMP12]])
 // CHECK1-NEXT:    ret void
 //
@@ -605,7 +605,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP15:%.*]] = load void (i8*, ...)*, void (i8*, ...)** [[DOTCOPY_FN__ADDR_I]], align 8, !noalias !14
 // CHECK1-NEXT:    [[TMP16:%.*]] = load i8*, i8** [[DOTPRIVATES__ADDR_I]], align 8, !noalias !14
 // CHECK1-NEXT:    [[TMP17:%.*]] = bitcast void (i8*, ...)* [[TMP15]] to void (i8*, i8***)*
-// CHECK1-NEXT:    call void [[TMP17]](i8* [[TMP16]], i8*** [[DOTFIRSTPRIV_PTR_ADDR_I]]) #[[ATTR3]]
+// CHECK1-NEXT:    call void [[TMP17]](i8* [[TMP16]], i8*** [[DOTFIRSTPRIV_PTR_ADDR_I]])
 // CHECK1-NEXT:    [[TMP18:%.*]] = load i8**, i8*** [[DOTFIRSTPRIV_PTR_ADDR_I]], align 8, !noalias !14
 // CHECK1-NEXT:    [[TMP19:%.*]] = getelementptr inbounds [[STRUCT_ANON]], %struct.anon* [[TMP12]], i32 0, i32 0
 // CHECK1-NEXT:    [[TMP20:%.*]] = load i32*, i32** [[TMP19]], align 8
@@ -619,7 +619,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP27:%.*]] = getelementptr inbounds [[STRUCT_ANON]], %struct.anon* [[TMP12]], i32 0, i32 2
 // CHECK1-NEXT:    [[TMP28:%.*]] = load i16*, i16** [[TMP27]], align 8
 // CHECK1-NEXT:    [[TMP29:%.*]] = load i8*, i8** [[TMP18]], align 8
-// CHECK1-NEXT:    call void @__omp_offloading_{{.*}}_main_l{{[0-9]+}}(i32* [[TMP26]], i64 [[TMP14]], i16* [[TMP28]], i8* [[TMP29]]) #[[ATTR3]]
+// CHECK1-NEXT:    call void @__omp_offloading_{{.*}}_main_l{{[0-9]+}}(i32* [[TMP26]], i64 [[TMP14]], i16* [[TMP28]], i8* [[TMP29]])
 // CHECK1-NEXT:    ret i32 0
 //
 //

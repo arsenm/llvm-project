@@ -158,8 +158,8 @@ end:
   ret void
 }
 
-declare void @bar()
-declare void @baz()
+declare void @bar() noconvergent
+declare void @baz() noconvergent
 
 ; verify the preheader is simplified by simplifycfg.
 define i1 @test_conditional2(i32 %a, i32 %b, ptr %c) {
@@ -295,4 +295,4 @@ if.end:                                           ; preds = %for.body, %if.then
   br label %for.cond
 }
 
-declare void @foo()
+declare void @foo() noconvergent

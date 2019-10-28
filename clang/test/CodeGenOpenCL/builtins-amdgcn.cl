@@ -496,7 +496,7 @@ void test_cubema(global float* out, float a, float b, float c) {
 }
 
 // CHECK-LABEL: @test_read_exec(
-// CHECK: call i64 @llvm.read_register.i64(metadata ![[$EXEC:[0-9]+]]) #[[$READ_EXEC_ATTRS:[0-9]+]]
+// CHECK: call i64 @llvm.read_register.i64(metadata ![[$EXEC:[0-9]+]]){{$}}
 void test_read_exec(global ulong* out) {
   *out = __builtin_amdgcn_read_exec();
 }
@@ -504,13 +504,13 @@ void test_read_exec(global ulong* out) {
 // CHECK: declare i64 @llvm.read_register.i64(metadata) #[[$NOUNWIND_READONLY:[0-9]+]]
 
 // CHECK-LABEL: @test_read_exec_lo(
-// CHECK: call i32 @llvm.read_register.i32(metadata ![[$EXEC_LO:[0-9]+]]) #[[$READ_EXEC_ATTRS]]
+// CHECK: call i32 @llvm.read_register.i32(metadata ![[$EXEC_LO:[0-9]+]]){{$}}
 void test_read_exec_lo(global uint* out) {
   *out = __builtin_amdgcn_read_exec_lo();
 }
 
 // CHECK-LABEL: @test_read_exec_hi(
-// CHECK: call i32 @llvm.read_register.i32(metadata ![[$EXEC_HI:[0-9]+]]) #[[$READ_EXEC_ATTRS]]
+// CHECK: call i32 @llvm.read_register.i32(metadata ![[$EXEC_HI:[0-9]+]]){{$}}
 void test_read_exec_hi(global uint* out) {
   *out = __builtin_amdgcn_read_exec_hi();
 }
@@ -796,8 +796,7 @@ kernel void test_s_setreg(uint val) {
 
 // CHECK-DAG: [[$WI_RANGE]] = !{i32 0, i32 1024}
 // CHECK-DAG: [[$WS_RANGE]] = !{i16 1, i16 1025}
-// CHECK-DAG: attributes #[[$NOUNWIND_READONLY]] = { mustprogress nocallback nofree nosync nounwind willreturn memory(read) }
-// CHECK-DAG: attributes #[[$READ_EXEC_ATTRS]] = { convergent }
+// CHECK-DAG: attributes #[[$NOUNWIND_READONLY]] = { mustprogress nocallback noconvergent nofree nosync nounwind willreturn memory(read) }
 // CHECK-DAG: ![[$EXEC]] = !{!"exec"}
 // CHECK-DAG: ![[$EXEC_LO]] = !{!"exec_lo"}
 // CHECK-DAG: ![[$EXEC_HI]] = !{!"exec_hi"}

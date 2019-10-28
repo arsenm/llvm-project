@@ -80,8 +80,9 @@ def NoUndef : EnumAttr<"noundef", [ParamAttr, RetAttr]>;
 /// Marks function as being in a cold path.
 def Cold : EnumAttr<"cold", [FnAttr]>;
 
-/// Can only be moved to control-equivalent blocks.
-def Convergent : EnumAttr<"convergent", [FnAttr]>;
+/// Function is not a convergent intrinsic call and does not call any
+/// functions that may be convergent.
+def NoConvergent : EnumAttr<"noconvergent", [FnAttr]>;
 
 /// Marks function as being in a hot path and frequently called.
 def Hot: EnumAttr<"hot", [FnAttr]>;

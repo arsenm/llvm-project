@@ -39,7 +39,7 @@ void bridge_transfer_from_cf(int *i) {
 void bridge_from_cf(int *i) {
   // CHECK: store i32 7
   *i = 7;
-  // CHECK: call ptr @CFCreateSomething() [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK: call ptr @CFCreateSomething() #{{[0-9]+}} [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
   id obj1 = (__bridge id)CFCreateSomething();
   // CHECK: store i32 11
   *i = 11;
@@ -57,11 +57,11 @@ void bridge_from_cf(int *i) {
 // CHECK-LABEL: define{{.*}} void @bridge_retained_of_cf
 void bridge_retained_of_cf(int *i) {
   *i = 7;
-  // CHECK: call ptr @CreateSomething() [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK: call ptr @CreateSomething() #{{[0-9]+}} [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
   CFTypeRef cf1 = (__bridge_retained CFTypeRef)CreateSomething();
   // CHECK: store i32 11
   *i = 11;
-  // CHECK: call ptr @CreateSomething() [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK: call ptr @CreateSomething() #{{[0-9]+}} [ "clang.arc.attachedcall"(ptr @llvm.objc.retainAutoreleasedReturnValue) ]
   (__bridge_retained CFTypeRef)CreateSomething(), *i = 13;
   // CHECK: store i32 13
   // CHECK: store i32 17

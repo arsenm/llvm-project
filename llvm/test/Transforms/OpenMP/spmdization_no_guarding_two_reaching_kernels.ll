@@ -70,7 +70,7 @@ define weak void @__omp_offloading_2b_10393b5_spmd_l12() #0 {
 ; CHECK-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 ; CHECK-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 ; CHECK:       user_code.entry:
-; CHECK-NEXT:    call void @spmd_helper() #[[ATTR6:[0-9]+]]
+; CHECK-NEXT:    call void @spmd_helper() #[[ATTR3:[0-9]+]]
 ; CHECK-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 2)
 ; CHECK-NEXT:    ret void
 ; CHECK:       worker.exit:
@@ -117,7 +117,7 @@ define weak void @__omp_offloading_2b_10393b5_spmd_l12() #0 {
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 ; CHECK-DISABLE-SPMDIZATION:       user_code.entry:
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @spmd_helper() #[[ATTR6:[0-9]+]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @spmd_helper() #[[ATTR3:[0-9]+]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ; CHECK-DISABLE-SPMDIZATION:       worker.exit:
@@ -129,7 +129,7 @@ entry:
   br i1 %exec_user_code, label %user_code.entry, label %worker.exit
 
 user_code.entry:                                  ; preds = %entry
-  call void @spmd_helper() #5
+  call void @spmd_helper()
   call void @__kmpc_target_deinit(ptr @1, i8 1)
   ret void
 
@@ -191,7 +191,7 @@ define weak void @__omp_offloading_2b_10393b5_generic_l20() #0 {
 ; CHECK-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 ; CHECK-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 ; CHECK:       user_code.entry:
-; CHECK-NEXT:    call void @generic_helper() #[[ATTR6]]
+; CHECK-NEXT:    call void @generic_helper() #[[ATTR3]]
 ; CHECK-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 ; CHECK-NEXT:    ret void
 ; CHECK:       worker.exit:
@@ -234,7 +234,7 @@ define weak void @__omp_offloading_2b_10393b5_generic_l20() #0 {
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 ; CHECK-DISABLE-SPMDIZATION:       user_code.entry:
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @generic_helper() #[[ATTR6]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @generic_helper() #[[ATTR3]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ; CHECK-DISABLE-SPMDIZATION:       worker.exit:
@@ -246,7 +246,7 @@ entry:
   br i1 %exec_user_code, label %user_code.entry, label %worker.exit
 
 user_code.entry:                                  ; preds = %entry
-  call void @generic_helper() #5
+  call void @generic_helper()
   call void @__kmpc_target_deinit(ptr @1, i8 1)
   ret void
 
@@ -260,8 +260,8 @@ define internal void @spmd_helper() #1 {
 ; CHECK-SAME: () #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CAPTURED_VARS_ADDRS:%.*]] = alloca [0 x ptr], align 8
-; CHECK-NEXT:    call void @leaf() #[[ATTR7:[0-9]+]]
-; CHECK-NEXT:    [[TMP0:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB2]]) #[[ATTR3:[0-9]+]]
+; CHECK-NEXT:    call void @leaf() #[[ATTR6:[0-9]+]]
+; CHECK-NEXT:    [[TMP0:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB2]]) #[[ATTR3]]
 ; CHECK-NEXT:    call void @__kmpc_parallel_51(ptr @[[GLOB2]], i32 [[TMP0]], i32 1, i32 -1, i32 -1, ptr @__omp_outlined__, ptr @__omp_outlined___wrapper, ptr [[CAPTURED_VARS_ADDRS]], i64 0)
 ; CHECK-NEXT:    ret void
 ;
@@ -269,8 +269,8 @@ define internal void @spmd_helper() #1 {
 ; CHECK-DISABLE-SPMDIZATION-SAME: () #[[ATTR1:[0-9]+]] {
 ; CHECK-DISABLE-SPMDIZATION-NEXT:  entry:
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[CAPTURED_VARS_ADDRS:%.*]] = alloca [0 x ptr], align 8
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR7:[0-9]+]]
-; CHECK-DISABLE-SPMDIZATION-NEXT:    [[TMP0:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB2]]) #[[ATTR3:[0-9]+]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR6:[0-9]+]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    [[TMP0:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB2]]) #[[ATTR3]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__kmpc_parallel_51(ptr @[[GLOB2]], i32 [[TMP0]], i32 1, i32 -1, i32 -1, ptr @__omp_outlined__, ptr @__omp_outlined___wrapper.ID, ptr [[CAPTURED_VARS_ADDRS]], i64 0)
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ;
@@ -289,7 +289,7 @@ define internal void @__omp_outlined__(ptr noalias %.global_tid., ptr noalias %.
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[DOTGLOBAL_TID__ADDR:%.*]] = alloca ptr, align 8
 ; CHECK-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 8
-; CHECK-NEXT:    call void @leaf() #[[ATTR7]]
+; CHECK-NEXT:    call void @leaf() #[[ATTR6]]
 ; CHECK-NEXT:    ret void
 ;
 ; CHECK-DISABLE-SPMDIZATION-LABEL: define {{[^@]+}}@__omp_outlined__
@@ -297,7 +297,7 @@ define internal void @__omp_outlined__(ptr noalias %.global_tid., ptr noalias %.
 ; CHECK-DISABLE-SPMDIZATION-NEXT:  entry:
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[DOTGLOBAL_TID__ADDR:%.*]] = alloca ptr, align 8
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 8
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR7]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR6]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ;
 entry:
@@ -319,7 +319,7 @@ define internal void @__omp_outlined___wrapper(i16 zeroext %0, i32 %1) #2 {
 ; CHECK-NEXT:    [[DOTZERO_ADDR:%.*]] = alloca i32, align 4
 ; CHECK-NEXT:    [[GLOBAL_ARGS:%.*]] = alloca ptr, align 8
 ; CHECK-NEXT:    call void @__kmpc_get_shared_variables(ptr [[GLOBAL_ARGS]])
-; CHECK-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]]) #[[ATTR6]]
 ; CHECK-NEXT:    ret void
 ;
 ; CHECK-DISABLE-SPMDIZATION-LABEL: define {{[^@]+}}@__omp_outlined___wrapper
@@ -330,7 +330,7 @@ define internal void @__omp_outlined___wrapper(i16 zeroext %0, i32 %1) #2 {
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[DOTZERO_ADDR:%.*]] = alloca i32, align 4
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    [[GLOBAL_ARGS:%.*]] = alloca ptr, align 8
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__kmpc_get_shared_variables(ptr [[GLOBAL_ARGS]])
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]]) #[[ATTR7]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @__omp_outlined__(ptr [[DOTADDR1]], ptr [[DOTZERO_ADDR]]) #[[ATTR6]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ;
 entry:
@@ -381,14 +381,14 @@ define internal void @generic_helper() #1 {
 ; CHECK-SAME: () #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    call void @unknown()
-; CHECK-NEXT:    call void @leaf() #[[ATTR7]]
+; CHECK-NEXT:    call void @leaf() #[[ATTR6]]
 ; CHECK-NEXT:    ret void
 ;
 ; CHECK-DISABLE-SPMDIZATION-LABEL: define {{[^@]+}}@generic_helper
 ; CHECK-DISABLE-SPMDIZATION-SAME: () #[[ATTR1]] {
 ; CHECK-DISABLE-SPMDIZATION-NEXT:  entry:
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @unknown()
-; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR7]]
+; CHECK-DISABLE-SPMDIZATION-NEXT:    call void @leaf() #[[ATTR6]]
 ; CHECK-DISABLE-SPMDIZATION-NEXT:    ret void
 ;
 entry:
@@ -397,12 +397,11 @@ entry:
   ret void
 }
 
-attributes #0 = { convergent noinline norecurse nounwind  "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-attributes #1 = { convergent noinline nounwind  "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-attributes #2 = { convergent noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+attributes #0 = { noinline norecurse nounwind  "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+attributes #1 = { noinline nounwind  "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+attributes #2 = { noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 attributes #3 = { nounwind }
 attributes #4 = { alwaysinline }
-attributes #5 = { convergent }
 
 !omp_offload.info = !{!0, !1}
 !nvvm.annotations = !{!2, !3}
@@ -420,23 +419,21 @@ attributes #5 = { convergent }
 !8 = !{i32 7, !"frame-pointer", i32 2}
 !9 = !{!"clang version 14.0.0"}
 ;.
-; CHECK: attributes #[[ATTR0]] = { convergent noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK: attributes #[[ATTR1]] = { convergent noinline nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK: attributes #[[ATTR2]] = { convergent noinline norecurse nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK: attributes #[[ATTR0]] = { noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK: attributes #[[ATTR1]] = { noinline nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK: attributes #[[ATTR2]] = { noinline norecurse nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 ; CHECK: attributes #[[ATTR3]] = { nounwind }
 ; CHECK: attributes #[[ATTR4:[0-9]+]] = { alwaysinline }
-; CHECK: attributes #[[ATTR5]] = { convergent noinline nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK: attributes #[[ATTR6]] = { convergent nounwind }
-; CHECK: attributes #[[ATTR7]] = { nosync nounwind }
+; CHECK: attributes #[[ATTR5]] = { noinline nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK: attributes #[[ATTR6]] = { nosync nounwind }
 ;.
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR0]] = { convergent noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR1]] = { convergent noinline nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR2]] = { convergent noinline norecurse nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR0]] = { noinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR1]] = { noinline nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR2]] = { noinline norecurse nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 ; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR3]] = { nounwind }
 ; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR4:[0-9]+]] = { alwaysinline }
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR5]] = { convergent noinline nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR6]] = { convergent nounwind }
-; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR7]] = { nosync nounwind }
+; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR5]] = { noinline nosync nounwind memory(write) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+; CHECK-DISABLE-SPMDIZATION: attributes #[[ATTR6]] = { nosync nounwind }
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{i32 0, i32 43, i32 17011637, !"spmd", i32 12, i32 0}
 ; CHECK: [[META1:![0-9]+]] = !{i32 0, i32 43, i32 17011637, !"generic", i32 20, i32 1}

@@ -84,7 +84,7 @@
 ; LOOP-MAX-COUNT-1: Loop at depth 3 containing:
 ; LOOP-MAX-NOT:      Loop at depth 3 containing:
 
-declare void @bar()
+declare void @bar() noconvergent
 
 define void @loop_nested3_conds5(ptr %addr, i1 %c1, i1 %c2, i1 %c3, i1 %c4, i1 %c5) {
 entry:

@@ -156,7 +156,3 @@ define void @round_custom(ptr %a, ptr %b) {
   store i64 %round2, ptr %idx2, align 8
   ret void
 }
-
-
-
-

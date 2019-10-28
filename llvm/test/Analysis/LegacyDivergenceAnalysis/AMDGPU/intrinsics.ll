@@ -9,5 +9,5 @@ define amdgpu_kernel void @ds_swizzle(ptr addrspace(1) %out, i32 %src) #0 {
 
 declare i32 @llvm.amdgcn.ds.swizzle(i32, i32) #1
 
-attributes #0 = { nounwind convergent }
-attributes #1 = { nounwind readnone convergent }
+attributes #0 = { nounwind }
+attributes #1 = { nounwind readnone }

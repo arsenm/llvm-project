@@ -328,7 +328,7 @@ namespace N3664 {
     // CHECK: call noalias noundef ptr @_ZnamRKSt9nothrow_t(i64 noundef 3, {{.*}}) [[ATTR_NOBUILTIN_NOUNWIND_ALLOCSIZE:#[^ ]*]]
     (void) new (nothrow) S[3];
 
-    // CHECK: call noundef ptr @_Znwm15MyPlacementType(i64 noundef 4){{$}}
+    // CHECK: call noundef ptr @_Znwm15MyPlacementType(i64 noundef 4) #{{[0-9]+$}}
     (void) new (mpt) int;
   }
 
@@ -362,9 +362,9 @@ namespace builtins {
   }
 }
 
-// CHECK-DAG: attributes [[ATTR_NOBUILTIN]] = {{[{].*}} nobuiltin allocsize(0) {{.*[}]}}
-// CHECK-DAG: attributes [[ATTR_NOBUILTIN_NOUNWIND]] = {{[{].*}} nobuiltin nounwind {{.*[}]}}
-// CHECK-DAG: attributes [[ATTR_NOBUILTIN_NOUNWIND_ALLOCSIZE]] = {{[{].*}} nobuiltin nounwind allocsize(0) {{.*[}]}}
+// CHECK-DAG: attributes [[ATTR_NOBUILTIN]] = {{[{].*}} nobuiltin noconvergent allocsize(0) {{.*[}]}}
+// CHECK-DAG: attributes [[ATTR_NOBUILTIN_NOUNWIND]] = {{[{].*}} nobuiltin noconvergent nounwind {{.*[}]}}
+// CHECK-DAG: attributes [[ATTR_NOBUILTIN_NOUNWIND_ALLOCSIZE]] = {{[{].*}} nobuiltin noconvergent nounwind allocsize(0) {{.*[}]}}
 
 // CHECK-DAG: attributes [[ATTR_BUILTIN_NEW]] = {{[{].*}} builtin {{.*[}]}}
 // CHECK-DAG: attributes [[ATTR_BUILTIN_DELETE]] = {{[{].*}} builtin {{.*[}]}}

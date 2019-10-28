@@ -49,7 +49,7 @@ End:
   ret void
 }
 
-attributes #0 = { "use-sample-profile" }
+attributes #0 = { noconvergent "use-sample-profile" }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!3, !4}

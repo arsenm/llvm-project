@@ -258,4 +258,4 @@ define amdgpu_kernel void @load_flat_i8_neg_offset(ptr %fptr) #0 {
 }
 
 attributes #0 = { nounwind }
-attributes #1 = { nounwind convergent }
+attributes #1 = { nounwind }

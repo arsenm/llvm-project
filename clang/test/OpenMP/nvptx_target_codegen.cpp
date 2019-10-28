@@ -296,7 +296,7 @@ void unreachable_call() {
 // CHECK1-NEXT:    [[ADD19:%.*]] = add nsw i32 [[CONV18]], 1
 // CHECK1-NEXT:    [[CONV20:%.*]] = trunc i32 [[ADD19]] to i8
 // CHECK1-NEXT:    store i8 [[CONV20]], ptr [[Y]], align 8
-// CHECK1-NEXT:    [[CALL:%.*]] = call nonnull align 8 dereferenceable(8) ptr @_ZN2TTIxcEixEi(ptr nonnull align 8 dereferenceable(16) [[TMP7]], i32 0) #[[ATTR10:[0-9]+]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call nonnull align 8 dereferenceable(8) ptr @_ZN2TTIxcEixEi(ptr nonnull align 8 dereferenceable(16) [[TMP7]], i32 0)
 // CHECK1-NEXT:    [[TMP17:%.*]] = load i64, ptr [[CALL]], align 8
 // CHECK1-NEXT:    [[ADD21:%.*]] = add nsw i64 [[TMP17]], 1
 // CHECK1-NEXT:    store i64 [[ADD21]], ptr [[CALL]], align 8
@@ -396,7 +396,7 @@ void unreachable_call() {
 // CHECK1-NEXT:    [[TMP8:%.*]] = load double, ptr [[A6]], align 8
 // CHECK1-NEXT:    [[CONV7:%.*]] = fptosi double [[TMP8]] to i32
 // CHECK1-NEXT:    [[A8:%.*]] = getelementptr inbounds [[STRUCT_S1]], ptr [[TMP0]], i32 0, i32 0
-// CHECK1-NEXT:    [[CALL:%.*]] = call i32 @_Z3baziRd(i32 [[CONV7]], ptr nonnull align 8 dereferenceable(8) [[A8]]) #[[ATTR10]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call i32 @_Z3baziRd(i32 [[CONV7]], ptr nonnull align 8 dereferenceable(8) [[A8]])
 // CHECK1-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 // CHECK1-NEXT:    ret void
 // CHECK1:       worker.exit:
@@ -430,7 +430,7 @@ void unreachable_call() {
 // CHECK1-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 // CHECK1-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 // CHECK1:       user_code.entry:
-// CHECK1-NEXT:    call void @_Z6asserti(i32 0) #[[ATTR11:[0-9]+]]
+// CHECK1-NEXT:    call void @_Z6asserti(i32 0) #[[ATTR10:[0-9]+]]
 // CHECK1-NEXT:    unreachable
 // CHECK1:       worker.exit:
 // CHECK1-NEXT:    ret void
@@ -666,7 +666,7 @@ void unreachable_call() {
 // CHECK2-NEXT:    [[ADD19:%.*]] = add nsw i32 [[CONV18]], 1
 // CHECK2-NEXT:    [[CONV20:%.*]] = trunc i32 [[ADD19]] to i8
 // CHECK2-NEXT:    store i8 [[CONV20]], ptr [[Y]], align 8
-// CHECK2-NEXT:    [[CALL:%.*]] = call nonnull align 8 dereferenceable(8) ptr @_ZN2TTIxcEixEi(ptr nonnull align 8 dereferenceable(16) [[TMP7]], i32 0) #[[ATTR10:[0-9]+]]
+// CHECK2-NEXT:    [[CALL:%.*]] = call nonnull align 8 dereferenceable(8) ptr @_ZN2TTIxcEixEi(ptr nonnull align 8 dereferenceable(16) [[TMP7]], i32 0)
 // CHECK2-NEXT:    [[TMP17:%.*]] = load i64, ptr [[CALL]], align 8
 // CHECK2-NEXT:    [[ADD21:%.*]] = add nsw i64 [[TMP17]], 1
 // CHECK2-NEXT:    store i64 [[ADD21]], ptr [[CALL]], align 8
@@ -766,7 +766,7 @@ void unreachable_call() {
 // CHECK2-NEXT:    [[TMP8:%.*]] = load double, ptr [[A6]], align 8
 // CHECK2-NEXT:    [[CONV7:%.*]] = fptosi double [[TMP8]] to i32
 // CHECK2-NEXT:    [[A8:%.*]] = getelementptr inbounds [[STRUCT_S1]], ptr [[TMP0]], i32 0, i32 0
-// CHECK2-NEXT:    [[CALL:%.*]] = call i32 @_Z3baziRd(i32 [[CONV7]], ptr nonnull align 8 dereferenceable(8) [[A8]]) #[[ATTR10]]
+// CHECK2-NEXT:    [[CALL:%.*]] = call i32 @_Z3baziRd(i32 [[CONV7]], ptr nonnull align 8 dereferenceable(8) [[A8]])
 // CHECK2-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 // CHECK2-NEXT:    ret void
 // CHECK2:       worker.exit:
@@ -800,7 +800,7 @@ void unreachable_call() {
 // CHECK2-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 // CHECK2-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 // CHECK2:       user_code.entry:
-// CHECK2-NEXT:    call void @_Z6asserti(i32 0) #[[ATTR11:[0-9]+]]
+// CHECK2-NEXT:    call void @_Z6asserti(i32 0) #[[ATTR10:[0-9]+]]
 // CHECK2-NEXT:    unreachable
 // CHECK2:       worker.exit:
 // CHECK2-NEXT:    ret void

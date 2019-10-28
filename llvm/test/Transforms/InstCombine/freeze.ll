@@ -1119,7 +1119,7 @@ define i32 @freeze_ctpop(i32 %x) {
 !1 = !{i64 4}
 !2 = !{i32 0, i32 100}
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ; CHECK: attributes #[[ATTR1]] = { nounwind }
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{}

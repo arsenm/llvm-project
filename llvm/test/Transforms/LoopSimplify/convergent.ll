@@ -11,7 +11,7 @@ entry:
 
 BB1:
   %indvar = phi i32 [%indvar, %BB1], [%inc, %BB2], [%init, %entry]
-  call void @f() convergent
+  call void @convergent.f()
   br i1 %loop_cond, label %BB1, label %BB2
 
 BB2:
@@ -22,4 +22,4 @@ exit:
   ret i32 %inc
 }
 
-declare void @f() convergent
+declare void @convergent.f()

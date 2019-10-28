@@ -89,7 +89,7 @@ bb7:                                              ; preds = %bb5
 bb8:                                              ; preds = %bb8, %bb7, %bb5, %bb2
   ret void
 }
-declare i32 @a()
+declare i32 @a() noconvergent
 
 ; This gets into a state that could cause instruction simplify
 ; to hang - an insertelement instruction has itself as an operand.

@@ -30,8 +30,8 @@
   }
 
   attributes #0 = { "target-cpu"="gfx803" }
-  attributes #1 = { convergent nounwind }
-  attributes #2 = { convergent nounwind readnone }
+  attributes #1 = { nounwind }
+  attributes #2 = { nounwind readnone }
 
   !0 = !{}
   !1 = !{i32 1}

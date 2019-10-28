@@ -6,7 +6,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ;CHECK-LABEL: @sqrt_f32(
 ;CHECK: vsqrtf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @sqrtf(float) nounwind readnone
+declare float @sqrtf(float) noconvergent nounwind readnone
 define void @sqrt_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -31,7 +31,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @exp_f32(
 ;CHECK: vexpf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @expf(float) nounwind readnone
+declare float @expf(float) noconvergent nounwind readnone
 define void @exp_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -56,7 +56,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @log_f32(
 ;CHECK: vlogf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @logf(float) nounwind readnone
+declare float @logf(float) noconvergent nounwind readnone
 define void @log_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -82,7 +82,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @fabs_f32(
 ;CHECK: fabs{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @fabsf(float) nounwind readnone
+declare float @fabsf(float) noconvergent nounwind readnone
 define void @fabs_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -134,7 +134,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @foo_f32(
 ;CHECK-NOT: foo{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @foo(float) nounwind readnone
+declare float @foo(float) noconvergent nounwind readnone
 define void @foo_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -184,7 +184,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @ceil_f32(
 ;CHECK: vceilf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @ceilf(float) nounwind readnone
+declare float @ceilf(float) noconvergent nounwind readnone
 define void @ceil_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -209,7 +209,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @floor_f32(
 ;CHECK: vfloorf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @floorf(float) nounwind readnone
+declare float @floorf(float) noconvergent nounwind readnone
 define void @floor_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -234,7 +234,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @expm1_f32(
 ;CHECK: vexpm1f{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @expm1f(float) nounwind readnone
+declare float @expm1f(float) noconvergent nounwind readnone
 define void @expm1_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -259,7 +259,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @log1p_f32(
 ;CHECK: vlog1pf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @log1pf(float) nounwind readnone
+declare float @log1pf(float) noconvergent nounwind readnone
 define void @log1p_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -284,7 +284,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @log10_f32(
 ;CHECK: vlog10f{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @log10f(float) nounwind readnone
+declare float @log10f(float) noconvergent nounwind readnone
 define void @log10_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -309,7 +309,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @logb_f32(
 ;CHECK: vlogbf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @logbf(float) nounwind readnone
+declare float @logbf(float) noconvergent nounwind readnone
 define void @logb_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -334,7 +334,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @sin_f32(
 ;CHECK: vsinf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @sinf(float) nounwind readnone
+declare float @sinf(float) noconvergent nounwind readnone
 define void @sin_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -359,7 +359,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @cos_f32(
 ;CHECK: vcosf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @cosf(float) nounwind readnone
+declare float @cosf(float) noconvergent nounwind readnone
 define void @cos_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -384,7 +384,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @tan_f32(
 ;CHECK: vtanf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @tanf(float) nounwind readnone
+declare float @tanf(float) noconvergent nounwind readnone
 define void @tan_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -409,7 +409,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @asin_f32(
 ;CHECK: vasinf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @asinf(float) nounwind readnone
+declare float @asinf(float) noconvergent nounwind readnone
 define void @asin_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -434,7 +434,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @acos_f32(
 ;CHECK: vacosf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @acosf(float) nounwind readnone
+declare float @acosf(float) noconvergent nounwind readnone
 define void @acos_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -459,7 +459,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @atan_f32(
 ;CHECK: vatanf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @atanf(float) nounwind readnone
+declare float @atanf(float) noconvergent nounwind readnone
 define void @atan_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -484,7 +484,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @sinh_f32(
 ;CHECK: vsinhf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @sinhf(float) nounwind readnone
+declare float @sinhf(float) noconvergent nounwind readnone
 define void @sinh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -509,7 +509,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @cosh_f32(
 ;CHECK: vcoshf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @coshf(float) nounwind readnone
+declare float @coshf(float) noconvergent nounwind readnone
 define void @cosh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -534,7 +534,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @tanh_f32(
 ;CHECK: vtanhf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @tanhf(float) nounwind readnone
+declare float @tanhf(float) noconvergent nounwind readnone
 define void @tanh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -559,7 +559,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @asinh_f32(
 ;CHECK: vasinhf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @asinhf(float) nounwind readnone
+declare float @asinhf(float) noconvergent nounwind readnone
 define void @asinh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -584,7 +584,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @acosh_f32(
 ;CHECK: vacoshf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @acoshf(float) nounwind readnone
+declare float @acoshf(float) noconvergent nounwind readnone
 define void @acosh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0
@@ -609,7 +609,7 @@ for.end:                                          ; preds = %for.body, %entry
 ;CHECK-LABEL: @atanh_f32(
 ;CHECK: vatanhf{{.*}}<4 x float>
 ;CHECK: ret void
-declare float @atanhf(float) nounwind readnone
+declare float @atanhf(float) noconvergent nounwind readnone
 define void @atanh_f32(i32 %n, ptr noalias %y, ptr noalias %x) nounwind uwtable {
 entry:
   %cmp6 = icmp sgt i32 %n, 0

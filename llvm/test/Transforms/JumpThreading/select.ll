@@ -10,10 +10,10 @@
 ; CHECK-BPI:       set edge cond.false -> 0 successor probability to 0x20000000 / 0x80000000 = 25.00%
 ; CHECK-BPI:       set edge cond.false -> 1 successor probability to 0x60000000 / 0x80000000 = 75.00%
 
-declare void @foo()
-declare void @bar()
-declare void @baz()
-declare void @quux()
+declare void @foo() noconvergent
+declare void @bar() noconvergent
+declare void @baz() noconvergent
+declare void @quux() noconvergent
 
 
 ; Jump threading of branch with select as condition.

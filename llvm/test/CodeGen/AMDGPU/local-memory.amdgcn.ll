@@ -110,4 +110,4 @@ declare void @llvm.amdgcn.s.barrier() #2
 
 attributes #0 = { nounwind }
 attributes #1 = { nounwind readnone }
-attributes #2 = { convergent nounwind }
+attributes #2 = { nounwind }

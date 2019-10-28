@@ -34,4 +34,4 @@ void test2_helper(int x, int y) {
 }
 
 // CHECK: attributes [[STRICTFP0]] = { {{.*}}strictfp{{.*}} }
-// CHECK: attributes [[STRICTFP1]] = { strictfp }
+// CHECK: attributes [[STRICTFP1]] = { noconvergent strictfp }

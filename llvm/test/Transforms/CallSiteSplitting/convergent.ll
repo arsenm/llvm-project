@@ -85,5 +85,5 @@ endif:
 declare void @convergent_external(ptr) #0
 declare void @nonconvergent_external(ptr) #1
 
-attributes #0 = { convergent nounwind }
-attributes #1 = { nounwind }
+attributes #0 = { nounwind }
+attributes #1 = { noconvergent nounwind }

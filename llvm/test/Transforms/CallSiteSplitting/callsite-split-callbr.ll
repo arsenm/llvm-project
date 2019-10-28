@@ -45,9 +45,9 @@ End2:
   ret void
 }
 
-define void @callee(i1 %b) {
+define void @callee(i1 %b) noconvergent {
 ; CHECK-LABEL: define {{[^@]+}}@callee
-; CHECK-SAME: (i1 [[B:%.*]]) {
+; CHECK-SAME: (i1 [[B:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    ret void
 ;
   ret void

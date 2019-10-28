@@ -47,5 +47,5 @@ func1.exit:                  ; preds = %if.end.i, %while.cond, %while.cond
   br label %while.cond
 }
 
-declare i32 @func3(i32, i32, i32)
+declare i32 @func3(i32, i32, i32) noconvergent
 

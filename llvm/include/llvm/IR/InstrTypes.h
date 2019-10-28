@@ -1917,9 +1917,11 @@ public:
   void setCannotMerge() { addFnAttr(Attribute::NoMerge); }
 
   /// Determine if the invoke is convergent
-  bool isConvergent() const { return hasFnAttr(Attribute::Convergent); }
-  void setConvergent() { addFnAttr(Attribute::Convergent); }
-  void setNotConvergent() { removeFnAttr(Attribute::Convergent); }
+  bool isConvergent() const { return !hasFnAttr(Attribute::NoConvergent); }
+  void setNotConvergent() { removeFnAttr(Attribute::NoConvergent); }
+  void setConvergent() { addFnAttr(Attribute::NoConvergent); }
+  bool isNoConvergent() const { return hasFnAttr(Attribute::NoConvergent); }
+  void setNoConvergent() { addFnAttr(Attribute::NoConvergent); }
 
   /// Determine if the call returns a structure through first
   /// pointer argument.

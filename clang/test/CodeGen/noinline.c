@@ -12,10 +12,10 @@ void foo(void) {
 // NOINLINE: @foo
 // NOINLINE: dont_inline_me
 // NOINLINE-NOT: inlinehint
-    pa[0] = dont_inline_me(pa[1],pa[2]);	
+    pa[0] = dont_inline_me(pa[1],pa[2]);
 // NOINLINE-NOT: inline_me
     pa[3] = inline_me(pa[4],pa[5]);
 }
 
-// NOINLINE: Function Attrs: noinline
+// NOINLINE: Function Attrs: noconvergent noinline
 // NOINLINE: @dont_inline_me

@@ -4,8 +4,8 @@
 ;
 ; CHECK-LABEL:  catch:
 ; CHECK:          %1 = catchpad within %0
-; CHECK:          %2 = tail call ptr @llvm.objc.retain(ptr %exn) #0 [ "funclet"(token %1) ]
-; CHECK:          call void @llvm.objc.release(ptr %exn) #0 [ "funclet"(token %1) ]
+; CHECK:          %2 = tail call ptr @llvm.objc.retain(ptr %exn) #{{[0-9]+}} [ "funclet"(token %1) ]
+; CHECK:          call void @llvm.objc.release(ptr %exn) #{{[0-9]+}} [ "funclet"(token %1) ]
 ; CHECK:          catchret from %1 to label %eh.cont
 
 define void @try_catch_with_objc_intrinsic() personality ptr @__CxxFrameHandler3 {

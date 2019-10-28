@@ -99,5 +99,5 @@ declare { i1, i64 } @llvm.amdgcn.else.i64.i64(i64) #0
 declare i64 @llvm.amdgcn.if.break.i64.i64(i1, i64) #1
 declare i1 @llvm.amdgcn.loop.i64(i64) #1
 
-attributes #0 = { convergent nounwind }
-attributes #1 = { convergent nounwind readnone }
+attributes #0 = { nounwind }
+attributes #1 = { nounwind readnone }

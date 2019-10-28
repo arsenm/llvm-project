@@ -12,18 +12,17 @@
 
 // RUN: %clang_cc1 -x cuda %s -emit-llvm -mlink-builtin-bitcode %t.bc -o - \
 // RUN:   -fcuda-is-device -triple nvptx-unknown-unknown \
-// RUN: | FileCheck %s --check-prefix=CHECK --check-prefix=NOFTZ --check-prefix=NOFAST
+// RUN: | FileCheck %s --check-prefix=CHECK --check-prefix=NOFTZ
 
 // RUN: %clang_cc1 -x cuda %s -emit-llvm -mlink-builtin-bitcode %t.bc \
 // RUN:   -fdenormal-fp-math-f32=preserve-sign -o - \
 // RUN:   -fcuda-is-device -triple nvptx-unknown-unknown \
-// RUN: | FileCheck %s --check-prefix=CHECK --check-prefix=FTZ \
-// RUN:   --check-prefix=NOFAST
+// RUN: | FileCheck %s --check-prefix=CHECK --check-prefix=FTZ
 
 // RUN: %clang_cc1 -x cuda %s -emit-llvm -mlink-builtin-bitcode %t.bc \
 // RUN:   -fdenormal-fp-math-f32=preserve-sign -o - \
 // RUN:   -fcuda-is-device -funsafe-math-optimizations -triple nvptx-unknown-unknown \
-// RUN: | FileCheck %s --check-prefix=CHECK --check-prefix=FAST
+// RUN: | FileCheck %s --check-prefix=CHECK
 
 // Wrap everything in extern "C" so we don't have to worry about name mangling
 // in the IR.
@@ -43,41 +42,16 @@ __global__ void kernel() { lib_fn(); }
 #endif
 }
 
+// CHECK-NOT: convergent
 // The kernel and lib function should have the same attributes.
 // CHECK: define{{.*}} void @kernel() [[kattr:#[0-9]+]]
 // CHECK: define internal void @lib_fn() [[fattr:#[0-9]+]]
 
-// FIXME: These -NOT checks do not work as intended and do not check on the same
-// line.
 
-// Check the attribute list for kernel.
-// CHECK: attributes [[kattr]] = {
+// NOFTZ: attributes [[kattr]] = { mustprogress noinline norecurse nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+ptx32,+sm_20" }
+// NOFTZ: attributes [[fattr]] = { mustprogress noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+ptx32,+sm_20" }
 
-// CHECK-SAME: convergent
-// CHECK-SAME: norecurse
 
-// FTZ-NOT: "denormal-fp-math"
-// FTZ-SAME: "denormal-fp-math-f32"="preserve-sign,preserve-sign"
-// NOFTZ-NOT: "denormal-fp-math-f32"
+// FTZ: attributes [[kattr]] = { mustprogress noinline norecurse nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+ptx32,+sm_20" }
+// FTZ: attributes [[fattr]] = { mustprogress noinline nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+ptx32,+sm_20" }
 
-// CHECK-SAME: "no-trapping-math"="true"
-
-// FAST-SAME: "unsafe-fp-math"="true"
-// NOFAST-NOT: "unsafe-fp-math"="true"
-
-// Check the attribute list for lib_fn.
-// CHECK: attributes [[fattr]] = {
-
-// CHECK-SAME: convergent
-// CHECK-NOT: norecurse
-
-// FTZ-NOT: "denormal-fp-math"
-// NOFTZ-NOT: "denormal-fp-math"
-
-// FTZ-SAME: "denormal-fp-math-f32"="preserve-sign,preserve-sign"
-// NOFTZ-NOT: "denormal-fp-math-f32"
-
-// CHECK-SAME: "no-trapping-math"="true"
-
-// FAST-SAME: "unsafe-fp-math"="true"
-// NOFAST-NOT: "unsafe-fp-math"="true"

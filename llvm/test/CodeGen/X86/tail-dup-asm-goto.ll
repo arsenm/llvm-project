@@ -4,7 +4,7 @@
 
 ; Ensure that we don't duplicate a block with an "INLINEASM_BR" instruction
 ; during code gen.
-declare dso_local void @foo()
+declare dso_local void @foo() noconvergent
 
 define ptr @test1(ptr %arg1, ptr %arg2) {
   ; CHECK-LABEL: name: test1
@@ -61,7 +61,7 @@ bb106:                                            ; preds = %bb
 
 bb110:                                            ; preds = %bb106, %bb100
   %i10.1 = phi ptr [ %arg2, %bb106 ], [ %i28.i, %bb100 ]
-  callbr void asm sideeffect "#$0 $1 $2", "i,i,!i,~{dirflag},~{fpsr},~{flags}"(i32 42, i1 false)
+  callbr void asm sideeffect "#$0 $1 $2", "i,i,!i,~{dirflag},~{fpsr},~{flags}"(i32 42, i1 false) noconvergent
           to label %kmem_cache_has_cpu_partial.exit [label %bb17.i.i.i]
 
 bb17.i.i.i:                                       ; preds = %bb110
@@ -133,11 +133,11 @@ for.cond:
   br i1 %cond, label %sw.bb, label %for.cond
 
 sw.bb:
-  %call.i.i2 = call i32 null(ptr %skip.i.i)
+  %call.i.i2 = call i32 null(ptr %skip.i.i) noconvergent
   br i1 %tobool.not.i.i, label %if.else.i.i, label %process_message_header.exit.i
 
 if.else.i.i:
-  callbr void asm sideeffect "", "!i"()
+  callbr void asm sideeffect "", "!i"() noconvergent
           to label %if.end.i [label %if.end.i]
 
 process_message_header.exit.i:

@@ -46,7 +46,7 @@ End:                                              ; preds = %CallSite, %TBB
   ret void
 }
 
-define i32 @callee(i32 %aa, i32 %bb) {
+define i32 @callee(i32 %aa, i32 %bb) noconvergent {
 entry:
   %add = add nsw i32 %aa, %bb
   ret i32 %add

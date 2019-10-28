@@ -77,4 +77,4 @@ void test() {
   // CHECK: ret void
 }
 
-// CHECK: attributes [[NUW]] = { nounwind{{.*}} }
+// CHECK: attributes [[NUW]] = { noconvergent nounwind{{.*}} }

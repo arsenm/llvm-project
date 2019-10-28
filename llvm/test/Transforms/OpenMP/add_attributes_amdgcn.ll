@@ -13,16 +13,16 @@ declare i64 @__kmpc_warp_active_thread_mask()
 
 declare void @__kmpc_syncwarp(i64)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i64 @__kmpc_warp_active_thread_mask()
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_syncwarp(i64)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i64 @__kmpc_warp_active_thread_mask()
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_syncwarp(i64)
 
 !llvm.module.flags = !{!0}

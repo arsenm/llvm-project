@@ -56,14 +56,14 @@
     ret void
   }
 
-  attributes #0 = { convergent nounwind }
-  attributes #1 = { convergent nounwind readnone }
+  attributes #0 = { nounwind }
+  attributes #1 = { nounwind readnone }
 
   define amdgpu_kernel void @move_waw_hazards() #0 {
     ret void
   }
 
-  attributes #0 = { convergent nounwind }
+  attributes #0 = { nounwind }
 
   define amdgpu_kernel void @merge_mmos(i32 addrspace(1)* %ptr_addr1) { ret void }
   define amdgpu_kernel void @reorder_offsets(i32 addrspace(1)* %reorder_addr1) { ret void }

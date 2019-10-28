@@ -5,7 +5,7 @@
 ; Test that the prologue end line directive is emitted after all the prologue instructions
 ; and also before the beginning of the epilogue instructions in a trivial function.
 
-; Function Attrs: convergent noinline nounwind optnone mustprogress
+; Function Attrs: noinline nounwind optnone mustprogress
 define hidden void @_Z9base_casev() #0 !dbg !6 {
 ; CHECK-LABEL: _Z9base_casev:
 ; CHECK:       .Lfunc_begin0:

@@ -90,4 +90,4 @@ define amdgpu_kernel void @store_value_lowered_to_undef_bitcast_source_extractel
 declare i64 @llvm.amdgcn.icmp.i64(i64, i64, i32) #1
 
 attributes #0 = { nounwind }
-attributes #1 = { nounwind readnone convergent }
+attributes #1 = { nounwind readnone }

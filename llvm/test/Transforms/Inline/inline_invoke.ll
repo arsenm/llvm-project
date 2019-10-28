@@ -343,7 +343,6 @@ terminate:
 ; CHECK-NEXT: call void @_ZSt9terminatev()
 
 ; CHECK: attributes [[NUW]] = { nounwind }
-; CHECK: attributes #1 = { nounwind memory(none) }
+; CHECK: attributes #1 = { noconvergent nounwind memory(none) }
 ; CHECK: attributes #2 = { ssp uwtable }
-; CHECK: attributes #3 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-; CHECK: attributes #4 = { noreturn nounwind }
+; CHECK: attributes #3 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }

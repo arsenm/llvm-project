@@ -46,4 +46,4 @@ int main(void)
   return 0;
 }
 
-// CHECK: attributes [[NUW]] = { nounwind }
+// CHECK: attributes [[NUW]] = { noconvergent nounwind }

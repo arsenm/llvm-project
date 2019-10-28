@@ -4,9 +4,9 @@
 ; RUN: opt < %s -S -passes="default<Os>" | FileCheck %s -check-prefixes=TRIVIAL,CHECK
 ; RUN: opt < %s -S -passes="default<Oz>" | FileCheck %s -check-prefixes=TRIVIAL,CHECK
 
-declare i32 @a()
-declare i32 @b()
-declare i32 @c()
+declare i32 @a() noconvergent
+declare i32 @b() noconvergent
+declare i32 @c() noconvergent
 
 ; TRIVIAL-NOT: loop_begin.us:
 ; NONTRIVIAL: loop_begin.us:

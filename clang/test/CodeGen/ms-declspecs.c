@@ -37,8 +37,8 @@ __declspec(noalias) void noalias_callee(int *x);
 // CHECK: call void @noalias_callee({{.*}}) [[NA:#[0-9]+]]
 void noalias_caller(int *x) { noalias_callee(x); }
 
-// CHECK: attributes [[NAKED]] = { naked noinline nounwind{{.*}} }
-// CHECK: attributes [[NUW]] = { nounwind{{.*}} }
-// CHECK: attributes [[NI]] = { noinline nounwind{{.*}} }
-// CHECK: attributes [[NR]] = { noreturn }
-// CHECK: attributes [[NA]] = { nounwind memory(argmem: readwrite){{.*}} }
+// CHECK: attributes [[NAKED]] = { naked noconvergent noinline nounwind{{.*}} }
+// CHECK: attributes [[NUW]] = { noconvergent nounwind{{.*}} }
+// CHECK: attributes [[NI]] = { noconvergent noinline nounwind{{.*}} }
+// CHECK: attributes [[NR]] = { noconvergent noreturn }
+// CHECK: attributes [[NA]] = { noconvergent nounwind memory(argmem: readwrite){{.*}} }

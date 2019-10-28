@@ -63,7 +63,7 @@ kernel void test_target_features_kernel(global int *i) {
 //.
 // CHECK: @__block_literal_global = internal addrspace(1) constant { i32, i32, ptr } { i32 16, i32 8, ptr @__test_target_features_kernel_block_invoke }, align 8 #0
 //.
-// NOCPU: Function Attrs: convergent noinline norecurse nounwind optnone
+// NOCPU: Function Attrs: noinline norecurse nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@callee
 // NOCPU-SAME: (i64 noundef [[ID:%.*]], ptr addrspace(1) noundef [[OUT:%.*]]) #[[ATTR1:[0-9]+]] {
 // NOCPU-NEXT:  entry:
@@ -79,7 +79,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline norecurse nounwind optnone
+// NOCPU: Function Attrs: noinline norecurse nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@test
 // NOCPU-SAME: (ptr addrspace(1) noundef align 1 [[A:%.*]], i8 noundef [[B:%.*]], ptr addrspace(1) noundef align 8 [[C:%.*]], i64 noundef [[D:%.*]]) #[[ATTR2:[0-9]+]] !kernel_arg_addr_space !3 !kernel_arg_access_qual !4 !kernel_arg_type !5 !kernel_arg_base_type !5 !kernel_arg_type_qual !6 {
 // NOCPU-NEXT:  entry:
@@ -193,7 +193,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline nounwind optnone
+// NOCPU: Function Attrs: noinline nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke
 // NOCPU-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR4:[0-9]+]] {
 // NOCPU-NEXT:  entry:
@@ -210,7 +210,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent nounwind
+// NOCPU: Function Attrs: nounwind
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_kernel
 // NOCPU-SAME: (<{ i32, i32, ptr, ptr addrspace(1), i8 }> [[TMP0:%.*]]) #[[ATTR5:[0-9]+]] !kernel_arg_addr_space !7 !kernel_arg_access_qual !8 !kernel_arg_type !9 !kernel_arg_base_type !9 !kernel_arg_type_qual !10 {
 // NOCPU-NEXT:  entry:
@@ -221,7 +221,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline nounwind optnone
+// NOCPU: Function Attrs: noinline nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_2
 // NOCPU-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR4]] {
 // NOCPU-NEXT:  entry:
@@ -244,7 +244,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent nounwind
+// NOCPU: Function Attrs: nounwind
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_2_kernel
 // NOCPU-SAME: (<{ i32, i32, ptr, ptr addrspace(1), ptr addrspace(1), i64, i8 }> [[TMP0:%.*]]) #[[ATTR5]] !kernel_arg_addr_space !7 !kernel_arg_access_qual !8 !kernel_arg_type !9 !kernel_arg_base_type !9 !kernel_arg_type_qual !10 {
 // NOCPU-NEXT:  entry:
@@ -255,7 +255,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline nounwind optnone
+// NOCPU: Function Attrs: noinline nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_3
 // NOCPU-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]], ptr addrspace(3) noundef [[LP:%.*]]) #[[ATTR4]] {
 // NOCPU-NEXT:  entry:
@@ -283,7 +283,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent nounwind
+// NOCPU: Function Attrs: nounwind
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_3_kernel
 // NOCPU-SAME: (<{ i32, i32, ptr, ptr addrspace(1), ptr addrspace(1), i64, i8 }> [[TMP0:%.*]], ptr addrspace(3) [[TMP1:%.*]]) #[[ATTR5]] !kernel_arg_addr_space !11 !kernel_arg_access_qual !12 !kernel_arg_type !13 !kernel_arg_base_type !13 !kernel_arg_type_qual !14 {
 // NOCPU-NEXT:  entry:
@@ -294,7 +294,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline nounwind optnone
+// NOCPU: Function Attrs: noinline nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_4
 // NOCPU-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR4]] {
 // NOCPU-NEXT:  entry:
@@ -306,11 +306,11 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    [[TMP0:%.*]] = load i64, ptr [[BLOCK_CAPTURE_ADDR]], align 8
 // NOCPU-NEXT:    [[BLOCK_CAPTURE_ADDR1:%.*]] = getelementptr inbounds <{ i32, i32, ptr, i64, ptr addrspace(1) }>, ptr [[DOTBLOCK_DESCRIPTOR]], i32 0, i32 4
 // NOCPU-NEXT:    [[TMP1:%.*]] = load ptr addrspace(1), ptr [[BLOCK_CAPTURE_ADDR1]], align 8
-// NOCPU-NEXT:    call void @callee(i64 noundef [[TMP0]], ptr addrspace(1) noundef [[TMP1]]) #[[ATTR8:[0-9]+]]
+// NOCPU-NEXT:    call void @callee(i64 noundef [[TMP0]], ptr addrspace(1) noundef [[TMP1]]) #[[ATTR9:[0-9]+]]
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent nounwind
+// NOCPU: Function Attrs: nounwind
 // NOCPU-LABEL: define {{[^@]+}}@__test_block_invoke_4_kernel
 // NOCPU-SAME: (<{ i32, i32, ptr, i64, ptr addrspace(1) }> [[TMP0:%.*]]) #[[ATTR5]] !kernel_arg_addr_space !7 !kernel_arg_access_qual !8 !kernel_arg_type !9 !kernel_arg_base_type !9 !kernel_arg_type_qual !10 {
 // NOCPU-NEXT:  entry:
@@ -321,9 +321,9 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline norecurse nounwind optnone
+// NOCPU: Function Attrs: noinline norecurse nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@test_target_features_kernel
-// NOCPU-SAME: (ptr addrspace(1) noundef align 4 [[I:%.*]]) #[[ATTR6:[0-9]+]] !kernel_arg_addr_space !15 !kernel_arg_access_qual !8 !kernel_arg_type !16 !kernel_arg_base_type !16 !kernel_arg_type_qual !10 {
+// NOCPU-SAME: (ptr addrspace(1) noundef align 4 [[I:%.*]]) #[[ATTR7:[0-9]+]] !kernel_arg_addr_space !15 !kernel_arg_access_qual !8 !kernel_arg_type !16 !kernel_arg_base_type !16 !kernel_arg_type_qual !10 {
 // NOCPU-NEXT:  entry:
 // NOCPU-NEXT:    [[I_ADDR:%.*]] = alloca ptr addrspace(1), align 8, addrspace(5)
 // NOCPU-NEXT:    [[DEFAULT_QUEUE:%.*]] = alloca ptr addrspace(1), align 8, addrspace(5)
@@ -340,7 +340,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent noinline nounwind optnone
+// NOCPU: Function Attrs: noinline nounwind optnone
 // NOCPU-LABEL: define {{[^@]+}}@__test_target_features_kernel_block_invoke
 // NOCPU-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR4]] {
 // NOCPU-NEXT:  entry:
@@ -352,7 +352,7 @@ kernel void test_target_features_kernel(global int *i) {
 // NOCPU-NEXT:    ret void
 //
 //
-// NOCPU: Function Attrs: convergent nounwind
+// NOCPU: Function Attrs: nounwind
 // NOCPU-LABEL: define {{[^@]+}}@__test_target_features_kernel_block_invoke_kernel
 // NOCPU-SAME: ({ i32, i32, ptr } [[TMP0:%.*]]) #[[ATTR5]] !kernel_arg_addr_space !7 !kernel_arg_access_qual !8 !kernel_arg_type !9 !kernel_arg_base_type !9 !kernel_arg_type_qual !10 {
 // NOCPU-NEXT:  entry:
@@ -376,7 +376,7 @@ kernel void test_target_features_kernel(global int *i) {
 //
 //
 //
-// GFX900: Function Attrs: convergent norecurse nounwind
+// GFX900: Function Attrs: norecurse nounwind
 // GFX900-LABEL: define {{[^@]+}}@callee
 // GFX900-SAME: (i64 noundef [[ID:%.*]], ptr addrspace(1) noundef [[OUT:%.*]]) #[[ATTR1:[0-9]+]] {
 // GFX900-NEXT:  entry:
@@ -392,7 +392,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent norecurse nounwind
+// GFX900: Function Attrs: norecurse nounwind
 // GFX900-LABEL: define {{[^@]+}}@test
 // GFX900-SAME: (ptr addrspace(1) noundef align 1 [[A:%.*]], i8 noundef [[B:%.*]], ptr addrspace(1) noundef align 8 [[C:%.*]], i64 noundef [[D:%.*]]) #[[ATTR2:[0-9]+]] !kernel_arg_addr_space !9 !kernel_arg_access_qual !10 !kernel_arg_type !11 !kernel_arg_base_type !11 !kernel_arg_type_qual !12 {
 // GFX900-NEXT:  entry:
@@ -417,10 +417,10 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    store i8 [[B]], ptr addrspace(5) [[B_ADDR]], align 1, !tbaa [[TBAA13:![0-9]+]]
 // GFX900-NEXT:    store ptr addrspace(1) [[C]], ptr addrspace(5) [[C_ADDR]], align 8, !tbaa [[TBAA7]]
 // GFX900-NEXT:    store i64 [[D]], ptr addrspace(5) [[D_ADDR]], align 8, !tbaa [[TBAA3]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR8:[0-9]+]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR9:[0-9]+]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR9]]
 // GFX900-NEXT:    store i32 0, ptr addrspace(5) [[FLAGS]], align 4, !tbaa [[TBAA14:![0-9]+]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR9]]
 // GFX900-NEXT:    [[TMP0:%.*]] = load ptr addrspace(1), ptr addrspace(5) [[DEFAULT_QUEUE]], align 8, !tbaa [[TBAA16:![0-9]+]]
 // GFX900-NEXT:    [[TMP1:%.*]] = load i32, ptr addrspace(5) [[FLAGS]], align 4, !tbaa [[TBAA14]]
 // GFX900-NEXT:    call void @llvm.memcpy.p5.p5.i64(ptr addrspace(5) align 4 [[TMP]], ptr addrspace(5) align 4 [[NDRANGE]], i64 4, i1 false), !tbaa.struct [[TBAA_STRUCT18:![0-9]+]]
@@ -483,12 +483,12 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    [[TMP19:%.*]] = load i64, ptr addrspace(5) [[D_ADDR]], align 8, !tbaa [[TBAA3]]
 // GFX900-NEXT:    store i64 [[TMP19]], ptr addrspace(5) [[BLOCK_CAPTURED19]], align 8, !tbaa [[TBAA3]]
 // GFX900-NEXT:    [[TMP20:%.*]] = addrspacecast ptr addrspace(5) [[BLOCK12]] to ptr
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[BLOCK_SIZES]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[BLOCK_SIZES]]) #[[ATTR9]]
 // GFX900-NEXT:    [[TMP21:%.*]] = getelementptr [1 x i64], ptr addrspace(5) [[BLOCK_SIZES]], i32 0, i32 0
 // GFX900-NEXT:    store i64 100, ptr addrspace(5) [[TMP21]], align 8
 // GFX900-NEXT:    [[TMP22:%.*]] = call i32 @__enqueue_kernel_varargs(ptr addrspace(1) [[TMP14]], i32 [[TMP15]], ptr addrspace(5) [[VARTMP11]], ptr @__test_block_invoke_3_kernel, ptr [[TMP20]], i32 1, ptr addrspace(5) [[TMP21]])
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[BLOCK_SIZES]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[BLOCK20]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[BLOCK_SIZES]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[BLOCK20]]) #[[ATTR9]]
 // GFX900-NEXT:    [[BLOCK_SIZE22:%.*]] = getelementptr inbounds <{ i32, i32, ptr, i64, ptr addrspace(1) }>, ptr addrspace(5) [[BLOCK21]], i32 0, i32 0
 // GFX900-NEXT:    store i32 32, ptr addrspace(5) [[BLOCK_SIZE22]], align 8
 // GFX900-NEXT:    [[BLOCK_ALIGN23:%.*]] = getelementptr inbounds <{ i32, i32, ptr, i64, ptr addrspace(1) }>, ptr addrspace(5) [[BLOCK21]], i32 0, i32 1
@@ -509,14 +509,14 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    [[TMP27:%.*]] = load ptr, ptr addrspace(5) [[BLOCK20]], align 8, !tbaa [[TBAA13]]
 // GFX900-NEXT:    [[TMP28:%.*]] = addrspacecast ptr addrspace(5) [[BLOCK21]] to ptr
 // GFX900-NEXT:    [[TMP29:%.*]] = call i32 @__enqueue_kernel_basic(ptr addrspace(1) [[TMP25]], i32 [[TMP26]], ptr addrspace(5) byval([[STRUCT_NDRANGE_T]]) [[VARTMP27]], ptr @__test_block_invoke_4_kernel, ptr [[TMP28]])
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[BLOCK20]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[BLOCK20]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR9]]
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke
 // GFX900-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR5:[0-9]+]] {
 // GFX900-NEXT:  entry:
@@ -531,7 +531,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_kernel
 // GFX900-SAME: (<{ i32, i32, ptr, ptr addrspace(1), i8 }> [[TMP0:%.*]]) #[[ATTR6:[0-9]+]] !kernel_arg_addr_space !19 !kernel_arg_access_qual !20 !kernel_arg_type !21 !kernel_arg_base_type !21 !kernel_arg_type_qual !22 {
 // GFX900-NEXT:  entry:
@@ -542,7 +542,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_2
 // GFX900-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR5]] {
 // GFX900-NEXT:  entry:
@@ -563,7 +563,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_2_kernel
 // GFX900-SAME: (<{ i32, i32, ptr, ptr addrspace(1), ptr addrspace(1), i64, i8 }> [[TMP0:%.*]]) #[[ATTR6]] !kernel_arg_addr_space !19 !kernel_arg_access_qual !20 !kernel_arg_type !21 !kernel_arg_base_type !21 !kernel_arg_type_qual !22 {
 // GFX900-NEXT:  entry:
@@ -574,7 +574,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_3
 // GFX900-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]], ptr addrspace(3) noundef [[LP:%.*]]) #[[ATTR5]] {
 // GFX900-NEXT:  entry:
@@ -600,7 +600,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_3_kernel
 // GFX900-SAME: (<{ i32, i32, ptr, ptr addrspace(1), ptr addrspace(1), i64, i8 }> [[TMP0:%.*]], ptr addrspace(3) [[TMP1:%.*]]) #[[ATTR6]] !kernel_arg_addr_space !23 !kernel_arg_access_qual !24 !kernel_arg_type !25 !kernel_arg_base_type !25 !kernel_arg_type_qual !26 {
 // GFX900-NEXT:  entry:
@@ -611,7 +611,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_4
 // GFX900-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR5]] {
 // GFX900-NEXT:  entry:
@@ -621,11 +621,11 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    [[TMP0:%.*]] = load i64, ptr [[BLOCK_CAPTURE_ADDR]], align 8, !tbaa [[TBAA3]]
 // GFX900-NEXT:    [[BLOCK_CAPTURE_ADDR1:%.*]] = getelementptr inbounds <{ i32, i32, ptr, i64, ptr addrspace(1) }>, ptr [[DOTBLOCK_DESCRIPTOR]], i32 0, i32 4
 // GFX900-NEXT:    [[TMP1:%.*]] = load ptr addrspace(1), ptr [[BLOCK_CAPTURE_ADDR1]], align 8, !tbaa [[TBAA7]]
-// GFX900-NEXT:    call void @callee(i64 noundef [[TMP0]], ptr addrspace(1) noundef [[TMP1]]) #[[ATTR9:[0-9]+]]
+// GFX900-NEXT:    call void @callee(i64 noundef [[TMP0]], ptr addrspace(1) noundef [[TMP1]]) #[[ATTR9]]
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_block_invoke_4_kernel
 // GFX900-SAME: (<{ i32, i32, ptr, i64, ptr addrspace(1) }> [[TMP0:%.*]]) #[[ATTR6]] !kernel_arg_addr_space !19 !kernel_arg_access_qual !20 !kernel_arg_type !21 !kernel_arg_base_type !21 !kernel_arg_type_qual !22 {
 // GFX900-NEXT:  entry:
@@ -636,7 +636,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent norecurse nounwind
+// GFX900: Function Attrs: norecurse nounwind
 // GFX900-LABEL: define {{[^@]+}}@test_target_features_kernel
 // GFX900-SAME: (ptr addrspace(1) noundef align 4 [[I:%.*]]) #[[ATTR2]] !kernel_arg_addr_space !27 !kernel_arg_access_qual !20 !kernel_arg_type !28 !kernel_arg_base_type !28 !kernel_arg_type_qual !22 {
 // GFX900-NEXT:  entry:
@@ -646,22 +646,22 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    [[NDRANGE:%.*]] = alloca [[STRUCT_NDRANGE_T:%.*]], align 4, addrspace(5)
 // GFX900-NEXT:    [[TMP:%.*]] = alloca [[STRUCT_NDRANGE_T]], align 4, addrspace(5)
 // GFX900-NEXT:    store ptr addrspace(1) [[I]], ptr addrspace(5) [[I_ADDR]], align 8, !tbaa [[TBAA7]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR9]]
 // GFX900-NEXT:    store i32 0, ptr addrspace(5) [[FLAGS]], align 4, !tbaa [[TBAA14]]
-// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR9]]
 // GFX900-NEXT:    [[TMP0:%.*]] = call i64 @llvm.amdgcn.s.memtime()
 // GFX900-NEXT:    [[TMP1:%.*]] = load ptr addrspace(1), ptr addrspace(5) [[DEFAULT_QUEUE]], align 8, !tbaa [[TBAA16]]
 // GFX900-NEXT:    [[TMP2:%.*]] = load i32, ptr addrspace(5) [[FLAGS]], align 4, !tbaa [[TBAA14]]
 // GFX900-NEXT:    call void @llvm.memcpy.p5.p5.i64(ptr addrspace(5) align 4 [[TMP]], ptr addrspace(5) align 4 [[NDRANGE]], i64 4, i1 false), !tbaa.struct [[TBAA_STRUCT18]]
 // GFX900-NEXT:    [[TMP3:%.*]] = call i32 @__enqueue_kernel_basic(ptr addrspace(1) [[TMP1]], i32 [[TMP2]], ptr addrspace(5) byval([[STRUCT_NDRANGE_T]]) [[TMP]], ptr @__test_target_features_kernel_block_invoke_kernel, ptr addrspacecast (ptr addrspace(1) @__block_literal_global to ptr))
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR8]]
-// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR8]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[NDRANGE]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) [[FLAGS]]) #[[ATTR9]]
+// GFX900-NEXT:    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) [[DEFAULT_QUEUE]]) #[[ATTR9]]
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_target_features_kernel_block_invoke
 // GFX900-SAME: (ptr noundef [[DOTBLOCK_DESCRIPTOR:%.*]]) #[[ATTR5]] {
 // GFX900-NEXT:  entry:
@@ -671,7 +671,7 @@ kernel void test_target_features_kernel(global int *i) {
 // GFX900-NEXT:    ret void
 //
 //
-// GFX900: Function Attrs: convergent nounwind
+// GFX900: Function Attrs: nounwind
 // GFX900-LABEL: define {{[^@]+}}@__test_target_features_kernel_block_invoke_kernel
 // GFX900-SAME: ({ i32, i32, ptr } [[TMP0:%.*]]) #[[ATTR6]] !kernel_arg_addr_space !19 !kernel_arg_access_qual !20 !kernel_arg_type !21 !kernel_arg_base_type !21 !kernel_arg_type_qual !22 {
 // GFX900-NEXT:  entry:
@@ -683,25 +683,26 @@ kernel void test_target_features_kernel(global int *i) {
 //
 //.
 // NOCPU: attributes #0 = { "objc_arc_inert" }
-// NOCPU: attributes #1 = { convergent noinline norecurse nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-// NOCPU: attributes #2 = { convergent noinline norecurse nounwind optnone "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "uniform-work-group-size"="false" }
-// NOCPU: attributes #3 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
-// NOCPU: attributes #4 = { convergent noinline nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-// NOCPU: attributes #5 = { convergent nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "enqueued-block" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-// NOCPU: attributes #6 = { convergent noinline norecurse nounwind optnone "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+s-memtime-inst" "uniform-work-group-size"="false" }
-// NOCPU: attributes #7 = { nocallback nofree nosync nounwind willreturn }
-// NOCPU: attributes #8 = { convergent nounwind }
+// NOCPU: attributes #1 = { noinline norecurse nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// NOCPU: attributes #2 = { noinline norecurse nounwind optnone "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "uniform-work-group-size"="false" }
+// NOCPU: attributes #3 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+// NOCPU: attributes #4 = { noinline nounwind optnone "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// NOCPU: attributes #5 = { nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "enqueued-block" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// NOCPU: attributes #6 = { noconvergent }
+// NOCPU: attributes #7 = { noinline norecurse nounwind optnone "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+s-memtime-inst" "uniform-work-group-size"="false" }
+// NOCPU: attributes #8 = { nocallback noconvergent nofree nosync nounwind willreturn }
+// NOCPU: attributes #9 = { nounwind }
 //.
 // GFX900: attributes #0 = { "objc_arc_inert" }
-// GFX900: attributes #1 = { convergent norecurse nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
-// GFX900: attributes #2 = { convergent norecurse nounwind "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" "uniform-work-group-size"="false" }
-// GFX900: attributes #3 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-// GFX900: attributes #4 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
-// GFX900: attributes #5 = { convergent nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
-// GFX900: attributes #6 = { convergent nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "enqueued-block" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
-// GFX900: attributes #7 = { nocallback nofree nosync nounwind willreturn }
-// GFX900: attributes #8 = { nounwind }
-// GFX900: attributes #9 = { convergent nounwind }
+// GFX900: attributes #1 = { norecurse nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
+// GFX900: attributes #2 = { norecurse nounwind "amdgpu-flat-work-group-size"="1,256" "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" "uniform-work-group-size"="false" }
+// GFX900: attributes #3 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }
+// GFX900: attributes #4 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+// GFX900: attributes #5 = { nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
+// GFX900: attributes #6 = { nounwind "denormal-fp-math-f32"="preserve-sign,preserve-sign" "enqueued-block" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx900" "target-features"="+16-bit-insts,+ci-insts,+dpp,+gfx8-insts,+gfx9-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64,-sram-ecc" }
+// GFX900: attributes #7 = { noconvergent }
+// GFX900: attributes #8 = { nocallback noconvergent nofree nosync nounwind willreturn }
+// GFX900: attributes #9 = { nounwind }
 //.
 // NOCPU: !0 = !{i32 1, !"amdgpu_code_object_version", i32 400}
 // NOCPU: !1 = !{i32 1, !"wchar_size", i32 4}

@@ -1520,4 +1520,4 @@ for.end:
   ret void
 }
 
-attributes #0 = { nounwind }
+attributes #0 = { noconvergent nounwind }

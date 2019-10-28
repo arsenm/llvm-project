@@ -50,7 +50,7 @@ int main() {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK1-NEXT:    store i32 0, ptr [[RETVAL]], align 4
-// CHECK1-NEXT:    call void @"?main@Test@@SAXXZ"()
+// CHECK1-NEXT:    call void @"?main@Test@@SAXXZ"() #[[ATTR4:[0-9]+]]
 // CHECK1-NEXT:    call void (ptr, i32, ptr, ...) @__kmpc_fork_call(ptr @[[GLOB1:[0-9]+]], i32 0, ptr @.omp_outlined.)
 // CHECK1-NEXT:    ret i32 0
 //
@@ -63,7 +63,7 @@ int main() {
 // CHECK1-NEXT:    [[T:%.*]] = alloca i32, align 4
 // CHECK1-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 8
 // CHECK1-NEXT:    store ptr [[DOTGLOBAL_TID_]], ptr [[DOTGLOBAL_TID__ADDR]], align 8
-// CHECK1-NEXT:    invoke void @"?foo@@YAXXZ"()
+// CHECK1-NEXT:    invoke void @"?foo@@YAXXZ"() #[[ATTR4]]
 // CHECK1-NEXT:    to label [[INVOKE_CONT:%.*]] unwind label [[CATCH_DISPATCH:%.*]]
 // CHECK1:       catch.dispatch:
 // CHECK1-NEXT:    [[TMP0:%.*]] = catchswitch within none [label %catch] unwind label [[TERMINATE:%.*]]
@@ -72,7 +72,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP2:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK1-NEXT:    [[TMP3:%.*]] = load i32, ptr [[TMP2]], align 4
 // CHECK1-NEXT:    call void @__kmpc_critical(ptr @[[GLOB1]], i32 [[TMP3]], ptr @.gomp_critical_user_.var) [ "funclet"(token [[TMP1]]) ]
-// CHECK1-NEXT:    invoke void @"?bar@@YAXXZ"() [ "funclet"(token [[TMP1]]) ]
+// CHECK1-NEXT:    invoke void @"?bar@@YAXXZ"() #[[ATTR4]] [ "funclet"(token [[TMP1]]) ]
 // CHECK1-NEXT:    to label [[INVOKE_CONT1:%.*]] unwind label [[TERMINATE2:%.*]]
 // CHECK1:       invoke.cont1:
 // CHECK1-NEXT:    call void @__kmpc_end_critical(ptr @[[GLOB1]], i32 [[TMP3]], ptr @.gomp_critical_user_.var) [ "funclet"(token [[TMP1]]) ]

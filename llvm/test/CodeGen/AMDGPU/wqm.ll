@@ -3292,7 +3292,7 @@ declare float @llvm.amdgcn.s.buffer.load.f32(<4 x i32>, i32, i32 immarg) #7
 attributes #1 = { nounwind }
 attributes #2 = { nounwind readonly }
 attributes #3 = { nounwind readnone }
-attributes #4 = { nounwind readnone convergent }
+attributes #4 = { nounwind readnone }
 attributes #5 = { "amdgpu-ps-wqm-outputs" }
 attributes #6 = { nounwind "InitialPSInputAddr"="2" }
 attributes #7 = { nounwind readnone willreturn }

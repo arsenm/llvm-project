@@ -4,7 +4,7 @@
 
 ; This negative test case checks that the optimization doesn't trigger
 ; when the code size cost is too high.
-define i32 @negative1(i32 %num) {
+define i32 @negative1(i32 %num) noconvergent {
 ; REMARK: NotProfitable
 ; REMARK-NEXT: negative1
 entry:
@@ -58,9 +58,10 @@ for.end:
   ret i32 %add22
 }
 
-declare void @func()
+declare void @convergent_func()
+declare void @noconvergent_func() noconvergent
 
-define i32 @negative2(i32 %num) {
+define i32 @negative2(i32 %num) noconvergent {
 ; REMARK: NonDuplicatableInst
 ; REMARK-NEXT: negative2
 entry:
@@ -84,7 +85,7 @@ case2:
 
 for.inc:
   %state.next = phi i32 [ %sel, %case2 ], [ 1, %for.body ], [ 2, %case1 ]
-  call void @func() noduplicate
+  call void @noconvergent_func() noduplicate
   %inc = add nsw i32 %count, 1
   %cmp.exit = icmp slt i32 %inc, %num
   br i1 %cmp.exit, label %for.body, label %for.end
@@ -117,7 +118,7 @@ case2:
 
 for.inc:
   %state.next = phi i32 [ %sel, %case2 ], [ 1, %for.body ], [ 2, %case1 ]
-  call void @func() convergent
+  call void @convergent_func()
   %inc = add nsw i32 %count, 1
   %cmp.exit = icmp slt i32 %inc, %num
   br i1 %cmp.exit, label %for.body, label %for.end
@@ -215,7 +216,7 @@ for.end:
   ret i32 0
 }
 
-declare i32 @arbitrary_function()
+declare i32 @arbitrary_function() noconvergent
 
 ; Don't confuse %state.2 for the initial switch value.
 define i32 @negative6(i32 %init) {

@@ -3,20 +3,20 @@
 ; RUN: opt -freeze-loop-unswitch-cond -passes='loop-mssa(simple-loop-unswitch<nontrivial>),verify<loops>' -S < %s | FileCheck %s
 ; RUN: opt -freeze-loop-unswitch-cond -passes='simple-loop-unswitch<nontrivial>' -verify-memoryssa -S < %s | FileCheck %s
 
-declare i32 @a()
-declare i32 @b()
-declare i32 @c()
-declare i32 @d()
+declare i32 @a() noconvergent
+declare i32 @b() noconvergent
+declare i32 @c() noconvergent
+declare i32 @d() noconvergent
 
-declare void @sink1(i32)
-declare void @sink2(i32)
-declare void @sink3(i1)
-declare void @sink4(i1)
+declare void @sink1(i32) noconvergent
+declare void @sink2(i32) noconvergent
+declare void @sink3(i1) noconvergent
+declare void @sink4(i1) noconvergent
 
-declare i1 @cond()
-declare i32 @cond.i32()
+declare i1 @cond() noconvergent
+declare i32 @cond.i32() noconvergent
 
-declare i32 @__CxxFrameHandler3(...)
+declare i32 @__CxxFrameHandler3(...) noconvergent
 
 define i32 @test1_freeze(ptr %ptr0, ptr %ptr1, ptr %ptr2) {
 ; CHECK-LABEL: @test1_freeze(
@@ -1326,9 +1326,9 @@ loop_exit:
 ; different cloning path from our other test cases and in turn verifying the
 ; resulting structure can catch any failures to correctly clone these nested
 ; loops.
-declare void @f()
-declare void @g()
-declare i32 @h(i32 %arg)
+declare void @f() noconvergent
+declare void @g() noconvergent
+declare i32 @h(i32 %arg) noconvergent
 
 ; Test that when we are unswitching and need to rebuild the loop block set we
 ; correctly skip past inner loops. We want to use the inner loop to efficiently

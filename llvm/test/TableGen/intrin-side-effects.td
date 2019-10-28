@@ -44,6 +44,7 @@ def int_random_gen   : Intrinsic<[llvm_i32_ty], [], [IntrNoMem, IntrHasSideEffec
 // CHECK: case 0:
 // CHECK-NEXT: return AttributeSet::get(C, {
 // CHECK-NEXT: Attribute::get(C, Attribute::NoUnwind),
+// CHECK-NEXT: Attribute::get(C, Attribute::NoConvergent),
 // CHECK-NEXT: });
 
 // CHECK: 1, // llvm.random.gen

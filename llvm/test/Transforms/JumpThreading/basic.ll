@@ -1,8 +1,8 @@
 ; RUN: opt -passes=jump-threading -S < %s | FileCheck %s
 
-declare i32 @f1()
-declare i32 @f2()
-declare void @f3()
+declare i32 @f1() noconvergent
+declare i32 @f2() noconvergent
+declare void @f3() noconvergent
 
 define i32 @test1(i1 %cond) {
 ; CHECK-LABEL: @test1(
@@ -292,9 +292,9 @@ F2:
 
 
 ; CHECK: @test10
-declare i32 @test10f1()
-declare i32 @test10f2()
-declare void @test10f3()
+declare i32 @test10f1() noconvergent
+declare i32 @test10f2() noconvergent
+declare void @test10f3() noconvergent
 
 ;; Non-local condition threading.
 define i32 @test10g(i1 %cond) {
@@ -589,9 +589,9 @@ l2:
   br label %l3
 
 l3:
-; CHECK: call void @g() [[$CON:#[0-9]+]]
-; CHECK-NOT: call void @g() [[$CON]]
-  call void @g() convergent
+; CHECK: call void @g(){{$}}
+; CHECK-NOT: call void @g()
+  call void @g()
   %y = icmp ult i32 %p, 5
   br i1 %y, label %l4, label %l5
 
@@ -607,4 +607,3 @@ l5:
 
 
 ; CHECK: attributes [[$NOD]] = { noduplicate }
-; CHECK: attributes [[$CON]] = { convergent }

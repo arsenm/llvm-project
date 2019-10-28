@@ -1,8 +1,8 @@
 ; RUN: opt < %s -passes=jump-threading,mem2reg,instcombine,simplifycfg -simplifycfg-require-and-preserve-domtree=1 -S | FileCheck %s
 
-declare i32 @f1()
-declare i32 @f2()
-declare void @f3()
+declare i32 @f1() noconvergent
+declare i32 @f2() noconvergent
+declare void @f3() noconvergent
 
 define i32 @test(i1 %cond, i1 %cond2) {
 ; CHECK: test

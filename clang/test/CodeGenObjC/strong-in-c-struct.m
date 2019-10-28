@@ -978,7 +978,7 @@ id test_assignment1(void) {
 // CHECK: br
 
 // CHECK: %[[V9:.*]] = bitcast %[[STRUCT_STRONGSMALL]]* %[[AGG_TMP]] to i8**
-// CHECK: call void @__destructor_8_s8(i8** %[[V9]]) #4
+// CHECK: call void @__destructor_8_s8(i8** %[[V9]])
 // CHECK: br
 
 void test_null_reveiver(C *c) {

@@ -5,7 +5,7 @@
 ; loops doesn't also prevent us from threading simple constructs where this
 ; isn't a problem.
 
-declare void @opaque_body()
+declare void @opaque_body() noconvergent
 
 define void @jump_threading_loopheader() {
 ; CHECK-LABEL: @jump_threading_loopheader(

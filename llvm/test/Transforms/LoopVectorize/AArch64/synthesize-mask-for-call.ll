@@ -197,7 +197,7 @@ define void @test_v4_v4m(ptr noalias %a, ptr readonly %b) #3 {
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[GEP:%.*]] = getelementptr i64, ptr [[B]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    [[LOAD:%.*]] = load i64, ptr [[GEP]], align 4
-; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR1:[0-9]+]]
+; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR2:[0-9]+]]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    store i64 [[CALL]], ptr [[ARRAYIDX]], align 4
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
@@ -254,7 +254,7 @@ define void @test_v2_v4m(ptr noalias %a, ptr readonly %b) #3 {
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[GEP:%.*]] = getelementptr i64, ptr [[B]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    [[LOAD:%.*]] = load i64, ptr [[GEP]], align 4
-; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR2:[0-9]+]]
+; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR3:[0-9]+]]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    store i64 [[CALL]], ptr [[ARRAYIDX]], align 4
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
@@ -311,7 +311,7 @@ define void @test_v2_v4(ptr noalias %a, ptr readonly %b) #3 {
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[GEP:%.*]] = getelementptr i64, ptr [[B]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    [[LOAD:%.*]] = load i64, ptr [[GEP]], align 4
-; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR3:[0-9]+]]
+; CHECK-NEXT:    [[CALL:%.*]] = call i64 @foo(i64 [[LOAD]]) #[[ATTR4:[0-9]+]]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    store i64 [[CALL]], ptr [[ARRAYIDX]], align 4
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
@@ -339,12 +339,12 @@ for.cond.cleanup:
 
 }
 
-declare i64 @foo(i64)
+declare i64 @foo(i64) noconvergent
 
 ;; fixed vector variants of foo
-declare <2 x i64> @foo_vector_fixed2_nomask(<2 x i64>)
-declare <4 x i64> @foo_vector_fixed4_nomask(<4 x i64>)
-declare <4 x i64> @foo_vector_fixed4_mask(<4 x i64>, <4 x i1>)
+declare <2 x i64> @foo_vector_fixed2_nomask(<2 x i64>) noconvergent
+declare <4 x i64> @foo_vector_fixed4_nomask(<4 x i64>) noconvergent
+declare <4 x i64> @foo_vector_fixed4_mask(<4 x i64>, <4 x i1>) noconvergent
 
 attributes #0 = { nounwind "vector-function-abi-variant"="_ZGV_LLVM_N4v_foo(foo_vector_fixed4_nomask),_ZGV_LLVM_M4v_foo(foo_vector_fixed4_mask)" }
 attributes #1 = { nounwind "vector-function-abi-variant"="_ZGV_LLVM_N2v_foo(foo_vector_fixed2_nomask),_ZGV_LLVM_M4v_foo(foo_vector_fixed4_mask)" }

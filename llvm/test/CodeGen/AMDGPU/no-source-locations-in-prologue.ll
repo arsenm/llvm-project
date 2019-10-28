@@ -3,7 +3,7 @@
 
 ; Test that source locations (.loc directives) are not added to the code within the prologue.
 
-; Function Attrs: convergent mustprogress nounwind
+; Function Attrs: mustprogress nounwind
 define hidden void @_ZL3barv() #0 !dbg !1644 {
 ; CHECK-LABEL: _ZL3barv:
 ; CHECK:       .Lfunc_begin0:
@@ -55,7 +55,7 @@ entry:
   ret void, !dbg !1647
 }
 
-; Function Attrs: convergent nounwind
+; Function Attrs: nounwind
 declare void @_ZL13sleep_foreverv() #0
 
 attributes #0 = { nounwind "frame-pointer"="all" }

@@ -5,12 +5,12 @@
 
 // CHECK: call noalias noundef nonnull ptr @_Znwm(i64 noundef 4)
 
-// CHECK: ; Function Attrs: nobuiltin nounwind allocsize(0)
+// CHECK: ; Function Attrs: nobuiltin noconvergent nounwind allocsize(0)
 // CHECK-NEXT: declare noundef nonnull ptr @_Znwm(i64 noundef)
 
 // NO-NEW-INFALLIBLE: call noalias noundef nonnull ptr @_Znwm(i64 noundef 4)
 
-// NO-NEW-INFALLIBLE: ; Function Attrs: nobuiltin allocsize(0)
+// NO-NEW-INFALLIBLE: ; Function Attrs: nobuiltin noconvergent allocsize(0)
 // NO-NEW-INFALLIBLE-NEXT: declare noundef nonnull ptr @_Znwm(i64 noundef)
 
 int *new_infallible = new int;

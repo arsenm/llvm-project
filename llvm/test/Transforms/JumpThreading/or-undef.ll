@@ -56,14 +56,14 @@ bb9:                                              ; preds = %bb8, %bb7
   ret void
 }
 
-declare noalias ptr @buildargv(ptr)
+declare noalias ptr @buildargv(ptr) noconvergent
 
-declare void @f2(ptr)
+declare void @f2(ptr) noconvergent
 
-declare void @f4(ptr)
+declare void @f4(ptr) noconvergent
 
-declare ptr @f3(ptr, ptr)
+declare ptr @f3(ptr, ptr) noconvergent
 
-declare void @f1()
+declare void @f1() noconvergent
 
-declare i64 @f5(ptr)
+declare i64 @f5(ptr) noconvergent

@@ -14,8 +14,8 @@
 ; We also verify that the real O2 pipeline catches these cases.
 ; RUN: opt -aa-pipeline=basic-aa -passes='default<O2>' -S < %s | FileCheck %s --check-prefix=CHECK --check-prefix=AFTER --check-prefix=AFTER2
 
-declare void @readnone() readnone
-; CHECK: Function Attrs: nofree nosync memory(none)
+declare void @readnone() noconvergent readnone
+; CHECK: Function Attrs: noconvergent nofree nosync memory(none)
 ; CHECK-NEXT: declare void @readnone()
 
 declare void @unknown()
@@ -28,7 +28,7 @@ declare void @unknown()
 
 define void @test1() {
 ; BEFORE-NOT: Function Attrs
-; AFTER: Function Attrs: nofree nosync memory(none)
+; AFTER: Function Attrs: noconvergent nofree nosync memory(none)
 ; CHECK-LABEL: define void @test1()
 entry:
   %fptr = alloca ptr
@@ -50,14 +50,14 @@ entry:
 ; to make that possible. This forces us to first deduce readonly, then
 ; devirtualize again, and then deduce readnone.
 
-declare void @readnone_with_arg(ptr) readnone
-; CHECK: Function Attrs: nofree nosync memory(none)
+declare void @readnone_with_arg(ptr) noconvergent readnone
+; CHECK: Function Attrs: noconvergent nofree nosync memory(none)
 ; CHECK-LABEL: declare void @readnone_with_arg(ptr)
 
 define void @test2_a(ptr %ignore) {
 ; BEFORE-NOT: Function Attrs
 ; AFTER1: Function Attrs: nofree memory(read)
-; AFTER2: Function Attrs: nofree nosync memory(none)
+; AFTER2: Function Attrs: noconvergent nofree nosync memory(none)
 ; BEFORE: define void @test2_a(ptr %ignore)
 ; AFTER: define void @test2_a(ptr readnone %ignore)
 entry:
@@ -78,7 +78,7 @@ entry:
 define void @test2_b() {
 ; BEFORE-NOT: Function Attrs
 ; AFTER1: Function Attrs: nofree memory(read)
-; AFTER2: Function Attrs: nofree nosync memory(none)
+; AFTER2: Function Attrs: noconvergent nofree nosync memory(none)
 ; CHECK-LABEL: define void @test2_b()
 entry:
   %f2ptr = alloca ptr
@@ -98,7 +98,7 @@ entry:
   ret void
 }
 
-declare ptr @memcpy(ptr, ptr, i64)
+declare ptr @memcpy(ptr, ptr, i64) noconvergent
 ; CHECK-LABEL: ptr @memcpy(
 
 ; The @test3 function checks that when we refine an indirect call to an

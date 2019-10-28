@@ -91,11 +91,11 @@ declare void @use(ptr readonly)
 declare void @useBool(i1)
 
 declare void @clobber(ptr)
-; CHECK: Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(inaccessiblemem: readwrite){{$}}
+; CHECK: Function Attrs: nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(inaccessiblemem: readwrite){{$}}
 ; CHECK-NEXT: declare ptr @llvm.launder.invariant.group.p0(ptr)
 declare ptr @llvm.launder.invariant.group.p0(ptr)
 
-; CHECK: Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none){{$}}
+; CHECK: Function Attrs: nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none){{$}}
 ; CHECK-NEXT: declare ptr @llvm.strip.invariant.group.p0(ptr)
 declare ptr @llvm.strip.invariant.group.p0(ptr)
 

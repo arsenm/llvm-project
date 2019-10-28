@@ -10,7 +10,7 @@ typedef struct {
 // CHECK: %[[A:.*]] = alloca %[[STRUCT_S]], align 4
 // CHECK: %[[X:.*]] = getelementptr inbounds %[[STRUCT_S]], ptr %[[A]], i32 0, i32 0
 // CHECK: store ptr %[[A_0]], ptr %[[X]], align 4
-// CHECK: call void @__destructor_4_s0(ptr %[[A]]) #2
+// CHECK: call void @__destructor_4_s0(ptr %[[A]])
 
 void test0(S a) {
 }

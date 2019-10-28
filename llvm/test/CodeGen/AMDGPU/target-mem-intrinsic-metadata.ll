@@ -14,7 +14,7 @@ define amdgpu_kernel void @ds_append_noalias() {
 
 declare i32 @llvm.amdgcn.ds.append.p3(ptr addrspace(3) nocapture, i1 immarg) #0
 
-attributes #0 = { argmemonly convergent nounwind willreturn }
+attributes #0 = { argmemonly nounwind willreturn }
 
 !0 = !{!1}
 !1 = distinct !{!1, !2}

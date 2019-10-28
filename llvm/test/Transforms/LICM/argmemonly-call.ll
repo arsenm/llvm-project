@@ -1,8 +1,8 @@
 ; RUN: opt -aa-pipeline=basic-aa -passes='require<aa>,require<targetir>,require<scalar-evolution>,require<opt-remark-emit>,loop-mssa(licm)' < %s -S | FileCheck %s
 
-declare i32 @foo() readonly argmemonly nounwind
-declare i32 @foo2() readonly nounwind
-declare i32 @bar(ptr %loc2) readonly argmemonly nounwind
+declare i32 @foo() noconvergent readonly argmemonly nounwind
+declare i32 @foo2() noconvergent readonly nounwind
+declare i32 @bar(ptr %loc2) noconvergent readonly argmemonly nounwind
 
 define void @test(ptr %loc) {
 ; CHECK-LABEL: @test

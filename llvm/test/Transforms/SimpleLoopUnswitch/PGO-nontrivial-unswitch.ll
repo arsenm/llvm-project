@@ -4,8 +4,8 @@
 ; This test checks for a crash.
 ; RUN: opt < %s -passes=simple-loop-unswitch -aa-pipeline= -disable-output
 
-declare i32 @a()
-declare i32 @b()
+declare i32 @a() noconvergent
+declare i32 @b() noconvergent
 ; Check loops in cold functions will not be applied non-trivial loop unswitch
 define void @f1(i32 %i, i1 %cond, i1 %hot_cond, i1 %cold_cond, ptr %ptr) !prof !0 {
 ; CHECK-LABEL: @f1(

@@ -40,5 +40,5 @@ namespace test0 {
 // CHECK:      call void @_ZN5test01AD1Ev(ptr @_ZN5test01aE)
 // CHECK-NEXT: ret void
 
-// CHECK: attributes #[[ATTR0]] = { alwaysinline nounwind {{.*}} }
-// CHECK: attributes #[[ATTR1]] = { noinline nounwind {{.*}} }
+// CHECK: attributes #[[ATTR0]] = { alwaysinline noconvergent nounwind {{.*}} }
+// CHECK: attributes #[[ATTR1]] = { noconvergent noinline nounwind {{.*}} }

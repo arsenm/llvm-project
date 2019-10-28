@@ -3,9 +3,9 @@
 ; RUN: opt -passes='loop-mssa(simple-loop-unswitch<nontrivial>),verify<loops>' -S < %s | FileCheck %s
 ; RUN: opt -passes='simple-loop-unswitch<nontrivial>' -verify-memoryssa -S < %s | FileCheck %s
 
-declare ptr @pluto()
-declare void @llvm.experimental.guard(i1, ...)
-declare void @widget()
+declare ptr @pluto() noconvergent
+declare void @llvm.experimental.guard(i1, ...) noconvergent
+declare void @widget() noconvergent
 
 ; REQUIRES: asserts
 

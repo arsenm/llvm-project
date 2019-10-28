@@ -66,5 +66,5 @@ for.end:                                          ; preds = %for.body
 }
 
 attributes #0 = { nounwind readnone }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }
 attributes #2 = { nounwind }

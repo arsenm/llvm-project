@@ -317,6 +317,6 @@ declare i32 @llvm.amdgcn.workitem.id.x() #2
 declare void @llvm.amdgcn.struct.tbuffer.store.v4i32(<4 x i32>, <4 x i32>, i32, i32, i32, i32 immarg, i32 immarg) #3
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind willreturn }
+attributes #1 = { nounwind willreturn }
 attributes #2 = { nounwind readnone speculatable willreturn }
 attributes #3 = { nounwind willreturn writeonly }

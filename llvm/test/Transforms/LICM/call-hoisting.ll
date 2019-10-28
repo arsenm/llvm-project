@@ -1,7 +1,7 @@
 ; RUN: opt -S -passes=licm %s | FileCheck %s
 ; RUN: opt -aa-pipeline=basic-aa -passes='require<aa>,require<targetir>,require<scalar-evolution>,require<opt-remark-emit>,loop-mssa(licm)' < %s -S | FileCheck %s
 
-declare i32 @load(ptr %p) argmemonly readonly nounwind
+declare i32 @load(ptr %p) argmemonly noconvergent readonly nounwind
 
 define void @test_load(ptr noalias %loc, ptr noalias %sink) {
 ; CHECK-LABEL: @test_load
@@ -23,7 +23,7 @@ exit:
   ret void
 }
 
-declare i32 @spec(ptr %p, ptr %q) readonly argmemonly nounwind speculatable
+declare i32 @spec(ptr %p, ptr %q) readonly argmemonly noconvergent nounwind speculatable
 
 ; We should strip the dereferenceable callsite attribute on spec call's argument since it is
 ; can cause UB in the speculatable call when hoisted to preheader.

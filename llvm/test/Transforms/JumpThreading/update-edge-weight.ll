@@ -33,10 +33,10 @@ if.end:
   ret void
 }
 
-declare void @a()
-declare void @b()
-declare void @c()
-declare void @d()
+declare void @a() noconvergent
+declare void @b() noconvergent
+declare void @c() noconvergent
+declare void @d() noconvergent
 
 !0 = !{!"function_entry_count", i64 1}
 !1 = !{!"branch_weights", i32 10, i32 5}

@@ -30,7 +30,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 ; CHECK: @[[A:[a-zA-Z0-9_$"\\.-]+]] = common global i32 0, align 4
 ;.
 define i32* @foo(%struct.ST* %s) nounwind uwtable readnone optsize ssp {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind optsize ssp willreturn memory(none) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind optsize ssp willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@foo
 ; CHECK-SAME: (%struct.ST* nofree readnone "no-capture-maybe-returned" [[S:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -50,7 +50,7 @@ entry:
 ; }
 
 define i32 @load_monotonic(i32* nocapture readonly %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@load_monotonic
 ; CHECK-SAME: (i32* nocapture nofree noundef nonnull readonly align 4 dereferenceable(4) [[TMP0:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP2:%.*]] = load atomic i32, i32* [[TMP0]] monotonic, align 4
@@ -68,7 +68,7 @@ define i32 @load_monotonic(i32* nocapture readonly %0) norecurse nounwind uwtabl
 ; }
 
 define void @store_monotonic(i32* nocapture %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@store_monotonic
 ; CHECK-SAME: (i32* nocapture nofree noundef nonnull writeonly align 4 dereferenceable(4) [[TMP0:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:    store atomic i32 10, i32* [[TMP0]] monotonic, align 4
@@ -86,7 +86,7 @@ define void @store_monotonic(i32* nocapture %0) norecurse nounwind uwtable {
 ; }
 
 define i32 @load_acquire(i32* nocapture readonly %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@load_acquire
 ; CHECK-SAME: (i32* nocapture nofree noundef nonnull readonly align 4 dereferenceable(4) [[TMP0:%.*]]) #[[ATTR2:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP2:%.*]] = load atomic i32, i32* [[TMP0]] acquire, align 4
@@ -103,7 +103,7 @@ define i32 @load_acquire(i32* nocapture readonly %0) norecurse nounwind uwtable 
 ; }
 
 define void @load_release(i32* nocapture %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@load_release
 ; CHECK-SAME: (i32* nocapture nofree noundef writeonly align 4 [[TMP0:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:    store atomic volatile i32 10, i32* [[TMP0]] release, align 4
@@ -116,7 +116,7 @@ define void @load_release(i32* nocapture %0) norecurse nounwind uwtable {
 ; TEST 6 - negative volatile, relaxed atomic
 
 define void @load_volatile_release(i32* nocapture %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@load_volatile_release
 ; CHECK-SAME: (i32* nocapture nofree noundef writeonly align 4 [[TMP0:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:    store atomic volatile i32 10, i32* [[TMP0]] release, align 4
@@ -133,7 +133,7 @@ define void @load_volatile_release(i32* nocapture %0) norecurse nounwind uwtable
 ; }
 
 define void @volatile_store(i32* %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@volatile_store
 ; CHECK-SAME: (i32* nofree noundef align 4 [[TMP0:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:    store volatile i32 14, i32* [[TMP0]], align 4
@@ -151,7 +151,7 @@ define void @volatile_store(i32* %0) norecurse nounwind uwtable {
 ; }
 
 define i32 @volatile_load(i32* %0) norecurse nounwind uwtable {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@volatile_load
 ; CHECK-SAME: (i32* nofree noundef align 4 [[TMP0:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:    [[TMP2:%.*]] = load volatile i32, i32* [[TMP0]], align 4
@@ -163,15 +163,15 @@ define i32 @volatile_load(i32* %0) norecurse nounwind uwtable {
 
 ; TEST 9
 
-; CHECK: Function Attrs: noinline nosync nounwind uwtable
+; CHECK: Function Attrs: noconvergent noinline nosync nounwind uwtable
 ; CHECK-NEXT: declare void @nosync_function()
-declare void @nosync_function() noinline nounwind uwtable nosync
+declare void @nosync_function() noconvergent noinline nounwind uwtable nosync
 
 define void @call_nosync_function() nounwind uwtable noinline {
-; CHECK: Function Attrs: noinline nosync nounwind uwtable
+; CHECK: Function Attrs: noconvergent noinline nosync nounwind uwtable
 ; CHECK-LABEL: define {{[^@]+}}@call_nosync_function
 ; CHECK-SAME: () #[[ATTR3:[0-9]+]] {
-; CHECK-NEXT:    tail call void @nosync_function() #[[ATTR4:[0-9]+]]
+; CHECK-NEXT:    tail call void @nosync_function() #[[ATTR19:[0-9]+]]
 ; CHECK-NEXT:    ret void
 ;
   tail call void @nosync_function() noinline nounwind uwtable
@@ -180,15 +180,15 @@ define void @call_nosync_function() nounwind uwtable noinline {
 
 ; TEST 10 - negative, should not deduce nosync
 
-; CHECK: Function Attrs: noinline nounwind uwtable
+; CHECK: Function Attrs: noconvergent noinline nounwind uwtable
 ; CHECK-NEXT: declare void @might_sync()
-declare void @might_sync() noinline nounwind uwtable
+declare void @might_sync() noconvergent noinline nounwind uwtable
 
 define void @call_might_sync() nounwind uwtable noinline {
-; CHECK: Function Attrs: noinline nounwind uwtable
+; CHECK: Function Attrs: noconvergent noinline nounwind uwtable
 ; CHECK-LABEL: define {{[^@]+}}@call_might_sync
-; CHECK-SAME: () #[[ATTR4]] {
-; CHECK-NEXT:    tail call void @might_sync() #[[ATTR4]]
+; CHECK-SAME: () #[[ATTR4:[0-9]+]] {
+; CHECK-NEXT:    tail call void @might_sync() #[[ATTR19]]
 ; CHECK-NEXT:    ret void
 ;
   tail call void @might_sync() noinline nounwind uwtable
@@ -199,18 +199,18 @@ define void @call_might_sync() nounwind uwtable noinline {
 ; volatile operation in same scc but dead. Call volatile_load defined in TEST 8.
 
 define i32 @scc1(i32* %0) noinline nounwind uwtable {
-; TUNIT: Function Attrs: nofree noinline nounwind memory(argmem: readwrite) uwtable
+; TUNIT: Function Attrs: noconvergent nofree noinline nounwind memory(argmem: readwrite) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@scc1
 ; TUNIT-SAME: (i32* nofree [[TMP0:%.*]]) #[[ATTR5:[0-9]+]] {
-; TUNIT-NEXT:    tail call void @scc2(i32* nofree [[TMP0]]) #[[ATTR19:[0-9]+]]
-; TUNIT-NEXT:    [[VAL:%.*]] = tail call i32 @volatile_load(i32* nofree align 4 [[TMP0]]) #[[ATTR19]]
+; TUNIT-NEXT:    tail call void @scc2(i32* nofree [[TMP0]]) #[[ATTR20:[0-9]+]]
+; TUNIT-NEXT:    [[VAL:%.*]] = tail call i32 @volatile_load(i32* nofree align 4 [[TMP0]]) #[[ATTR20]]
 ; TUNIT-NEXT:    ret i32 [[VAL]]
 ;
-; CGSCC: Function Attrs: nofree noinline nounwind memory(argmem: readwrite) uwtable
+; CGSCC: Function Attrs: noconvergent nofree noinline nounwind memory(argmem: readwrite) uwtable
 ; CGSCC-LABEL: define {{[^@]+}}@scc1
 ; CGSCC-SAME: (i32* nofree [[TMP0:%.*]]) #[[ATTR5:[0-9]+]] {
-; CGSCC-NEXT:    tail call void @scc2(i32* nofree [[TMP0]]) #[[ATTR19:[0-9]+]]
-; CGSCC-NEXT:    [[VAL:%.*]] = tail call i32 @volatile_load(i32* nofree noundef align 4 [[TMP0]]) #[[ATTR14:[0-9]+]]
+; CGSCC-NEXT:    tail call void @scc2(i32* nofree [[TMP0]]) #[[ATTR20:[0-9]+]]
+; CGSCC-NEXT:    [[VAL:%.*]] = tail call i32 @volatile_load(i32* nofree noundef align 4 [[TMP0]]) #[[ATTR21:[0-9]+]]
 ; CGSCC-NEXT:    ret i32 [[VAL]]
 ;
   tail call void @scc2(i32* %0);
@@ -219,10 +219,10 @@ define i32 @scc1(i32* %0) noinline nounwind uwtable {
 }
 
 define void @scc2(i32* %0) noinline nounwind uwtable {
-; CHECK: Function Attrs: nofree noinline nounwind memory(argmem: readwrite) uwtable
+; CHECK: Function Attrs: noconvergent nofree noinline nounwind memory(argmem: readwrite) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@scc2
 ; CHECK-SAME: (i32* nofree [[TMP0:%.*]]) #[[ATTR5:[0-9]+]] {
-; CHECK-NEXT:    [[TMP2:%.*]] = tail call i32 @scc1(i32* nofree [[TMP0]]) #[[ATTR19:[0-9]+]]
+; CHECK-NEXT:    [[TMP2:%.*]] = tail call i32 @scc1(i32* nofree [[TMP0]]) #[[ATTR20:[0-9]+]]
 ; CHECK-NEXT:    ret void
 ;
   tail call i32 @scc1(i32* %0);
@@ -249,7 +249,7 @@ define void @scc2(i32* %0) noinline nounwind uwtable {
 %"struct.std::__atomic_base" = type { i8 }
 
 define void @foo1(i32* %0, %"struct.std::atomic"* %1) {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind willreturn
 ; CHECK-LABEL: define {{[^@]+}}@foo1
 ; CHECK-SAME: (i32* nocapture nofree noundef nonnull writeonly align 4 dereferenceable(4) [[TMP0:%.*]], %"struct.std::atomic"* nocapture nofree nonnull writeonly dereferenceable(1) [[TMP1:%.*]]) #[[ATTR6:[0-9]+]] {
 ; CHECK-NEXT:    store i32 100, i32* [[TMP0]], align 4
@@ -266,7 +266,7 @@ define void @foo1(i32* %0, %"struct.std::atomic"* %1) {
 }
 
 define void @bar(i32* %0, %"struct.std::atomic"* %1) {
-; CHECK: Function Attrs: nofree norecurse nounwind
+; CHECK: Function Attrs: noconvergent nofree norecurse nounwind
 ; CHECK-LABEL: define {{[^@]+}}@bar
 ; CHECK-SAME: (i32* nocapture nofree readnone [[TMP0:%.*]], %"struct.std::atomic"* nocapture nofree nonnull readonly dereferenceable(1) [[TMP1:%.*]]) #[[ATTR7:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP3:%.*]] = getelementptr inbounds %"struct.std::atomic", %"struct.std::atomic"* [[TMP1]], i64 0, i32 0, i32 0
@@ -296,7 +296,7 @@ define void @bar(i32* %0, %"struct.std::atomic"* %1) {
 
 ; TEST 13 - Fence syncscope("singlethread") seq_cst
 define void @foo1_singlethread(i32* %0, %"struct.std::atomic"* %1) {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn
 ; CHECK-LABEL: define {{[^@]+}}@foo1_singlethread
 ; CHECK-SAME: (i32* nocapture nofree noundef nonnull writeonly align 4 dereferenceable(4) [[TMP0:%.*]], %"struct.std::atomic"* nocapture nofree nonnull writeonly dereferenceable(1) [[TMP1:%.*]]) #[[ATTR8:[0-9]+]] {
 ; CHECK-NEXT:    store i32 100, i32* [[TMP0]], align 4
@@ -313,7 +313,7 @@ define void @foo1_singlethread(i32* %0, %"struct.std::atomic"* %1) {
 }
 
 define void @bar_singlethread(i32* %0, %"struct.std::atomic"* %1) {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind
 ; CHECK-LABEL: define {{[^@]+}}@bar_singlethread
 ; CHECK-SAME: (i32* nocapture nofree readnone [[TMP0:%.*]], %"struct.std::atomic"* nocapture nofree nonnull readonly dereferenceable(1) [[TMP1:%.*]]) #[[ATTR9:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP3:%.*]] = getelementptr inbounds %"struct.std::atomic", %"struct.std::atomic"* [[TMP1]], i64 0, i32 0, i32 0
@@ -349,11 +349,17 @@ declare void @llvm.memset(i8* %dest, i8 %val, i32 %len, i1 %isvolatile)
 ; It is odd to add nocapture but a result of the llvm.memcpy nocapture.
 ;
 define i32 @memcpy_volatile(i8* %ptr1, i8* %ptr2) {
-; CHECK: Function Attrs: nofree norecurse nounwind willreturn memory(argmem: readwrite)
-; CHECK-LABEL: define {{[^@]+}}@memcpy_volatile
-; CHECK-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8* nocapture nofree readonly [[PTR2:%.*]]) #[[ATTR10:[0-9]+]] {
-; CHECK-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i32(i8* noalias nocapture nofree writeonly [[PTR1]], i8* noalias nocapture nofree readonly [[PTR2]], i32 noundef 8, i1 noundef true) #[[ATTR20:[0-9]+]]
-; CHECK-NEXT:    ret i32 4
+; TUNIT: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite)
+; TUNIT-LABEL: define {{[^@]+}}@memcpy_volatile
+; TUNIT-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8* nocapture nofree readonly [[PTR2:%.*]]) #[[ATTR10:[0-9]+]] {
+; TUNIT-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i32(i8* noalias nocapture nofree writeonly [[PTR1]], i8* noalias nocapture nofree readonly [[PTR2]], i32 noundef 8, i1 noundef true) #[[ATTR21:[0-9]+]]
+; TUNIT-NEXT:    ret i32 4
+;
+; CGSCC: Function Attrs: noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite)
+; CGSCC-LABEL: define {{[^@]+}}@memcpy_volatile
+; CGSCC-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8* nocapture nofree readonly [[PTR2:%.*]]) #[[ATTR10:[0-9]+]] {
+; CGSCC-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i32(i8* noalias nocapture nofree writeonly [[PTR1]], i8* noalias nocapture nofree readonly [[PTR2]], i32 noundef 8, i1 noundef true) #[[ATTR22:[0-9]+]]
+; CGSCC-NEXT:    ret i32 4
 ;
   call void @llvm.memcpy(i8* %ptr1, i8* %ptr2, i32 8, i1 1)
   ret i32 4
@@ -364,11 +370,17 @@ define i32 @memcpy_volatile(i8* %ptr1, i8* %ptr2) {
 ; It is odd to add nocapture but a result of the llvm.memset nocapture.
 ;
 define i32 @memset_non_volatile(i8* %ptr1, i8 %val) {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(argmem: write)
-; CHECK-LABEL: define {{[^@]+}}@memset_non_volatile
-; CHECK-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8 [[VAL:%.*]]) #[[ATTR11:[0-9]+]] {
-; CHECK-NEXT:    call void @llvm.memset.p0i8.i32(i8* nocapture nofree writeonly [[PTR1]], i8 [[VAL]], i32 noundef 8, i1 noundef false) #[[ATTR20]]
-; CHECK-NEXT:    ret i32 4
+; TUNIT: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write)
+; TUNIT-LABEL: define {{[^@]+}}@memset_non_volatile
+; TUNIT-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8 [[VAL:%.*]]) #[[ATTR11:[0-9]+]] {
+; TUNIT-NEXT:    call void @llvm.memset.p0i8.i32(i8* nocapture nofree writeonly [[PTR1]], i8 [[VAL]], i32 noundef 8, i1 noundef false) #[[ATTR21]]
+; TUNIT-NEXT:    ret i32 4
+;
+; CGSCC: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write)
+; CGSCC-LABEL: define {{[^@]+}}@memset_non_volatile
+; CGSCC-SAME: (i8* nocapture nofree writeonly [[PTR1:%.*]], i8 [[VAL:%.*]]) #[[ATTR11:[0-9]+]] {
+; CGSCC-NEXT:    call void @llvm.memset.p0i8.i32(i8* nocapture nofree writeonly [[PTR1]], i8 [[VAL]], i32 noundef 8, i1 noundef false) #[[ATTR22]]
+; CGSCC-NEXT:    ret i32 4
 ;
   call void @llvm.memset(i8* %ptr1, i8 %val, i32 8, i1 0)
   ret i32 4
@@ -377,16 +389,17 @@ define i32 @memset_non_volatile(i8* %ptr1, i8 %val) {
 ; TEST 16 - negative, inline assembly.
 
 define i32 @inline_asm_test(i32 %x) {
+; CHECK: Function Attrs: noconvergent
 ; CHECK-LABEL: define {{[^@]+}}@inline_asm_test
-; CHECK-SAME: (i32 [[X:%.*]]) {
-; CHECK-NEXT:    [[TMP1:%.*]] = call i32 asm sideeffect "bswap $0", "=r,r"(i32 [[X]])
+; CHECK-SAME: (i32 [[X:%.*]]) #[[ATTR12:[0-9]+]] {
+; CHECK-NEXT:    [[TMP1:%.*]] = call i32 asm sideeffect "bswap $0", "=r,r"(i32 [[X]]) #[[ATTR12]]
 ; CHECK-NEXT:    ret i32 4
 ;
-  call i32 asm sideeffect "bswap $0", "=r,r"(i32 %x)
+  call i32 asm sideeffect "bswap $0", "=r,r"(i32 %x) noconvergent
   ret i32 4
 }
 
-declare void @readnone_test() convergent readnone
+declare void @readnone_test() readnone
 
 ; TEST 17 - negative. Convergent
 define void @convergent_readnone(){
@@ -400,7 +413,7 @@ define void @convergent_readnone(){
   ret void
 }
 
-; CHECK: Function Attrs: nounwind
+; CHECK: Function Attrs: noconvergent nounwind
 ; CHECK-NEXT: declare void @llvm.x86.sse2.clflush(i8*)
 declare void @llvm.x86.sse2.clflush(i8*)
 @a = common global i32 0, align 4
@@ -408,7 +421,7 @@ declare void @llvm.x86.sse2.clflush(i8*)
 ; TEST 18 - negative. Synchronizing intrinsic
 
 define void @i_totally_sync() {
-; CHECK: Function Attrs: nounwind
+; CHECK: Function Attrs: noconvergent nounwind
 ; CHECK-LABEL: define {{[^@]+}}@i_totally_sync
 ; CHECK-SAME: () #[[ATTR14:[0-9]+]] {
 ; CHECK-NEXT:    tail call void @llvm.x86.sse2.clflush(i8* noundef nonnull align 4 dereferenceable(4) bitcast (i32* @a to i8*))
@@ -418,12 +431,12 @@ define void @i_totally_sync() {
   ret void
 }
 
-declare float @llvm.cos(float %val) readnone
+declare float @llvm.cos(float %val) noconvergent readnone
 
 ; TEST 19 - positive, readnone & non-convergent intrinsic.
 
 define i32 @cos_test(float %x) {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@cos_test
 ; CHECK-SAME: (float [[X:%.*]]) #[[ATTR15:[0-9]+]] {
 ; CHECK-NEXT:    ret i32 4
@@ -433,35 +446,66 @@ define i32 @cos_test(float %x) {
 }
 
 define float @cos_test2(float %x) {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(none)
-; CHECK-LABEL: define {{[^@]+}}@cos_test2
-; CHECK-SAME: (float [[X:%.*]]) #[[ATTR15]] {
-; CHECK-NEXT:    [[C:%.*]] = call float @llvm.cos.f32(float [[X]]) #[[ATTR20]]
-; CHECK-NEXT:    ret float [[C]]
+; TUNIT: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(none)
+; TUNIT-LABEL: define {{[^@]+}}@cos_test2
+; TUNIT-SAME: (float [[X:%.*]]) #[[ATTR15]] {
+; TUNIT-NEXT:    [[C:%.*]] = call float @llvm.cos.f32(float [[X]]) #[[ATTR21]]
+; TUNIT-NEXT:    ret float [[C]]
+;
+; CGSCC: Function Attrs: noconvergent nofree norecurse nosync nounwind willreturn memory(none)
+; CGSCC-LABEL: define {{[^@]+}}@cos_test2
+; CGSCC-SAME: (float [[X:%.*]]) #[[ATTR15]] {
+; CGSCC-NEXT:    [[C:%.*]] = call float @llvm.cos.f32(float [[X]]) #[[ATTR22]]
+; CGSCC-NEXT:    ret float [[C]]
 ;
   %c = call float @llvm.cos(float %x)
   ret float %c
 }
 ;.
-; CHECK: attributes #[[ATTR0]] = { nofree norecurse nosync nounwind optsize ssp willreturn memory(none) uwtable }
-; CHECK: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable }
-; CHECK: attributes #[[ATTR2]] = { nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable }
-; CHECK: attributes #[[ATTR3]] = { noinline nosync nounwind uwtable }
-; CHECK: attributes #[[ATTR4]] = { noinline nounwind uwtable }
-; CHECK: attributes #[[ATTR5]] = { nofree noinline nounwind memory(argmem: readwrite) uwtable }
-; CHECK: attributes #[[ATTR6]] = { nofree norecurse nounwind willreturn }
-; CHECK: attributes #[[ATTR7]] = { nofree norecurse nounwind }
-; CHECK: attributes #[[ATTR8]] = { nofree norecurse nosync nounwind willreturn }
-; CHECK: attributes #[[ATTR9]] = { nofree norecurse nosync nounwind }
-; CHECK: attributes #[[ATTR10]] = { nofree norecurse nounwind willreturn memory(argmem: readwrite) }
-; CHECK: attributes #[[ATTR11]] = { nofree norecurse nosync nounwind willreturn memory(argmem: write) }
-; CHECK: attributes #[[ATTR12:[0-9]+]] = { convergent memory(none) }
-; CHECK: attributes #[[ATTR13]] = { memory(none) }
-; CHECK: attributes #[[ATTR14]] = { nounwind }
-; CHECK: attributes #[[ATTR15]] = { nofree norecurse nosync nounwind willreturn memory(none) }
-; CHECK: attributes #[[ATTR16:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
-; CHECK: attributes #[[ATTR17:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: write) }
-; CHECK: attributes #[[ATTR18:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
-; CHECK: attributes #[[ATTR19]] = { nofree nounwind }
-; CHECK: attributes #[[ATTR20]] = { willreturn }
+; TUNIT: attributes #[[ATTR0]] = { noconvergent nofree norecurse nosync nounwind optsize ssp willreturn memory(none) uwtable }
+; TUNIT: attributes #[[ATTR1]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable }
+; TUNIT: attributes #[[ATTR2]] = { noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable }
+; TUNIT: attributes #[[ATTR3]] = { noconvergent noinline nosync nounwind uwtable }
+; TUNIT: attributes #[[ATTR4]] = { noconvergent noinline nounwind uwtable }
+; TUNIT: attributes #[[ATTR5]] = { noconvergent nofree noinline nounwind memory(argmem: readwrite) uwtable }
+; TUNIT: attributes #[[ATTR6]] = { noconvergent nofree norecurse nounwind willreturn }
+; TUNIT: attributes #[[ATTR7]] = { noconvergent nofree norecurse nounwind }
+; TUNIT: attributes #[[ATTR8]] = { noconvergent nofree norecurse nosync nounwind willreturn }
+; TUNIT: attributes #[[ATTR9]] = { noconvergent nofree norecurse nosync nounwind }
+; TUNIT: attributes #[[ATTR10]] = { noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) }
+; TUNIT: attributes #[[ATTR11]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write) }
+; TUNIT: attributes #[[ATTR12]] = { noconvergent }
+; TUNIT: attributes #[[ATTR13]] = { memory(none) }
+; TUNIT: attributes #[[ATTR14]] = { noconvergent nounwind }
+; TUNIT: attributes #[[ATTR15]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(none) }
+; TUNIT: attributes #[[ATTR16:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+; TUNIT: attributes #[[ATTR17:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: write) }
+; TUNIT: attributes #[[ATTR18:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
+; TUNIT: attributes #[[ATTR19]] = { noinline nounwind uwtable }
+; TUNIT: attributes #[[ATTR20]] = { nofree nounwind }
+; TUNIT: attributes #[[ATTR21]] = { willreturn }
+;.
+; CGSCC: attributes #[[ATTR0]] = { noconvergent nofree norecurse nosync nounwind optsize ssp willreturn memory(none) uwtable }
+; CGSCC: attributes #[[ATTR1]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable }
+; CGSCC: attributes #[[ATTR2]] = { noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) uwtable }
+; CGSCC: attributes #[[ATTR3]] = { noconvergent noinline nosync nounwind uwtable }
+; CGSCC: attributes #[[ATTR4]] = { noconvergent noinline nounwind uwtable }
+; CGSCC: attributes #[[ATTR5]] = { noconvergent nofree noinline nounwind memory(argmem: readwrite) uwtable }
+; CGSCC: attributes #[[ATTR6]] = { noconvergent nofree norecurse nounwind willreturn }
+; CGSCC: attributes #[[ATTR7]] = { noconvergent nofree norecurse nounwind }
+; CGSCC: attributes #[[ATTR8]] = { noconvergent nofree norecurse nosync nounwind willreturn }
+; CGSCC: attributes #[[ATTR9]] = { noconvergent nofree norecurse nosync nounwind }
+; CGSCC: attributes #[[ATTR10]] = { noconvergent nofree norecurse nounwind willreturn memory(argmem: readwrite) }
+; CGSCC: attributes #[[ATTR11]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write) }
+; CGSCC: attributes #[[ATTR12]] = { noconvergent }
+; CGSCC: attributes #[[ATTR13]] = { memory(none) }
+; CGSCC: attributes #[[ATTR14]] = { noconvergent nounwind }
+; CGSCC: attributes #[[ATTR15]] = { noconvergent nofree norecurse nosync nounwind willreturn memory(none) }
+; CGSCC: attributes #[[ATTR16:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+; CGSCC: attributes #[[ATTR17:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: write) }
+; CGSCC: attributes #[[ATTR18:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
+; CGSCC: attributes #[[ATTR19]] = { noinline nounwind uwtable }
+; CGSCC: attributes #[[ATTR20]] = { nofree nounwind }
+; CGSCC: attributes #[[ATTR21]] = { nounwind }
+; CGSCC: attributes #[[ATTR22]] = { willreturn }
 ;.

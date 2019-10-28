@@ -52,7 +52,7 @@ entry:
   ret void
 }
 
-declare void @_ZN24CompositeEditCommandImplC2Ev() #1
+declare void @_ZN24CompositeEditCommandImplC2Ev() noconvergent
 
 define void @_ZN1D7doApplyEv(ptr nocapture %this) unnamed_addr nounwind readnone uwtable align 2 {
 ; CHECK-LABEL: @_ZN1D7doApplyEv(
@@ -172,11 +172,11 @@ entry:
   ret void
 }
 
-declare noalias ptr @_Znwm()
+declare noalias ptr @_Znwm() noconvergent
 
-declare i32 @__gxx_personality_v0(...)
+declare i32 @__gxx_personality_v0(...) noconvergent
 
-declare void @_ZdlPv()
+declare void @_ZdlPv() noconvergent
 
 define ptr @_ZN1BI1DEptEv(ptr nocapture readonly %this) nounwind readonly uwtable align 2 {
 ; CHECK-LABEL: @_ZN1BI1DEptEv(
@@ -189,7 +189,7 @@ entry:
   ret ptr %0
 }
 
-declare void @_ZN1D16deleteKeyPressedEv()
+declare void @_ZN1D16deleteKeyPressedEv() noconvergent
 
 define void @_ZN1BI1DED1Ev(ptr nocapture readonly %this) unnamed_addr uwtable align 2 {
 ; CHECK-LABEL: @_ZN1BI1DED1Ev(
@@ -223,7 +223,7 @@ _ZN1BI1DED2Ev.exit:                               ; preds = %entry, %if.then.i.i
   ret void
 }
 
-declare hidden void @__clang_call_terminate()
+declare hidden void @__clang_call_terminate() noconvergent
 
 define void @_ZN1BI1DED2Ev(ptr nocapture readonly %this) unnamed_addr uwtable align 2 {
 ; CHECK-LABEL: @_ZN1BI1DED2Ev(

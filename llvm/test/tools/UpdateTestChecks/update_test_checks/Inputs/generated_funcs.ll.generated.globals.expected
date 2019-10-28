@@ -78,7 +78,7 @@ declare void @_Z10sideeffectv()
 ; CHECK-NEXT:    unreachable
 ;
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { cold noreturn nounwind }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { cold noconvergent noreturn nounwind }
 ; CHECK: attributes #[[ATTR1:[0-9]+]] = { cold minsize noreturn }
 ; CHECK: attributes #[[ATTR2]] = { noinline }
 ;.

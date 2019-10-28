@@ -22,7 +22,7 @@
   (list
    ;; Attributes
    `(,(regexp-opt
-       '("alwaysinline" "argmemonly" "allocsize" "builtin" "cold" "convergent" "dereferenceable" "dereferenceable_or_null" "hot" "inaccessiblememonly"
+       '("alwaysinline" "argmemonly" "allocsize" "builtin" "cold" "noconvergent" "convergent" "dereferenceable" "dereferenceable_or_null" "hot" "inaccessiblememonly"
          "inaccessiblemem_or_argmemonly" "inalloca" "inlinehint" "jumptable" "minsize" "mustprogress" "naked" "nobuiltin" "nonnull"
          "nocallback" "nocf_check" "noduplicate" "nofree" "noimplicitfloat" "noinline" "nomerge" "nonlazybind" "noprofile" "noredzone" "noreturn"
          "norecurse" "nosync" "noundef" "nounwind" "nosanitize_bounds" "nosanitize_coverage" "null_pointer_is_valid" "optforfuzzing" "optnone" "optsize" "preallocated" "readnone" "readonly" "returned" "returns_twice"

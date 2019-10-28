@@ -129,7 +129,6 @@ void foo(double *d, float f, float *fp, long double *l, int *i, const char *c) {
 // HAS_MAYTRAP: declare float @acosf(float noundef) [[NOT_READNONE]]
 // HAS_MAYTRAP: declare x86_fp80 @acosl(x86_fp80 noundef) [[NOT_READNONE]]
 
-
   acosh(f);      acoshf(f);     acoshl(f);
 
 // NO__ERRNO: declare double @acosh(double noundef) [[READNONE]]
@@ -706,15 +705,15 @@ void foo(double *d, float f, float *fp, long double *l, int *i, const char *c) {
 
 // NO__ERRNO: attributes [[READNONE]] = { {{.*}}memory(none){{.*}} }
 // NO__ERRNO: attributes [[READNONE_INTRINSIC]] = { {{.*}}memory(none){{.*}} }
-// NO__ERRNO: attributes [[NOT_READNONE]] = { nounwind {{.*}} }
+// NO__ERRNO: attributes [[NOT_READNONE]] = { noconvergent nounwind {{.*}} }
 // NO__ERRNO: attributes [[READONLY]] = { {{.*}}memory(read){{.*}} }
 
-// HAS_ERRNO: attributes [[NOT_READNONE]] = { nounwind {{.*}} }
+// HAS_ERRNO: attributes [[NOT_READNONE]] = { noconvergent nounwind {{.*}} }
 // HAS_ERRNO: attributes [[READNONE_INTRINSIC]] = { {{.*}}memory(none){{.*}} }
 // HAS_ERRNO: attributes [[READONLY]] = { {{.*}}memory(read){{.*}} }
 // HAS_ERRNO: attributes [[READNONE]] = { {{.*}}memory(none){{.*}} }
 
-// HAS_MAYTRAP: attributes [[NOT_READNONE]] = { nounwind {{.*}} }
+// HAS_MAYTRAP: attributes [[NOT_READNONE]] = { noconvergent nounwind {{.*}} }
 // HAS_MAYTRAP: attributes [[READNONE]] = { {{.*}}memory(none){{.*}} }
 
 // HAS_ERRNO_GNU: attributes [[READNONE_INTRINSIC]] = { {{.*}}memory(none){{.*}} }

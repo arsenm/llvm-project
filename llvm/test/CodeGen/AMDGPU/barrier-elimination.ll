@@ -26,6 +26,6 @@ define amdgpu_kernel void @flat_wgs_attr_32_64() #2 {
 
 declare void @llvm.amdgcn.s.barrier() #0
 
-attributes #0 = { convergent nounwind }
+attributes #0 = { nounwind }
 attributes #1 = { nounwind "amdgpu-flat-work-group-size"="32,128" }
 attributes #2 = { nounwind "amdgpu-flat-work-group-size"="32,64" }

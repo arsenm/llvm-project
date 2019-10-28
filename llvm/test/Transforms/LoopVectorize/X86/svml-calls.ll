@@ -836,4 +836,4 @@ for.end:
   ret void
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { noconvergent nounwind readnone }

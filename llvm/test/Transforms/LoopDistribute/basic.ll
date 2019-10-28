@@ -156,4 +156,4 @@ for.end:                                          ; preds = %for.body
   ret void
 }
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

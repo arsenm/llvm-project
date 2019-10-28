@@ -10,7 +10,7 @@ int f();
 // WITH-TSS: call i32 @__cxa_guard_acquire
 // WITH-TSS: call void @__cxa_guard_release
 // WITH-TSS: ret void
-void g() { 
+void g() {
   static int a = f();
 }
 
@@ -22,6 +22,6 @@ void g() {
 // NO-TSS-NOT: call void @__cxa_guard_release
 // NO-TSS: ret void
 
-// WITH-TSS: attributes [[NUW]] = { mustprogress noinline nounwind{{.*}} }
+// WITH-TSS: attributes [[NUW]] = { mustprogress noconvergent noinline nounwind{{.*}} }
 
-// NO-TSS: attributes [[NUW]] = { mustprogress noinline nounwind{{.*}} }
+// NO-TSS: attributes [[NUW]] = { mustprogress noconvergent noinline nounwind{{.*}} }

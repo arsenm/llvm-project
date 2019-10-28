@@ -36,8 +36,8 @@ bb:
   ret void
 }
 
-; Function Attrs: convergent nounwind
+; Function Attrs: nounwind
 declare void @llvm.amdgcn.s.barrier() #1
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }

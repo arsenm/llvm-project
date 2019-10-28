@@ -7,7 +7,7 @@
 
 ; We explicitly set the unroll count so that expensiveTripCount computation is allowed.
 
-declare i1 @unknown(i32) readonly nounwind willreturn
+declare i1 @unknown(i32) noconvergent readonly nounwind willreturn
 
 ; mergedexit block has edges from loop exit blocks.
 define i64 @test1() {

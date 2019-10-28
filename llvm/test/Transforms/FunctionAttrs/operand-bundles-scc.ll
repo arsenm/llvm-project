@@ -2,7 +2,7 @@
 ; RUN: opt -S -passes=function-attrs < %s | FileCheck %s
 
 define void @f() {
-; CHECK: Function Attrs: nofree nosync nounwind
+; CHECK: Function Attrs: noconvergent nofree nosync nounwind
 ; CHECK-LABEL: define {{[^@]+}}@f
 ; CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    call void @g() [ "unknown"() ]
@@ -13,7 +13,7 @@ define void @f() {
 }
 
 define void @g() {
-; CHECK: Function Attrs: nofree nosync nounwind
+; CHECK: Function Attrs: noconvergent nofree nosync nounwind
 ; CHECK-LABEL: define {{[^@]+}}@g
 ; CHECK-SAME: () #[[ATTR0]] {
 ; CHECK-NEXT:    call void @f()

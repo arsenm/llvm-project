@@ -155,8 +155,8 @@ for.end:                                          ; preds = %_ZN12StringSwitchI5
   ret i32 0
 }
 
-declare i32 @printf(ptr nocapture, ...) nounwind
+declare i32 @printf(ptr nocapture, ...) noconvergent nounwind
 
-declare i32 @memcmp(ptr nocapture, ptr nocapture, i64) nounwind readonly
+declare i32 @memcmp(ptr nocapture, ptr nocapture, i64) noconvergent nounwind readonly
 
-declare i64 @strlen(ptr nocapture) nounwind readonly
+declare i64 @strlen(ptr nocapture) noconvergent nounwind readonly

@@ -182,6 +182,8 @@ for.end:                                          ; preds = %for.body
   ret void
 }
 
+attributes #0 = { noconvergent nounwind readnone }
+
 !51 = distinct !{!51, !52, !53}
 !52 = !{!"llvm.loop.vectorize.width", i32 4}
 !53 = !{!"llvm.loop.vectorize.enable", i1 true}

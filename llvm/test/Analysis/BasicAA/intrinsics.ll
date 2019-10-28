@@ -22,6 +22,6 @@ entry:
 declare <8 x i16> @llvm.masked.load.v8i16.p0(ptr, i32, <8 x i1>, <8 x i16>) nounwind readonly
 declare void @llvm.masked.store.v8i16.p0(<8 x i16>, ptr, i32, <8 x i1>) nounwind
 
-; CHECK: attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: read) }
-; CHECK: attributes #1 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+; CHECK: attributes #0 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: read) }
+; CHECK: attributes #1 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: write) }
 ; CHECK: attributes [[ATTR]] = { nounwind }

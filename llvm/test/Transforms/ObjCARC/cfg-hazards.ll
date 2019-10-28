@@ -14,7 +14,7 @@ declare void @block_callee(ptr)
 define void @test0(ptr %digits) {
 ; CHECK-LABEL: @test0(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR0:[0-9]+]]
+; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR1:[0-9]+]]
 ; CHECK-NEXT:    call void @use_pointer(ptr [[DIGITS]])
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
@@ -24,7 +24,7 @@ define void @test0(ptr %digits) {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp ult i64 [[INC]], 12
 ; CHECK-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]]
 ; CHECK:       for.end:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -47,7 +47,7 @@ for.end:                                          ; preds = %for.body
 define void @test1(ptr %digits) {
 ; CHECK-LABEL: @test1(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[UPCDIGITINDEX_01:%.*]] = phi i64 [ 2, [[ENTRY:%.*]] ], [ [[INC:%.*]], [[FOR_BODY]] ]
@@ -57,7 +57,7 @@ define void @test1(ptr %digits) {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp ult i64 [[INC]], 12
 ; CHECK-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]]
 ; CHECK:       for.end:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -80,7 +80,7 @@ for.end:                                          ; preds = %for.body
 define void @test2(ptr %digits) {
 ; CHECK-LABEL: @test2(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[TMP1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[DIGITS:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[UPCDIGITINDEX_01:%.*]] = phi i64 [ 2, [[ENTRY:%.*]] ], [ [[INC:%.*]], [[FOR_BODY]] ]
@@ -90,7 +90,7 @@ define void @test2(ptr %digits) {
 ; CHECK-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    call void @use_pointer(ptr [[DIGITS]])
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[DIGITS]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -114,14 +114,14 @@ for.end:                                          ; preds = %for.body
 define void @test3(ptr %a) nounwind {
 ; CHECK-LABEL: @test3(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
 ; CHECK-NEXT:    call void @callee()
 ; CHECK-NEXT:    store i8 0, ptr [[A]], align 1
 ; CHECK-NEXT:    br i1 undef, label [[LOOP]], label [[EXIT:%.*]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -143,7 +143,7 @@ exit:
 define void @test4(ptr %a) nounwind {
 ; CHECK-LABEL: @test4(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
 ; CHECK-NEXT:    br label [[MORE:%.*]]
@@ -153,7 +153,7 @@ define void @test4(ptr %a) nounwind {
 ; CHECK-NEXT:    store i8 0, ptr [[A]], align 1
 ; CHECK-NEXT:    br i1 undef, label [[LOOP]], label [[EXIT:%.*]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -179,7 +179,7 @@ exit:
 define void @test5(ptr %a) nounwind {
 ; CHECK-LABEL: @test5(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    call void @callee()
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
@@ -190,7 +190,7 @@ define void @test5(ptr %a) nounwind {
 ; CHECK-NEXT:    br i1 undef, label [[EXIT:%.*]], label [[LOOP]]
 ; CHECK:       exit:
 ; CHECK-NEXT:    call void @use_pointer(ptr [[A]])
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -218,7 +218,7 @@ exit:
 define void @test6(ptr %a) nounwind {
 ; CHECK-LABEL: @test6(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
 ; CHECK-NEXT:    br i1 undef, label [[TRUE:%.*]], label [[MORE:%.*]]
@@ -229,7 +229,7 @@ define void @test6(ptr %a) nounwind {
 ; CHECK-NEXT:    br i1 undef, label [[EXIT:%.*]], label [[LOOP]]
 ; CHECK:       exit:
 ; CHECK-NEXT:    call void @use_pointer(ptr [[A]])
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -257,7 +257,7 @@ exit:
 define void @test7(ptr %a) nounwind {
 ; CHECK-LABEL: @test7(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    call void @callee()
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
@@ -268,7 +268,7 @@ define void @test7(ptr %a) nounwind {
 ; CHECK:       more:
 ; CHECK-NEXT:    br i1 undef, label [[EXIT:%.*]], label [[LOOP]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -296,7 +296,7 @@ exit:
 define void @test8(ptr %a) nounwind {
 ; CHECK-LABEL: @test8(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
 ; CHECK-NEXT:    br i1 undef, label [[TRUE:%.*]], label [[MORE:%.*]]
@@ -307,7 +307,7 @@ define void @test8(ptr %a) nounwind {
 ; CHECK:       more:
 ; CHECK-NEXT:    br i1 undef, label [[EXIT:%.*]], label [[LOOP]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -440,8 +440,8 @@ exit:
 define void @test12(ptr %a) nounwind {
 ; CHECK-LABEL: @test12(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
-; CHECK-NEXT:    [[INNER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A]]) #[[ATTR0]]
+; CHECK-NEXT:    [[OUTER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
+; CHECK-NEXT:    [[INNER:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
 ; CHECK-NEXT:    br i1 undef, label [[TRUE:%.*]], label [[MORE:%.*]]
@@ -450,8 +450,8 @@ define void @test12(ptr %a) nounwind {
 ; CHECK:       more:
 ; CHECK-NEXT:    br i1 undef, label [[EXIT:%.*]], label [[LOOP]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]]
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]]
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -483,17 +483,17 @@ define void @test13(ptr %a) nounwind {
 ; CHECK-LABEL: @test13(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[BLOCK:%.*]] = alloca ptr, align 8
-; CHECK-NEXT:    [[A1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[A1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    br label [[LOOP:%.*]]
 ; CHECK:       loop:
-; CHECK-NEXT:    [[A2:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A]]) #[[ATTR0]]
+; CHECK-NEXT:    [[A2:%.*]] = tail call ptr @llvm.objc.retain(ptr [[A]]) #[[ATTR1]]
 ; CHECK-NEXT:    store ptr [[A]], ptr [[BLOCK]], align 8
 ; CHECK-NEXT:    call void @block_callee(ptr [[BLOCK]])
 ; CHECK-NEXT:    [[RELOADED_A:%.*]] = load ptr, ptr [[BLOCK]], align 8
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[RELOADED_A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[RELOADED_A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    br i1 undef, label [[LOOP]], label [[EXIT:%.*]]
 ; CHECK:       exit:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[A]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -519,7 +519,7 @@ exit:
 define void @test14(ptr %val0, i8 %val1) {
 ; CHECK-LABEL: @test14(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[V1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[VAL0:%.*]]) #[[ATTR0]]
+; CHECK-NEXT:    [[V1:%.*]] = tail call ptr @llvm.objc.retain(ptr [[VAL0:%.*]]) #[[ATTR1]]
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[VAL0]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[IF_END27:%.*]], label [[IF_THEN:%.*]]
 ; CHECK:       if.then:
@@ -541,7 +541,7 @@ define void @test14(ptr %val0, i8 %val1) {
 ; CHECK-NEXT:    call void @use_pointer(ptr [[V1]])
 ; CHECK-NEXT:    br label [[IF_END27]]
 ; CHECK:       if.end27:
-; CHECK-NEXT:    call void @llvm.objc.release(ptr [[V1]]) #[[ATTR0]], !clang.imprecise_release !0
+; CHECK-NEXT:    call void @llvm.objc.release(ptr [[V1]]) #[[ATTR1]], !clang.imprecise_release !0
 ; CHECK-NEXT:    ret void
 ;
 entry:

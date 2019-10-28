@@ -21,8 +21,8 @@ int container(int i)
   return template_normal<int>(i) + template_optnone<int>(i);
 }
 
-// CHECK: @_Z15template_normalIiET_S0_({{.*}}) [[NORMAL:#[0-9]+]]
-// CHECK: @_Z16template_optnoneIiET_S0_({{.*}}) [[OPTNONE:#[0-9]+]]
+// CHECK: define {{.*}} @_Z15template_normalIiET_S0_({{.*}}) [[NORMAL:#[0-9]+]]
+// CHECK: define {{.*}} @_Z16template_optnoneIiET_S0_({{.*}}) [[OPTNONE:#[0-9]+]]
 
 
 //-- Effect of optnone on a partial specialization.
@@ -30,7 +30,7 @@ int container(int i)
 
 template <typename T, typename U> class template_normal_base {
 public:
-  T method(T t, U u) 
+  T method(T t, U u)
   {
     return t + static_cast<T>(u);
   }
@@ -48,7 +48,7 @@ public:
 // This function should cause an instantiation of the full template (whose
 // method is not marked optnone) and an instantiation of the partially
 // specialized template (whose method is marked optnone).
-void container2() 
+void container2()
 {
   int y = 2;
   float z = 3.0;
@@ -67,7 +67,7 @@ void container2()
 
 template <typename T, typename U> class template_optnone_base {
 public:
-  __attribute__((optnone)) T method(T t, U u) 
+  __attribute__((optnone)) T method(T t, U u)
   {
     return t + static_cast<T>(u);
   }
@@ -85,7 +85,7 @@ public:
 // This function should cause an instantiation of the full template (whose
 // method is marked optnone) and an instantiation of the partially
 // specialized template (whose method is not marked optnone).
-void container3() 
+void container3()
 {
   int y = 2;
   float z = 3.0;

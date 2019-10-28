@@ -36,5 +36,5 @@ for.end:                                          ; preds = %for.body
 
 declare i32 @llvm.convergent(i32) #1
 
-attributes #0 = { nounwind convergent }
-attributes #1 = { nounwind readnone convergent }
+attributes #0 = { nounwind }
+attributes #1 = { nounwind readnone }

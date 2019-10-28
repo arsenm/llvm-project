@@ -33,7 +33,7 @@ entry:
 declare void @free(ptr nocapture) local_unnamed_addr #2
 
 define i32 @_Z4foo3Pi(ptr nocapture readonly %a) local_unnamed_addr #3 {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) uwtable
+; CHECK: Function Attrs: mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: read) uwtable
 ; CHECK-LABEL: @_Z4foo3Pi(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = load i32, ptr [[A:%.*]], align 4

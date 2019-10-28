@@ -49,7 +49,7 @@ void parallel_taskgroup() {
 // CHECK1-LABEL: define {{[^@]+}}@_Z3foov
 // CHECK1-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK1-NEXT:  entry:
-// CHECK1-NEXT:    call void @_Z8mayThrowv()
+// CHECK1-NEXT:    call void @_Z8mayThrowv() #[[ATTR4:[0-9]+]]
 // CHECK1-NEXT:    ret void
 //
 //
@@ -64,7 +64,7 @@ void parallel_taskgroup() {
 // CHECK1-NEXT:    store i8 2, ptr [[A]], align 1
 // CHECK1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[TMP0]])
 // CHECK1-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB1]], i32 [[TMP0]])
-// CHECK1-NEXT:    invoke void @_Z3foov()
+// CHECK1-NEXT:    invoke void @_Z3foov() #[[ATTR4]]
 // CHECK1-NEXT:    to label [[INVOKE_CONT:%.*]] unwind label [[TERMINATE_LPAD:%.*]]
 // CHECK1:       invoke.cont:
 // CHECK1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[TMP0]])
@@ -103,7 +103,7 @@ void parallel_taskgroup() {
 // CHECK1-NEXT:    [[TMP0:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK1-NEXT:    [[TMP1:%.*]] = load i32, ptr [[TMP0]], align 4
 // CHECK1-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB1]], i32 [[TMP1]])
-// CHECK1-NEXT:    invoke void @_Z3foov()
+// CHECK1-NEXT:    invoke void @_Z3foov() #[[ATTR4]]
 // CHECK1-NEXT:    to label [[INVOKE_CONT:%.*]] unwind label [[TERMINATE_LPAD:%.*]]
 // CHECK1:       invoke.cont:
 // CHECK1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[TMP1]])
@@ -119,7 +119,7 @@ void parallel_taskgroup() {
 // DEBUG1-LABEL: define {{[^@]+}}@_Z3foov
 // DEBUG1-SAME: () #[[ATTR0:[0-9]+]] !dbg [[DBG6:![0-9]+]] {
 // DEBUG1-NEXT:  entry:
-// DEBUG1-NEXT:    call void @_Z8mayThrowv(), !dbg [[DBG10:![0-9]+]]
+// DEBUG1-NEXT:    call void @_Z8mayThrowv() #[[ATTR4:[0-9]+]], !dbg [[DBG10:![0-9]+]]
 // DEBUG1-NEXT:    ret void, !dbg [[DBG11:![0-9]+]]
 //
 //
@@ -134,7 +134,7 @@ void parallel_taskgroup() {
 // DEBUG1-NEXT:    store i8 2, ptr [[A]], align 1, !dbg [[DBG14:![0-9]+]]
 // DEBUG1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[TMP0]]), !dbg [[DBG15:![0-9]+]]
 // DEBUG1-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB3:[0-9]+]], i32 [[TMP0]]), !dbg [[DBG16:![0-9]+]]
-// DEBUG1-NEXT:    invoke void @_Z3foov()
+// DEBUG1-NEXT:    invoke void @_Z3foov() #[[ATTR4]]
 // DEBUG1-NEXT:    to label [[INVOKE_CONT:%.*]] unwind label [[TERMINATE_LPAD:%.*]], !dbg [[DBG17:![0-9]+]]
 // DEBUG1:       invoke.cont:
 // DEBUG1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB3]], i32 [[TMP0]]), !dbg [[DBG17]]
@@ -173,7 +173,7 @@ void parallel_taskgroup() {
 // DEBUG1-NEXT:    [[TMP0:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !dbg [[DBG24:![0-9]+]]
 // DEBUG1-NEXT:    [[TMP1:%.*]] = load i32, ptr [[TMP0]], align 4, !dbg [[DBG24]]
 // DEBUG1-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB5:[0-9]+]], i32 [[TMP1]]), !dbg [[DBG24]]
-// DEBUG1-NEXT:    invoke void @_Z3foov()
+// DEBUG1-NEXT:    invoke void @_Z3foov() #[[ATTR4]]
 // DEBUG1-NEXT:    to label [[INVOKE_CONT:%.*]] unwind label [[TERMINATE_LPAD:%.*]], !dbg [[DBG25:![0-9]+]]
 // DEBUG1:       invoke.cont:
 // DEBUG1-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB5]], i32 [[TMP1]]), !dbg [[DBG25]]
@@ -189,7 +189,7 @@ void parallel_taskgroup() {
 // CHECK2-LABEL: define {{[^@]+}}@_Z3foov
 // CHECK2-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK2-NEXT:  entry:
-// CHECK2-NEXT:    call void @_Z8mayThrowv()
+// CHECK2-NEXT:    call void @_Z8mayThrowv() #[[ATTR5:[0-9]+]]
 // CHECK2-NEXT:    ret void
 //
 //
@@ -207,7 +207,7 @@ void parallel_taskgroup() {
 // CHECK2-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[OMP_GLOBAL_THREAD_NUM]])
 // CHECK2-NEXT:    [[OMP_GLOBAL_THREAD_NUM1:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB1]])
 // CHECK2-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB1]], i32 [[OMP_GLOBAL_THREAD_NUM1]])
-// CHECK2-NEXT:    call void @_Z3foov()
+// CHECK2-NEXT:    call void @_Z3foov() #[[ATTR5]]
 // CHECK2-NEXT:    br label [[TASKGROUP_EXIT2:%.*]]
 // CHECK2:       taskgroup.exit2:
 // CHECK2-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[OMP_GLOBAL_THREAD_NUM1]])
@@ -231,7 +231,7 @@ void parallel_taskgroup() {
 //
 //
 // CHECK2-LABEL: define {{[^@]+}}@_Z18parallel_taskgroupv..omp_par
-// CHECK2-SAME: (ptr noalias [[TID_ADDR:%.*]], ptr noalias [[ZERO_ADDR:%.*]]) #[[ATTR5:[0-9]+]] {
+// CHECK2-SAME: (ptr noalias [[TID_ADDR:%.*]], ptr noalias [[ZERO_ADDR:%.*]]) #[[ATTR4:[0-9]+]] {
 // CHECK2-NEXT:  omp.par.entry:
 // CHECK2-NEXT:    [[TID_ADDR_LOCAL:%.*]] = alloca i32, align 4
 // CHECK2-NEXT:    [[TMP0:%.*]] = load i32, ptr [[TID_ADDR]], align 4
@@ -241,7 +241,7 @@ void parallel_taskgroup() {
 // CHECK2:       omp.par.region:
 // CHECK2-NEXT:    [[OMP_GLOBAL_THREAD_NUM1:%.*]] = call i32 @__kmpc_global_thread_num(ptr @[[GLOB1]])
 // CHECK2-NEXT:    call void @__kmpc_taskgroup(ptr @[[GLOB1]], i32 [[OMP_GLOBAL_THREAD_NUM1]])
-// CHECK2-NEXT:    call void @_Z3foov()
+// CHECK2-NEXT:    call void @_Z3foov() #[[ATTR5]]
 // CHECK2-NEXT:    br label [[TASKGROUP_EXIT:%.*]]
 // CHECK2:       taskgroup.exit:
 // CHECK2-NEXT:    call void @__kmpc_end_taskgroup(ptr @[[GLOB1]], i32 [[OMP_GLOBAL_THREAD_NUM1]])

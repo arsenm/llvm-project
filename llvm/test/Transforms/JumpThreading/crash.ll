@@ -22,7 +22,7 @@ bb110:		; preds = %bb
 	unreachable
 }
 
-declare %struct.system__secondary_stack__mark_id @system__secondary_stack__ss_mark()
+declare %struct.system__secondary_stack__mark_id @system__secondary_stack__ss_mark() noconvergent
 
 
 
@@ -324,7 +324,7 @@ entry:
   br label %A
 
 A:                                             ; preds = %entry
-  call void undef(i64 ptrtoint (ptr blockaddress(@test11, %A) to i64)) nounwind
+  call void undef(i64 ptrtoint (ptr blockaddress(@test11, %A) to i64)) noconvergent nounwind
   unreachable
 }
 
@@ -561,9 +561,9 @@ ur:
   unreachable
 }
 
-declare ptr @PR14233.f1()
+declare ptr @PR14233.f1() noconvergent
 
-declare ptr @PR14233.f2()
+declare ptr @PR14233.f2() noconvergent
 
 ; Make sure the following compiles in a sane amount of time, as opposed
 ; to taking exponential time.

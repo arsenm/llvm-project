@@ -980,16 +980,16 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare dso_local i32 @omp_get_supported_active_levels()
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_barrier(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_cancel(ptr, i32, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_cancel_barrier(ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_flush(ptr)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -998,7 +998,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_fork_call(ptr, i32, ptr, ...)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_omp_taskwait(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1022,13 +1022,13 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_master(ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_critical(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_critical_with_hint(ptr, i32, ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_critical(ptr, i32, ptr)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1037,22 +1037,22 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end(ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_reduce(ptr, i32, i32, i64, ptr, ptr, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_reduce_nowait(ptr, i32, i32, i64, ptr, ptr, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_reduce(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_reduce_nowait(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_ordered(ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_ordered(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1094,10 +1094,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_dist_for_static_init_8u(ptr, i32, i32, ptr, ptr, ptr, ptr, ptr, i64, i64)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_single(ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_single(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1106,10 +1106,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_omp_task(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_end_taskgroup(ptr, i32)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_taskgroup(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1169,7 +1169,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i32 @__kmpc_omp_task_with_deps(ptr, i32, ptr, i32, ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_omp_wait_deps(ptr, i32, i32, ptr, i32, ptr)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1193,7 +1193,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare ptr @__kmpc_taskred_init(i32, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_task_reduction_modifier_fini(ptr, i32, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1205,16 +1205,16 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_threadprivate_register(ptr, ptr, ptr, ptr, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_doacross_init(ptr, i32, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_doacross_wait(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_doacross_post(ptr, i32, ptr)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_doacross_fini(ptr, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1232,10 +1232,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_push_target_tripcount_mapper(ptr, i64, i64)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare i64 @__kmpc_warp_active_thread_mask()
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_syncwarp(i64)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1292,7 +1292,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nounwind
 ; CHECK-NEXT: declare void @__kmpc_proxy_task_completed_ooo(ptr)
 
-; CHECK: ; Function Attrs: cold convergent noinline nounwind
+; CHECK: ; Function Attrs: cold noinline nounwind
 ; CHECK-NEXT: declare void @__kmpc_barrier_simple_spmd(ptr nocapture nofree readonly, i32)
 
 ; CHECK: ; Function Attrs: nounwind
@@ -1301,7 +1301,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; CHECK: ; Function Attrs: nosync nounwind allocsize(0)
 ; CHECK-NEXT: declare ptr @__kmpc_alloc_shared(i64)
 
-; CHECK: ; Function Attrs: convergent nounwind
+; CHECK: ; Function Attrs: nounwind
 ; CHECK: declare void @__kmpc_barrier_simple_generic(ptr, i32)
 
 ; CHECK-NOT: Function Attrs
@@ -1646,7 +1646,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_fork_call(ptr nocapture nofree readonly, i32, ptr nocapture nofree readonly, ...)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_omp_taskwait(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
@@ -1670,13 +1670,13 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_master(ptr nocapture nofree readonly, i32)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_critical(ptr nocapture nofree readonly, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_critical_with_hint(ptr nocapture nofree readonly, i32, ptr, i32)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_critical(ptr nocapture nofree readonly, i32, ptr)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1685,22 +1685,22 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end(ptr nocapture nofree readonly)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_reduce(ptr nocapture nofree readonly, i32, i32, i64, ptr nocapture nofree readonly, ptr, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_reduce_nowait(ptr nocapture nofree readonly, i32, i32, i64, ptr nocapture nofree readonly, ptr, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_reduce(ptr nocapture nofree readonly, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_reduce_nowait(ptr nocapture nofree readonly, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_ordered(ptr nocapture nofree readonly, i32)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_ordered(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
@@ -1742,10 +1742,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
 ; OPTIMISTIC-NEXT: declare void @__kmpc_dist_for_static_init_8u(ptr nocapture nofree readonly, i32, i32, ptr nocapture nofree, ptr nocapture nofree, ptr nocapture nofree, ptr nocapture nofree, ptr nocapture nofree, i64, i64)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_single(ptr nocapture nofree readonly, i32)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_single(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1754,10 +1754,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_omp_task(ptr nocapture nofree readonly, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_end_taskgroup(ptr nocapture nofree readonly, i32)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_taskgroup(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
@@ -1817,7 +1817,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare i32 @__kmpc_omp_task_with_deps(ptr nocapture nofree readonly, i32, ptr, i32, ptr nocapture nofree readonly, i32, ptr nocapture nofree readonly)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_omp_wait_deps(ptr nocapture nofree readonly, i32, i32, ptr nocapture nofree readonly, i32, ptr)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1841,7 +1841,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare ptr @__kmpc_taskred_init(i32, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_task_reduction_modifier_fini(ptr nocapture nofree readonly, i32, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1853,16 +1853,16 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare void @__kmpc_threadprivate_register(ptr nocapture nofree readonly, ptr, ptr nocapture nofree readonly, ptr nocapture nofree readonly, ptr nocapture nofree readonly)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_doacross_init(ptr nocapture nofree readonly, i32, i32, ptr)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_doacross_wait(ptr nocapture nofree readonly, i32, ptr nocapture nofree readonly)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_doacross_post(ptr nocapture nofree readonly, i32, ptr nocapture nofree readonly)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_doacross_fini(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1880,10 +1880,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn memory(inaccessiblemem: write)
 ; OPTIMISTIC-NEXT: declare void @__kmpc_push_target_tripcount_mapper(ptr, i64, i64)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare i64 @__kmpc_warp_active_thread_mask()
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_syncwarp(i64)
 
 ; OPTIMISTIC: ; Function Attrs: nounwind
@@ -1940,7 +1940,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
 ; OPTIMISTIC-NEXT: declare void @__kmpc_proxy_task_completed_ooo(ptr)
 
-; OPTIMISTIC: ; Function Attrs: cold convergent noinline nounwind
+; OPTIMISTIC: ; Function Attrs: cold noinline nounwind
 ; OPTIMISTIC-NEXT: declare void @__kmpc_barrier_simple_spmd(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC: ; Function Attrs: nofree nosync nounwind willreturn
@@ -1949,7 +1949,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; OPTIMISTIC: ; Function Attrs: nosync nounwind allocsize(0)
 ; OPTIMISTIC-NEXT: declare noalias ptr @__kmpc_alloc_shared(i64)
 
-; OPTIMISTIC: ; Function Attrs: convergent nounwind
+; OPTIMISTIC: ; Function Attrs: nounwind
 ; OPTIMISTIC: declare void @__kmpc_barrier_simple_generic(ptr nocapture nofree readonly, i32)
 
 ; OPTIMISTIC-NOT: Function Attrs
@@ -2289,16 +2289,16 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare dso_local signext i32 @omp_get_supported_active_levels()
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_barrier(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_cancel(ptr, i32 signext, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_cancel_barrier(ptr, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_flush(ptr)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2307,7 +2307,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_fork_call(ptr, i32 signext, ptr, ...)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_omp_taskwait(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2331,13 +2331,13 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_master(ptr, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_critical(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_critical_with_hint(ptr, i32 signext, ptr, i32 zeroext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_critical(ptr, i32 signext, ptr)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2346,22 +2346,22 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end(ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_reduce(ptr, i32 signext, i32 signext, i64, ptr, ptr, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_reduce_nowait(ptr, i32 signext, i32 signext, i64, ptr, ptr, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_reduce(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_reduce_nowait(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_ordered(ptr, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_ordered(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2403,10 +2403,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_dist_for_static_init_8u(ptr, i32 signext, i32 signext, ptr, ptr, ptr, ptr, ptr, i64, i64)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_single(ptr, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_single(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2415,10 +2415,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_omp_task(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_end_taskgroup(ptr, i32 signext)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_taskgroup(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2478,7 +2478,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare signext i32 @__kmpc_omp_task_with_deps(ptr, i32 signext, ptr, i32 signext, ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_omp_wait_deps(ptr, i32 signext, i32 signext, ptr, i32 signext, ptr)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2502,7 +2502,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare ptr @__kmpc_taskred_init(i32 signext, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_task_reduction_modifier_fini(ptr, i32 signext, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2514,16 +2514,16 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_threadprivate_register(ptr, ptr, ptr, ptr, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_doacross_init(ptr, i32 signext, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_doacross_wait(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_doacross_post(ptr, i32 signext, ptr)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_doacross_fini(ptr, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2541,10 +2541,10 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_push_target_tripcount_mapper(ptr, i64, i64)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare i64 @__kmpc_warp_active_thread_mask()
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_syncwarp(i64)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2601,7 +2601,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nounwind
 ; EXT-NEXT: declare void @__kmpc_proxy_task_completed_ooo(ptr)
 
-; EXT: ; Function Attrs: cold convergent noinline nounwind
+; EXT: ; Function Attrs: cold noinline nounwind
 ; EXT-NEXT: declare void @__kmpc_barrier_simple_spmd(ptr nocapture nofree readonly, i32 signext)
 
 ; EXT: ; Function Attrs: nounwind
@@ -2610,7 +2610,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; EXT: ; Function Attrs: nosync nounwind allocsize(0)
 ; EXT-NEXT: declare ptr @__kmpc_alloc_shared(i64)
 
-; EXT: ; Function Attrs: convergent nounwind
+; EXT: ; Function Attrs: nounwind
 ; EXT: declare void @__kmpc_barrier_simple_generic(ptr, i32 signext)
 
 ; EXT-NOT: Function Attrs
@@ -2730,7 +2730,7 @@ declare i32 @__tgt_target_kernel_nowait(ptr, i64, i32, i32, ptr, ptr, i32, ptr, 
 ; MIPS_EXT: ; Function Attrs: nounwind
 ; MIPS_EXT: declare dso_local i32 @omp_get_num_threads()
 
-; MIPS_EXT: ; Function Attrs: convergent nounwind
+; MIPS_EXT: ; Function Attrs: nounwind
 ; MIPS_EXT: declare void @__kmpc_critical_with_hint(ptr, i32 signext, ptr, i32 signext)
 
 ; MIPS_EXT: ; Function Attrs: nounwind

@@ -39,8 +39,8 @@ declare void @__kmpc_target_deinit(ptr, i8) local_unnamed_addr
 
 define weak void @__omp_offloading__fd02_85283c04_Device_l6_ctor() {
 entry:
-  %call.i = tail call double @__nv_log(double noundef 2.000000e+00) #1
-  %call.i2 = tail call double @__nv_log(double noundef 2.000000e+00) #1
+  %call.i = tail call double @__nv_log(double noundef 2.000000e+00) #0
+  %call.i2 = tail call double @__nv_log(double noundef 2.000000e+00) #0
   %div = fdiv double %call.i, %call.i2
   store double %div, ptr @_ZL6Device, align 8, !tbaa !11
   ret void
@@ -53,7 +53,6 @@ declare i32 @__kmpc_get_hardware_thread_id_in_block()
 declare void @__kmpc_barrier_simple_spmd(ptr, i32)
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
 
 !omp_offload.info = !{!0, !1, !2}
 !nvvm.annotations = !{!3, !4}

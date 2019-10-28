@@ -27,7 +27,6 @@ for.end:                                          ; preds = %for.body, %entry
   ret void
 }
 
-declare void @llvm.amdgcn.s.barrier() #1
+declare void @llvm.amdgcn.s.barrier() #0
 
 attributes #0 = { nounwind }
-attributes #1 = { nounwind convergent }

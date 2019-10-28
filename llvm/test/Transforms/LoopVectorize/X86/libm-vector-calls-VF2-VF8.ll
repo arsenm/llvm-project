@@ -356,7 +356,7 @@ for.end:                                          ; preds = %for.body
 !132 = !{!"llvm.loop.vectorize.width", i32 8}
 !133 = !{!"llvm.loop.vectorize.enable", i1 true}
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { noconvergent nounwind readnone }
 
 declare double @sin(double) #0
 declare float @sinf(float) #0

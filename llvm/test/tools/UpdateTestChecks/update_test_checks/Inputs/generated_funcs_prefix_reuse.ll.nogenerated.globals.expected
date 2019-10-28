@@ -60,7 +60,7 @@ exit:
 declare void @llvm.trap() noreturn cold
 declare void @_Z10sideeffectv()
 ;.
-; REUSE: attributes #[[ATTR0:[0-9]+]] = { cold noreturn nounwind }
+; REUSE: attributes #[[ATTR0:[0-9]+]] = { cold noconvergent noreturn nounwind }
 ; REUSE: attributes #[[ATTR1:[0-9]+]] = { cold minsize noreturn }
 ; REUSE: attributes #[[ATTR2]] = { noinline }
 ;.

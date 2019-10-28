@@ -18,7 +18,7 @@ struct A {
   inline void template_run(T);
 };
 
-// CHECK: @_ZN1A7int_runEi({{.*}}) [[ATTR:#[0-9]+]]
+// CHECK: define {{.*}} @_ZN1A7int_runEi({{.*}}) [[ATTR:#[0-9]+]]
 void A::int_run(int) {}
 // CHECK: @_ZN1A12template_runIiEEvT_({{.*}}) [[ATTR]]
 template <typename T>

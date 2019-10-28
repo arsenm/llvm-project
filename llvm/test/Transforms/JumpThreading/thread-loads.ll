@@ -7,7 +7,7 @@ target triple = "i386-apple-darwin7"
 
 ; Test that we can thread through the block with the partially redundant load (%2).
 ; rdar://6402033
-define i32 @test1(ptr %P) nounwind {
+define i32 @test1(ptr %P) noconvergent nounwind {
 ; CHECK-LABEL: @test1(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = tail call i32 (...) @f1() #[[ATTR0:[0-9]+]]
@@ -50,15 +50,15 @@ bb3:		; preds = %bb1
   ret i32 %res.0
 }
 
-declare i32 @f1(...)
+declare i32 @f1(...) noconvergent
 
-declare i32 @f2(...)
+declare i32 @f2(...) noconvergent
 
 
 ;; Check that we preserve TBAA information.
 ; rdar://11039258
 
-define i32 @test2(ptr %P) nounwind {
+define i32 @test2(ptr %P) noconvergent nounwind {
 ; CHECK-LABEL: @test2(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = tail call i32 (...) @f1() #[[ATTR0]]
@@ -101,7 +101,7 @@ bb3:		; preds = %bb1
   ret i32 %res.0
 }
 
-define i32 @test3(ptr %x, i1 %f) {
+define i32 @test3(ptr %x, i1 %f) noconvergent {
 ; Correctly thread loads of different (but compatible) types, placing bitcasts
 ; as necessary in the predecessors. This is especially tricky because the same
 ; predecessor ends up with two entries in the PHI node and they must share
@@ -138,7 +138,7 @@ return:
   ret i32 13
 }
 
-define i32 @test4(ptr %P) {
+define i32 @test4(ptr %P) noconvergent {
 ; CHECK-LABEL: @test4(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[V0:%.*]] = tail call i32 (...) @f1()
@@ -181,7 +181,7 @@ bb3:
   ret i32 %res.0
 }
 
-define i32 @test5(ptr %P) {
+define i32 @test5(ptr %P) noconvergent {
 ; Negative test
 ; CHECK-LABEL: @test5(
 ; CHECK-NEXT:  entry:
@@ -226,7 +226,7 @@ bb3:
   ret i32 %res.0
 }
 
-define i32 @test6(ptr %P) {
+define i32 @test6(ptr %P) noconvergent {
 ; Negative test
 ; CHECK-LABEL: @test6(
 ; CHECK-NEXT:  entry:
@@ -271,7 +271,7 @@ bb3:
   ret i32 %res.0
 }
 
-define i32 @test7(ptr %P) {
+define i32 @test7(ptr %P) noconvergent {
 ; Negative test
 ; CHECK-LABEL: @test7(
 ; CHECK-NEXT:  entry:
@@ -319,7 +319,7 @@ bb3:
 ; Make sure we merge the aliasing metadata. We keep the range metadata for the
 ; first load, as it dominates the second load. Hence we can eliminate the
 ; branch.
-define void @test8(ptr, ptr, ptr) {
+define void @test8(ptr, ptr, ptr) noconvergent {
 ; CHECK-LABEL: @test8(
 ; CHECK-NEXT:  ret2:
 ; CHECK-NEXT:    [[A:%.*]] = load i32, ptr [[TMP0:%.*]], align 4, !range [[RNG4:![0-9]+]]
@@ -344,7 +344,7 @@ ret2:
 ; Make sure we merge/PRE aliasing metadata correctly.  That means that
 ; we need to remove metadata from the existing load, and add appropriate
 ; metadata to the newly inserted load.
-define void @test9(ptr, ptr, ptr, i1 %c) {
+define void @test9(ptr, ptr, ptr, i1 %c) noconvergent {
 ; CHECK-LABEL: @test9(
 ; CHECK-NEXT:    br i1 [[C:%.*]], label [[D1:%.*]], label [[D2:%.*]]
 ; CHECK:       d1:
@@ -391,7 +391,7 @@ ret2:
   ret void
 }
 
-define i32 @fn_noalias(i1 %c2,ptr noalias %P, ptr noalias %P2) {
+define i32 @fn_noalias(i1 %c2,ptr noalias %P, ptr noalias %P2) noconvergent {
 ; CHECK-LABEL: @fn_noalias(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    br i1 [[C2:%.*]], label [[COND2:%.*]], label [[COND1:%.*]]
@@ -447,7 +447,8 @@ end:
 @current_move = internal global [65 x i32] zeroinitializer, align 4
 @last = internal unnamed_addr global [65 x ptr] zeroinitializer, align 8
 @next_status = internal unnamed_addr global [65 x %struct.NEXT_MOVE] zeroinitializer, align 8
-define fastcc i32 @Search(i64 %idxprom.i, i64 %idxprom.i89, i32 %c) {
+
+define fastcc i32 @Search(i64 %idxprom.i, i64 %idxprom.i89, i32 %c) noconvergent {
 ; CHECK-LABEL: @Search(
 ; CHECK-NEXT:  cond.true282:
 ; CHECK-NEXT:    [[ARRAYIDX185:%.*]] = getelementptr inbounds [65 x i32], ptr @hash_move, i64 0, i64 [[IDXPROM_I:%.*]]
@@ -537,13 +538,13 @@ cleanup:
   ret  i32 0
 }
 
-declare fastcc ptr @GenerateCheckEvasions()
-declare fastcc i32 @ValidMove(i32 %move)
-declare void @f67()
-declare void @Cleanup()
-declare void @f65()
+declare fastcc ptr @GenerateCheckEvasions() noconvergent
+declare fastcc i32 @ValidMove(i32 %move) noconvergent
+declare void @f67() noconvergent
+declare void @Cleanup() noconvergent
+declare void @f65() noconvergent
 
-define i32 @fn_SinglePred(i1 %c2,ptr %P) {
+define i32 @fn_SinglePred(i1 %c2,ptr %P) noconvergent {
 ; CHECK-LABEL: @fn_SinglePred(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L1:%.*]] = load i64, ptr [[P:%.*]], align 4
@@ -562,7 +563,6 @@ define i32 @fn_SinglePred(i1 %c2,ptr %P) {
 ; CHECK:       end:
 ; CHECK-NEXT:    ret i32 0
 ;
-
 entry:
   %l1 = load i64, ptr %P
   %c = icmp eq i64 %l1, 0
@@ -585,7 +585,7 @@ end:
   ret i32 0
 }
 
-define i32 @fn_SinglePredMultihop(i1 %c1, i1 %c2,ptr %P) {
+define i32 @fn_SinglePredMultihop(i1 %c1, i1 %c2,ptr %P) noconvergent {
 ; CHECK-LABEL: @fn_SinglePredMultihop(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[L1:%.*]] = load i64, ptr [[P:%.*]], align 4
@@ -606,7 +606,6 @@ define i32 @fn_SinglePredMultihop(i1 %c1, i1 %c2,ptr %P) {
 ; CHECK:       end:
 ; CHECK-NEXT:    ret i32 0
 ;
-
 entry:
   %l1 = load i64, ptr %P
   %c0 = icmp eq i64 %l1, 0
@@ -632,15 +631,15 @@ end:
   ret i32 0
 }
 
-declare void @fn2(i64)
-declare void @fn3(i64)
+declare void @fn2(i64) noconvergent
+declare void @fn3(i64) noconvergent
 
 
 ; Make sure we phi-translate and make the partially redundant load in
 ; merge fully redudant and then we can jump-thread the block with the
 ; store.
 ;
-define i32 @phi_translate_partial_redundant_loads(i32, ptr, ptr) {
+define i32 @phi_translate_partial_redundant_loads(i32, ptr, ptr) noconvergent {
 ; CHECK-LABEL: @phi_translate_partial_redundant_loads(
 ; CHECK-NEXT:    [[CMP0:%.*]] = icmp ne i32 [[TMP0:%.*]], 0
 ; CHECK-NEXT:    br i1 [[CMP0]], label [[MERGE_THREAD:%.*]], label [[MERGE:%.*]]

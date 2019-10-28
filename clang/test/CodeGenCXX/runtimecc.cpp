@@ -26,7 +26,7 @@ namespace test0 {
 // CHECK-NEXT: ret void
 }
 
-// CHECK: declare i32 @__cxa_atexit(ptr, ptr, ptr) [[NOUNWIND]]
+// CHECK: declare i32 @__cxa_atexit(ptr, ptr, ptr) [[NOCONVERGENT_NOUNWIND:#[0-9]+]]
 
 namespace test1 {
   void test() {
@@ -48,5 +48,6 @@ namespace test1 {
 // CHECK:   call void @__cxx_global_var_init()
 
 
+// CHECK: attributes [[NOCONVERGENT_NOUNWIND]] = { noconvergent nounwind }
 // CHECK: attributes [[NOUNWIND]] = { nounwind }
 // CHECK: attributes [[NORETURN]] = { noreturn }

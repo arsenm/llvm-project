@@ -124,7 +124,7 @@ declare float @llvm.amdgcn.wqm.f32(float) #1
 
 attributes #1 = { nounwind readnone speculatable willreturn }
 attributes #2 = { nounwind willreturn }
-attributes #3 = { convergent nounwind readnone willreturn }
+attributes #3 = { nounwind readnone willreturn }
 attributes #4 = { nounwind }
 
 !0 = !{}

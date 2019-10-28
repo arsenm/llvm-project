@@ -56,7 +56,6 @@ target triple = "nvptx64"
 @G = external global i32
 @llvm.compiler.used = appending global [2 x ptr] [ptr @__omp_offloading_2a_d80d3d_test_fallback_l11_exec_mode, ptr @__omp_offloading_2a_d80d3d_test_no_fallback_l20_exec_mode], section "llvm.metadata"
 
-; Function Attrs: convergent norecurse nounwind
 define weak void @__omp_offloading_2a_d80d3d_test_fallback_l11() local_unnamed_addr #0 !dbg !15 {
 entry:
   %captured_vars_addrs.i.i = alloca [0 x ptr], align 8
@@ -84,10 +83,8 @@ define weak i32 @__kmpc_target_init(ptr, i8, i1) {
   ret i32 0
 }
 
-; Function Attrs: convergent
 declare void @unknown() local_unnamed_addr #1
 
-; Function Attrs: nounwind
 define hidden void @known() local_unnamed_addr #2 !dbg !29 {
 entry:
   %captured_vars_addrs = alloca [0 x ptr], align 8
@@ -96,12 +93,10 @@ entry:
   ret void, !dbg !31
 }
 
-; Function Attrs: nounwind
 declare i32 @__kmpc_global_thread_num(ptr) local_unnamed_addr #3
 
 declare void @__kmpc_target_deinit(ptr, i8) local_unnamed_addr
 
-; Function Attrs: norecurse nounwind
 define weak void @__omp_offloading_2a_d80d3d_test_no_fallback_l20() local_unnamed_addr #4 !dbg !32 {
 entry:
   %captured_vars_addrs.i2.i = alloca [0 x ptr], align 8
@@ -132,7 +127,6 @@ user_code.entry:                                  ; preds = %entry
   br label %common.ret
 }
 
-; Function Attrs: convergent norecurse nounwind
 define internal void @__omp_outlined__2(ptr noalias nocapture nofree readnone %.global_tid., ptr noalias nocapture nofree readnone %.bound_tid.) #0 !dbg !47 {
 entry:
   call void @unknown() #6, !dbg !48
@@ -161,13 +155,13 @@ declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #5
 declare void @no_openmp() #7
 declare void @no_parallelism() #8
 
-attributes #0 = { convergent norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
-attributes #1 = { convergent "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+attributes #0 = { norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
+attributes #1 = { "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 attributes #2 = { nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 attributes #3 = { nounwind }
 attributes #4 = { norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="sm_53" "target-features"="+ptx32,+sm_53" }
 attributes #5 = { argmemonly nofree nosync nounwind willreturn }
-attributes #6 = { convergent nounwind }
+attributes #6 = { nounwind }
 attributes #7 = { "llvm.assume"="omp_no_openmp" }
 attributes #8 = { "llvm.assume"="omp_no_parallelism" }
 

@@ -26,14 +26,14 @@ lpad:
   resume { ptr, i32 } %b
 }
 
-declare void @bar()
+declare void @bar() noconvergent
 
 declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) nounwind
 
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) nounwind
 
-declare i32 @__gxx_personality_v0(...)
+declare i32 @__gxx_personality_v0(...) noconvergent
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }
 ; CHECK: attributes #[[ATTR1]] = { nounwind }
 ;.

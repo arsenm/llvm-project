@@ -56,8 +56,8 @@ int maini1() {
 // CHECK1-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 8
 // CHECK1-NEXT:    store ptr [[A]], ptr [[A_ADDR]], align 8
 // CHECK1-NEXT:    [[TMP0:%.*]] = load ptr, ptr [[A_ADDR]], align 8
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooRi(ptr noundef nonnull align 4 dereferenceable(4) [[B]]) #[[ATTR7:[0-9]+]]
-// CHECK1-NEXT:    [[CALL1:%.*]] = call noundef i32 @_Z3barv() #[[ATTR7]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooRi(ptr noundef nonnull align 4 dereferenceable(4) [[B]])
+// CHECK1-NEXT:    [[CALL1:%.*]] = call noundef i32 @_Z3barv()
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 [[CALL]], [[CALL1]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[TMP0]], align 4
 // CHECK1-NEXT:    ret void
@@ -77,7 +77,7 @@ int maini1() {
 // CHECK1-SAME: () #[[ATTR2]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[A:%.*]] = call align 8 ptr @__kmpc_alloc_shared(i64 4)
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooRi(ptr noundef nonnull align 4 dereferenceable(4) [[A]]) #[[ATTR7]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooRi(ptr noundef nonnull align 4 dereferenceable(4) [[A]])
 // CHECK1-NEXT:    call void @__kmpc_free_shared(ptr [[A]], i64 4)
 // CHECK1-NEXT:    ret i32 [[CALL]]
 //

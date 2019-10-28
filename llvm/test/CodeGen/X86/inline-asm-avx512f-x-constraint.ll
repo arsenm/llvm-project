@@ -10,7 +10,7 @@
 
 define <8 x i64> @mask_Yk_i8(i8 signext %msk, <8 x i64> %x, <8 x i64> %y) {
 entry:
-  %0 = tail call <8 x i64> asm "vpaddq\09$3, $2, $0 {$1}", "=x,^Yk,x,x,~{dirflag},~{fpsr},~{flags}"(i8 %msk, <8 x i64> %x, <8 x i64> %y)
+  %0 = tail call <8 x i64> asm "vpaddq\09$3, $2, $0 {$1}", "=x,^Yk,x,x,~{dirflag},~{fpsr},~{flags}"(i8 %msk, <8 x i64> %x, <8 x i64> %y) noconvergent
   ret <8 x i64> %0
 }
 
@@ -21,6 +21,6 @@ entry:
 ; CHECK-STDERR: couldn't allocate output register for constraint 'x'
 define <32 x half> @mask_Yk_f16(i8 signext %msk, <32 x half> %x, <32 x half> %y) {
 entry:
-  %0 = tail call <32 x half> asm "vaddph\09$3, $2, $0 {$1}", "=x,^Yk,x,x,~{dirflag},~{fpsr},~{flags}"(i8 %msk, <32 x half> %x, <32 x half> %y)
+  %0 = tail call <32 x half> asm "vaddph\09$3, $2, $0 {$1}", "=x,^Yk,x,x,~{dirflag},~{fpsr},~{flags}"(i8 %msk, <32 x half> %x, <32 x half> %y) noconvergent
   ret <32 x half> %0
 }

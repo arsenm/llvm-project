@@ -2,8 +2,8 @@
 
 @e = global i32 10
 
-declare void @f1(i32) convergent
-declare void @f2(i32)
+declare void @f1(i32)
+declare void @f2(i32) noconvergent
 
 ; The call to f1 in the loop header shouldn't be duplicated (meaning, loop
 ; rotation shouldn't occur), because f1 is convergent.

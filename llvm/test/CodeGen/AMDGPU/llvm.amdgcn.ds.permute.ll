@@ -19,4 +19,4 @@ define amdgpu_kernel void @ds_permute_imm_offset(ptr addrspace(1) %out, i32 %bas
   ret void
 }
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

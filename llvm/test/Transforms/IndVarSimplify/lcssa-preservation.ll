@@ -141,4 +141,4 @@ loop.2.latch:
   br label %loop.2.header
 }
 
-declare void @use(i1)
+declare void @use(i1) noconvergent

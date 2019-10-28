@@ -100,5 +100,5 @@ declare float @llvm.amdgcn.lds.param.load(i32 immarg, i32 immarg, i32) #1
 attributes #0 = { nounwind }
 attributes #1 = { nounwind readnone speculatable willreturn }
 attributes #2 = { nounwind readnone willreturn }
-attributes #3 = { convergent nounwind readnone willreturn }
+attributes #3 = { nounwind readnone willreturn }
 attributes #4 = { inaccessiblememonly nounwind willreturn writeonly }

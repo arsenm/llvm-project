@@ -30,15 +30,15 @@ void f(void) {
   __sigsetjmp(jb, 0);
 }
 
-// CHECK: ; Function Attrs: returns_twice
+// CHECK: ; Function Attrs: noconvergent returns_twice
 // CHECK-NEXT: declare {{.*}} @setjmp(
 
-// CHECK: ; Function Attrs: returns_twice
+// CHECK: ; Function Attrs: noconvergent returns_twice
 // CHECK-NEXT: declare {{.*}} @sigsetjmp(
 
-// CHECK: ; Function Attrs: returns_twice
+// CHECK: ; Function Attrs: noconvergent returns_twice
 // CHECK-NEXT: declare {{.*}} @_setjmp(
 
-// CHECK: ; Function Attrs: returns_twice
+// CHECK: ; Function Attrs: noconvergent returns_twice
 // CHECK-NEXT: declare {{.*}} @__sigsetjmp(
 

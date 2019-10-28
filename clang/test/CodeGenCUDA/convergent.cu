@@ -10,17 +10,15 @@
 
 #include "Inputs/cuda.h"
 
-// DEVICE: Function Attrs:
-// DEVICE-SAME: convergent
-// DEVICE-NEXT: define{{.*}} void @_Z3foov
+// DEVICE: Function Attrs: mustprogress noinline nounwind optnone{{$}}
+// DEVICE-NEXT: define dso_local void @_Z3foov
 __device__ void foo() {}
 
-// HOST: Function Attrs:
-// HOST-NOT: convergent
-// HOST-NEXT: define{{.*}} void @_Z3barv
-// DEVICE: Function Attrs:
-// DEVICE-SAME: convergent
-// DEVICE-NEXT: define{{.*}} void @_Z3barv
+// HOST: Function Attrs: mustprogress noconvergent noinline nounwind optnone{{$}}
+// HOST-NEXT: define dso_local void @_Z3barv
+
+// DEVICE: Function Attrs: mustprogress noinline nounwind optnone{{$}}
+// DEVICE-NEXT: define dso_local void @_Z3barv
 __host__ __device__ void baz();
 __host__ __device__ void bar() {
   // DEVICE: call void @_Z3bazv() [[CALL_ATTR:#[0-9]+]]
@@ -33,13 +31,9 @@ __host__ __device__ void bar() {
 }
 
 // DEVICE: declare void @_Z3bazv() [[BAZ_ATTR:#[0-9]+]]
-// DEVICE: attributes [[BAZ_ATTR]] = {
-// DEVICE-SAME: convergent
-// DEVICE-SAME: }
-// DEVICE-DAG: attributes [[CALL_ATTR]] = { convergent
-// DEVICE-DAG: attributes [[ASM_ATTR]] = { convergent
+
+// No noconvergent
+// DEVICE: attributes [[BAZ_ATTR]] = { nounwind "{{.*}} }
 
 // HOST: declare void @_Z3bazv() [[BAZ_ATTR:#[0-9]+]]
-// HOST: attributes [[BAZ_ATTR]] = {
-// HOST-NOT: convergent
-// HOST-SAME: }
+// HOST: attributes [[BAZ_ATTR]] = { {{.*}}noconvergent{{.*}} }

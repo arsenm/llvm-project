@@ -59,4 +59,4 @@ bb14:
   ret void
 }
 
-declare i32 @chrome2(...)
+declare i32 @chrome2(...) noconvergent

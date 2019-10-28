@@ -61,7 +61,7 @@ false:
 }
 
 ; Function Attrs: optsize
-declare i32 @doSomething(i32, ptr)
+declare i32 @doSomething(i32, ptr) noconvergent
 
 
 ; Check that we do not perform the restore inside the loop whereas the save
@@ -134,13 +134,13 @@ entry:
   br i1 %tobool, label %if.else, label %for.preheader
 
 for.preheader:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %entry, %for.body
   %i.05 = phi i32 [ %inc, %for.body ], [ 0, %for.preheader ]
   %sum.04 = phi i32 [ %add, %for.body ], [ 0, %for.preheader ]
-  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.04
   %inc = add nuw nsw i32 %i.05, 1
   %exitcond = icmp eq i32 %inc, 10
@@ -219,20 +219,20 @@ entry:
   br label %for.preheader
 
 for.preheader:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %for.body, %entry
   %i.04 = phi i32 [ 0, %for.preheader ], [ %inc, %for.body ]
   %sum.03 = phi i32 [ 0, %for.preheader ], [ %add, %for.body ]
-  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.03
   %inc = add nuw nsw i32 %i.04, 1
   %exitcond = icmp eq i32 %inc, 10
   br i1 %exitcond, label %for.exit, label %for.body
 
 for.exit:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %for.end
 
 for.end:                                          ; preds = %for.body
@@ -315,20 +315,20 @@ entry:
   br i1 %tobool, label %if.else, label %for.preheader
 
 for.preheader:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %entry, %for.body
   %i.05 = phi i32 [ %inc, %for.body ], [ 0, %for.preheader ]
   %sum.04 = phi i32 [ %add, %for.body ], [ 0, %for.preheader ]
-  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.04
   %inc = add nuw nsw i32 %i.05, 1
   %exitcond = icmp eq i32 %inc, 10
   br i1 %exitcond, label %for.end, label %for.body
 
 for.end:                                          ; preds = %for.body
-  tail call void asm "nop", "~{ebx}"()
+  tail call void asm "nop", "~{ebx}"() noconvergent
   %shl = shl i32 %add, 3
   br label %if.end
 
@@ -407,13 +407,13 @@ entry:
   br i1 %tobool, label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  tail call void asm "nop", "~{ebx}"()
+  tail call void asm "nop", "~{ebx}"() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %for.body, %if.then
   %i.05 = phi i32 [ 0, %if.then ], [ %inc, %for.body ]
   %sum.04 = phi i32 [ 0, %if.then ], [ %add, %for.body ]
-  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm sideeffect "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.04
   %inc = add nuw nsw i32 %i.05, 1
   %exitcond = icmp eq i32 %inc, 10
@@ -518,18 +518,18 @@ entry:
   br i1 %tobool, label %if.else, label %for.preheader
 
 for.preheader:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %entry, %for.body
   %i.03 = phi i32 [ %inc, %for.body ], [ 0, %for.preheader ]
-  tail call void asm "addl $$1, %ebx", "~{ebx}"()
+  tail call void asm "addl $$1, %ebx", "~{ebx}"() noconvergent
   %inc = add nuw nsw i32 %i.03, 1
   %exitcond = icmp eq i32 %inc, 10
   br i1 %exitcond, label %for.exit, label %for.body
 
 for.exit:
-  tail call void asm "nop", ""()
+  tail call void asm "nop", ""() noconvergent
   br label %if.end
 
 if.else:                                          ; preds = %entry
@@ -792,7 +792,7 @@ if.end:
 
 declare void @abort() #0
 
-attributes #0 = { noreturn nounwind }
+attributes #0 = { noconvergent noreturn nounwind }
 
 
 ; Make sure that we handle infinite loops properly When checking that the Save
@@ -876,7 +876,7 @@ if.then:
 
 for.body:                                         ; preds = %for.body, %entry
   %sum.03 = phi i32 [ 0, %if.then ], [ %add, %for.body ]
-  %call = tail call i32 asm "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.03
   store i32 %add, ptr %ptr
   br label %for.body
@@ -991,17 +991,17 @@ if.then:
 
 for.body:                                         ; preds = %for.body, %entry
   %sum.03 = phi i32 [ 0, %if.then ], [ %add, %body1 ], [ 1, %body2]
-  %call = tail call i32 asm "movl $$1, $0", "=r,~{ebx}"()
+  %call = tail call i32 asm "movl $$1, $0", "=r,~{ebx}"() noconvergent
   %add = add nsw i32 %call, %sum.03
   store i32 %add, ptr %ptr
   br i1 undef, label %body1, label %body2
 
 body1:
-  tail call void asm sideeffect "nop", "~{ebx}"()
+  tail call void asm sideeffect "nop", "~{ebx}"() noconvergent
   br label %for.body
 
 body2:
-  tail call void asm sideeffect "nop", "~{ebx}"()
+  tail call void asm sideeffect "nop", "~{ebx}"() noconvergent
   br label %for.body
 
 if.end:
@@ -1150,7 +1150,7 @@ define i32 @regmask(i32 %a, i32 %b, ptr %addr) {
 true:
   ; Clobber a CSR so that we check something on the regmask
   ; of the tail call.
-  tail call void asm sideeffect "nop", "~{ebx}"()
+  tail call void asm sideeffect "nop", "~{ebx}"() noconvergent
   %tmp4 = call i32 @doSomething(i32 0, ptr %addr)
   br label %end
 
@@ -1251,7 +1251,7 @@ entry:
   br i1 %.b, label %for.body.lr.ph, label %for.end
 
 for.body.lr.ph:                                   ; preds = %entry
-  tail call void asm sideeffect "nop", "~{ebx}"()
+  tail call void asm sideeffect "nop", "~{ebx}"() noconvergent
   br label %for.body
 
 for.body:                                         ; preds = %for.body.lr.ph, %for.body
@@ -1272,7 +1272,7 @@ for.end:                                          ; preds = %for.cond.for.end_cr
   ret i32 0
 }
 
-declare i32 @varfunc(ptr nocapture readonly)
+declare i32 @varfunc(ptr nocapture readonly) noconvergent
 
 @sum1 = external hidden thread_local global i32, align 4
 
@@ -1484,7 +1484,7 @@ for.inc:
   br i1 %cmp, label %for.cond8, label %fn1.exit
 }
 
-attributes #4 = { "frame-pointer"="all" }
+attributes #4 = { noconvergent "frame-pointer"="all" }
 
 @x = external global i32, align 4
 @y = external global i32, align 4
@@ -1573,6 +1573,6 @@ define void @infiniteLoopNoSuccessor() #5 {
   ret void
 }
 
-declare void @somethingElse(...)
+declare void @somethingElse(...) noconvergent
 
-attributes #5 = { nounwind "frame-pointer"="non-leaf" }
+attributes #5 = { noconvergent nounwind "frame-pointer"="non-leaf" }

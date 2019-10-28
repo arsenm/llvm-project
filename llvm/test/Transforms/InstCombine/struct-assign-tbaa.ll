@@ -44,7 +44,7 @@ define ptr @test2() {
 !5 = !{!"float", !0}
 
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 ;.
 ; CHECK: [[TBAA0]] = !{!1, !1, i64 0}
 ; CHECK: [[META1:![0-9]+]] = !{!"float", !2}

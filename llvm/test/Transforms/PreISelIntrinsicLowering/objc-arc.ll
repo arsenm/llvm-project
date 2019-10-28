@@ -341,5 +341,5 @@ attributes #0 = { nounwind }
 ; CHECK: declare i32 @objc_sync_enter(ptr)
 ; CHECK: declare i32 @objc_sync_exit(ptr)
 
-; CHECK: attributes #0 = { nounwind }
+; CHECK: attributes #0 = { noconvergent nounwind }
 ; CHECK: attributes [[NLB]] = { nonlazybind }

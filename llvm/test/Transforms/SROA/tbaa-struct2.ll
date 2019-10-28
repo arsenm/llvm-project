@@ -36,7 +36,7 @@ define double @bar(ptr %wishart) {
 !7 = !{!8, !8, i64 0}
 !8 = !{!"int", !5, i64 0}
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 ;.
 ; CHECK: [[TBAA_STRUCT0]] = !{i64 0, i64 8, !1, i64 8, i64 4, !5}
 ; CHECK: [[META1:![0-9]+]] = !{!2, !2, i64 0}

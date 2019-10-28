@@ -91,7 +91,7 @@ void bar() {
 // CHECK1-NEXT:    store i32 0, ptr [[RETVAL]], align 4
 // CHECK1-NEXT:    store i32 2, ptr @_ZZ4mainE1a, align 4
 // CHECK1-NEXT:    store double 3.000000e+00, ptr [[B]], align 8
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooIiET_v() #[[ATTR7:[0-9]+]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooIiET_v()
 // CHECK1-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -126,7 +126,7 @@ void bar() {
 // CHECK1-NEXT:    [[TMP0:%.*]] = load float, ptr [[BAR_A]], align 4
 // CHECK1-NEXT:    [[CONV:%.*]] = fpext float [[TMP0]] to double
 // CHECK1-NEXT:    store double [[CONV]], ptr addrspacecast (ptr addrspace(3) @bar_b to ptr), align 8
-// CHECK1-NEXT:    call void @_Z3bazRf(ptr noundef nonnull align 4 dereferenceable(4) [[BAR_A]]) #[[ATTR7]]
+// CHECK1-NEXT:    call void @_Z3bazRf(ptr noundef nonnull align 4 dereferenceable(4) [[BAR_A]])
 // CHECK1-NEXT:    ret void
 //
 //

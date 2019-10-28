@@ -781,8 +781,8 @@ void IntrinsicEmitter::EmitAttributes(const CodeGenIntrinsicTable &Ints,
       OS << "      Attribute::get(C, Attribute::NoDuplicate),\n";
     if (Intrinsic.isNoMerge)
       OS << "      Attribute::get(C, Attribute::NoMerge),\n";
-    if (Intrinsic.isConvergent)
-      OS << "      Attribute::get(C, Attribute::Convergent),\n";
+    if (!Intrinsic.isConvergent)
+      OS << "      Attribute::get(C, Attribute::NoConvergent),\n";
     if (Intrinsic.isSpeculatable)
       OS << "      Attribute::get(C, Attribute::Speculatable),\n";
 
@@ -857,7 +857,7 @@ void IntrinsicEmitter::EmitAttributes(const CodeGenIntrinsicTable &Ints,
         Intrinsic.isNoReturn || Intrinsic.isNoCallback || Intrinsic.isNoSync ||
         Intrinsic.isNoFree || Intrinsic.isWillReturn || Intrinsic.isCold ||
         Intrinsic.isNoDuplicate || Intrinsic.isNoMerge ||
-        Intrinsic.isConvergent || Intrinsic.isSpeculatable) {
+        !Intrinsic.isConvergent || Intrinsic.isSpeculatable) {
       unsigned ID = UniqFnAttributes.find(&Intrinsic)->second;
       OS << "      AS[" << numAttrs++ << "] = {AttributeList::FunctionIndex, "
          << "getIntrinsicFnAttributeSet(C, " << ID << ")};\n";

@@ -69,6 +69,6 @@ entry:
 
 
 
-attributes #0 = { convergent nounwind }
-attributes #1 = { nounwind readnone }
-attributes #2 = { nounwind }
+attributes #0 = { nounwind }
+attributes #1 = { noconvergent nounwind readnone }
+attributes #2 = { noconvergent nounwind }

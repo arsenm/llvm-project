@@ -72,26 +72,26 @@ la:
   ]
 
 lb:
-  tail call void asm sideeffect ".space 0", ""()
+  tail call void asm sideeffect ".space 0", ""() noconvergent
   br label %le
 
 lc:
-  tail call void asm sideeffect ".space 0", ""()
+  tail call void asm sideeffect ".space 0", ""() noconvergent
   br label %le
 
 le:
-  tail call void asm sideeffect ".space 66500", ""()
+  tail call void asm sideeffect ".space 66500", ""() noconvergent
   br label %lg
 
 lf:
-  tail call void asm sideeffect ".space 0", ""()
+  tail call void asm sideeffect ".space 0", ""() noconvergent
   br label %lg
 
 lg:
-  tail call void asm sideeffect ".space 0", ""()
+  tail call void asm sideeffect ".space 0", ""() noconvergent
   br label %li
 
 li:
-  tail call void asm sideeffect ".space 0", ""()
+  tail call void asm sideeffect ".space 0", ""() noconvergent
   ret void
 }

@@ -1009,9 +1009,9 @@ m3:
 !16 = !{i32 7, !"openmp-device", i32 50}
 ;.
 ; CHECK: attributes #[[ATTR0:[0-9]+]] = { "llvm.assume"="ompx_aligned_barrier" }
-; CHECK: attributes #[[ATTR1:[0-9]+]] = { convergent nocallback nounwind }
-; CHECK: attributes #[[ATTR2:[0-9]+]] = { convergent nocallback nofree nounwind willreturn }
-; CHECK: attributes #[[ATTR3:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
+; CHECK: attributes #[[ATTR1:[0-9]+]] = { nocallback nounwind }
+; CHECK: attributes #[[ATTR2:[0-9]+]] = { nocallback nofree nounwind willreturn }
+; CHECK: attributes #[[ATTR3:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
 ; CHECK: attributes #[[ATTR4]] = { nosync memory(none) }
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{i32 7, !"openmp-device", i32 50}

@@ -457,7 +457,7 @@ define amdgpu_kernel void @merge_global_store_4_adjacent_loads_inverse_i32(ptr a
 ; CHECK-NEXT:    [[Y2:%.*]] = extractelement <4 x i32> [[TMP1]], i32 1
 ; CHECK-NEXT:    [[Z3:%.*]] = extractelement <4 x i32> [[TMP1]], i32 2
 ; CHECK-NEXT:    [[W4:%.*]] = extractelement <4 x i32> [[TMP1]], i32 3
-; CHECK-NEXT:    tail call void @llvm.amdgcn.s.barrier() #[[ATTR3:[0-9]+]]
+; CHECK-NEXT:    tail call void @llvm.amdgcn.s.barrier()
 ; CHECK-NEXT:    [[TMP2:%.*]] = insertelement <4 x i32> poison, i32 [[X1]], i32 0
 ; CHECK-NEXT:    [[TMP3:%.*]] = insertelement <4 x i32> [[TMP2]], i32 [[Y2]], i32 1
 ; CHECK-NEXT:    [[TMP4:%.*]] = insertelement <4 x i32> [[TMP3]], i32 [[Z3]], i32 2
@@ -495,7 +495,7 @@ define amdgpu_kernel void @merge_global_store_4_adjacent_loads_shuffle_i32(ptr a
 ; CHECK-NEXT:    [[Y2:%.*]] = extractelement <4 x i32> [[TMP1]], i32 1
 ; CHECK-NEXT:    [[Z3:%.*]] = extractelement <4 x i32> [[TMP1]], i32 2
 ; CHECK-NEXT:    [[W4:%.*]] = extractelement <4 x i32> [[TMP1]], i32 3
-; CHECK-NEXT:    tail call void @llvm.amdgcn.s.barrier() #[[ATTR3]]
+; CHECK-NEXT:    tail call void @llvm.amdgcn.s.barrier()
 ; CHECK-NEXT:    [[TMP2:%.*]] = insertelement <4 x i32> poison, i32 [[W4]], i32 0
 ; CHECK-NEXT:    [[TMP3:%.*]] = insertelement <4 x i32> [[TMP2]], i32 [[Z3]], i32 1
 ; CHECK-NEXT:    [[TMP4:%.*]] = insertelement <4 x i32> [[TMP3]], i32 [[Y2]], i32 2
@@ -837,7 +837,6 @@ define amdgpu_kernel void @copy_vec_of_ptrs(ptr addrspace(1) %out,
   ret void
 }
 
-declare void @llvm.amdgcn.s.barrier() #1
+declare void @llvm.amdgcn.s.barrier() #0
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }

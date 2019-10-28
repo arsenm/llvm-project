@@ -153,7 +153,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK1-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR2:[0-9]+]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR3:[0-9]+]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -187,7 +187,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK1-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK1:       omp_offload.failed3:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK1:       omp_offload.cont4:
 // CHECK1-NEXT:    ret void
@@ -400,7 +400,7 @@ int main() {
 // CHECK1-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK1-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP20]]
 // CHECK1-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP20]]
-// CHECK1-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP20]]
+// CHECK1-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP20]]
 // CHECK1-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK1:       omp.inner.for.inc:
@@ -478,7 +478,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP23]]
-// CHECK1-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP23]]
+// CHECK1-NEXT:    call void @_Z9gtid_testv() #[[ATTR2:[0-9]+]], !llvm.access.group [[ACC_GRP23]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -502,7 +502,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@main
-// CHECK1-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK1-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK1-NEXT:    [[TMP:%.*]] = alloca i32, align 4
@@ -544,7 +544,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK1-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -578,7 +578,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK1-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK1:       omp_offload.failed3:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK1:       omp_offload.cont4:
 // CHECK1-NEXT:    [[TMP30:%.*]] = load i32, ptr @Arg, align 4
@@ -623,11 +623,11 @@ int main() {
 // CHECK1-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK1-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK1:       omp_offload.failed7:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK1:       omp_offload.cont8:
 // CHECK1-NEXT:    [[TMP52:%.*]] = load i32, ptr @Arg, align 4
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]])
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]]) #[[ATTR2]]
 // CHECK1-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -760,7 +760,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP29]]
-// CHECK1-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP29]]
+// CHECK1-NEXT:    call void @_Z3fn4v() #[[ATTR2]], !llvm.access.group [[ACC_GRP29]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -839,7 +839,7 @@ int main() {
 // CHECK1-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP32]]
 // CHECK1-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP32]]
 // CHECK1-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP32]]
-// CHECK1-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP32]]
+// CHECK1-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP32]]
 // CHECK1-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP32]]
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK1:       omp.inner.for.inc:
@@ -917,7 +917,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP35]]
-// CHECK1-NEXT:    call void @_Z3fn5v(), !llvm.access.group [[ACC_GRP35]]
+// CHECK1-NEXT:    call void @_Z3fn5v() #[[ATTR2]], !llvm.access.group [[ACC_GRP35]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1008,7 +1008,7 @@ int main() {
 // CHECK1-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP38]]
 // CHECK1-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP38]]
 // CHECK1-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP38]]
-// CHECK1-NEXT:    call void @.omp_outlined..9(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP38]]
+// CHECK1-NEXT:    call void @.omp_outlined..9(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP38]]
 // CHECK1-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP38]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
@@ -1088,7 +1088,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP41]]
-// CHECK1-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP41]]
+// CHECK1-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP41]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1154,7 +1154,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK1-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -1188,7 +1188,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK1-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK1:       omp_offload.failed3:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK1:       omp_offload.cont4:
 // CHECK1-NEXT:    [[TMP30:%.*]] = load i32, ptr [[ARG_ADDR]], align 4
@@ -1233,7 +1233,7 @@ int main() {
 // CHECK1-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK1-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK1:       omp_offload.failed7:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK1:       omp_offload.cont8:
 // CHECK1-NEXT:    ret i32 0
@@ -1368,7 +1368,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP47]]
-// CHECK1-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP47]]
+// CHECK1-NEXT:    call void @_Z3fn1v() #[[ATTR2]], !llvm.access.group [[ACC_GRP47]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1447,7 +1447,7 @@ int main() {
 // CHECK1-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP50]]
 // CHECK1-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP50]]
 // CHECK1-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP50]]
-// CHECK1-NEXT:    call void @.omp_outlined..13(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP50]]
+// CHECK1-NEXT:    call void @.omp_outlined..13(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP50]]
 // CHECK1-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP50]]
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK1:       omp.inner.for.inc:
@@ -1525,7 +1525,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP53]]
-// CHECK1-NEXT:    call void @_Z3fn2v(), !llvm.access.group [[ACC_GRP53]]
+// CHECK1-NEXT:    call void @_Z3fn2v() #[[ATTR2]], !llvm.access.group [[ACC_GRP53]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1616,7 +1616,7 @@ int main() {
 // CHECK1-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP56]]
 // CHECK1-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP56]]
 // CHECK1-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP56]]
-// CHECK1-NEXT:    call void @.omp_outlined..15(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP56]]
+// CHECK1-NEXT:    call void @.omp_outlined..15(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP56]]
 // CHECK1-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP56]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
@@ -1696,7 +1696,7 @@ int main() {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP59]]
-// CHECK1-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP59]]
+// CHECK1-NEXT:    call void @_Z3fn3v() #[[ATTR2]], !llvm.access.group [[ACC_GRP59]]
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK1:       omp.body.continue:
 // CHECK1-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -1720,7 +1720,7 @@ int main() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK1-SAME: () #[[ATTR5:[0-9]+]] {
+// CHECK1-SAME: () #[[ATTR6:[0-9]+]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK1-NEXT:    ret void
@@ -1762,7 +1762,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK3-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR2:[0-9]+]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR3:[0-9]+]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -1796,7 +1796,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK3-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK3:       omp_offload.failed3:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK3:       omp_offload.cont4:
 // CHECK3-NEXT:    ret void
@@ -2009,7 +2009,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK3-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP20]]
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP20]]
-// CHECK3-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP20]]
+// CHECK3-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP20]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK3:       omp.inner.for.inc:
@@ -2087,7 +2087,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP23]]
-// CHECK3-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP23]]
+// CHECK3-NEXT:    call void @_Z9gtid_testv() #[[ATTR2:[0-9]+]], !llvm.access.group [[ACC_GRP23]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -2111,7 +2111,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@main
-// CHECK3-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK3-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK3-NEXT:    [[TMP:%.*]] = alloca i32, align 4
@@ -2153,7 +2153,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK3-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -2187,7 +2187,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK3-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK3:       omp_offload.failed3:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK3:       omp_offload.cont4:
 // CHECK3-NEXT:    [[TMP30:%.*]] = load i32, ptr @Arg, align 4
@@ -2232,11 +2232,11 @@ int main() {
 // CHECK3-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK3-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK3:       omp_offload.failed7:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK3:       omp_offload.cont8:
 // CHECK3-NEXT:    [[TMP52:%.*]] = load i32, ptr @Arg, align 4
-// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]])
+// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]]) #[[ATTR2]]
 // CHECK3-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -2369,7 +2369,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP29]]
-// CHECK3-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP29]]
+// CHECK3-NEXT:    call void @_Z3fn4v() #[[ATTR2]], !llvm.access.group [[ACC_GRP29]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -2448,7 +2448,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK3-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4
-// CHECK3-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK3:       omp.inner.for.inc:
@@ -2526,7 +2526,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4
-// CHECK3-NEXT:    call void @_Z3fn5v()
+// CHECK3-NEXT:    call void @_Z3fn5v() #[[ATTR2]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -2634,7 +2634,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]]), !llvm.access.group [[ACC_GRP35]]
 // CHECK3-NEXT:    [[TMP17:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP35]]
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP35]]
-// CHECK3-NEXT:    call void @.omp_outlined..9(ptr [[TMP17]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP11]], i64 [[TMP13]], i64 [[TMP15]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP35]]
+// CHECK3-NEXT:    call void @.omp_outlined..9(ptr [[TMP17]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP11]], i64 [[TMP13]], i64 [[TMP15]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP35]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]]), !llvm.access.group [[ACC_GRP35]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
@@ -2674,7 +2674,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]])
 // CHECK3-NEXT:    [[TMP29:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR17]], align 4
-// CHECK3-NEXT:    call void @.omp_outlined..10(ptr [[TMP29]], ptr [[DOTBOUND_ZERO_ADDR17]], i64 [[TMP23]], i64 [[TMP25]], i64 [[TMP27]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @.omp_outlined..10(ptr [[TMP29]], ptr [[DOTBOUND_ZERO_ADDR17]], i64 [[TMP23]], i64 [[TMP25]], i64 [[TMP27]]) #[[ATTR3]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]])
 // CHECK3-NEXT:    br label [[OMP_IF_END18]]
 // CHECK3:       omp_if.end18:
@@ -2762,7 +2762,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP10]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP39]]
-// CHECK3-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP39]]
+// CHECK3-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP39]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -2801,7 +2801,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL12:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK3-NEXT:    [[ADD13:%.*]] = add nsw i32 0, [[MUL12]]
 // CHECK3-NEXT:    store i32 [[ADD13]], ptr [[I]], align 4
-// CHECK3-NEXT:    call void @_Z3fn6v()
+// CHECK3-NEXT:    call void @_Z3fn6v() #[[ATTR2]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE14:%.*]]
 // CHECK3:       omp.body.continue14:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC15:%.*]]
@@ -2889,7 +2889,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP10]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP43]]
-// CHECK3-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP43]]
+// CHECK3-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP43]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -2928,7 +2928,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL12:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK3-NEXT:    [[ADD13:%.*]] = add nsw i32 0, [[MUL12]]
 // CHECK3-NEXT:    store i32 [[ADD13]], ptr [[I]], align 4
-// CHECK3-NEXT:    call void @_Z3fn6v()
+// CHECK3-NEXT:    call void @_Z3fn6v() #[[ATTR2]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE14:%.*]]
 // CHECK3:       omp.body.continue14:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC15:%.*]]
@@ -2998,7 +2998,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK3-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -3032,7 +3032,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK3-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK3:       omp_offload.failed3:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK3:       omp_offload.cont4:
 // CHECK3-NEXT:    [[TMP30:%.*]] = load i32, ptr [[ARG_ADDR]], align 4
@@ -3077,7 +3077,7 @@ int main() {
 // CHECK3-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK3-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK3:       omp_offload.failed7:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK3:       omp_offload.cont8:
 // CHECK3-NEXT:    ret i32 0
@@ -3212,7 +3212,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP50]]
-// CHECK3-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP50]]
+// CHECK3-NEXT:    call void @_Z3fn1v() #[[ATTR2]], !llvm.access.group [[ACC_GRP50]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3291,7 +3291,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK3-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4
-// CHECK3-NEXT:    call void @.omp_outlined..14(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @.omp_outlined..14(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK3:       omp.inner.for.inc:
@@ -3369,7 +3369,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4
-// CHECK3-NEXT:    call void @_Z3fn2v()
+// CHECK3-NEXT:    call void @_Z3fn2v() #[[ATTR2]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3460,7 +3460,7 @@ int main() {
 // CHECK3-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP55]]
 // CHECK3-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP55]]
 // CHECK3-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP55]]
-// CHECK3-NEXT:    call void @.omp_outlined..16(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP55]]
+// CHECK3-NEXT:    call void @.omp_outlined..16(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP55]]
 // CHECK3-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP55]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
@@ -3540,7 +3540,7 @@ int main() {
 // CHECK3-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP58]]
-// CHECK3-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP58]]
+// CHECK3-NEXT:    call void @_Z3fn3v() #[[ATTR2]], !llvm.access.group [[ACC_GRP58]]
 // CHECK3-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK3:       omp.body.continue:
 // CHECK3-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3564,7 +3564,7 @@ int main() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK3-SAME: () #[[ATTR5:[0-9]+]] {
+// CHECK3-SAME: () #[[ATTR6:[0-9]+]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK3-NEXT:    ret void
@@ -3623,7 +3623,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK5-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK5-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP6]]
-// CHECK5-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP6]]
+// CHECK5-NEXT:    call void @_Z9gtid_testv() #[[ATTR3:[0-9]+]], !llvm.access.group [[ACC_GRP6]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK5:       omp.body.continue12:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -3672,7 +3672,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK5-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK5-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP9]]
-// CHECK5-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP9]]
+// CHECK5-NEXT:    call void @_Z3fn4v() #[[ATTR3]], !llvm.access.group [[ACC_GRP9]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK5:       omp.body.continue:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3698,7 +3698,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK5-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK5-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP12]]
-// CHECK5-NEXT:    call void @_Z3fn5v(), !llvm.access.group [[ACC_GRP12]]
+// CHECK5-NEXT:    call void @_Z3fn5v() #[[ATTR3]], !llvm.access.group [[ACC_GRP12]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK5:       omp.body.continue12:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -3724,7 +3724,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK5-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK5-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP15]]
-// CHECK5-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP15]]
+// CHECK5-NEXT:    call void @_Z3fn6v() #[[ATTR3]], !llvm.access.group [[ACC_GRP15]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK5:       omp.body.continue26:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]
@@ -3736,7 +3736,7 @@ int main() {
 // CHECK5:       omp.inner.for.end29:
 // CHECK5-NEXT:    store i32 100, ptr [[I20]], align 4
 // CHECK5-NEXT:    [[TMP15:%.*]] = load i32, ptr @Arg, align 4
-// CHECK5-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP15]])
+// CHECK5-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP15]]) #[[ATTR3]]
 // CHECK5-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -3775,7 +3775,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK5-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK5-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP18]]
-// CHECK5-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP18]]
+// CHECK5-NEXT:    call void @_Z3fn1v() #[[ATTR3]], !llvm.access.group [[ACC_GRP18]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK5:       omp.body.continue:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3801,7 +3801,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK5-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK5-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP21]]
-// CHECK5-NEXT:    call void @_Z3fn2v(), !llvm.access.group [[ACC_GRP21]]
+// CHECK5-NEXT:    call void @_Z3fn2v() #[[ATTR3]], !llvm.access.group [[ACC_GRP21]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK5:       omp.body.continue12:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -3827,7 +3827,7 @@ int main() {
 // CHECK5-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK5-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK5-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP24]]
-// CHECK5-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP24]]
+// CHECK5-NEXT:    call void @_Z3fn3v() #[[ATTR3]], !llvm.access.group [[ACC_GRP24]]
 // CHECK5-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK5:       omp.body.continue26:
 // CHECK5-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]
@@ -3894,7 +3894,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK7-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK7-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP6]]
-// CHECK7-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP6]]
+// CHECK7-NEXT:    call void @_Z9gtid_testv() #[[ATTR3:[0-9]+]], !llvm.access.group [[ACC_GRP6]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK7:       omp.body.continue12:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -3944,7 +3944,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK7-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK7-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP9]]
-// CHECK7-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP9]]
+// CHECK7-NEXT:    call void @_Z3fn4v() #[[ATTR3]], !llvm.access.group [[ACC_GRP9]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK7:       omp.body.continue:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -3970,7 +3970,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK7-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK7-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4
-// CHECK7-NEXT:    call void @_Z3fn5v()
+// CHECK7-NEXT:    call void @_Z3fn5v() #[[ATTR3]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK7:       omp.body.continue12:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -4004,7 +4004,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL25:%.*]] = mul nsw i32 [[TMP15]], 1
 // CHECK7-NEXT:    [[ADD26:%.*]] = add nsw i32 0, [[MUL25]]
 // CHECK7-NEXT:    store i32 [[ADD26]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP14]]
-// CHECK7-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP14]]
+// CHECK7-NEXT:    call void @_Z3fn6v() #[[ATTR3]], !llvm.access.group [[ACC_GRP14]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE27:%.*]]
 // CHECK7:       omp.body.continue27:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC28:%.*]]
@@ -4027,7 +4027,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL34:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK7-NEXT:    [[ADD35:%.*]] = add nsw i32 0, [[MUL34]]
 // CHECK7-NEXT:    store i32 [[ADD35]], ptr [[I20]], align 4
-// CHECK7-NEXT:    call void @_Z3fn6v()
+// CHECK7-NEXT:    call void @_Z3fn6v() #[[ATTR3]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE36:%.*]]
 // CHECK7:       omp.body.continue36:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC37:%.*]]
@@ -4041,7 +4041,7 @@ int main() {
 // CHECK7:       omp_if.end:
 // CHECK7-NEXT:    store i32 100, ptr [[I20]], align 4
 // CHECK7-NEXT:    [[TMP21:%.*]] = load i32, ptr @Arg, align 4
-// CHECK7-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP21]])
+// CHECK7-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP21]]) #[[ATTR3]]
 // CHECK7-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -4080,7 +4080,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK7-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK7-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP18]]
-// CHECK7-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP18]]
+// CHECK7-NEXT:    call void @_Z3fn1v() #[[ATTR3]], !llvm.access.group [[ACC_GRP18]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK7:       omp.body.continue:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -4106,7 +4106,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK7-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK7-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4
-// CHECK7-NEXT:    call void @_Z3fn2v()
+// CHECK7-NEXT:    call void @_Z3fn2v() #[[ATTR3]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK7:       omp.body.continue12:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -4132,7 +4132,7 @@ int main() {
 // CHECK7-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK7-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK7-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP22]]
-// CHECK7-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP22]]
+// CHECK7-NEXT:    call void @_Z3fn3v() #[[ATTR3]], !llvm.access.group [[ACC_GRP22]]
 // CHECK7-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK7:       omp.body.continue26:
 // CHECK7-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]
@@ -4182,7 +4182,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK9-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK9:       omp_offload.failed:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR2:[0-9]+]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR3:[0-9]+]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK9:       omp_offload.cont:
 // CHECK9-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -4216,7 +4216,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK9-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK9:       omp_offload.failed3:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK9:       omp_offload.cont4:
 // CHECK9-NEXT:    ret void
@@ -4429,7 +4429,7 @@ int main() {
 // CHECK9-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK9-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP20]]
 // CHECK9-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP20]]
-// CHECK9-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP20]]
+// CHECK9-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP20]]
 // CHECK9-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK9:       omp.inner.for.inc:
@@ -4507,7 +4507,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP23]]
-// CHECK9-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP23]]
+// CHECK9-NEXT:    call void @_Z9gtid_testv() #[[ATTR2:[0-9]+]], !llvm.access.group [[ACC_GRP23]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -4531,7 +4531,7 @@ int main() {
 //
 //
 // CHECK9-LABEL: define {{[^@]+}}@main
-// CHECK9-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK9-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK9-NEXT:  entry:
 // CHECK9-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK9-NEXT:    [[TMP:%.*]] = alloca i32, align 4
@@ -4573,7 +4573,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK9-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK9:       omp_offload.failed:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK9:       omp_offload.cont:
 // CHECK9-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -4607,7 +4607,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK9-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK9:       omp_offload.failed3:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK9:       omp_offload.cont4:
 // CHECK9-NEXT:    [[TMP30:%.*]] = load i32, ptr @Arg, align 4
@@ -4652,11 +4652,11 @@ int main() {
 // CHECK9-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK9-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK9:       omp_offload.failed7:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK9:       omp_offload.cont8:
 // CHECK9-NEXT:    [[TMP52:%.*]] = load i32, ptr @Arg, align 4
-// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]])
+// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]]) #[[ATTR2]]
 // CHECK9-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -4789,7 +4789,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP29]]
-// CHECK9-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP29]]
+// CHECK9-NEXT:    call void @_Z3fn4v() #[[ATTR2]], !llvm.access.group [[ACC_GRP29]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -4868,7 +4868,7 @@ int main() {
 // CHECK9-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP32]]
 // CHECK9-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP32]]
 // CHECK9-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP32]]
-// CHECK9-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP32]]
+// CHECK9-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP32]]
 // CHECK9-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP32]]
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK9:       omp.inner.for.inc:
@@ -4946,7 +4946,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP35]]
-// CHECK9-NEXT:    call void @_Z3fn5v(), !llvm.access.group [[ACC_GRP35]]
+// CHECK9-NEXT:    call void @_Z3fn5v() #[[ATTR2]], !llvm.access.group [[ACC_GRP35]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -5037,7 +5037,7 @@ int main() {
 // CHECK9-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP38]]
 // CHECK9-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP38]]
 // CHECK9-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP38]]
-// CHECK9-NEXT:    call void @.omp_outlined..9(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP38]]
+// CHECK9-NEXT:    call void @.omp_outlined..9(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP38]]
 // CHECK9-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP38]]
 // CHECK9-NEXT:    br label [[OMP_IF_END]]
 // CHECK9:       omp_if.end:
@@ -5117,7 +5117,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP41]]
-// CHECK9-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP41]]
+// CHECK9-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP41]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -5183,7 +5183,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK9-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK9:       omp_offload.failed:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK9:       omp_offload.cont:
 // CHECK9-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -5217,7 +5217,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK9-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK9:       omp_offload.failed3:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK9:       omp_offload.cont4:
 // CHECK9-NEXT:    [[TMP30:%.*]] = load i32, ptr [[ARG_ADDR]], align 4
@@ -5262,7 +5262,7 @@ int main() {
 // CHECK9-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK9-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK9:       omp_offload.failed7:
-// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK9-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK9-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK9:       omp_offload.cont8:
 // CHECK9-NEXT:    ret i32 0
@@ -5397,7 +5397,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP47]]
-// CHECK9-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP47]]
+// CHECK9-NEXT:    call void @_Z3fn1v() #[[ATTR2]], !llvm.access.group [[ACC_GRP47]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -5476,7 +5476,7 @@ int main() {
 // CHECK9-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP50]]
 // CHECK9-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP50]]
 // CHECK9-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP50]]
-// CHECK9-NEXT:    call void @.omp_outlined..13(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP50]]
+// CHECK9-NEXT:    call void @.omp_outlined..13(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP50]]
 // CHECK9-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP50]]
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK9:       omp.inner.for.inc:
@@ -5554,7 +5554,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP53]]
-// CHECK9-NEXT:    call void @_Z3fn2v(), !llvm.access.group [[ACC_GRP53]]
+// CHECK9-NEXT:    call void @_Z3fn2v() #[[ATTR2]], !llvm.access.group [[ACC_GRP53]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -5645,7 +5645,7 @@ int main() {
 // CHECK9-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP56]]
 // CHECK9-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP56]]
 // CHECK9-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP56]]
-// CHECK9-NEXT:    call void @.omp_outlined..15(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP56]]
+// CHECK9-NEXT:    call void @.omp_outlined..15(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP56]]
 // CHECK9-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP56]]
 // CHECK9-NEXT:    br label [[OMP_IF_END]]
 // CHECK9:       omp_if.end:
@@ -5725,7 +5725,7 @@ int main() {
 // CHECK9-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK9-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK9-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP59]]
-// CHECK9-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP59]]
+// CHECK9-NEXT:    call void @_Z3fn3v() #[[ATTR2]], !llvm.access.group [[ACC_GRP59]]
 // CHECK9-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK9:       omp.body.continue:
 // CHECK9-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -5749,7 +5749,7 @@ int main() {
 //
 //
 // CHECK9-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK9-SAME: () #[[ATTR5:[0-9]+]] {
+// CHECK9-SAME: () #[[ATTR6:[0-9]+]] {
 // CHECK9-NEXT:  entry:
 // CHECK9-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK9-NEXT:    ret void
@@ -5791,7 +5791,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK11-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK11:       omp_offload.failed:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR2:[0-9]+]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l43() #[[ATTR3:[0-9]+]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK11:       omp_offload.cont:
 // CHECK11-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -5825,7 +5825,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK11-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK11:       omp_offload.failed3:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9gtid_testv_l48() #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK11:       omp_offload.cont4:
 // CHECK11-NEXT:    ret void
@@ -6038,7 +6038,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK11-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP20]]
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP20]]
-// CHECK11-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP20]]
+// CHECK11-NEXT:    call void @.omp_outlined..3(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP20]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]]), !llvm.access.group [[ACC_GRP20]]
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK11:       omp.inner.for.inc:
@@ -6116,7 +6116,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP23]]
-// CHECK11-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP23]]
+// CHECK11-NEXT:    call void @_Z9gtid_testv() #[[ATTR2:[0-9]+]], !llvm.access.group [[ACC_GRP23]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -6140,7 +6140,7 @@ int main() {
 //
 //
 // CHECK11-LABEL: define {{[^@]+}}@main
-// CHECK11-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK11-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK11-NEXT:  entry:
 // CHECK11-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 // CHECK11-NEXT:    [[TMP:%.*]] = alloca i32, align 4
@@ -6182,7 +6182,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK11-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK11:       omp_offload.failed:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l81() #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK11:       omp_offload.cont:
 // CHECK11-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -6216,7 +6216,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK11-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK11:       omp_offload.failed3:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l90() #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK11:       omp_offload.cont4:
 // CHECK11-NEXT:    [[TMP30:%.*]] = load i32, ptr @Arg, align 4
@@ -6261,11 +6261,11 @@ int main() {
 // CHECK11-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK11-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK11:       omp_offload.failed7:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}_main_l99(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK11:       omp_offload.cont8:
 // CHECK11-NEXT:    [[TMP52:%.*]] = load i32, ptr @Arg, align 4
-// CHECK11-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]])
+// CHECK11-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP52]]) #[[ATTR2]]
 // CHECK11-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -6398,7 +6398,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP29]]
-// CHECK11-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP29]]
+// CHECK11-NEXT:    call void @_Z3fn4v() #[[ATTR2]], !llvm.access.group [[ACC_GRP29]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -6477,7 +6477,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK11-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4
-// CHECK11-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]]
+// CHECK11-NEXT:    call void @.omp_outlined..7(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK11:       omp.inner.for.inc:
@@ -6555,7 +6555,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4
-// CHECK11-NEXT:    call void @_Z3fn5v()
+// CHECK11-NEXT:    call void @_Z3fn5v() #[[ATTR2]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -6663,7 +6663,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]]), !llvm.access.group [[ACC_GRP35]]
 // CHECK11-NEXT:    [[TMP17:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP35]]
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP35]]
-// CHECK11-NEXT:    call void @.omp_outlined..9(ptr [[TMP17]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP11]], i64 [[TMP13]], i64 [[TMP15]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP35]]
+// CHECK11-NEXT:    call void @.omp_outlined..9(ptr [[TMP17]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP11]], i64 [[TMP13]], i64 [[TMP15]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP35]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]]), !llvm.access.group [[ACC_GRP35]]
 // CHECK11-NEXT:    br label [[OMP_IF_END]]
 // CHECK11:       omp_if.end:
@@ -6703,7 +6703,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]])
 // CHECK11-NEXT:    [[TMP29:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR17]], align 4
-// CHECK11-NEXT:    call void @.omp_outlined..10(ptr [[TMP29]], ptr [[DOTBOUND_ZERO_ADDR17]], i64 [[TMP23]], i64 [[TMP25]], i64 [[TMP27]]) #[[ATTR2]]
+// CHECK11-NEXT:    call void @.omp_outlined..10(ptr [[TMP29]], ptr [[DOTBOUND_ZERO_ADDR17]], i64 [[TMP23]], i64 [[TMP25]], i64 [[TMP27]]) #[[ATTR3]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP3]])
 // CHECK11-NEXT:    br label [[OMP_IF_END18]]
 // CHECK11:       omp_if.end18:
@@ -6791,7 +6791,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP10]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP39]]
-// CHECK11-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP39]]
+// CHECK11-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP39]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -6830,7 +6830,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL12:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK11-NEXT:    [[ADD13:%.*]] = add nsw i32 0, [[MUL12]]
 // CHECK11-NEXT:    store i32 [[ADD13]], ptr [[I]], align 4
-// CHECK11-NEXT:    call void @_Z3fn6v()
+// CHECK11-NEXT:    call void @_Z3fn6v() #[[ATTR2]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE14:%.*]]
 // CHECK11:       omp.body.continue14:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC15:%.*]]
@@ -6918,7 +6918,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP10]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP43]]
-// CHECK11-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP43]]
+// CHECK11-NEXT:    call void @_Z3fn6v() #[[ATTR2]], !llvm.access.group [[ACC_GRP43]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -6957,7 +6957,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL12:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK11-NEXT:    [[ADD13:%.*]] = add nsw i32 0, [[MUL12]]
 // CHECK11-NEXT:    store i32 [[ADD13]], ptr [[I]], align 4
-// CHECK11-NEXT:    call void @_Z3fn6v()
+// CHECK11-NEXT:    call void @_Z3fn6v() #[[ATTR2]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE14:%.*]]
 // CHECK11:       omp.body.continue14:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC15:%.*]]
@@ -7027,7 +7027,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP14:%.*]] = icmp ne i32 [[TMP13]], 0
 // CHECK11-NEXT:    br i1 [[TMP14]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK11:       omp_offload.failed:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l59() #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK11:       omp_offload.cont:
 // CHECK11-NEXT:    [[KERNEL_ARGS2:%.*]] = alloca [[STRUCT___TGT_KERNEL_ARGUMENTS]], align 8
@@ -7061,7 +7061,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP29:%.*]] = icmp ne i32 [[TMP28]], 0
 // CHECK11-NEXT:    br i1 [[TMP29]], label [[OMP_OFFLOAD_FAILED3:%.*]], label [[OMP_OFFLOAD_CONT4:%.*]]
 // CHECK11:       omp_offload.failed3:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l65() #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT4]]
 // CHECK11:       omp_offload.cont4:
 // CHECK11-NEXT:    [[TMP30:%.*]] = load i32, ptr [[ARG_ADDR]], align 4
@@ -7106,7 +7106,7 @@ int main() {
 // CHECK11-NEXT:    [[TMP51:%.*]] = icmp ne i32 [[TMP50]], 0
 // CHECK11-NEXT:    br i1 [[TMP51]], label [[OMP_OFFLOAD_FAILED7:%.*]], label [[OMP_OFFLOAD_CONT8:%.*]]
 // CHECK11:       omp_offload.failed7:
-// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR2]]
+// CHECK11-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z5tmainIiEiT__l71(i64 [[TMP31]]) #[[ATTR3]]
 // CHECK11-NEXT:    br label [[OMP_OFFLOAD_CONT8]]
 // CHECK11:       omp_offload.cont8:
 // CHECK11-NEXT:    ret i32 0
@@ -7241,7 +7241,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP50]]
-// CHECK11-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP50]]
+// CHECK11-NEXT:    call void @_Z3fn1v() #[[ATTR2]], !llvm.access.group [[ACC_GRP50]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7320,7 +7320,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK11-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4
-// CHECK11-NEXT:    call void @.omp_outlined..14(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR2]]
+// CHECK11-NEXT:    call void @.omp_outlined..14(ptr [[TMP11]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP8]], i64 [[TMP10]]) #[[ATTR3]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP1]])
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
 // CHECK11:       omp.inner.for.inc:
@@ -7398,7 +7398,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4
-// CHECK11-NEXT:    call void @_Z3fn2v()
+// CHECK11-NEXT:    call void @_Z3fn2v() #[[ATTR2]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7489,7 +7489,7 @@ int main() {
 // CHECK11-NEXT:    call void @__kmpc_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP55]]
 // CHECK11-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTGLOBAL_TID__ADDR]], align 8, !llvm.access.group [[ACC_GRP55]]
 // CHECK11-NEXT:    store i32 0, ptr [[DOTBOUND_ZERO_ADDR]], align 4, !llvm.access.group [[ACC_GRP55]]
-// CHECK11-NEXT:    call void @.omp_outlined..16(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR2]], !llvm.access.group [[ACC_GRP55]]
+// CHECK11-NEXT:    call void @.omp_outlined..16(ptr [[TMP13]], ptr [[DOTBOUND_ZERO_ADDR]], i64 [[TMP9]], i64 [[TMP11]]) #[[ATTR3]], !llvm.access.group [[ACC_GRP55]]
 // CHECK11-NEXT:    call void @__kmpc_end_serialized_parallel(ptr @[[GLOB3]], i32 [[TMP2]]), !llvm.access.group [[ACC_GRP55]]
 // CHECK11-NEXT:    br label [[OMP_IF_END]]
 // CHECK11:       omp_if.end:
@@ -7569,7 +7569,7 @@ int main() {
 // CHECK11-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP9]], 1
 // CHECK11-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK11-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP58]]
-// CHECK11-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP58]]
+// CHECK11-NEXT:    call void @_Z3fn3v() #[[ATTR2]], !llvm.access.group [[ACC_GRP58]]
 // CHECK11-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK11:       omp.body.continue:
 // CHECK11-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7593,7 +7593,7 @@ int main() {
 //
 //
 // CHECK11-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK11-SAME: () #[[ATTR5:[0-9]+]] {
+// CHECK11-SAME: () #[[ATTR6:[0-9]+]] {
 // CHECK11-NEXT:  entry:
 // CHECK11-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK11-NEXT:    ret void
@@ -7652,7 +7652,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK13-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK13-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP6]]
-// CHECK13-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP6]]
+// CHECK13-NEXT:    call void @_Z9gtid_testv() #[[ATTR3:[0-9]+]], !llvm.access.group [[ACC_GRP6]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK13:       omp.body.continue12:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -7701,7 +7701,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK13-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK13-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP9]]
-// CHECK13-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP9]]
+// CHECK13-NEXT:    call void @_Z3fn4v() #[[ATTR3]], !llvm.access.group [[ACC_GRP9]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK13:       omp.body.continue:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7727,7 +7727,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK13-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK13-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP12]]
-// CHECK13-NEXT:    call void @_Z3fn5v(), !llvm.access.group [[ACC_GRP12]]
+// CHECK13-NEXT:    call void @_Z3fn5v() #[[ATTR3]], !llvm.access.group [[ACC_GRP12]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK13:       omp.body.continue12:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -7753,7 +7753,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK13-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK13-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP15]]
-// CHECK13-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP15]]
+// CHECK13-NEXT:    call void @_Z3fn6v() #[[ATTR3]], !llvm.access.group [[ACC_GRP15]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK13:       omp.body.continue26:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]
@@ -7765,7 +7765,7 @@ int main() {
 // CHECK13:       omp.inner.for.end29:
 // CHECK13-NEXT:    store i32 100, ptr [[I20]], align 4
 // CHECK13-NEXT:    [[TMP15:%.*]] = load i32, ptr @Arg, align 4
-// CHECK13-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP15]])
+// CHECK13-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP15]]) #[[ATTR3]]
 // CHECK13-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -7804,7 +7804,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK13-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK13-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP18]]
-// CHECK13-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP18]]
+// CHECK13-NEXT:    call void @_Z3fn1v() #[[ATTR3]], !llvm.access.group [[ACC_GRP18]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK13:       omp.body.continue:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7830,7 +7830,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK13-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK13-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP21]]
-// CHECK13-NEXT:    call void @_Z3fn2v(), !llvm.access.group [[ACC_GRP21]]
+// CHECK13-NEXT:    call void @_Z3fn2v() #[[ATTR3]], !llvm.access.group [[ACC_GRP21]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK13:       omp.body.continue12:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -7856,7 +7856,7 @@ int main() {
 // CHECK13-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK13-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK13-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP24]]
-// CHECK13-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP24]]
+// CHECK13-NEXT:    call void @_Z3fn3v() #[[ATTR3]], !llvm.access.group [[ACC_GRP24]]
 // CHECK13-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK13:       omp.body.continue26:
 // CHECK13-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]
@@ -7923,7 +7923,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK15-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK15-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4, !llvm.access.group [[ACC_GRP6]]
-// CHECK15-NEXT:    call void @_Z9gtid_testv(), !llvm.access.group [[ACC_GRP6]]
+// CHECK15-NEXT:    call void @_Z9gtid_testv() #[[ATTR3:[0-9]+]], !llvm.access.group [[ACC_GRP6]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK15:       omp.body.continue12:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -7973,7 +7973,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK15-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK15-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP9]]
-// CHECK15-NEXT:    call void @_Z3fn4v(), !llvm.access.group [[ACC_GRP9]]
+// CHECK15-NEXT:    call void @_Z3fn4v() #[[ATTR3]], !llvm.access.group [[ACC_GRP9]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK15:       omp.body.continue:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -7999,7 +7999,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK15-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK15-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4
-// CHECK15-NEXT:    call void @_Z3fn5v()
+// CHECK15-NEXT:    call void @_Z3fn5v() #[[ATTR3]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK15:       omp.body.continue12:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -8033,7 +8033,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL25:%.*]] = mul nsw i32 [[TMP15]], 1
 // CHECK15-NEXT:    [[ADD26:%.*]] = add nsw i32 0, [[MUL25]]
 // CHECK15-NEXT:    store i32 [[ADD26]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP14]]
-// CHECK15-NEXT:    call void @_Z3fn6v(), !llvm.access.group [[ACC_GRP14]]
+// CHECK15-NEXT:    call void @_Z3fn6v() #[[ATTR3]], !llvm.access.group [[ACC_GRP14]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE27:%.*]]
 // CHECK15:       omp.body.continue27:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC28:%.*]]
@@ -8056,7 +8056,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL34:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK15-NEXT:    [[ADD35:%.*]] = add nsw i32 0, [[MUL34]]
 // CHECK15-NEXT:    store i32 [[ADD35]], ptr [[I20]], align 4
-// CHECK15-NEXT:    call void @_Z3fn6v()
+// CHECK15-NEXT:    call void @_Z3fn6v() #[[ATTR3]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE36:%.*]]
 // CHECK15:       omp.body.continue36:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC37:%.*]]
@@ -8070,7 +8070,7 @@ int main() {
 // CHECK15:       omp_if.end:
 // CHECK15-NEXT:    store i32 100, ptr [[I20]], align 4
 // CHECK15-NEXT:    [[TMP21:%.*]] = load i32, ptr @Arg, align 4
-// CHECK15-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP21]])
+// CHECK15-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP21]]) #[[ATTR3]]
 // CHECK15-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -8109,7 +8109,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP3]], 1
 // CHECK15-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK15-NEXT:    store i32 [[ADD]], ptr [[I]], align 4, !llvm.access.group [[ACC_GRP18]]
-// CHECK15-NEXT:    call void @_Z3fn1v(), !llvm.access.group [[ACC_GRP18]]
+// CHECK15-NEXT:    call void @_Z3fn1v() #[[ATTR3]], !llvm.access.group [[ACC_GRP18]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
 // CHECK15:       omp.body.continue:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC:%.*]]
@@ -8135,7 +8135,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL10:%.*]] = mul nsw i32 [[TMP8]], 1
 // CHECK15-NEXT:    [[ADD11:%.*]] = add nsw i32 0, [[MUL10]]
 // CHECK15-NEXT:    store i32 [[ADD11]], ptr [[I6]], align 4
-// CHECK15-NEXT:    call void @_Z3fn2v()
+// CHECK15-NEXT:    call void @_Z3fn2v() #[[ATTR3]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE12:%.*]]
 // CHECK15:       omp.body.continue12:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC13:%.*]]
@@ -8161,7 +8161,7 @@ int main() {
 // CHECK15-NEXT:    [[MUL24:%.*]] = mul nsw i32 [[TMP13]], 1
 // CHECK15-NEXT:    [[ADD25:%.*]] = add nsw i32 0, [[MUL24]]
 // CHECK15-NEXT:    store i32 [[ADD25]], ptr [[I20]], align 4, !llvm.access.group [[ACC_GRP22]]
-// CHECK15-NEXT:    call void @_Z3fn3v(), !llvm.access.group [[ACC_GRP22]]
+// CHECK15-NEXT:    call void @_Z3fn3v() #[[ATTR3]], !llvm.access.group [[ACC_GRP22]]
 // CHECK15-NEXT:    br label [[OMP_BODY_CONTINUE26:%.*]]
 // CHECK15:       omp.body.continue26:
 // CHECK15-NEXT:    br label [[OMP_INNER_FOR_INC27:%.*]]

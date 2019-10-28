@@ -117,4 +117,4 @@ declare void @llvm.objc.release(ptr)
 !0 = !{}
 
 ; CHECK: attributes [[NUW]] = { nounwind }
-; CHECK: attributes #1 = { nounwind ssp }
+; CHECK: attributes #2 = { nounwind ssp }

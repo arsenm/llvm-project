@@ -70,7 +70,7 @@ exit:                                             ; preds = %then.bb, %loop.head
   ret void
 }
 
-declare i16 @foo() nounwind readnone
+declare i16 @foo() noconvergent nounwind readnone
 
 define void @test_pr58158(i1 %c.1) {
 ; CHECK-LABEL: @test_pr58158(
@@ -109,7 +109,7 @@ inner:
   br i1 %c.2, label %outer, label %inner
 }
 
-declare i16 @bar()
+declare i16 @bar() noconvergent
 
 define void @pr58751(i16 %a, ptr %dst) {
 entry:

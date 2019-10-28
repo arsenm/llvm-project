@@ -2,7 +2,7 @@
 ; RUN: opt < %s -passes=loop-unroll -S -unroll-count=4 | FileCheck %s
 ; Test phi update after partial unroll.
 
-declare i1 @check() nounwind
+declare i1 @check() noconvergent nounwind
 
 define void @test1(i32 %i, i32 %j) nounwind uwtable ssp {
 ;

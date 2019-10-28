@@ -45,4 +45,4 @@ declare i32 @llvm.amdgcn.workitem.id.x() #1
 
 attributes #0 = { nounwind }
 attributes #1 = { nounwind readnone }
-attributes #2 = { convergent nounwind }
+attributes #2 = { nounwind }

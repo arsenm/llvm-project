@@ -155,7 +155,7 @@ bees:
 }
 
 declare void @llvm.trap() nounwind noreturn
-declare void @bees.a() nounwind
-declare void @bees.b() nounwind
+declare void @bees.a() noconvergent nounwind
+declare void @bees.b() noconvergent nounwind
 
-; CHECK: attributes #1 = { cold noreturn nounwind }
+; CHECK: attributes #1 = { cold noconvergent noreturn nounwind }

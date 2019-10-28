@@ -48,7 +48,7 @@ int main() {
 // CHECK1-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    store ptr [[DOTGLOBAL_TID_]], ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK1-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 8
-// CHECK1-NEXT:    call void @_Z3usev() #[[ATTR8:[0-9]+]]
+// CHECK1-NEXT:    call void @_Z3usev()
 // CHECK1-NEXT:    ret void
 //
 //
@@ -68,7 +68,7 @@ int main() {
 // CHECK1-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 // CHECK1-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 // CHECK1:       user_code.entry:
-// CHECK1-NEXT:    call void @_Z3usev() #[[ATTR8]]
+// CHECK1-NEXT:    call void @_Z3usev()
 // CHECK1-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 // CHECK1-NEXT:    ret void
 // CHECK1:       worker.exit:
@@ -82,7 +82,7 @@ int main() {
 // CHECK1-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 8
 // CHECK1-NEXT:    store ptr [[DOTGLOBAL_TID_]], ptr [[DOTGLOBAL_TID__ADDR]], align 8
 // CHECK1-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 8
-// CHECK1-NEXT:    call void @_Z4workv() #[[ATTR8]]
+// CHECK1-NEXT:    call void @_Z4workv()
 // CHECK1-NEXT:    ret void
 //
 //
@@ -124,7 +124,7 @@ int main() {
 // CHECK2-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 4
 // CHECK2-NEXT:    store ptr [[DOTGLOBAL_TID_]], ptr [[DOTGLOBAL_TID__ADDR]], align 4
 // CHECK2-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 4
-// CHECK2-NEXT:    call void @_Z3usev() #[[ATTR8:[0-9]+]]
+// CHECK2-NEXT:    call void @_Z3usev()
 // CHECK2-NEXT:    ret void
 //
 //
@@ -144,7 +144,7 @@ int main() {
 // CHECK2-NEXT:    [[EXEC_USER_CODE:%.*]] = icmp eq i32 [[TMP0]], -1
 // CHECK2-NEXT:    br i1 [[EXEC_USER_CODE]], label [[USER_CODE_ENTRY:%.*]], label [[WORKER_EXIT:%.*]]
 // CHECK2:       user_code.entry:
-// CHECK2-NEXT:    call void @_Z3usev() #[[ATTR8]]
+// CHECK2-NEXT:    call void @_Z3usev()
 // CHECK2-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 1)
 // CHECK2-NEXT:    ret void
 // CHECK2:       worker.exit:
@@ -158,7 +158,7 @@ int main() {
 // CHECK2-NEXT:    [[DOTBOUND_TID__ADDR:%.*]] = alloca ptr, align 4
 // CHECK2-NEXT:    store ptr [[DOTGLOBAL_TID_]], ptr [[DOTGLOBAL_TID__ADDR]], align 4
 // CHECK2-NEXT:    store ptr [[DOTBOUND_TID_]], ptr [[DOTBOUND_TID__ADDR]], align 4
-// CHECK2-NEXT:    call void @_Z4workv() #[[ATTR8]]
+// CHECK2-NEXT:    call void @_Z4workv()
 // CHECK2-NEXT:    ret void
 //
 //

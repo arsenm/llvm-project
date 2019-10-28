@@ -53,4 +53,4 @@ if.end4:                                          ; preds = %if.then2, %if.end
   ret i32 undef
 }
 
-declare i32 @b()
+declare i32 @b() noconvergent

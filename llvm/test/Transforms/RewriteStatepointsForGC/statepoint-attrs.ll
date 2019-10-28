@@ -17,8 +17,8 @@ define void @test1(ptr addrspace(1) %arg) gc "statepoint-example" {
 }
 
 
-attributes #1 = { norecurse noimplicitfloat }
+attributes #1 = { noconvergent norecurse noimplicitfloat }
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(none) }
-; CHECK: attributes #[[ATTR1]] = { noimplicitfloat norecurse }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(none) }
+; CHECK: attributes #[[ATTR1]] = { noconvergent noimplicitfloat norecurse }
 ;.

@@ -1959,13 +1959,15 @@ void CodeGenModule::getDefaultFunctionAttributes(StringRef Name,
     }
   }
 
-  if (getLangOpts().assumeFunctionsAreConvergent()) {
-    // Conservatively, mark all functions and calls in CUDA and OpenCL as
-    // convergent (meaning, they may call an intrinsically convergent op, such
-    // as __syncthreads() / barrier(), and so can't have certain optimizations
-    // applied around them).  LLVM will remove this attribute where it safely
-    // can.
-    FuncAttrs.addAttribute(llvm::Attribute::Convergent);
+  if (!getLangOpts().assumeFunctionsAreConvergent()) {
+    // The language is assumed to not have SPMD semantics, so there should be no
+    // convergent operations anywhere in the program.
+    //
+    // Functions and calls in CUDA and OpenCL may be convergent (meaning, they
+    // may call an intrinsically convergent op, such as __syncthreads() /
+    // barrier(), and so can't have certain optimizations applied around them).
+    // LLVM will infer this attribute where it safely can.
+    FuncAttrs.addAttribute(llvm::Attribute::NoConvergent);
   }
 
   // TODO: NoUnwind attribute should be added for other GPU modes HIP,
@@ -2177,8 +2179,6 @@ void CodeGenModule::ConstructAttributeList(StringRef Name,
       FuncAttrs.addAttribute(llvm::Attribute::Hot);
     if (TargetDecl->hasAttr<NoDuplicateAttr>())
       FuncAttrs.addAttribute(llvm::Attribute::NoDuplicate);
-    if (TargetDecl->hasAttr<ConvergentAttr>())
-      FuncAttrs.addAttribute(llvm::Attribute::Convergent);
 
     if (const FunctionDecl *Fn = dyn_cast<FunctionDecl>(TargetDecl)) {
       AddAttributesFromFunctionProtoType(

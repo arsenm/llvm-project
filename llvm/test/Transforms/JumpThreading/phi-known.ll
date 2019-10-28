@@ -65,8 +65,8 @@ exit:
 ; The eq predicate is always true if we go through the path from
 ; L1 to L3, no matter the phi result %t5 is on the lhs or rhs of
 ; the predicate.
-declare void @goo()
-declare void @hoo()
+declare void @goo() noconvergent
+declare void @hoo() noconvergent
 
 define void @test3(i32 %m, ptr %t1) {
 L1:

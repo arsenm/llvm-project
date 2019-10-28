@@ -59,9 +59,9 @@ cond.end:                                         ; preds = %entry
   ret void
 }
 
-declare i32 @__gxx_personality_v0(...)
+declare i32 @__gxx_personality_v0(...) noconvergent
 
-declare void @_ZN1C3endEv()
+declare void @_ZN1C3endEv() noconvergent
 
 define void @_ZN1C13_M_insert_auxER1D() uwtable ssp align 2 {
 entry:
@@ -93,4 +93,4 @@ entry:
   unreachable
 }
 
-declare void @_Z10__assert13v() noreturn
+declare void @_Z10__assert13v() noconvergent noreturn

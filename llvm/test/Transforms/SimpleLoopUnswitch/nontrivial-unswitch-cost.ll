@@ -4,9 +4,9 @@
 ; RUN: opt -passes='loop-mssa(simple-loop-unswitch<nontrivial>),verify<loops>' -unswitch-threshold=5 -S < %s | FileCheck %s
 ; RUN: opt -passes='simple-loop-unswitch<nontrivial>' -unswitch-threshold=5 -verify-memoryssa -S < %s | FileCheck %s
 
-declare void @a()
-declare void @b()
-declare void @x()
+declare void @a() noconvergent
+declare void @b() noconvergent
+declare void @x() noconvergent
 
 ; First establish enough code size in the duplicated 'loop_begin' block to
 ; suppress unswitching.

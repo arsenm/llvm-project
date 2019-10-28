@@ -9,7 +9,7 @@
 @global = external global ptr, align 8
 @global.1 = external constant ptr
 
-declare i32 @wombat.2()
+declare i32 @wombat.2() noconvergent
 
 define void @blam() {
 ; CHECK-LABEL: @blam(
@@ -265,7 +265,7 @@ bb41:
   ret void
 }
 
-declare i32 @foo(...)
+declare i32 @foo(...) noconvergent
 
 define void @zot() align 2 personality ptr @foo {
 ; CHECK-LABEL: @zot(
@@ -439,4 +439,4 @@ bb32:
   unreachable
 }
 
-declare void @bar()
+declare void @bar() noconvergent

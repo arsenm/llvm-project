@@ -34,7 +34,7 @@ void test0() {
 // CHECK-NEXT:   %[[EXN:.*]] = call ptr @llvm.wasm.get.exception(token %[[CATCHPAD]])
 // CHECK-NEXT:   store ptr %[[EXN]], ptr %exn.slot
 // CHECK-NEXT:   %[[SELECTOR:.*]] = call i32 @llvm.wasm.get.ehselector(token %[[CATCHPAD]])
-// CHECK-NEXT:   %[[TYPEID:.*]] = call i32 @llvm.eh.typeid.for(ptr @_ZTIi) #8
+// CHECK-NEXT:   %[[TYPEID:.*]] = call i32 @llvm.eh.typeid.for(ptr @_ZTIi) #9
 // CHECK-NEXT:   %[[MATCHES:.*]] = icmp eq i32 %[[SELECTOR]], %[[TYPEID]]
 // CHECK-NEXT:   br i1 %[[MATCHES]], label %[[CATCH_INT_BB:.*]], label %[[CATCH_FALLTHROUGH_BB:.*]]
 
@@ -51,7 +51,7 @@ void test0() {
 // CHECK-NEXT:   br label %[[TRY_CONT_BB:.*]]
 
 // CHECK: [[CATCH_FALLTHROUGH_BB]]
-// CHECK-NEXT:   %[[TYPEID:.*]] = call i32 @llvm.eh.typeid.for(ptr @_ZTId) #8
+// CHECK-NEXT:   %[[TYPEID:.*]] = call i32 @llvm.eh.typeid.for(ptr @_ZTId) #9
 // CHECK-NEXT:   %[[MATCHES:.*]] = icmp eq i32 %[[SELECTOR]], %[[TYPEID]]
 // CHECK-NEXT:   br i1 %[[MATCHES]], label %[[CATCH_FLOAT_BB:.*]], label %[[RETHROW_BB:.*]]
 
@@ -142,7 +142,7 @@ void test4() {
 // CHECK: [[CATCHSTART_BB]]:
 // CHECK:   %[[CATCHPAD:.*]] = catchpad within %[[CATCHSWITCH]] [ptr @_ZTIi]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD]]) ]
 // CHECK-NEXT:           to label %[[INVOKE_CONT_BB:.*]] unwind label %[[EHCLEANUP_BB:.*]]
 
 // CHECK: [[INVOKE_CONT_BB]]:
@@ -170,7 +170,7 @@ void test5() {
 // CHECK: [[CATCHSTART_BB]]:
 // CHECK:   %[[CATCHPAD:.*]] = catchpad within %[[CATCHSWITCH]] [ptr null]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD]]) ]
 // CHECK-NEXT:           to label %[[INVOKE_CONT_BB0:.*]] unwind label %[[EHCLEANUP_BB:.*]]
 
 // CHECK: [[INVOKE_CONT_BB0]]:
@@ -219,7 +219,7 @@ void test6() {
 // CHECK:   br i1 %{{.*}}, label %[[CATCH_INT_BB:.*]], label %[[RETHROW_BB:.*]]
 
 // CHECK: [[CATCH_INT_BB]]:
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD]]) ]
 // CHECK-NEXT:           to label %[[INVOKE_CONT_BB:.*]] unwind label %[[EHCLEANUP_BB2:.*]]
 
 // CHECK: [[INVOKE_CONT_BB]]:
@@ -282,11 +282,11 @@ void test7() {
 
 // CHECK:   %[[CATCHPAD0:.*]] = catchpad within %[[CATCHSWITCH0]] [ptr @_ZTIi, ptr @_ZTId]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD0]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD0]]) ]
 
 // CHECK:   catchret from %[[CATCHPAD0]] to label
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD0]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD0]]) ]
 
 // CHECK:   catchret from %[[CATCHPAD0]] to label
 
@@ -305,11 +305,11 @@ void test7() {
 
 // CHECK:   %[[CATCHPAD1:.*]] = catchpad within %[[CATCHSWITCH1]] [ptr @_ZTIi, ptr null]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD1]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD1]]) ]
 
 // CHECK:   catchret from %[[CATCHPAD1]] to label
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD1]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD1]]) ]
 
 // CHECK:   invoke void @__cxa_end_catch() [ "funclet"(token %[[CATCHPAD1]]) ]
 
@@ -352,13 +352,13 @@ void test8() {
 
 // CHECK:   %[[CATCHPAD0:.*]] = catchpad within %[[CATCHSWITCH0]] [ptr @_ZTIi]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD0]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD0]]) ]
 
 // CHECK:   %[[CATCHSWITCH1:.*]] = catchswitch within %[[CATCHPAD0]]
 
 // CHECK:   %[[CATCHPAD1:.*]] = catchpad within %[[CATCHSWITCH1]] [ptr @_ZTIi]
 
-// CHECK:   invoke void @_Z9may_throwv() [ "funclet"(token %[[CATCHPAD1]]) ]
+// CHECK:   invoke void @_Z9may_throwv() #{{[0-9]+}} [ "funclet"(token %[[CATCHPAD1]]) ]
 
 // CHECK:   catchret from %[[CATCHPAD1]] to label
 

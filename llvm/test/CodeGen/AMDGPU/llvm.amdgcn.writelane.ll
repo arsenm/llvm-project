@@ -82,6 +82,6 @@ define amdgpu_kernel void @test_writelane_imm_oldval(ptr addrspace(1) %out, i32 
 
 declare i32 @llvm.amdgcn.workitem.id.x() #2
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind }
 attributes #2 = { nounwind readnone }

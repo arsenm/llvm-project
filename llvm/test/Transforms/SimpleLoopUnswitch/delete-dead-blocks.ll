@@ -3,7 +3,7 @@
 ;
 ; Checking that (dead) blocks from inner loop are deleted after unswitch.
 ;
-declare void @foo()
+declare void @foo() noconvergent
 
 ; CHECK-LABEL: @Test
 define void @Test(i32) {

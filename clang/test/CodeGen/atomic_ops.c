@@ -113,4 +113,4 @@ _Atomic(int) compound_mul(_Atomic(int) in) {
   return (in *= 5);
 }
 
-// LIBCALL: [[LC_ATTRS]] = { nounwind willreturn }
+// LIBCALL: [[LC_ATTRS]] = { noconvergent nounwind willreturn }

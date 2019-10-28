@@ -93,17 +93,14 @@ declare i32 @llvm.umin.i32(i32, i32) #5
 ; Function Attrs: inaccessiblememonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.assume(i1 noundef) #6
 
-; Function Attrs: convergent nounwind willreturn
 declare void @llvm.amdgcn.s.barrier() #7
 
-; Function Attrs: convergent mustprogress noinline nounwind willreturn
 define internal fastcc void @_ZN4ompx11synchronize14threadsAlignedEv() unnamed_addr #8 {
 entry:
   call void @llvm.amdgcn.s.barrier() #13
   ret void
 }
 
-; Function Attrs: convergent nounwind
 define internal i32 @__kmpc_target_init(ptr nocapture noundef readnone %Ident, i8 noundef signext %Mode, i1 noundef zeroext %UseGenericStateMachine) local_unnamed_addr #9 {
 entry:
   %0 = and i32 undef, undef
@@ -265,28 +262,27 @@ define internal void @__kmpc_target_deinit(ptr nocapture noundef readnone %Ident
   ret void
 }
 
-; Function Attrs: convergent nounwind
 declare void @__kmpc_parallel_51(ptr nocapture noundef readnone %ident, i32 noundef %0, i32 noundef %if_expr, i32 noundef %num_threads, i32 noundef %proc_bind, ptr noundef %fn, ptr noundef %wrapper_fn, ptr noundef %args, i64 noundef %nargs)
 
 ; Function Attrs: argmemonly nofree nounwind willreturn
 declare void @llvm.memcpy.p0.p0.i64(ptr noalias nocapture writeonly, ptr noalias nocapture readonly, i64, i1 immarg) #12
 
-attributes #0 = { alwaysinline convergent norecurse nounwind "frame-pointer"="none" "kernel" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
+attributes #0 = { alwaysinline norecurse nounwind "frame-pointer"="none" "kernel" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
 attributes #1 = { argmemonly nocallback nofree nosync nounwind willreturn }
 attributes #2 = { alwaysinline mustprogress nofree norecurse nosync nounwind readnone willreturn "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
 attributes #3 = { mustprogress nofree norecurse nosync nounwind readnone willreturn "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
 attributes #4 = { nounwind readnone speculatable willreturn }
 attributes #5 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
 attributes #6 = { inaccessiblememonly nocallback nofree nosync nounwind willreturn }
-attributes #7 = { convergent nounwind willreturn }
-attributes #8 = { convergent mustprogress noinline nounwind willreturn "frame-pointer"="none" "llvm.assume"="ompx_aligned_barrier,ompx_no_call_asm,ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
-attributes #9 = { convergent nounwind "frame-pointer"="none" "llvm.assume"="ompx_no_call_asm,ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
+attributes #7 = { nounwind willreturn }
+attributes #8 = { mustprogress noinline nounwind willreturn "frame-pointer"="none" "llvm.assume"="ompx_aligned_barrier,ompx_no_call_asm,ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
+attributes #9 = { nounwind "frame-pointer"="none" "llvm.assume"="ompx_no_call_asm,ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
 attributes #10 = { nounwind "frame-pointer"="none" "llvm.assume"="ompx_no_call_asm,ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
-attributes #11 = { convergent nounwind "frame-pointer"="none" "llvm.assume"="ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
+attributes #11 = { nounwind "frame-pointer"="none" "llvm.assume"="ompx_no_call_asm" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx908" "target-features"="+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+flat-address-space,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst" }
 attributes #12 = { argmemonly nofree nounwind willreturn }
 attributes #13 = { nounwind }
-attributes #14 = { convergent nounwind "llvm.assume"="ompx_aligned_barrier,ompx_no_call_asm" }
-attributes #15 = { convergent nounwind }
+attributes #14 = { nounwind "llvm.assume"="ompx_aligned_barrier,ompx_no_call_asm" }
+attributes #15 = { nounwind }
 
 !omp_offload.info = !{!0}
 !nvvm.annotations = !{!1}

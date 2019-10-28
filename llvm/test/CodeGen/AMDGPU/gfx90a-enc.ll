@@ -23,4 +23,4 @@ declare <4 x i32> @llvm.amdgcn.mfma.i32.4x4x4i8(i32, i32, <4 x i32>, i32 immarg,
 
 attributes #0 = { nounwind readnone speculatable willreturn "amdgpu-flat-work-group-size"="1,256" }
 attributes #1 = { nounwind readonly willreturn }
-attributes #2 = { convergent nounwind readnone willreturn }
+attributes #2 = { nounwind readnone willreturn }

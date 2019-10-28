@@ -10,7 +10,7 @@ void non_convfun(void) {
   *p = 0;
 }
 
-void convfun(void) __attribute__((convergent));
+void convfun(void);
 void nodupfun(void) __attribute__((noduplicate));
 
 // External functions should be assumed convergent.
@@ -31,15 +31,14 @@ void g(void);
 // CHECK: %[[tobool:.+]] = icmp eq i32 %a, 0
 // CHECK: br i1 %[[tobool]], label %[[if_end3_critedge:.+]], label %[[if_then:.+]]
 
+// CHECK: [[if_end3_critedge]]:
+// CHECK: tail call spir_func void @non_convfun()
+// CHECK: br label %[[if_end3:.+]]
+
 // CHECK: [[if_then]]:
 // CHECK: tail call spir_func void @f()
 // CHECK: tail call spir_func void @non_convfun()
 // CHECK: tail call spir_func void @g()
-
-// CHECK: br label %[[if_end3:.+]]
-
-// CHECK: [[if_end3_critedge]]:
-// CHECK: tail call spir_func void @non_convfun()
 // CHECK: br label %[[if_end3]]
 
 // CHECK: [[if_end3]]:
@@ -133,11 +132,10 @@ kernel void assume_convergent_asm()
   __asm__ volatile("s_barrier");
 }
 
-// CHECK: attributes #0 = { nofree noinline norecurse nounwind "
-// CHECK: attributes #1 = { {{[^}]*}}convergent{{[^}]*}} }
-// CHECK: attributes #2 = { {{[^}]*}}convergent{{[^}]*}} }
-// CHECK: attributes #3 = { {{[^}]*}}convergent noduplicate{{[^}]*}} }
-// CHECK: attributes #4 = { {{[^}]*}}convergent{{[^}]*}} }
-// CHECK: attributes #5 = { {{[^}]*}}convergent{{[^}]*}} }
-// CHECK: attributes #6 = { {{[^}]*}}nounwind{{[^}]*}} }
-// CHECK: attributes #7 = { {{[^}]*}}convergent noduplicate nounwind{{[^}]*}} }
+// CHECK: attributes #0 = { noconvergent nofree noinline norecurse nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// CHECK: attributes #1 = { norecurse nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// CHECK: attributes #2 = { nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// CHECK: attributes #3 = { noduplicate nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+// CHECK: attributes #4 = { norecurse nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "uniform-work-group-size"="true" }
+// CHECK: attributes #5 = { nounwind }
+// CHECK: attributes #6 = { noduplicate nounwind }

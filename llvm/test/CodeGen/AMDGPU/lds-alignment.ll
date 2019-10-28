@@ -226,7 +226,7 @@ define amdgpu_kernel void @test_round_size_3_order5(ptr addrspace(1) %out, ptr a
 
 attributes #0 = { argmemonly nounwind }
 attributes #1 = { nounwind }
-attributes #2 = { convergent nounwind }
+attributes #2 = { nounwind }
 
 !llvm.module.flags = !{!0}
 !0 = !{i32 1, !"amdgpu_code_object_version", i32 200}

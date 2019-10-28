@@ -1,6 +1,6 @@
 ; RUN: opt < %s -passes=loop-unroll -unroll-runtime -unroll-allow-partial -S | FileCheck %s
 
-declare void @f() convergent
+declare void @f()
 
 ; Although this loop contains a convergent instruction, it should be
 ; fully unrolled.
@@ -42,7 +42,7 @@ l3:
 ; CHECK: call void @f()
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, %loop_ctl
   br i1 %exitcond, label %exit, label %l3
@@ -71,7 +71,7 @@ l3:
 ; CHECK: call void @f()
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, %loop_ctl
   br i1 %exitcond, label %exit, label %l3, !llvm.loop !0
@@ -92,7 +92,7 @@ l3:
 ; CHECK: call void @f()
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, 4
   br i1 %exitcond, label %exit, label %l3, !llvm.loop !1
@@ -114,7 +114,7 @@ l3:
 ; CHECK: call void @f()
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, %loop_ctl
   br i1 %exitcond, label %exit, label %l3, !llvm.loop !1
@@ -137,7 +137,7 @@ l3:
   %x.0 = phi i32 [ 0, %entry ], [ %inc, %l3 ]
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, %n
   br i1 %exitcond, label %exit, label %l3, !llvm.loop !1
@@ -165,7 +165,7 @@ l3:
 ; CHECK: call void @f()
 ; CHECK: call void @f()
 ; CHECK-NOT: call void @f()
-  call void @f() convergent
+  call void @f() ; convergent
   %inc = add nsw i32 %x.0, 1
   %exitcond = icmp eq i32 %inc, 5
   br i1 %exitcond, label %exit, label %l3, !llvm.loop !1
@@ -176,4 +176,3 @@ exit:
 
 !0 = !{!0, !{!"llvm.loop.unroll.count", i32 16}}
 !1 = !{!1, !{!"llvm.loop.unroll.count", i32 2}}
-

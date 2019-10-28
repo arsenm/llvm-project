@@ -18,6 +18,7 @@ entry:
 
 ; CHECK:      2 function-attrs - Number of functions with improved memory attribute
 ; CHECK-NEXT: 1 function-attrs - Number of arguments marked nocapture
+; CHECK-NEXT: 2 function-attrs - Number of functions marked as noconvergent
 ; CHECK-NEXT: 1 function-attrs - Number of functions marked as nofree
 ; CHECK-NEXT: 2 function-attrs - Number of functions marked as norecurse
 ; CHECK-NEXT: 2 function-attrs - Number of functions marked as nosync

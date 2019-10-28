@@ -250,4 +250,4 @@ attributes #2 = { "amdgpu-ieee" = "false" }
 attributes #3 = { "amdgpu-dx10-clamp" = "false" "amdgpu-ieee" = "false" }
 attributes #4 = { "amdgpu-32bit-address-high-bits"="0xffff8000" }
 attributes #5 = { "amdgpu-gds-size"="4096" }
-attributes #6 = { convergent nounwind readnone willreturn }
+attributes #6 = { nounwind readnone willreturn }

@@ -10,4 +10,4 @@ A a;
 
 // Check that the xray-instruction-threshold was applied
 // CHECK: define internal void @_GLOBAL__sub_I_xray_global_init.cpp() [[NUX:#[0-9]+]] section ".text.startup" {
-// CHECK: attributes [[NUX]] = { noinline nounwind {{.*}}"xray-instruction-threshold"="1"{{.*}} }
+// CHECK: attributes [[NUX]] = { noconvergent noinline nounwind {{.*}}"xray-instruction-threshold"="1"{{.*}} }

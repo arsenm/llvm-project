@@ -20,7 +20,7 @@ void foo(int n) {
   // UBSAN-DAG: call void @__ubsan_handle
   if (n)
     x[n] = 42;
-  // KCFI-DAG: call void %[[#]]() [ "kcfi"(i32 {{.*}}) ]
+  // KCFI-DAG: call void %[[#]]() #{{[0-9]+}} [ "kcfi"(i32 {{.*}}) ]
   f();
 }
 
@@ -46,7 +46,7 @@ __attribute__((no_sanitize("coverage"))) void test_no_sanitize_coverage(int n) {
   // UBSAN-DAG: call void @__ubsan_handle
   if (n)
     x[n] = 42;
-  // KCFI-DAG: call void %[[#]]() [ "kcfi"(i32 {{.*}}) ]
+  // KCFI-DAG: call void %[[#]]() #{{[0-9]+}} [ "kcfi"(i32 {{.*}}) ]
   f();
 }
 

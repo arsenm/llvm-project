@@ -2312,12 +2312,14 @@ static void UpdateAsmCallInst(llvm::CallBase &Result, bool HasSideEffect,
                                          llvm::ConstantAsMetadata::get(Loc)));
   }
 
-  if (CGF.getLangOpts().assumeFunctionsAreConvergent())
+  if (!CGF.getLangOpts().assumeFunctionsAreConvergent()) {
     // Conservatively, mark all inline asm blocks in CUDA or OpenCL as
     // convergent (meaning, they may call an intrinsically convergent op, such
     // as bar.sync, and so can't have certain optimizations applied around
     // them).
-    Result.addFnAttr(llvm::Attribute::Convergent);
+    Result.addFnAttr(llvm::Attribute::NoConvergent);
+  }
+
   // Extract all of the register value results from the asm.
   if (ResultRegTypes.size() == 1) {
     RegResults.push_back(&Result);

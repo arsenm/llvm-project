@@ -1,9 +1,9 @@
 ; RUN: opt -S -passes=jump-threading,verify < %s | FileCheck %s
 
-declare i32 @f1()
-declare i32 @f2()
-declare void @f3()
-declare void @f4(i32)
+declare i32 @f1() noconvergent
+declare i32 @f2() noconvergent
+declare void @f3() noconvergent
+declare void @f4(i32) noconvergent
 
 
 ; Make sure we update the phi node properly.

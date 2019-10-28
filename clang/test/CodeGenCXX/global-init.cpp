@@ -205,12 +205,12 @@ namespace test7 {
 
 // rdar://problem/8090834: this should be nounwind
 // CHECK-NOEXC: define internal void @_GLOBAL__sub_I_global_init.cpp() [[NUW:#[0-9]+]] section "__TEXT,__StaticInit,regular,pure_instructions" {
-// CHECK-NOEXC: attributes [[NUW]] = { noinline nounwind{{.*}} }
+// CHECK-NOEXC: attributes [[NUW]] = { noconvergent noinline nounwind{{.*}} }
 
 // Make sure we mark global initializers with the no-builtins attribute.
 // CHECK-NOBUILTIN: define internal void @_GLOBAL__sub_I_global_init.cpp() [[NUW:#[0-9]+]] section "__TEXT,__StaticInit,regular,pure_instructions" {
-// CHECK-NOBUILTIN: attributes [[NUW]] = { noinline nounwind{{.*}}"no-builtins"{{.*}} }
+// CHECK-NOBUILTIN: attributes [[NUW]] = { noconvergent noinline nounwind{{.*}}"no-builtins"{{.*}} }
 
 // PR21811: attach the appropriate attribute to the global init function
 // CHECK-FP: define internal void @_GLOBAL__sub_I_global_init.cpp() [[NUX:#[0-9]+]] section "__TEXT,__StaticInit,regular,pure_instructions" {
-// CHECK-FP: attributes [[NUX]] = { noinline nounwind {{.*}}"frame-pointer"="non-leaf"{{.*}} }
+// CHECK-FP: attributes [[NUX]] = { noconvergent noinline nounwind {{.*}}"frame-pointer"="non-leaf"{{.*}} }

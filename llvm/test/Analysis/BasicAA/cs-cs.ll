@@ -429,9 +429,9 @@ entry:
 }
 
 
-; CHECK:      attributes #0 = { nocallback nofree nounwind willreturn memory(argmem: write) }
-; CHECK-NEXT: attributes #1 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
-; CHECK-NEXT: attributes #2 = { nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK:      attributes #0 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: write) }
+; CHECK-NEXT: attributes #1 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK-NEXT: attributes #2 = { noconvergent nosync nounwind willreturn memory(argmem: readwrite) }
 ; CHECK-NEXT: attributes #3 = { noinline nounwind memory(read) }
 ; CHECK-NEXT: attributes #4 = { noinline nounwind memory(write) }
 ; CHECK-NEXT: attributes #5 = { nounwind ssp }

@@ -38,4 +38,4 @@ void func(const S &s1, const S &s2) {
 // CHECK: call noundef zeroext i1 @_ZeqRK1SS1_({{.*}}) #[[ALWAYSINLINEATTR]]
 }
 
-// CHECK: attributes #[[ALWAYSINLINEATTR]] = { alwaysinline }
+// CHECK: attributes #[[ALWAYSINLINEATTR]] = { alwaysinline noconvergent }

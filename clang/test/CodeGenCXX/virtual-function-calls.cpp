@@ -13,7 +13,7 @@ void f(A *a) {
   a->f('c');
 }
 
-struct B : virtual A { 
+struct B : virtual A {
   virtual void f();
 };
 
@@ -24,8 +24,8 @@ void f(B * b) {
 }
 
 namespace Test1 {
-  struct A { 
-    virtual ~A(); 
+  struct A {
+    virtual ~A();
   };
 
   struct B : A {
@@ -47,10 +47,11 @@ namespace VirtualNoreturn {
   // CHECK-INVARIANT-LABEL: define {{(dso_local )?}}void @_ZN15VirtualNoreturn1f
   void f(A *p) {
     p->f();
-    // CHECK: call {{.*}}void %{{[^#]*$}}
+    // CHECK: call {{.*}}void %{{[^#]*}}[[ATTR:#[0-9]+]]{{$}}
     // CHECK-NOT: unreachable
     // CHECK-INVARIANT: load {{.*}} !invariant.load ![[EMPTY_NODE:[0-9]+]]
   }
 }
 
+// CHECK: [[ATTR]] = { noconvergent }
 // CHECK-INVARIANT: ![[EMPTY_NODE]] = !{}

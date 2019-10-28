@@ -547,15 +547,20 @@ public:
     addFnAttr(Attribute::NoDuplicate);
   }
 
-  /// Determine if the call is convergent.
+  /// Determine if the call is not convergent.
+  bool isNoConvergent() const {
+    return hasFnAttribute(Attribute::NoConvergent);
+  }
+
   bool isConvergent() const {
-    return hasFnAttribute(Attribute::Convergent);
+    return !isNoConvergent();
   }
-  void setConvergent() {
-    addFnAttr(Attribute::Convergent);
+
+  void setNoConvergent() {
+    addFnAttr(Attribute::NoConvergent);
   }
-  void setNotConvergent() {
-    removeFnAttr(Attribute::Convergent);
+  void setNotNoConvergent() {
+    removeFnAttr(Attribute::NoConvergent);
   }
 
   /// Determine if the call has sideeffects.

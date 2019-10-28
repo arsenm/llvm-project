@@ -2,7 +2,7 @@
 ; RUN: opt -passes='simple-loop-unswitch<nontrivial>' -S < %s | FileCheck %s
 
 ; If we try to replace uses of `true` outside of `@foo`, we'll see it here.
-define i1 @bar() {
+define i1 @bar() noconvergent {
 ; CHECK-LABEL: @bar(
 ; CHECK-NEXT:    ret i1 true
 ;
@@ -10,7 +10,7 @@ define i1 @bar() {
 }
 
 ; We shouldn't unswitch this loop.
-define void @foo() {
+define void @foo() noconvergent {
 ; CHECK-LABEL: @foo(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    br label [[HEADER:%.*]]

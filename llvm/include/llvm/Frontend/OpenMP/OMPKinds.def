@@ -535,8 +535,8 @@ __OMP_ATTRS_SET(DefaultAttrs,
 
 __OMP_ATTRS_SET(BarrierAttrs,
                 OptimisticAttributes
-                    ? AttributeSet(EnumAttr(NoUnwind), EnumAttr(Convergent))
-                    : AttributeSet(EnumAttr(NoUnwind), EnumAttr(Convergent)))
+                    ? AttributeSet(EnumAttr(NoUnwind))
+                    : AttributeSet(EnumAttr(NoUnwind)))
 
 __OMP_ATTRS_SET(
     InaccessibleArgOnlyAttrs,

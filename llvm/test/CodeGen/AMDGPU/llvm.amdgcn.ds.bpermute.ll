@@ -50,4 +50,4 @@ define void @ds_bpermute_or_shl(ptr addrspace(1) %out, i32 %base_index, i32 %src
   ret void
 }
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

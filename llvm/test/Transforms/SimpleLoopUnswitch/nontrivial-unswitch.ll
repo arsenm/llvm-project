@@ -2,16 +2,18 @@
 ; RUN: opt -passes='loop-mssa(simple-loop-unswitch<nontrivial>),verify<loops>' -S < %s | FileCheck %s
 ; RUN: opt -passes='simple-loop-unswitch<nontrivial>' -verify-memoryssa -S < %s | FileCheck %s
 
-declare i32 @a()
-declare i32 @b()
-declare i32 @c()
-declare i32 @d()
+declare i32 @a() noconvergent
+declare i32 @b() noconvergent
+declare i32 @c() noconvergent
+declare i32 @d() noconvergent
 
-declare void @sink1(i32)
-declare void @sink2(i32)
+declare i32 @convergent()
 
-declare i1 @cond()
-declare i32 @cond.i32()
+declare void @sink1(i32) noconvergent
+declare void @sink2(i32) noconvergent
+
+declare i1 @cond() noconvergent
+declare i32 @cond.i32() noconvergent
 
 ; Negative test: we cannot unswitch convergent calls.
 define void @test_no_unswitch_convergent(ptr %ptr, i1 %cond) {
@@ -30,7 +32,7 @@ loop_begin:
 ; CHECK-NEXT:    br i1 %cond, label %loop_a, label %loop_b
 
 loop_a:
-  call i32 @a() convergent
+  call i32 @convergent()
   br label %loop_latch
 
 loop_b:
@@ -77,7 +79,7 @@ loop_exit:
   ret void
 }
 
-declare i32 @__CxxFrameHandler3(...)
+declare i32 @__CxxFrameHandler3(...) noconvergent
 
 ; Negative test: we cannot unswitch when tokens are used across blocks as we
 ; might introduce PHIs.
@@ -2487,9 +2489,9 @@ bb23:
 ; different cloning path from our other test cases and in turn verifying the
 ; resulting structure can catch any failures to correctly clone these nested
 ; loops.
-declare void @f()
-declare void @g()
-declare i32 @h(i32 %arg)
+declare void @f() noconvergent
+declare void @g() noconvergent
+declare i32 @h(i32 %arg) noconvergent
 define void @test22(i32 %arg) {
 ; CHECK-LABEL: define void @test22(
 entry:

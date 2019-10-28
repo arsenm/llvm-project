@@ -904,7 +904,7 @@ Function *CodeExtractor::constructFunction(const ValueSet &inputs,
       // here so we get a warning if new attributes are added.
       case Attribute::AllocSize:
       case Attribute::Builtin:
-      case Attribute::Convergent:
+      case Attribute::NoConvergent: // TODO: Probably safe
       case Attribute::JumpTable:
       case Attribute::Naked:
       case Attribute::NoBuiltin:

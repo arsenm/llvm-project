@@ -78,4 +78,4 @@ int main(void) {
 @end
 
 // -- calls to objc_loadClassRef() are readnone
-// CHECK: attributes [[ATTRLIST]] = { nounwind nonlazybind memory(none) }
+// CHECK: attributes [[ATTRLIST]] = { noconvergent nounwind nonlazybind memory(none) }

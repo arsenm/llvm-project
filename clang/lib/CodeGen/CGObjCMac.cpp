@@ -4390,6 +4390,7 @@ void FragileHazards::emitReadHazard(CGBuilderTy &Builder) {
   assert(!Locals.empty());
   llvm::CallInst *call = Builder.CreateCall(ReadHazard, Locals);
   call->setDoesNotThrow();
+  call->setNoConvergent();
   call->setCallingConv(CGF.getRuntimeCC());
   for (auto Pair : llvm::enumerate(Locals))
     call->addParamAttr(Pair.index(), llvm::Attribute::get(

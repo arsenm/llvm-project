@@ -22,7 +22,7 @@ exit2:
   ret i32 1
 }
 
-declare void @use(i1)
+declare void @use(i1) noconvergent
 
 ; It would not be legal to replace %cmp2 (well, in this case it actually is,
 ; but that's a CSE problem, not a LVI/jump threading problem)

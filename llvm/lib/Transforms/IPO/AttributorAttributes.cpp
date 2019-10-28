@@ -154,6 +154,7 @@ namespace llvm {
 
 PIPE_OPERATOR(AAIsDead)
 PIPE_OPERATOR(AANoUnwind)
+PIPE_OPERATOR(AANoConvergent)
 PIPE_OPERATOR(AANoSync)
 PIPE_OPERATOR(AANoRecurse)
 PIPE_OPERATOR(AAWillReturn)
@@ -2030,6 +2031,80 @@ struct AANoUnwindCallSite final : AANoUnwindImpl {
   /// See AbstractAttribute::trackStatistics()
   void trackStatistics() const override { STATS_DECLTRACK_CS_ATTR(nounwind); }
 };
+
+struct AANoConvergentImpl : public AANoConvergent {
+  AANoConvergentImpl(const IRPosition &IRP, Attributor &A)
+      : AANoConvergent(IRP, A) {}
+
+  const std::string getAsStr() const override {
+    return getAssumed() ? "noconvergent" : "maybe-convergnet";
+  }
+
+  /// See AbstractAttribute::updateImpl(...).
+  ChangeStatus updateImpl(Attributor &A) override {
+    auto Opcodes = {
+        (unsigned)Instruction::Invoke,      (unsigned)Instruction::CallBr,
+        (unsigned)Instruction::Call,        (unsigned)Instruction::CleanupRet,
+        (unsigned)Instruction::CatchSwitch, (unsigned)Instruction::Resume};
+
+    auto CheckForNoConvergent = [&](Instruction &I) {
+      if (!I.mayThrow())
+        return true;
+
+      if (const auto *CB = dyn_cast<CallBase>(&I)) {
+        const auto &NoConvergentAA = A.getAAFor<AANoConvergent>(
+            *this, IRPosition::callsite_function(*CB), DepClassTy::REQUIRED);
+        return NoConvergentAA.isAssumedNoConvergent();
+      }
+      return false;
+    };
+
+    bool UsedAssumedInformation = false;
+    if (!A.checkForAllInstructions(CheckForNoConvergent, *this, Opcodes,
+                                   UsedAssumedInformation))
+      return indicatePessimisticFixpoint();
+
+    return ChangeStatus::UNCHANGED;
+  }
+};
+
+struct AANoConvergentFunction final : public AANoConvergentImpl {
+  AANoConvergentFunction(const IRPosition &IRP, Attributor &A)
+      : AANoConvergentImpl(IRP, A) {}
+
+  /// See AbstractAttribute::trackStatistics()
+  void trackStatistics() const override { STATS_DECLTRACK_FN_ATTR(nounwind) }
+};
+
+/// NoConvergent attribute deduction for a call sites.
+struct AANoConvergentCallSite final : AANoConvergentImpl {
+  AANoConvergentCallSite(const IRPosition &IRP, Attributor &A)
+      : AANoConvergentImpl(IRP, A) {}
+
+  /// See AbstractAttribute::initialize(...).
+  void initialize(Attributor &A) override {
+    AANoConvergentImpl::initialize(A);
+    Function *F = getAssociatedFunction();
+    if (!F || F->isDeclaration())
+      indicatePessimisticFixpoint();
+  }
+
+  /// See AbstractAttribute::updateImpl(...).
+  ChangeStatus updateImpl(Attributor &A) override {
+    // TODO: Once we have call site specific value information we can provide
+    //       call site specific liveness information and then it makes
+    //       sense to specialize attributes for call sites arguments instead of
+    //       redirecting requests to the callee argument.
+    Function *F = getAssociatedFunction();
+    const IRPosition &FnPos = IRPosition::function(*F);
+    auto &FnAA = A.getAAFor<AANoConvergent>(*this, FnPos, DepClassTy::REQUIRED);
+    return clampStateAndIndicateChange(getState(), FnAA.getState());
+  }
+
+  /// See AbstractAttribute::trackStatistics()
+  void trackStatistics() const override { STATS_DECLTRACK_CS_ATTR(nounwind); }
+};
+
 } // namespace
 
 /// --------------------- Function Return Values -------------------------------
@@ -11606,6 +11681,7 @@ struct AAUnderlyingObjectsFunction final : AAUnderlyingObjectsImpl {
 
 const char AAReturnedValues::ID = 0;
 const char AANoUnwind::ID = 0;
+const char AANoConvergent::ID = 0;
 const char AANoSync::ID = 0;
 const char AANoFree::ID = 0;
 const char AANonNull::ID = 0;
@@ -11729,6 +11805,7 @@ const char AAUnderlyingObjects::ID = 0;
   }
 
 CREATE_FUNCTION_ABSTRACT_ATTRIBUTE_FOR_POSITION(AANoUnwind)
+CREATE_FUNCTION_ABSTRACT_ATTRIBUTE_FOR_POSITION(AANoConvergent)
 CREATE_FUNCTION_ABSTRACT_ATTRIBUTE_FOR_POSITION(AANoSync)
 CREATE_FUNCTION_ABSTRACT_ATTRIBUTE_FOR_POSITION(AANoRecurse)
 CREATE_FUNCTION_ABSTRACT_ATTRIBUTE_FOR_POSITION(AAWillReturn)

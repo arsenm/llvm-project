@@ -13,7 +13,7 @@ struct A {
   static int static_optnone_method(int a) {
     return a + a;
   }
-  // CHECK: @_ZN1A21static_optnone_methodEi({{.*}}) [[OPTNONE:#[0-9]+]]
+  // CHECK: define {{.*}} @_ZN1A21static_optnone_methodEi({{.*}}) [[OPTNONE:#[0-9]+]]
 
   // Definition of an optnone normal method.
   __attribute__((optnone))

@@ -69,17 +69,17 @@ define i32 @test3_no(ptr %p) nounwind {
   ret i32 %t
 }
 
-declare void @callee(ptr %p) nounwind
+declare void @callee(ptr %p) noconvergent nounwind
 declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1) nounwind
 
-; CHECK: attributes #0 = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CHECK: attributes #1 = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }
-; CHECK: attributes #2 = { nofree nosync nounwind memory(none) }
-; CHECK: attributes #3 = { nounwind }
-; CHECK: attributes #4 = { mustprogress nofree nosync nounwind willreturn memory(none) }
-; CHECK: attributes #5 = { mustprogress nofree nosync nounwind willreturn memory(argmem: readwrite) }
-; CHECK: attributes #6 = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
-; CHECK: attributes #7 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #0 = { mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(none) }
+; CHECK: attributes #1 = { mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: write) }
+; CHECK: attributes #2 = { noconvergent nofree nosync nounwind memory(none) }
+; CHECK: attributes #3 = { noconvergent nounwind }
+; CHECK: attributes #4 = { mustprogress noconvergent nofree nosync nounwind willreturn memory(none) }
+; CHECK: attributes #5 = { mustprogress noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #6 = { mustprogress noconvergent nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #7 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 
 ; Root note.
 !0 = !{ }

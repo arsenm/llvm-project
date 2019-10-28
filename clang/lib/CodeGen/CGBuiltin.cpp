@@ -17175,18 +17175,16 @@ Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
     return Builder.CreateCall(F, {Addr, Val, ZeroI32, ZeroI32, ZeroI1});
   }
   case AMDGPU::BI__builtin_amdgcn_read_exec: {
-    CallInst *CI = cast<CallInst>(
-      EmitSpecialRegisterBuiltin(*this, E, Int64Ty, Int64Ty, NormalRead, "exec"));
-    CI->setConvergent();
+    CallInst *CI = cast<CallInst>(EmitSpecialRegisterBuiltin(
+        *this, E, Int64Ty, Int64Ty, NormalRead, "exec"));
     return CI;
   }
   case AMDGPU::BI__builtin_amdgcn_read_exec_lo:
   case AMDGPU::BI__builtin_amdgcn_read_exec_hi: {
     StringRef RegName = BuiltinID == AMDGPU::BI__builtin_amdgcn_read_exec_lo ?
       "exec_lo" : "exec_hi";
-    CallInst *CI = cast<CallInst>(
-      EmitSpecialRegisterBuiltin(*this, E, Int32Ty, Int32Ty, NormalRead, RegName));
-    CI->setConvergent();
+    CallInst *CI = cast<CallInst>(EmitSpecialRegisterBuiltin(
+        *this, E, Int32Ty, Int32Ty, NormalRead, RegName));
     return CI;
   }
   case AMDGPU::BI__builtin_amdgcn_image_bvh_intersect_ray:

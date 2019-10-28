@@ -2,8 +2,8 @@
 
 ; RUN: opt < %s -passes='require<profile-summary>,function(loop-mssa(simple-loop-unswitch<nontrivial>))' -S | FileCheck %s
 
-declare i32 @a()
-declare i32 @b()
+declare i32 @a() noconvergent
+declare i32 @b() noconvergent
 
 ; Check loops will be applied non-trivial loop unswitch in a non-cold function,
 ; even loop headers are cold

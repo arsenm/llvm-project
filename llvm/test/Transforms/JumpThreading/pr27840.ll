@@ -3,8 +3,8 @@
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-macosx10.11.0"
 
-declare void @helper()
-declare i32 @__gxx_personality_v0(...)
+declare void @helper() noconvergent
+declare i32 @__gxx_personality_v0(...) noconvergent
 
 
 define void @pr27840(ptr %call, i1 %A) personality ptr @__gxx_personality_v0 {

@@ -1,6 +1,6 @@
 ; RUN: opt -S -passes=jump-threading < %s | FileCheck %s
 
-declare ptr @escape()
+declare ptr @escape() noconvergent
 declare void @llvm.assume(i1)
 
 define i1 @test1(i1 %cond) {

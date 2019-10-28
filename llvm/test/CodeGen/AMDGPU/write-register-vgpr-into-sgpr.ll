@@ -19,6 +19,6 @@ define amdgpu_kernel void @write_vgpr_into_sgpr() {
 
 attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind }
-attributes #2 = { convergent nounwind }
+attributes #2 = { nounwind }
 
 !0 = !{!"exec_lo"}

@@ -198,8 +198,8 @@ void foo(float f) {
 };
 
 // NO__ERRNO: attributes [[READNONE]] = { {{.*}}memory(none){{.*}} }
-// NO__ERRNO: attributes [[NOT_READNONE]] = { nounwind {{.*}} }
+// NO__ERRNO: attributes [[NOT_READNONE]] = { noconvergent nounwind {{.*}} }
 
-// HAS_ERRNO: attributes [[NOT_READNONE]] = { nounwind {{.*}} }
+// HAS_ERRNO: attributes [[NOT_READNONE]] = { noconvergent nounwind {{.*}} }
 // HAS_ERRNO: attributes [[READNONE]] = { {{.*}}memory(none){{.*}} }
-// HAS_ERRNO: attributes [[WILLRETURN_NOT_READNONE]] = { nounwind willreturn {{.*}} }
+// HAS_ERRNO: attributes [[WILLRETURN_NOT_READNONE]] = { noconvergent nounwind willreturn {{.*}} }

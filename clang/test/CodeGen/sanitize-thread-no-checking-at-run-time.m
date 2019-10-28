@@ -38,4 +38,4 @@ void test2(id x) {
 // TSAN: define linkonce_odr hidden void @__destroy_helper_block_8_32o(ptr noundef %0) unnamed_addr [[ATTR:#[0-9]+]]
 }
 
-// TSAN: attributes [[ATTR]] = { noinline nounwind {{.*}} "sanitize_thread_no_checking_at_run_time" {{.*}} }
+// TSAN: attributes [[ATTR]] = { noconvergent noinline nounwind {{.*}} "sanitize_thread_no_checking_at_run_time" {{.*}} }

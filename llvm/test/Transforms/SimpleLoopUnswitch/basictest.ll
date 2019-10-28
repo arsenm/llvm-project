@@ -82,7 +82,7 @@ loop_begin:
 
 ; CHECK: call void @conv()
 ; CHECK-NOT: call void @conv()
-  call void @conv() convergent
+  call void @conv()
 
   switch i32 %c, label %default [
       i32 1, label %inc
@@ -116,7 +116,7 @@ entry:
 
 for.body:
   %i = phi i2 [ 0, %entry ], [ %inc, %for.inc ]
-  %and = and i2 %a, %i 
+  %and = and i2 %a, %i
   %or = or i2 %and, %i
   switch i2 %or, label %sw.default [
     i2 0, label %sw.bb
@@ -137,7 +137,7 @@ sw.epilog:
 
 for.inc:
   %inc = add nsw i2 %i, 1
-  %cmp = icmp slt i2 %inc, 3 
+  %cmp = icmp slt i2 %inc, 3
   br i1 %cmp, label %for.body, label %for.end
 
 for.end:
@@ -158,7 +158,7 @@ entry:
 
 for.body:
   %i = phi i1 [ 0, %entry ], [ %inc, %for.inc ]
-  %and = and i1 %a, %i 
+  %and = and i1 %a, %i
   %or = or i1 %and, %i
   br i1 %or, label %sw.bb, label %sw.bb1
 
@@ -173,13 +173,13 @@ sw.epilog:
 
 for.inc:
   %inc = add nsw i1 %i, 1
-  %cmp = icmp slt i1 %inc, 1 
+  %cmp = icmp slt i1 %inc, 1
   br i1 %cmp, label %for.body, label %for.end
 
 for.end:
   ret void
 }
 
-declare void @incf() noreturn
-declare void @decf() noreturn
-declare void @conv() convergent
+declare void @incf() noconvergent noreturn
+declare void @decf() noconvergent noreturn
+declare void @conv()

@@ -46,7 +46,7 @@ void test_assign(void) {
 // DISABLED-NEXT:        [[T2:%.*]] = {{.*}}call i8* @llvm.objc.retainAutoreleasedReturnValue(i8* [[T1]])
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_assign()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_assign_assign(void) {
@@ -72,7 +72,7 @@ void test_assign_assign(void) {
 // CHECK-NEXT:           ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_assign_assign()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_strong_assign_assign(void) {
@@ -103,7 +103,7 @@ void test_strong_assign_assign(void) {
 // CHECK-NEXT:           ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_strong_assign_assign()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_assign_strong_assign(void) {
@@ -134,7 +134,7 @@ void test_assign_strong_assign(void) {
 // CHECK-NEXT:           ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_assign_strong_assign()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_init(void) {
@@ -155,7 +155,7 @@ void test_init(void) {
 // CHECK-NEXT:           ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_init()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_init_assignment(void) {
@@ -181,7 +181,7 @@ void test_init_assignment(void) {
 // CHECK-NEXT: ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_init_assignment()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_strong_init_assignment(void) {
@@ -209,7 +209,7 @@ void test_strong_init_assignment(void) {
 // CHECK-NEXT: ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_strong_init_assignment()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_init_strong_assignment(void) {
@@ -239,7 +239,7 @@ void test_init_strong_assignment(void) {
 // CHECK-NEXT: ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_init_strong_assignment()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_ignored(void) {
@@ -255,7 +255,7 @@ void test_ignored(void) {
 // CHECK-NEXT:        ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_ignored()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 void test_cast_to_void(void) {
@@ -271,7 +271,7 @@ void test_cast_to_void(void) {
 // CHECK-NEXT:        ret void
 
 // ATTACHED-CALL-LABEL:      define{{.*}} void @test_cast_to_void()
-// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
+// ATTACHED-CALL:              [[T0:%.*]] = call [[A:.*]]* @makeA() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.unsafeClaimAutoreleasedReturnValue) ],
 // ATTACHED-CALL:              call void (...) @llvm.objc.clang.arc.noop.use([[A]]* [[T0]])
 
 

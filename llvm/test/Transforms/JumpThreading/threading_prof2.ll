@@ -28,13 +28,13 @@ bb9:
   ret void
 }
 
-declare void @bar()
+declare void @bar() noconvergent
 
-declare void @foo()
+declare void @foo() noconvergent
 
-declare i32 @a()
+declare i32 @a() noconvergent
 
-declare i32 @b()
+declare i32 @b() noconvergent
 
 !0 = !{!"branch_weights", i32 2146410443, i32 1073205}
 ;CHECK: ![[PROF1]] = !{!"branch_weights", i32 1073205, i32 2146410443}

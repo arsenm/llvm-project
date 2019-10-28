@@ -134,5 +134,5 @@ define void @test7(ptr %p, ptr %n, ptr %q, ptr %m) {
   ret void
 }
 
-; CHECK: attributes #0 = { nounwind }
+; CHECK: attributes #0 = { noconvergent nounwind }
 ; CHECK: attributes [[RO]] = { memory(read) }

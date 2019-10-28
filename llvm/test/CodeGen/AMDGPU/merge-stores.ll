@@ -682,4 +682,4 @@ define amdgpu_kernel void @copy_v3f64_align4(ptr addrspace(1) noalias %out, ptr 
 declare void @llvm.amdgcn.s.barrier() #1
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }

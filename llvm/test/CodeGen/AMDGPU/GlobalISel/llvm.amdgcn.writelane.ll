@@ -318,5 +318,5 @@ declare i32 @llvm.amdgcn.writelane(i32, i32, i32) #1
 declare i32 @llvm.amdgcn.workitem.id.x() #2
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind readnone willreturn }
+attributes #1 = { nounwind readnone willreturn }
 attributes #2 = { nounwind readnone speculatable willreturn }

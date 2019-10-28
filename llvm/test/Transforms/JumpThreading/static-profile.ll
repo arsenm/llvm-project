@@ -71,7 +71,7 @@
 ; As a result, the loop exit edge ends up with 0 frequency which in turn makes
 ; the loop header to have maximum frequency.
 
-declare void @bar()
+declare void @bar() noconvergent
 
 define void @foo(ptr %p, i32 %n) !prof !0 {
 entry:

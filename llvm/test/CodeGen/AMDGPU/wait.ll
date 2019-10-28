@@ -74,7 +74,7 @@ declare <4 x float> @llvm.amdgcn.struct.buffer.load.format.v4f32(<4 x i32>, i32,
 declare void @llvm.amdgcn.exp.f32(i32, i32, float, float, float, float, i1, i1) #0
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }
 attributes #2 = { nounwind readonly }
 
 !0 = !{!1, !1, i64 0, i32 1}

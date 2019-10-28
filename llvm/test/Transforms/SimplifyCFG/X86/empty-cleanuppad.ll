@@ -549,14 +549,15 @@ return:                                           ; preds = %invoke.cont, %catch
 
 %struct.S = type { i8 }
 %struct.S2 = type { i8 }
-declare void @"\01??1S2@@QEAA@XZ"(ptr)
-declare void @g()
-declare void @use_x(i32 %x)
+declare void @"\01??1S2@@QEAA@XZ"(ptr) noconvergent
+declare void @g() noconvergent
+declare void @use_x(i32 %x) noconvergent
 
-declare i32 @__CxxFrameHandler3(...)
+declare i32 @__CxxFrameHandler3(...) noconvergent
 
 declare void @llvm.lifetime.start.p0(i64, ptr nocapture)
 declare void @llvm.lifetime.end.p0(i64, ptr nocapture)
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { noconvergent }
+; CHECK: attributes #[[ATTR1:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }
 ;.

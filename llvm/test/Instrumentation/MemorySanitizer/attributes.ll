@@ -47,5 +47,5 @@ entry:
 ; CHECK-NOT: memory(
 ; CHECK-NOT: speculatable
 
-; CHECK: Function Attrs: nocallback nofree nosync nounwind willreturn memory(none)
+; CHECK: Function Attrs: nocallback noconvergent nofree nosync nounwind willreturn memory(none)
 ; CHECK-NEXT: declare void @llvm.donothing

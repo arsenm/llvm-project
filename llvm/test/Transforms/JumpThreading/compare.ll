@@ -2,9 +2,9 @@
 ; There should be no phi nodes left.
 ; RUN: opt -S -passes=jump-threading < %s | FileCheck %s
 
-declare i32 @f1()
-declare i32 @f2()
-declare void @f3()
+declare i32 @f1() noconvergent
+declare i32 @f2() noconvergent
+declare void @f3() noconvergent
 
 define i32 @test(i1 %cond) {
 ; CHECK-LABEL: @test(

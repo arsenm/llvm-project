@@ -3232,15 +3232,6 @@ Instruction *InstCombinerImpl::visitCallBase(CallBase &Call) {
     return nullptr;
 
   if (CalleeF) {
-    // Remove the convergent attr on calls when the callee is not convergent.
-    if (Call.isConvergent() && !CalleeF->isConvergent() &&
-        !CalleeF->isIntrinsic()) {
-      LLVM_DEBUG(dbgs() << "Removing convergent attr from instr " << Call
-                        << "\n");
-      Call.setNotConvergent();
-      return &Call;
-    }
-
     // If the call and callee calling conventions don't match, and neither one
     // of the calling conventions is compatible with C calling convention
     // this call must be unreachable, as the call is undefined.

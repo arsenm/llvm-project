@@ -38,6 +38,6 @@ void f4(void) __attribute__((cmse_nonsecure_entry))
 
 // CHECK-NOSE-NOT: cmse_nonsecure_entry
 // CHECK-NOSE-NOT: cmse_nonsecure_call
-// CHECK-SE: attributes #0 = { nounwind
+// CHECK-SE: attributes #0 = { noconvergent nounwind
 // CHECK-SE: attributes #1 = { {{.*}} "cmse_nonsecure_entry"
 // CHECK-SE: attributes #2 = { {{.*}} "cmse_nonsecure_call"

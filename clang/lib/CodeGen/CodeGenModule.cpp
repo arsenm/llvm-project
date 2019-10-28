@@ -4272,9 +4272,9 @@ llvm::FunctionCallee
 CodeGenModule::CreateRuntimeFunction(llvm::FunctionType *FTy, StringRef Name,
                                      llvm::AttributeList ExtraAttrs, bool Local,
                                      bool AssumeConvergent) {
-  if (AssumeConvergent) {
+  if (!AssumeConvergent) {
     ExtraAttrs =
-        ExtraAttrs.addFnAttribute(VMContext, llvm::Attribute::Convergent);
+        ExtraAttrs.addFnAttribute(VMContext, llvm::Attribute::NoConvergent);
   }
 
   llvm::Constant *C =

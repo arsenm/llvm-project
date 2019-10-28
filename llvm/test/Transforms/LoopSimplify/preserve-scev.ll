@@ -74,7 +74,7 @@ return:                                           ; preds = %for.body18, %for.bo
   ret i32 0
 }
 
-declare void @foo() nounwind
+declare void @foo() noconvergent nounwind
 
 ; Notify SCEV when removing an ExitingBlock. This only changes the
 ; backedge-taken information.

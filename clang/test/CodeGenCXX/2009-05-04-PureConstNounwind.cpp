@@ -15,8 +15,8 @@ int f(void) {
 // CHECK: declare noundef i32 @_Z1tv() [[TF2:#[0-9]+]]
 
 // CHECK: attributes [[TF]] = { {{.*}} }
-// CHECK: attributes [[NUW_RN]] = { nounwind willreturn memory(none){{.*}} }
-// CHECK: attributes [[NUW_RO]] = { nounwind willreturn memory(read){{.*}} }
+// CHECK: attributes [[NUW_RN]] = { noconvergent nounwind willreturn memory(none){{.*}} }
+// CHECK: attributes [[NUW_RO]] = { noconvergent nounwind willreturn memory(read){{.*}} }
 // CHECK: attributes [[TF2]] = { {{.*}} }
-// CHECK: attributes [[NUW_RN_CALL]] = { nounwind willreturn memory(none) }
-// CHECK: attributes [[NUW_RO_CALL]] = { nounwind willreturn memory(read) }
+// CHECK: attributes [[NUW_RN_CALL]] = { noconvergent nounwind willreturn memory(none) }
+// CHECK: attributes [[NUW_RO_CALL]] = { noconvergent nounwind willreturn memory(read) }

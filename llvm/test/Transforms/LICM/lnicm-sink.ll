@@ -19,7 +19,7 @@
 ;
 ; We only want to sink the call of sin out of the loop nest.
 ; LICM also sinks the call of abs out of j-loop, but LNICM doesn't do so
-; to try to make a perfect loop nest. (though y[i] = s; still prevents the 
+; to try to make a perfect loop nest. (though y[i] = s; still prevents the
 ; loop nest from being a perfect loop nest in this test case)
 
 define dso_local double @test(double %x, ptr noalias %y) {
@@ -131,4 +131,4 @@ declare dso_local double @sin(double) #0
 
 declare dso_local i32 @abs(i32) #0
 
-attributes #0 = { nounwind readnone willreturn }
+attributes #0 = { noconvergent nounwind readnone willreturn }

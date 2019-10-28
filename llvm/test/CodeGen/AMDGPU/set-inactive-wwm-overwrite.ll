@@ -133,7 +133,7 @@ declare i32 @llvm.amdgcn.update.dpp.i32(i32, i32, i32, i32, i32, i1) #0
 declare i32 @llvm.amdgcn.strict.wwm.i32(i32) #1
 declare void @llvm.amdgcn.raw.buffer.store.i32(i32, <4 x i32>, i32, i32 immarg, i32 immarg) #2
 
-attributes #0 = { convergent nounwind readnone willreturn }
-attributes #1 = { convergent nounwind readnone speculatable willreturn }
+attributes #0 = { nounwind readnone willreturn }
+attributes #1 = { nounwind readnone speculatable willreturn }
 attributes #2 = { nounwind willreturn writeonly }
 

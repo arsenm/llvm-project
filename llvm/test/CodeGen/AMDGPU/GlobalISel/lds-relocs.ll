@@ -25,4 +25,3 @@ main_body:
 }
 
 attributes #0 = { "no-signed-zeros-fp-math"="true" }
-attributes #4 = { convergent nounwind readnone }

@@ -34,7 +34,7 @@ End:
   ret void
 }
 
-define void @callee(ptr %dst_elt, ptr %a_elt, ptr %b_elt, i1 %c) {
+define void @callee(ptr %dst_elt, ptr %a_elt, ptr %b_elt, i1 %c) noconvergent {
 entry:
   %tobool = icmp ne ptr %a_elt, null
   %tobool1 = icmp ne ptr %b_elt, null
@@ -96,7 +96,7 @@ End:
   ret void
 }
 
-define i1 @callee2(i1 %b) {
+define i1 @callee2(i1 %b) noconvergent {
 entry:
   br i1 %b, label %BB1, label %BB2
 
@@ -112,6 +112,6 @@ End:
   ret i1 %b
 }
 
-declare void @dummy3()
-declare void @dummy4()
-declare void @foo(i1)
+declare void @dummy3() noconvergent
+declare void @dummy4() noconvergent
+declare void @foo(i1) noconvergent

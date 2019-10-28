@@ -19,13 +19,13 @@
 @display_edited_filters = external hidden global ptr, align 8
 @__PRETTY_FUNCTION__.get_filter_list = external hidden unnamed_addr constant [44 x i8], align 1
 
-declare void @g_assertion_message(ptr, ptr, i32, ptr, ptr) noreturn
+declare void @g_assertion_message(ptr, ptr, i32, ptr, ptr) noconvergent noreturn
 
-declare void @g_free(ptr)
+declare void @g_free(ptr) noconvergent
 
-declare ptr @g_list_first(ptr)
+declare ptr @g_list_first(ptr) noconvergent
 
-declare noalias ptr @g_malloc(i64)
+declare noalias ptr @g_malloc(i64) noconvergent
 
 define void @copy_filter_list(i32 %dest_type, i32 %src_type) nounwind uwtable ssp {
 entry:
@@ -188,12 +188,12 @@ while.end16:                                      ; preds = %while.cond11
   ret void
 }
 
-declare void @g_assertion_message_expr(ptr, ptr, i32, ptr, ptr) noreturn
+declare void @g_assertion_message_expr(ptr, ptr, i32, ptr, ptr) noconvergent noreturn
 
-declare i32 @g_list_length(ptr)
+declare i32 @g_list_length(ptr) noconvergent
 
-declare noalias ptr @g_strdup(ptr)
+declare noalias ptr @g_strdup(ptr) noconvergent
 
-declare ptr @g_list_append(ptr, ptr)
+declare ptr @g_list_append(ptr, ptr) noconvergent
 
-declare ptr @g_list_remove_link(ptr, ptr)
+declare ptr @g_list_remove_link(ptr, ptr) noconvergent

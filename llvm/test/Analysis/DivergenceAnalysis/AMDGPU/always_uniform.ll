@@ -59,5 +59,5 @@ declare i64 @llvm.amdgcn.icmp.i32(i32, i32, i32) #1
 declare i64 @llvm.amdgcn.fcmp.i32(float, float, i32) #1
 declare i64 @llvm.amdgcn.ballot.i32(i1) #1
 
-attributes #0 = { nounwind readnone }
-attributes #1 = { nounwind readnone convergent }
+attributes #0 = { noconvergent nounwind readnone }
+attributes #1 = { nounwind readnone }

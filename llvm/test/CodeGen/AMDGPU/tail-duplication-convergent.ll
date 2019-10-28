@@ -173,5 +173,5 @@ ret:
 }
 
 attributes #0 = { nounwind }
-attributes #1 = { nounwind convergent }
-attributes #2 = { convergent inaccessiblememonly nounwind }
+attributes #1 = { nounwind }
+attributes #2 = { inaccessiblememonly nounwind }

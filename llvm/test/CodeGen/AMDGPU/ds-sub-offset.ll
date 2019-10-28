@@ -658,4 +658,4 @@ declare float @llvm.amdgcn.div.fmas.f32(float, float, float, i1)
 
 attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind }
-attributes #2 = { nounwind convergent }
+attributes #2 = { nounwind }

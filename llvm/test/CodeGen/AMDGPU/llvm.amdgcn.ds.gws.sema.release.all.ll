@@ -34,4 +34,4 @@ define amdgpu_kernel void @gws_sema_release_all_offset0(i32 %val) #0 {
 
 declare void @llvm.amdgcn.ds.gws.sema.release.all(i32) #0
 
-attributes #0 = { convergent inaccessiblememonly nounwind }
+attributes #0 = { inaccessiblememonly nounwind }

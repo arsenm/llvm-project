@@ -15,7 +15,7 @@ int foo(void) {
   }();
 }
 int bar(void) {
-  // CHECK: @"_ZZ3barvENK3$_0clEv"({{.*}}) [[EXTERN:#[0-9]+]]
+  // CHECK: define {{.*}} @"_ZZ3barvENK3$_0clEv"({{.*}}) [[EXTERN:#[0-9]+]]
   return []() __attribute__((function_return("thunk-extern"))) {
     return 42;
   }

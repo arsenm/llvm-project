@@ -19,7 +19,7 @@ void test0(__weak id *wp, __weak volatile id *wvp) {
   // TODO: this is sub-optimal, we should retain at the actual call site.
   // TODO: in the non-volatile case, we do not need to be reloading.
 
-  // CHECK:      [[T1:%.*]] = call noundef i8* @_Z12test0_helperv() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK:      [[T1:%.*]] = call noundef i8* @_Z12test0_helperv() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T1]])
   // CHECK-NEXT: [[T2:%.*]] = load i8**, i8*** {{%.*}}, align 8
   // CHECK-NEXT: [[T3:%.*]] = call i8* @llvm.objc.storeWeak(i8** [[T2]], i8* [[T1]])
@@ -28,7 +28,7 @@ void test0(__weak id *wp, __weak volatile id *wvp) {
   // CHECK-NEXT: call void @llvm.objc.release(i8* [[T1]])
   id x = *wp = test0_helper();
 
-  // CHECK:      [[T1:%.*]] = call noundef i8* @_Z12test0_helperv() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK:      [[T1:%.*]] = call noundef i8* @_Z12test0_helperv() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T1]])
   // CHECK-NEXT: [[T2:%.*]] = load i8**, i8*** {{%.*}}, align 8
   // CHECK-NEXT: [[T3:%.*]] = call i8* @llvm.objc.storeWeak(i8** [[T2]], i8* [[T1]])

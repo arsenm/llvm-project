@@ -5,14 +5,14 @@
 
 // powerpc64le-ibm-linux-gnu
 
-// RUN: %clang_cc1 -verify -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -verify -fno-ident -fopenmp -fopenmp-extensions \
 // RUN:     -fopenmp-targets=powerpc64le-ibm-linux-gnu -x c++ \
 // RUN:     -triple powerpc64le-unknown-unknown -emit-llvm %s -o - | \
 // RUN:   FileCheck %s --check-prefixes=CHECK-PPC64LE
-// RUN: %clang_cc1 -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -fno-ident  -fopenmp -fopenmp-extensions \
 // RUN:     -fopenmp-targets=powerpc64le-ibm-linux-gnu -x c++ -std=c++11 \
 // RUN:     -triple powerpc64le-unknown-unknown -emit-pch -o %t %s
-// RUN: %clang_cc1 -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -fno-ident  -fopenmp -fopenmp-extensions \
 // RUN:     -fopenmp-targets=powerpc64le-ibm-linux-gnu -x c++ \
 // RUN:     -triple powerpc64le-unknown-unknown -std=c++11 -include-pch %t \
 // RUN:     -verify %s -emit-llvm -o - | \
@@ -20,14 +20,14 @@
 
 // i386-pc-linux-gnu
 
-// RUN: %clang_cc1 -verify -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -verify -fno-ident -fopenmp -fopenmp-extensions \
 // RUN:     -fopenmp-targets=i386-pc-linux-gnu -x c++ \
 // RUN:     -triple i386-unknown-unknown -emit-llvm %s -o - | \
 // RUN:   FileCheck %s --check-prefixes=CHECK-I386
-// RUN: %clang_cc1 -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -fopenmp -fno-ident  -fopenmp-extensions \
 // RUN:     -fopenmp-targets=i386-pc-linux-gnu -x c++ -std=c++11 \
 // RUN:     -triple i386-unknown-unknown -emit-pch -o %t %s
-// RUN: %clang_cc1 -fopenmp -fopenmp-extensions \
+// RUN: %clang_cc1 -fno-ident  -fopenmp -fopenmp-extensions \
 // RUN:     -fopenmp-targets=i386-pc-linux-gnu -x c++ \
 // RUN:     -triple i386-unknown-unknown -std=c++11 -include-pch %t -verify %s \
 // RUN:     -emit-llvm -o - | \
@@ -515,10 +515,18 @@ void foo(int arg) {
 
 #endif
 //.
-// CHECK-PPC64LE: attributes #0 = { mustprogress noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="-altivec,-bpermd,-crbits,-crypto,-direct-move,-extdiv,-htm,-isa-v206-instructions,-isa-v207-instructions,-isa-v30-instructions,-power8-vector,-power9-vector,-privileged,-quadword-atomics,-rop-protect,-spe,-vsx" }
+// CHECK-PPC64LE: attributes #0 = { mustprogress noconvergent noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="-altivec,-bpermd,-crbits,-crypto,-direct-move,-extdiv,-htm,-isa-v206-instructions,-isa-v207-instructions,-isa-v30-instructions,-power8-vector,-power9-vector,-privileged,-quadword-atomics,-rop-protect,-spe,-vsx" }
 // CHECK-PPC64LE: attributes #1 = { nounwind }
-// CHECK-PPC64LE: attributes #2 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+// CHECK-PPC64LE: attributes #2 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 //.
-// CHECK-I386: attributes #0 = { mustprogress noinline nounwind optnone "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+cx8,+x87" }
+// CHECK-I386: attributes #0 = { mustprogress noconvergent noinline nounwind optnone "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+cx8,+x87" }
 // CHECK-I386: attributes #1 = { nounwind }
-// CHECK-I386: attributes #2 = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+// CHECK-I386: attributes #2 = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
+//.
+// CHECK-PPC64LE: !0 = !{i32 1, !"wchar_size", i32 4}
+// CHECK-PPC64LE: !1 = !{i32 7, !"openmp", i32 50}
+//.
+// CHECK-I386: !0 = !{i32 1, !"NumRegisterParameters", i32 0}
+// CHECK-I386: !1 = !{i32 1, !"wchar_size", i32 4}
+// CHECK-I386: !2 = !{i32 7, !"openmp", i32 50}
+//.

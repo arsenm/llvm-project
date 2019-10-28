@@ -26,6 +26,6 @@ void test_v4i32(v4i32 a1, int a2, v4i32 a3) {
   test_v4i32_2(a3, a2, a1);
 }
 
-// O32: attributes [[NUW]] = { nounwind{{.*}} }
+// O32: attributes [[NUW]] = { noconvergent nounwind{{.*}} }
 
-// N64: attributes [[NUW]] = { nounwind{{.*}} }
+// N64: attributes [[NUW]] = { noconvergent nounwind{{.*}} }

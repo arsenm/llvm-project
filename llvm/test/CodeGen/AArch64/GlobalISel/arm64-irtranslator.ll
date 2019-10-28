@@ -1528,8 +1528,8 @@ define void @test_trivial_inlineasm() {
 ; CHECK-LABEL: name: test_trivial_inlineasm
 ; CHECK: INLINEASM &wibble, 1
 ; CHECK: INLINEASM &wibble, 0
-  call void asm sideeffect "wibble", ""()
-  call void asm "wibble", ""()
+  call void asm sideeffect "wibble", ""() noconvergent
+  call void asm "wibble", ""() noconvergent
   ret void
 }
 

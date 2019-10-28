@@ -160,5 +160,5 @@ FILE *t26(const char *path, const char *mode) {
 // CHECK-LABEL: t26
 // CHECK: call{{.*}}@fopen{{.*}} #2
 
-// GLOBAL: #2 = { nobuiltin "no-builtins" }
-// INDIVIDUAL: #2 = { nobuiltin "no-builtin-ceil" "no-builtin-copysign" "no-builtin-cos" "no-builtin-fabs" "no-builtin-floor" "no-builtin-fopen" "no-builtin-fread" "no-builtin-fwrite" "no-builtin-stpcpy" "no-builtin-strcat" "no-builtin-strchr" "no-builtin-strcmp" "no-builtin-strcpy" "no-builtin-strlen" "no-builtin-strncat" "no-builtin-strncmp" "no-builtin-strncpy" "no-builtin-strpbrk" "no-builtin-strrchr" "no-builtin-strspn" "no-builtin-strtod" "no-builtin-strtof" "no-builtin-strtol" "no-builtin-strtold" "no-builtin-strtoll" "no-builtin-strtoul" "no-builtin-strtoull" }
+// GLOBAL: #2 = { nobuiltin noconvergent "no-builtins" }
+// INDIVIDUAL: #2 = { nobuiltin noconvergent "no-builtin-ceil" "no-builtin-copysign" "no-builtin-cos" "no-builtin-fabs" "no-builtin-floor" "no-builtin-fopen" "no-builtin-fread" "no-builtin-fwrite" "no-builtin-stpcpy" "no-builtin-strcat" "no-builtin-strchr" "no-builtin-strcmp" "no-builtin-strcpy" "no-builtin-strlen" "no-builtin-strncat" "no-builtin-strncmp" "no-builtin-strncpy" "no-builtin-strpbrk" "no-builtin-strrchr" "no-builtin-strspn" "no-builtin-strtod" "no-builtin-strtof" "no-builtin-strtol" "no-builtin-strtold" "no-builtin-strtoll" "no-builtin-strtoul" "no-builtin-strtoull" }

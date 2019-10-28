@@ -2,9 +2,9 @@
 ; RUN: opt < %s -passes=licm -S -verify-memoryssa | FileCheck %s
 
 
-declare i32 @strlen(ptr) readonly nounwind willreturn
+declare i32 @strlen(ptr) noconvergent readonly nounwind willreturn
 
-declare void @foo()
+declare void @foo() noconvergent
 
 ; Sink readonly function.
 define i32 @test1(ptr %P) {
@@ -26,7 +26,7 @@ Out:		; preds = %Loop
   ret i32 %A
 }
 
-declare double @sin(double) readnone nounwind willreturn
+declare double @sin(double) noconvergent readnone nounwind willreturn
 
 ; Sink readnone function out of loop with unknown memory behavior.
 define double @test2(double %X) {
@@ -997,10 +997,10 @@ out:
   ret i32 %x
 }
 
-declare void @may_throw()
-declare void @may_throw2()
-declare i32 @__CxxFrameHandler3(...)
-declare i32 @getv()
-declare i1 @getc()
-declare void @f(ptr)
-declare void @g()
+declare void @may_throw() noconvergent
+declare void @may_throw2() noconvergent
+declare i32 @__CxxFrameHandler3(...) noconvergent
+declare i32 @getv() noconvergent
+declare i1 @getc() noconvergent
+declare void @f(ptr) noconvergent
+declare void @g() noconvergent

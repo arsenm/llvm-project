@@ -23,7 +23,7 @@ void foo(int a)
 // CHECK-NEXT:    store i32 [[TMP0]], i32* [[CONV]], align 4
 // CHECK-NEXT:    [[TMP1:%.*]] = load i64, i64* [[A_CASTED]], align 8
 // CHECK-NEXT:    call void @{{__omp_offloading_[a-z0-9]+_[a-z0-9]+_foo_l[0-9]+}}(i64 [[TMP1]]) #[[ATTR3:[0-9]+]]
-// CHECK-NEXT:    call void @{{__test_offloading_[a-z0-9]+_[a-z0-9]+_bar_l[0-9]+}}()
+// CHECK-NEXT:    call void @{{__test_offloading_[a-z0-9]+_[a-z0-9]+_bar_l[0-9]+}}() #[[ATTR4:[0-9]+]]
 // CHECK-NEXT:    ret void
 //
 //
@@ -33,6 +33,6 @@ void foo(int a)
 // CHECK-NEXT:    store i64 [[A:%.*]], i64* [[A_ADDR]], align 8
 // CHECK-NEXT:    [[CONV:%.*]] = bitcast i64* [[A_ADDR]] to i32*
 // CHECK-NEXT:    [[TMP0:%.*]] = load i32, i32* [[CONV]], align 4
-// CHECK-NEXT:    call void @use(i32 noundef [[TMP0]])
+// CHECK-NEXT:    call void @use(i32 noundef [[TMP0]]) #[[ATTR4]]
 // CHECK-NEXT:    ret void
 //

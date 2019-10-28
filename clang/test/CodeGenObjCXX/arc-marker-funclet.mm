@@ -10,8 +10,10 @@ void g() {
   }
 }
 
-// CHECK: call noundef ptr @"?f@@YAPAUobjc_object@@XZ"() [ "funclet"(token %1) ]
+// CHECK: call noundef ptr @"?f@@YAPAUobjc_object@@XZ"() [[NOCONV:#[0-9]+]] [ "funclet"(token %1) ]
 // CHECK-NEXT: call void asm sideeffect "movl{{.*}}%ebp, %ebp{{.*}}", ""() [ "funclet"(token %1) ]
 
 // The corresponding f() call was invoked from the entry basic block.
 // CHECK: call void asm sideeffect "movl{{.*}}%ebp, %ebp{{.*}}", ""(){{$}}
+
+// CHECK: [[NOCONV]] = { noconvergent }

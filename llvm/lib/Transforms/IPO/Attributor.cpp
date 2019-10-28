@@ -3181,6 +3181,9 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
   // Every function can be nounwind.
   getOrCreateAAFor<AANoUnwind>(FPos);
 
+  // Every function can be noconvergent.
+  getOrCreateAAFor<AANoConvergent>(FPos);
+
   // Every function might be marked "nosync"
   getOrCreateAAFor<AANoSync>(FPos);
 

@@ -23,7 +23,7 @@ __attribute__((weak)) int test2(void) {
   return 0;
 }
 
-// CHECK: attributes [[TF]] = { noinline optnone "{{.*}} }
-// CHECK: attributes [[NUW]] = { noinline nounwind{{.*}} }
+// CHECK: attributes [[TF]] = { noconvergent noinline optnone "{{.*}} }
+// CHECK: attributes [[NUW]] = { noconvergent noinline nounwind{{.*}} }
 
-// CHECK-NOEXC: attributes [[NUW]] = { noinline nounwind{{.*}} }
+// CHECK-NOEXC: attributes [[NUW]] = { noconvergent noinline nounwind{{.*}} }

@@ -61,5 +61,5 @@ void test(int x) {
 // CHECK: declare signext i32 @tolower(i32 noundef signext) [[NUW_RO:#[0-9]+]]
 // CHECK: declare signext i32 @toupper(i32 noundef signext) [[NUW_RO:#[0-9]+]]
 
-// CHECK: attributes [[NUW_RO]] = { nounwind willreturn memory(read){{.*}} }
-// CHECK: attributes [[NUW_RO_CALL]] = { nounwind willreturn memory(read) }
+// CHECK: attributes [[NUW_RO]] = { noconvergent nounwind willreturn memory(read){{.*}} }
+// CHECK: attributes [[NUW_RO_CALL]] = { noconvergent nounwind willreturn memory(read) }

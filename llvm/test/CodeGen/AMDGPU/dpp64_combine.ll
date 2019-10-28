@@ -74,4 +74,4 @@ declare i64 @llvm.amdgcn.update.dpp.i64(i64, i64, i32, i32, i32, i1) #0
 declare double @llvm.ceil.f64(double)
 declare double @llvm.amdgcn.rcp.f64(double)
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

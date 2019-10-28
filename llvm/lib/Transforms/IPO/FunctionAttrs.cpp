@@ -83,7 +83,7 @@ STATISTIC(NumNoUnwind, "Number of functions marked as nounwind");
 STATISTIC(NumNoFree, "Number of functions marked as nofree");
 STATISTIC(NumWillReturn, "Number of functions marked as willreturn");
 STATISTIC(NumNoSync, "Number of functions marked as nosync");
-
+STATISTIC(NumNoConvergent, "Number of functions marked as noconvergent");
 STATISTIC(NumThinLinkNoRecurse,
           "Number of functions marked as norecurse during thinlink");
 STATISTIC(NumThinLinkNoUnwind,
@@ -640,7 +640,7 @@ determinePointerAccessAttrs(Argument *A,
             if (Visited.insert(&UU).second)
               Worklist.push_back(&UU);
       }
-      
+
       if (CB.doesNotAccessMemory())
         continue;
 
@@ -1367,14 +1367,14 @@ struct SCCNodesResult {
 
 } // end anonymous namespace
 
-/// Helper for non-Convergent inference predicate InstrBreaksAttribute.
-static bool InstrBreaksNonConvergent(Instruction &I,
-                                     const SCCNodeSet &SCCNodes) {
+/// Helper for NoConvergent inference predicate InstrBreaksAttribute.
+static bool InstrBreaksNoConvergent(Instruction &I,
+                                    const SCCNodeSet &SCCNodes) {
   const CallBase *CB = dyn_cast<CallBase>(&I);
   // Breaks non-convergent assumption if CS is a convergent call to a function
   // not in the SCC.
-  return CB && CB->isConvergent() &&
-         !SCCNodes.contains(CB->getCalledFunction());
+  return CB && !CB->isNoConvergent() &&
+         SCCNodes.count(CB->getCalledFunction()) == 0;
 }
 
 /// Helper for NoUnwind inference predicate InstrBreaksAttribute.
@@ -1408,36 +1408,6 @@ static bool InstrBreaksNoFree(Instruction &I, const SCCNodeSet &SCCNodes) {
       return false;
 
   return true;
-}
-
-/// Attempt to remove convergent function attribute when possible.
-///
-/// Returns true if any changes to function attributes were made.
-static void inferConvergent(const SCCNodeSet &SCCNodes,
-                            SmallSet<Function *, 8> &Changed) {
-  AttributeInferer AI;
-
-  // Request to remove the convergent attribute from all functions in the SCC
-  // if every callsite within the SCC is not convergent (except for calls
-  // to functions within the SCC).
-  // Note: Removal of the attr from the callsites will happen in
-  // InstCombineCalls separately.
-  AI.registerAttrInference(AttributeInferer::InferenceDescriptor{
-      Attribute::Convergent,
-      // Skip non-convergent functions.
-      [](const Function &F) { return !F.isConvergent(); },
-      // Instructions that break non-convergent assumption.
-      [SCCNodes](Instruction &I) {
-        return InstrBreaksNonConvergent(I, SCCNodes);
-      },
-      [](Function &F) {
-        LLVM_DEBUG(dbgs() << "Removing convergent attr from fn " << F.getName()
-                          << "\n");
-        F.setNotConvergent();
-      },
-      /* RequiresExactDefinition= */ false});
-  // Perform all the requested attribute inference actions.
-  AI.run(SCCNodes, Changed);
 }
 
 /// Infer attributes from all functions in the SCC by scanning every
@@ -1494,6 +1464,22 @@ static void inferAttrsFromFunctionBodies(const SCCNodeSet &SCCNodes,
           ++NumNoFree;
         },
         /* RequiresExactDefinition= */ true});
+
+  AI.registerAttrInference(AttributeInferer::InferenceDescriptor{
+      Attribute::NoConvergent,
+      // Skip noconvergent functions.
+      [](const Function &F) { return F.isNoConvergent(); },
+      // Instructions that break non-throwing assumption.
+      [SCCNodes](Instruction &I) {
+        return InstrBreaksNoConvergent(I, SCCNodes);
+      },
+      [](Function &F) {
+        LLVM_DEBUG(dbgs() << "Adding noconvergent attr to fn " << F.getName()
+                          << '\n');
+        F.setNoConvergent();
+        ++NumNoConvergent;
+      },
+      /* RequiresExactDefinition= */ true});
 
   // Perform all the requested attribute inference actions.
   AI.run(SCCNodes, Changed);
@@ -1743,7 +1729,6 @@ deriveAttrsInPostOrder(ArrayRef<Function *> Functions, AARGetterT &&AARGetter) {
   addArgumentReturnedAttrs(Nodes.SCCNodes, Changed);
   addMemoryAttrs(Nodes.SCCNodes, AARGetter, Changed);
   addArgumentAttrs(Nodes.SCCNodes, Changed);
-  inferConvergent(Nodes.SCCNodes, Changed);
   addNoReturnAttrs(Nodes.SCCNodes, Changed);
   addWillReturn(Nodes.SCCNodes, Changed);
 

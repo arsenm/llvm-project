@@ -68,8 +68,8 @@ declare i64 @llvm.amdgcn.s.getpc() #0
 
 attributes #0 = { nounwind readnone speculatable willreturn }
 ;.
-; AKF_GCN: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; AKF_GCN: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ;.
 ; ATTRIBUTOR_GCN: attributes #[[ATTR0]] = { "uniform-work-group-size"="false" }
-; ATTRIBUTOR_GCN: attributes #[[ATTR1:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+; ATTRIBUTOR_GCN: attributes #[[ATTR1:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
 ;.

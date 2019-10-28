@@ -110,5 +110,5 @@ declare <16 x i16> @llvm.amdgcn.wmma.bf16.16x16x16.bf16.v16i16(<16 x i16>, <16 x
 declare <8 x i32> @llvm.amdgcn.wmma.i32.16x16x16.iu8.v8i32(i1 immarg, <4 x i32>, i1 immarg, <4 x i32> , <8 x i32>, i1 immarg) #1
 declare <8 x i32> @llvm.amdgcn.wmma.i32.16x16x16.iu4.v8i32(i1 immarg, <2 x i32>, i1 immarg, <2 x i32> , <8 x i32>, i1 immarg) #1
 
-attributes #0 = { nounwind convergent }
-attributes #1 = { nounwind readnone convergent }
+attributes #0 = { nounwind }
+attributes #1 = { nounwind readnone }

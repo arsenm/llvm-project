@@ -3,7 +3,7 @@
 target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
 target triple = "arm64-apple-darwin"
 
-declare float @expf(float) nounwind readnone
+declare float @expf(float) noconvergent nounwind readnone
 define void @expf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @expf_v4f32(
 ; CHECK: call <4 x float> @_simd_exp_f4(
@@ -27,7 +27,7 @@ for.end:
   ret void
 }
 
-declare double @exp(double) nounwind readnone
+declare double @exp(double) noconvergent nounwind readnone
 define void @exp_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @exp_v2f64(
 ; CHECK: call <2 x double> @_simd_exp_d2(
@@ -51,7 +51,7 @@ for.end:
   ret void
 }
 
-declare float @acosf(float) nounwind readnone
+declare float @acosf(float) noconvergent nounwind readnone
 define void @acos_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @acos_v4f32(
 ; CHECK: call <4 x float> @_simd_acos_f4(
@@ -75,7 +75,7 @@ for.end:
   ret void
 }
 
-declare double @acos(double) nounwind readnone
+declare double @acos(double) noconvergent nounwind readnone
 define void @acos_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @acos_v2f64(
 ; CHECK: call <2 x double> @_simd_acos_d2(
@@ -99,7 +99,7 @@ for.end:
   ret void
 }
 
-declare float @asinf(float) nounwind readnone
+declare float @asinf(float) noconvergent nounwind readnone
 define void @asinf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @asinf_v4f32(
 ; CHECK: call <4 x float> @_simd_asin_f4(
@@ -123,7 +123,7 @@ for.end:
   ret void
 }
 
-declare double @asin(double) nounwind readnone
+declare double @asin(double) noconvergent nounwind readnone
 define void @asin_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @asin_v2f64(
 ; CHECK: call <2 x double> @_simd_asin_d2(
@@ -147,7 +147,7 @@ for.end:
   ret void
 }
 
- declare float @atanf(float) nounwind readnone
+ declare float @atanf(float) noconvergent nounwind readnone
 define void @atanf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atanf_v4f32(
 ; CHECK: call <4 x float> @_simd_atan_f4(
@@ -171,7 +171,7 @@ for.end:
   ret void
 }
 
-declare double @atan(double) nounwind readnone
+declare double @atan(double) noconvergent nounwind readnone
 define void @atan_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atan_v2f64(
 ; CHECK: call <2 x double> @_simd_atan_d2(
@@ -195,7 +195,7 @@ for.end:
   ret void
 }
 
-declare float @atan2f(float) nounwind readnone
+declare float @atan2f(float) noconvergent nounwind readnone
 define void @atan2f_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atan2f_v4f32(
 ; CHECK: call <4 x float> @_simd_atan2_f4(
@@ -219,7 +219,7 @@ for.end:
   ret void
 }
 
-declare double @atan2(double) nounwind readnone
+declare double @atan2(double) noconvergent nounwind readnone
 define void @atan2_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atan2_v2f64(
 ; CHECK: call <2 x double> @_simd_atan2_d2(
@@ -243,7 +243,7 @@ for.end:
   ret void
 }
 
-declare float @cosf(float) nounwind readnone
+declare float @cosf(float) noconvergent nounwind readnone
 define void @cosf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @cosf_v4f32(
 ; CHECK: call <4 x float> @_simd_cos_f4(
@@ -267,7 +267,7 @@ for.end:
   ret void
 }
 
-declare double @cos(double) nounwind readnone
+declare double @cos(double) noconvergent nounwind readnone
 define void @cos_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @cos_v2f64(
 ; CHECK: call <2 x double> @_simd_cos_d2(
@@ -291,7 +291,7 @@ for.end:
   ret void
 }
 
-declare float @cbrtf(float) nounwind readnone
+declare float @cbrtf(float) noconvergent nounwind readnone
 define void @cbrtf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @cbrtf_v4f32(
 ; CHECK: call <4 x float> @_simd_cbrt_f4(
@@ -315,7 +315,7 @@ for.end:
   ret void
 }
 
-declare double @cbrt(double) nounwind readnone
+declare double @cbrt(double) noconvergent nounwind readnone
 define void @cbrt_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @cbrt_v2f64(
 ; CHECK: call <2 x double> @_simd_cbrt_d2(
@@ -339,7 +339,7 @@ for.end:
   ret void
 }
 
-declare float @erff(float) nounwind readnone
+declare float @erff(float) noconvergent nounwind readnone
 define void @erff_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @erff_v4f32(
 ; CHECK: call <4 x float> @_simd_erf_f4(
@@ -363,7 +363,7 @@ for.end:
   ret void
 }
 
-declare double @erf(double) nounwind readnone
+declare double @erf(double) noconvergent nounwind readnone
 define void @erf_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @erf_v2f64(
 ; CHECK: call <2 x double> @_simd_erf_d2(
@@ -387,7 +387,7 @@ for.end:
   ret void
 }
 
-declare float @powf(float) nounwind readnone
+declare float @powf(float) noconvergent nounwind readnone
 define void @powf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @powf_v4f32(
 ; CHECK: call <4 x float> @_simd_pow_f4(
@@ -411,7 +411,7 @@ for.end:
   ret void
 }
 
-declare double @pow(double) nounwind readnone
+declare double @pow(double) noconvergent nounwind readnone
 define void @pow_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @pow_v2f64(
 ; CHECK: call <2 x double> @_simd_pow_d2(
@@ -435,7 +435,7 @@ for.end:
   ret void
 }
 
-declare float @sinhf(float) nounwind readnone
+declare float @sinhf(float) noconvergent nounwind readnone
 define void @sinhf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @sinhf_v4f32(
 ; CHECK: call <4 x float> @_simd_sinh_f4(
@@ -459,7 +459,7 @@ for.end:
   ret void
 }
 
-declare double @sinh(double) nounwind readnone
+declare double @sinh(double) noconvergent nounwind readnone
 define void @sinh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @sinh_v2f64(
 ; CHECK: call <2 x double> @_simd_sinh_d2(
@@ -483,7 +483,7 @@ for.end:
   ret void
 }
 
-declare float @coshf(float) nounwind readnone
+declare float @coshf(float) noconvergent nounwind readnone
 define void @coshf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @coshf_v4f32(
 ; CHECK: call <4 x float> @_simd_cosh_f4(
@@ -507,7 +507,7 @@ for.end:
   ret void
 }
 
-declare double @cosh(double) nounwind readnone
+declare double @cosh(double) noconvergent nounwind readnone
 define void @cosh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @cosh_v2f64(
 ; CHECK: call <2 x double> @_simd_cosh_d2(
@@ -531,7 +531,7 @@ for.end:
   ret void
 }
 
-declare float @tanhf(float) nounwind readnone
+declare float @tanhf(float) noconvergent nounwind readnone
 define void @tanhf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @tanhf_v4f32(
 ; CHECK: call <4 x float> @_simd_tanh_f4(
@@ -555,7 +555,7 @@ for.end:
   ret void
 }
 
-declare double @tanh(double) nounwind readnone
+declare double @tanh(double) noconvergent nounwind readnone
 define void @tanh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @tanh_v2f64(
 ; CHECK: call <2 x double> @_simd_tanh_d2(
@@ -579,7 +579,7 @@ for.end:
   ret void
 }
 
-declare float @asinhf(float) nounwind readnone
+declare float @asinhf(float) noconvergent nounwind readnone
 define void @asinhf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @asinhf_v4f32(
 ; CHECK: call <4 x float> @_simd_asinh_f4(
@@ -603,7 +603,7 @@ for.end:
   ret void
 }
 
-declare double @asinh(double) nounwind readnone
+declare double @asinh(double) noconvergent nounwind readnone
 define void @asinh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @asinh_v2f64(
 ; CHECK: call <2 x double> @_simd_asinh_d2(
@@ -627,7 +627,7 @@ for.end:
   ret void
 }
 
-declare float @acoshf(float) nounwind readnone
+declare float @acoshf(float) noconvergent nounwind readnone
 define void @acoshf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @acoshf_v4f32(
 ; CHECK: call <4 x float> @_simd_acosh_f4(
@@ -651,7 +651,7 @@ for.end:
   ret void
 }
 
-declare double @acosh(double) nounwind readnone
+declare double @acosh(double) noconvergent nounwind readnone
 define void @acosh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @acosh_v2f64(
 ; CHECK: call <2 x double> @_simd_acosh_d2(
@@ -675,7 +675,7 @@ for.end:
   ret void
 }
 
-declare float @atanhf(float) nounwind readnone
+declare float @atanhf(float) noconvergent nounwind readnone
 define void @atanhf_v4f32(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atanhf_v4f32(
 ; CHECK: call <4 x float> @_simd_atanh_f4(
@@ -699,7 +699,7 @@ for.end:
   ret void
 }
 
-declare double @atanh(double) nounwind readnone
+declare double @atanh(double) noconvergent nounwind readnone
 define void @atanh_v2f64(i64 %n, ptr noalias %y, ptr noalias %x) {
 ; CHECK-LABEL: @atanh_v2f64(
 ; CHECK: call <2 x double> @_simd_atanh_d2(

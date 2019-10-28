@@ -164,5 +164,5 @@ void test() {
 
 #endif
 
-// ARC: attributes [[NUW]] = { mustprogress noinline nounwind{{.*}} }
-// MRC: attributes [[NUW]] = { mustprogress noinline nounwind{{.*}} }
+// ARC: attributes [[NUW]] = { mustprogress noconvergent noinline nounwind{{.*}} }
+// MRC: attributes [[NUW]] = { mustprogress noconvergent noinline nounwind{{.*}} }

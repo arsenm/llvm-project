@@ -13,7 +13,7 @@ __attribute__((objc_root_class))
 + (void) abort __attribute__((noreturn));
 - (void) fail __attribute__((noreturn));
 @end
-  
+
 @interface Derived : Middle
 @end
 
@@ -22,7 +22,7 @@ void testInstanceMethod(Derived *x) {
   [x fail];
 }
 // CHECK-LABEL: @testInstanceMethod
-// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}){{$}}
+// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) #{{[0-9]+$}}
 
 // A direct call of a class method will normally never have a null receiver.
 void testClassMethod(void) {
@@ -34,7 +34,7 @@ void testClassMethod(void) {
 __attribute__((weak_import))
 @interface WeakMiddle : Base
 @end
-  
+
 @interface WeakDerived : WeakMiddle
 + (void) abort __attribute__((noreturn));
 @end
@@ -44,7 +44,7 @@ void testWeakImport(void) {
   [WeakDerived abort];
 }
 // CHECK-LABEL: @testWeakImport
-// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}){{$}}
+// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) #{{[0-9]+$}}
 
 @interface Derived (MyMethods)
 @end
@@ -59,7 +59,7 @@ void testWeakImport(void) {
   [self fail];
 }
 // CHECK-LABEL: [Derived(MyMethods) testSelfInstanceMethod]
-// CHECK-MRC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}){{$}}
+// CHECK-MRC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) #{{[0-9]+$}}
 // CHECK-ARC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) [[NORETURN]]
 
 // The ARC rule doesn't apply in -init methods.
@@ -69,14 +69,14 @@ void testWeakImport(void) {
   return self;
 }
 // CHECK-LABEL: [Derived(MyMethods) initWhileTestingSelfInstanceMethod]
-// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}){{$}}
+// CHECK: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) #{{[0-9]+$}}
 
 // Same thing applies to class methods.
 + (void) testSelfClassMethod {
   [self abort];
 }
 // CHECK-LABEL: [Derived(MyMethods) testSelfClassMethod]
-// CHECK-MRC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}){{$}}
+// CHECK-MRC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) #{{[0-9]+$}}
 // CHECK-ARC: call void @objc_msgSend(ptr {{.*}}, ptr {{.*}}) [[NORETURN]]
 
 // Super invocations may never be used with a null pointer; this is a
@@ -95,5 +95,4 @@ void testWeakImport(void) {
 // CHECK: call void @objc_msgSendSuper2(ptr {{.*}}, ptr {{.*}}) [[NORETURN]]
 @end
 
-// CHECK: attributes [[NORETURN]] = { noreturn }
-  
+// CHECK-DAG: attributes [[NORETURN]] = { noconvergent noreturn }

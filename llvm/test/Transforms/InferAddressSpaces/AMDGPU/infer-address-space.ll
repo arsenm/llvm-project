@@ -174,8 +174,7 @@ define void @select_bug() #0 {
   unreachable
 }
 
-declare void @llvm.amdgcn.s.barrier() #1
+declare void @llvm.amdgcn.s.barrier() #0
 declare void @use(float) #0
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }

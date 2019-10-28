@@ -47,9 +47,9 @@ void call_function_pointer_typedef(void) {
   // CHECK: call ptr [[INDIRECT_TYPEDEF_CALLOC_FN_PTR]](ptr noundef null, ptr noundef null, i32 noundef 8, i32 noundef 4) [[INDIRECT_TYPEDEF_CALLOC_ATTR:#[0-9]+]]
 }
 
-// CHECK: attributes [[DIRECT_MALLOC_ATTR]] = { allocsize(0) }
-// CHECK: attributes [[DIRECT_CALLOC_ATTR]] = { allocsize(0,1) }
-// CHECK: attributes [[INDIRECT_MALLOC_ATTR]] = { allocsize(1) }
-// CHECK: attributes [[INDIRECT_CALLOC_ATTR]] = { allocsize(1,2) }
-// CHECK: attributes [[INDIRECT_TYPEDEF_MALLOC_ATTR]] = { allocsize(2) }
-// CHECK: attributes [[INDIRECT_TYPEDEF_CALLOC_ATTR]] = { allocsize(2,3) }
+// CHECK: attributes [[DIRECT_MALLOC_ATTR]] = { noconvergent allocsize(0) }
+// CHECK: attributes [[DIRECT_CALLOC_ATTR]] = { noconvergent allocsize(0,1) }
+// CHECK: attributes [[INDIRECT_MALLOC_ATTR]] = { noconvergent allocsize(1) }
+// CHECK: attributes [[INDIRECT_CALLOC_ATTR]] = { noconvergent allocsize(1,2) }
+// CHECK: attributes [[INDIRECT_TYPEDEF_MALLOC_ATTR]] = { noconvergent allocsize(2) }
+// CHECK: attributes [[INDIRECT_TYPEDEF_CALLOC_ATTR]] = { noconvergent allocsize(2,3) }

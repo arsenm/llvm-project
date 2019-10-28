@@ -113,8 +113,8 @@ void t24(f_t f1) {
   (*p)();
 }
 
-// CHECK: attributes [[NUW]] = { noinline nounwind{{.*}} }
-// CHECK: attributes [[NR]] = { noinline noreturn nounwind{{.*}} }
+// CHECK: attributes [[NUW]] = { noconvergent noinline nounwind{{.*}} }
+// CHECK: attributes [[NR]] = { noconvergent noinline noreturn nounwind{{.*}} }
 // CHECK: attributes [[COLDDEF]] = { cold {{.*}}}
 // CHECK: attributes [[COLDDECL]] = { cold {{.*}}}
 // CHECK: attributes [[HOTDEF]] = { hot {{.*}}}
@@ -122,4 +122,4 @@ void t24(f_t f1) {
 // CHECK: attributes [[NOCF_CHECK_FUNC]] = { nocf_check {{.*}}}
 // CHECK: attributes [[COLDSITE]] = { cold {{.*}}}
 // CHECK: attributes [[HOTSITE]] = { hot {{.*}}}
-// CHECK: attributes [[NOCF_CHECK_CALL]] = { nocf_check }
+// CHECK: attributes [[NOCF_CHECK_CALL]] = { nocf_check {{.*}} }

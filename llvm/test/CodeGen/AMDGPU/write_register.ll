@@ -92,7 +92,7 @@ define amdgpu_kernel void @test_write_exec_hi(i32 %val) #0 {
 declare void @llvm.amdgcn.wave.barrier() #1
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }
 
 !0 = !{!"m0"}
 !1 = !{!"exec"}

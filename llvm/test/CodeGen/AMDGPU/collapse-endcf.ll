@@ -522,5 +522,5 @@ declare i32 @llvm.amdgcn.workitem.id.x() #0
 declare void @llvm.amdgcn.s.barrier() #1
 
 attributes #0 = { nounwind readnone speculatable }
-attributes #1 = { nounwind convergent }
+attributes #1 = { nounwind }
 attributes #2 = { nounwind }

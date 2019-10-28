@@ -92,6 +92,6 @@ for.end13:                                        ; preds = %for.inc11, %entry
 declare void @llvm.convergent() #1
 declare void @llvm.noduplicate() #2
 
-attributes #0 = { norecurse nounwind }
-attributes #1 = { norecurse nounwind readnone convergent }
-attributes #2 = { norecurse nounwind readnone noduplicate }
+attributes #0 = { noconvergent norecurse nounwind }
+attributes #1 = { norecurse nounwind readnone }
+attributes #2 = { noconvergent norecurse nounwind readnone noduplicate }

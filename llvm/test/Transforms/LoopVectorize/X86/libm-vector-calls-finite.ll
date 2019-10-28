@@ -174,3 +174,5 @@ declare float @__logf_finite(float) #0
 declare double @__log_finite(double) #0
 declare float @__powf_finite(float, float) #0
 declare double @__pow_finite(double, double) #0
+
+attributes #0 = { noconvergent }

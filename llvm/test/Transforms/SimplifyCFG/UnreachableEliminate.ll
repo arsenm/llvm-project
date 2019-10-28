@@ -20,7 +20,7 @@ F:
 define void @test2() personality ptr @__gxx_personality_v0 {
 ; CHECK-LABEL: @test2(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    call void @test2() #[[ATTR3:[0-9]+]]
+; CHECK-NEXT:    call void @test2() #[[ATTR4:[0-9]+]]
 ; CHECK-NEXT:    ret void
 ;
 entry:
@@ -34,7 +34,7 @@ N:
   ret void
 }
 
-declare i32 @__gxx_personality_v0(...)
+declare i32 @__gxx_personality_v0(...) noconvergent
 
 define i32 @test3(i32 %v) {
 ; CHECK-LABEL: @test3(
@@ -84,8 +84,8 @@ bb2:
   ret void
 }
 
-declare void @llvm.assume(i1)
-declare i1 @llvm.type.test(ptr, metadata) nounwind readnone
+declare void @llvm.assume(i1) noconvergent
+declare i1 @llvm.type.test(ptr, metadata) noconvergent nounwind readnone
 
 ;; Same as the above test but make sure the unreachable control flow is still
 ;; removed in the presence of a type test / assume sequence.
@@ -237,11 +237,11 @@ else:
   ret void
 }
 
-declare ptr @fn_nonnull_noundef_arg(ptr nonnull noundef %p)
-declare ptr @fn_nonnull_deref_arg(ptr nonnull dereferenceable(4) %p)
-declare ptr @fn_nonnull_deref_or_null_arg(ptr nonnull dereferenceable_or_null(4) %p)
-declare ptr @fn_nonnull_arg(ptr nonnull %p)
-declare ptr @fn_noundef_arg(ptr noundef %p)
+declare ptr @fn_nonnull_noundef_arg(ptr nonnull noundef %p) noconvergent
+declare ptr @fn_nonnull_deref_arg(ptr nonnull dereferenceable(4) %p) noconvergent
+declare ptr @fn_nonnull_deref_or_null_arg(ptr nonnull dereferenceable_or_null(4) %p) noconvergent
+declare ptr @fn_nonnull_arg(ptr nonnull %p) noconvergent
+declare ptr @fn_noundef_arg(ptr noundef %p) noconvergent
 
 define void @test9(i1 %X, ptr %Y) {
 ; CHECK-LABEL: @test9(
@@ -567,8 +567,9 @@ else:
 
 attributes #0 = { null_pointer_is_valid }
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
-; CHECK: attributes #[[ATTR1:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
-; CHECK: attributes #[[ATTR2:[0-9]+]] = { null_pointer_is_valid }
-; CHECK: attributes #[[ATTR3]] = { nounwind }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { noconvergent }
+; CHECK: attributes #[[ATTR1:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
+; CHECK: attributes #[[ATTR2:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind speculatable willreturn memory(none) }
+; CHECK: attributes #[[ATTR3:[0-9]+]] = { null_pointer_is_valid }
+; CHECK: attributes #[[ATTR4]] = { nounwind }
 ;.

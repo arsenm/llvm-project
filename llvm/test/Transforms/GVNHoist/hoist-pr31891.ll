@@ -47,12 +47,12 @@ if.end:                                           ; preds = %if.else, %if.then
 ; CHECK: ![[sp_hoistit]] = distinct !DISubprogram(name: "hoistit", {{.*}})
 ; CHECK: ![[dbgloc]] = !DILocation({{.*}}, scope: ![[sp_hoistit]])
 
-declare void @useit1(float)
+declare void @useit1(float) noconvergent
 
-declare void @useit2(float)
+declare void @useit2(float) noconvergent
 
 attributes #0 = { noinline nounwind readnone uwtable }
-attributes #1 = { nounwind readnone willreturn }
+attributes #1 = { noconvergent nounwind readnone willreturn }
 attributes #2 = { noinline nounwind uwtable }
 
 !llvm.dbg.cu = !{!0}

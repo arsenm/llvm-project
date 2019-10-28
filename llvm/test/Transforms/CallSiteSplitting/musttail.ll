@@ -24,7 +24,7 @@ End:
   ret ptr null
 }
 
-define ptr @callee(ptr %a, ptr %b) noinline {
+define ptr @callee(ptr %a, ptr %b) noconvergent noinline {
   ret ptr %a
 }
 
@@ -70,7 +70,7 @@ End:
   ret void
 }
 
-define void @void_callee(ptr %a, ptr %b) noinline {
+define void @void_callee(ptr %a, ptr %b) noconvergent noinline {
   ret void
 }
 

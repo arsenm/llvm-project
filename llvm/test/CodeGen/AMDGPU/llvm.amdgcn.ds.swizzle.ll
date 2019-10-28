@@ -11,4 +11,4 @@ define amdgpu_kernel void @ds_swizzle(ptr addrspace(1) %out, i32 %src) nounwind 
   ret void
 }
 
-attributes #0 = { nounwind readnone convergent }
+attributes #0 = { nounwind readnone }

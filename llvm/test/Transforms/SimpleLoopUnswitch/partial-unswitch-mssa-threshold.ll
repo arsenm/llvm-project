@@ -5,7 +5,7 @@
 ; -memssa-check-limit=1 to effectively disable any MemorySSA optimizations
 ; on construction, so the test can be kept simple.
 
-declare void @clobber()
+declare void @clobber() noconvergent
 
 ; Partial unswitching is possible, because the store in %noclobber does not
 ; alias the load of the condition.

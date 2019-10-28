@@ -35,4 +35,4 @@ define dso_local i32 @barrier0(i32 %0) local_unnamed_addr  {
 
 declare void @llvm.nvvm.barrier0() #0
 
-attributes #0 = { convergent nounwind }
+attributes #0 = { nounwind }

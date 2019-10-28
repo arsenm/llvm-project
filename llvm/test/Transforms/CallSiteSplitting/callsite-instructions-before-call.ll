@@ -205,7 +205,7 @@ End:
 ; CHECK-LABEL: Tail:
 ; CHECK: %[[MERGED:.*]] = phi i32 [ %[[CALL1]], %Header.split ], [ %[[CALL2]], %TBB.split ]
 ; CHECK: ret i32 %[[MERGED]]
-define i32 @callee(ptr %a, i32 %v, i32 %p) {
+define i32 @callee(ptr %a, i32 %v, i32 %p) noconvergent {
     ret i32 0
 }
 
@@ -244,10 +244,10 @@ End:                                           ; preds = %CallSite, %TBB
 ; CHECK-NEXT:  %l = phi i32 [ %l1, %Header.split ], [ %l2, %TBB.split ]
 ; CHECK: call void @bari(i32 %l)
 
-define void @bar(ptr, i32) {
+define void @bar(ptr, i32) noconvergent {
     ret void
 }
 
-define  void @bari(i32) {
+define  void @bari(i32) noconvergent {
     ret void
 }

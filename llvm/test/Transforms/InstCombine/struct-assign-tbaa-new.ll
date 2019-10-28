@@ -49,7 +49,7 @@ define ptr @test2() {
 ; undecorated 'store undef', so TAG_B is not present in the output.
 
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 ;.
 ; CHECK: [[TBAA0]] = !{!1, !1, i64 0, i64 4}
 ; CHECK: [[META1:![0-9]+]] = !{!2, i64 4, !"A", !4, i64 0, i64 4}

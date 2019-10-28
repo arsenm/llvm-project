@@ -538,7 +538,7 @@ End:
   ret i32 %v
 }
 
-define i32 @callee(ptr %a, i32 %v, i32 %p) {
+define i32 @callee(ptr %a, i32 %v, i32 %p) noconvergent {
 entry:
   %c = icmp ne ptr %a, null
   br i1 %c, label %BB1, label %BB2
@@ -555,8 +555,8 @@ End:
   ret i32 %p
 }
 
-declare void @dummy(ptr, i32)
-declare void @dummy2(i32, i32)
+declare void @dummy(ptr, i32) noconvergent
+declare void @dummy2(i32, i32) noconvergent
 
 ; Make sure we remove the non-nullness on constant paramater.
 ;

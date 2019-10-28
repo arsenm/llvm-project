@@ -142,7 +142,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !12
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !12
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !12
-// CHECK1-NEXT:    call void @_Z9gtid_testv()
+// CHECK1-NEXT:    call void @_Z9gtid_testv() #[[ATTR7:[0-9]+]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -205,7 +205,7 @@ int main() {
 // CHECK1-NEXT:    br label [[OMP_IF_END7]]
 // CHECK1:       omp_if.end7:
 // CHECK1-NEXT:    [[TMP22:%.*]] = load i32, ptr @Arg, align 4
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP22]])
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiEiT_(i32 noundef [[TMP22]]) #[[ATTR7]]
 // CHECK1-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -239,7 +239,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !24
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !24
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !24
-// CHECK1-NEXT:    call void @_Z3fn7v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn7v() #[[ATTR8:[0-9]+]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -273,7 +273,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !34
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !34
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !34
-// CHECK1-NEXT:    call void @_Z3fn8v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn8v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -307,7 +307,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !44
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !44
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !44
-// CHECK1-NEXT:    call void @_Z3fn9v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn9v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -341,7 +341,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !54
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !54
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !54
-// CHECK1-NEXT:    call void @_Z4fn10v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z4fn10v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -493,7 +493,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !64
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !64
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !64
-// CHECK1-NEXT:    call void @_Z3fn1v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn1v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -527,7 +527,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !74
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !74
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !74
-// CHECK1-NEXT:    call void @_Z3fn2v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn2v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -561,7 +561,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !84
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !84
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !84
-// CHECK1-NEXT:    call void @_Z3fn3v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn3v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -595,7 +595,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !94
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !94
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !94
-// CHECK1-NEXT:    call void @_Z3fn4v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn4v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -629,7 +629,7 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !104
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !104
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !104
-// CHECK1-NEXT:    call void @_Z3fn5v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn5v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //
 //
@@ -663,6 +663,6 @@ int main() {
 // CHECK1-NEXT:    store ptr [[TMP3]], ptr [[DOTTASK_T__ADDR_I]], align 8, !noalias !114
 // CHECK1-NEXT:    store ptr [[TMP7]], ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !114
 // CHECK1-NEXT:    [[TMP8:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !114
-// CHECK1-NEXT:    call void @_Z3fn6v() #[[ATTR3]]
+// CHECK1-NEXT:    call void @_Z3fn6v() #[[ATTR8]]
 // CHECK1-NEXT:    ret i32 0
 //

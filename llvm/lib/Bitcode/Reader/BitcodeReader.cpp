@@ -1732,7 +1732,7 @@ static uint64_t getRawAttributeMask(Attribute::AttrKind Val) {
   case Attribute::InAlloca:        return 1ULL << 43;
   case Attribute::NonNull:         return 1ULL << 44;
   case Attribute::JumpTable:       return 1ULL << 45;
-  case Attribute::Convergent:      return 1ULL << 46;
+  // Removed Convergent, 1ULL << 46
   case Attribute::SafeStack:       return 1ULL << 47;
   case Attribute::NoRecurse:       return 1ULL << 48;
   // 1ULL << 49 is InaccessibleMemOnly, which is upgraded separately.
@@ -1913,7 +1913,11 @@ static Attribute::AttrKind getAttrFromCode(uint64_t Code) {
   case bitc::ATTR_KIND_COLD:
     return Attribute::Cold;
   case bitc::ATTR_KIND_CONVERGENT:
-    return Attribute::Convergent;
+    // Upgrade convergent by ignoring it. The new default behavior matches
+    // the old attributed semantics.
+    return Attribute::EndAttrKinds;
+  case bitc::ATTR_KIND_NOCONVERGENT:
+    return Attribute::NoConvergent;
   case bitc::ATTR_KIND_DISABLE_SANITIZER_INSTRUMENTATION:
     return Attribute::DisableSanitizerInstrumentation;
   case bitc::ATTR_KIND_ELEMENTTYPE:
@@ -2165,6 +2169,9 @@ Error BitcodeReader::parseAttributeGroupBlock() {
 
           if (Error Err = parseAttrKind(EncodedKind, &Kind))
             return Err;
+
+          if (Kind == Attribute::EndAttrKinds) // Removed attribute
+            continue;
 
           // Upgrade old-style byval attribute to one with a type, even if it's
           // nullptr. We will have to insert the real type when we associate

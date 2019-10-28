@@ -411,7 +411,7 @@ declare void @llvm.amdgcn.s.barrier() #1
 declare i32 @llvm.amdgcn.workitem.id.x() #2
 
 attributes #0 = { nounwind }
-attributes #1 = { nounwind convergent }
+attributes #1 = { nounwind }
 attributes #2 = { nounwind readnone }
 attributes #3 = { nounwind "amdgpu-32bit-address-high-bits"="0xffff8000" }
 

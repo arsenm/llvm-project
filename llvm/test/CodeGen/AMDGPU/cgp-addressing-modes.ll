@@ -798,4 +798,4 @@ declare i32 @llvm.amdgcn.ds.consume.p3(ptr addrspace(3) nocapture, i1 immarg) #3
 attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind }
 attributes #2 = { nounwind argmemonly }
-attributes #3 = { argmemonly convergent nounwind willreturn }
+attributes #3 = { argmemonly nounwind willreturn }

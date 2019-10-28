@@ -2,8 +2,8 @@
 ;RUN: opt < %s -passes=jump-threading -S | FileCheck %s
 
 
-declare void @bar(...)
-declare void @baz(...)
+declare void @bar(...) noconvergent
+declare void @baz(...) noconvergent
 
 ; Make sure we thread the end of the bar block to the end of the function.
 define void @test1(i32 %x) {

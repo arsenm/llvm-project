@@ -67,7 +67,7 @@ define i32 @range_use1() #0 {
 ; CHECK_DISABLED_FUNCTION-NEXT:    [[TMP1:%.*]] = call i32 @range_test(i32 123)
 ; CHECK_DISABLED_FUNCTION-NEXT:    ret i32 [[TMP1]]
 ;
-; CHECK_ENABLED_FUNCTION: Function Attrs: noinline norecurse nounwind uwtable
+; CHECK_ENABLED_FUNCTION: Function Attrs: noconvergent noinline norecurse nounwind uwtable
 ; CHECK_ENABLED_FUNCTION-LABEL: define {{[^@]+}}@range_use1
 ; CHECK_ENABLED_FUNCTION-SAME: () #[[ATTR1:[0-9]+]] {
 ; CHECK_ENABLED_FUNCTION-NEXT:    [[TMP1:%.*]] = call i32 @range_test(i32 noundef 123) #[[ATTR2:[0-9]+]]
@@ -116,6 +116,6 @@ attributes #0 = { nounwind uwtable noinline }
 ; CHECK_DISABLED_FUNCTION: attributes #[[ATTR0]] = { noinline nounwind uwtable }
 ;.
 ; CHECK_ENABLED_FUNCTION: attributes #[[ATTR0]] = { noinline nounwind uwtable }
-; CHECK_ENABLED_FUNCTION: attributes #[[ATTR1]] = { noinline norecurse nounwind uwtable }
+; CHECK_ENABLED_FUNCTION: attributes #[[ATTR1]] = { noconvergent noinline norecurse nounwind uwtable }
 ; CHECK_ENABLED_FUNCTION: attributes #[[ATTR2]] = { nounwind }
 ;.

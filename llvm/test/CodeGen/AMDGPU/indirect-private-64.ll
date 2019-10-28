@@ -120,5 +120,5 @@ define amdgpu_kernel void @private_access_v2i64_alloca(ptr addrspace(1) noalias 
   ret void
 }
 
-attributes #0 = { convergent nounwind }
+attributes #0 = { nounwind }
 attributes #1 = { nounwind "amdgpu-waves-per-eu"="1,2" "amdgpu-flat-work-group-size"="64,128" }

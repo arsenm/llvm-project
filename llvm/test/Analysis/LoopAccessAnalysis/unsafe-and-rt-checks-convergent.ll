@@ -68,5 +68,5 @@ for.end:                                          ; preds = %for.body
 
 declare void @llvm.convergent() #0
 
-attributes #0 = { nounwind readnone convergent }
-attributes #1 = { nounwind convergent }
+attributes #0 = { nounwind readnone }
+attributes #1 = { nounwind }

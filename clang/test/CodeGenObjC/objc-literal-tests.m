@@ -81,8 +81,8 @@ int main(void) {
   NSNumber *yesNumber1 = @YES;
   // CHECK: call{{.*}}@objc_msgSend{{.*}}i8 noundef signext 0
   NSNumber *noNumber1 = @NO;
-NSDictionary *dictionary = @{@"name" : NSUserName(), 
-                             @"date" : [NSDate date] }; 
+NSDictionary *dictionary = @{@"name" : NSUserName(),
+                             @"date" : [NSDate date] };
   return __objc_yes == __objc_no;
 }
 
@@ -94,4 +94,4 @@ void baz(void) {
   bar(^(void) { return YES; });
 }
 
-// CHECK: attributes [[NUW]] = { {{.*}}noinline {{(norecurse )?}}nounwind{{.*}} }
+// CHECK: attributes [[NUW]] = { {{.*}}noconvergent noinline {{(norecurse )?}}nounwind{{.*}} }

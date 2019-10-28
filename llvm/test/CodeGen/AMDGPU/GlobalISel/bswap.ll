@@ -698,5 +698,5 @@ declare i64 @llvm.bswap.i64(i64) #1
 declare <2 x i64> @llvm.bswap.v2i64(<2 x i64>) #1
 declare i48 @llvm.bswap.i48(i48) #1
 
-attributes #0 = { convergent nounwind readnone }
+attributes #0 = { nounwind readnone }
 attributes #1 = { nounwind readnone speculatable willreturn }

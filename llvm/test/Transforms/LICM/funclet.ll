@@ -151,8 +151,8 @@ else:                                             ; preds = %postinvoke
   to label %forcond.backedge unwind label %catch.dispatch
 }
 
-declare void @may_throw()
+declare void @may_throw() noconvergent
 
-declare i32 @pure_computation() nounwind argmemonly readonly willreturn
+declare i32 @pure_computation() noconvergent nounwind argmemonly readonly willreturn
 
-declare i32 @__CxxFrameHandler3(...)
+declare i32 @__CxxFrameHandler3(...) noconvergent

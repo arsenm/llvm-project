@@ -1173,7 +1173,7 @@ void mapInt128() {
 // CHECK1-NEXT:    br label [[DOTOMP_REDUCTION_DEFAULT]]
 // CHECK1:       .omp.reduction.case2:
 // CHECK1-NEXT:    [[TMP9:%.*]] = load i128, ptr [[Z2]], align 16
-// CHECK1-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0)
+// CHECK1-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0) #[[ATTR7:[0-9]+]]
 // CHECK1-NEXT:    br label [[ATOMIC_CONT:%.*]]
 // CHECK1:       atomic_cont:
 // CHECK1-NEXT:    [[TMP10:%.*]] = load i128, ptr [[ATOMIC_TEMP]], align 16
@@ -1182,7 +1182,7 @@ void mapInt128() {
 // CHECK1-NEXT:    [[TMP12:%.*]] = load i128, ptr [[Z2]], align 16
 // CHECK1-NEXT:    [[ADD4:%.*]] = add nsw i128 [[TMP11]], [[TMP12]]
 // CHECK1-NEXT:    store i128 [[ADD4]], ptr [[ATOMIC_TEMP3]], align 16
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0)
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0) #[[ATTR7]]
 // CHECK1-NEXT:    br i1 [[CALL]], label [[ATOMIC_EXIT:%.*]], label [[ATOMIC_CONT]]
 // CHECK1:       atomic_exit:
 // CHECK1-NEXT:    call void @__kmpc_end_reduce(ptr @[[GLOB2]], i32 [[TMP5]], ptr @.gomp_critical_user_.reduction.var)
@@ -1265,7 +1265,7 @@ void mapInt128() {
 // CHECK1-NEXT:    br label [[DOTOMP_REDUCTION_DEFAULT]]
 // CHECK1:       .omp.reduction.case2:
 // CHECK1-NEXT:    [[TMP9:%.*]] = load i128, ptr [[Z2]], align 16
-// CHECK1-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0)
+// CHECK1-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0) #[[ATTR7]]
 // CHECK1-NEXT:    br label [[ATOMIC_CONT:%.*]]
 // CHECK1:       atomic_cont:
 // CHECK1-NEXT:    [[TMP10:%.*]] = load i128, ptr [[ATOMIC_TEMP]], align 16
@@ -1274,7 +1274,7 @@ void mapInt128() {
 // CHECK1-NEXT:    [[TMP12:%.*]] = load i128, ptr [[Z2]], align 16
 // CHECK1-NEXT:    [[ADD4:%.*]] = add nsw i128 [[TMP11]], [[TMP12]]
 // CHECK1-NEXT:    store i128 [[ADD4]], ptr [[ATOMIC_TEMP3]], align 16
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0)
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0) #[[ATTR7]]
 // CHECK1-NEXT:    br i1 [[CALL]], label [[ATOMIC_EXIT:%.*]], label [[ATOMIC_CONT]]
 // CHECK1:       atomic_exit:
 // CHECK1-NEXT:    call void @__kmpc_end_reduce(ptr @[[GLOB2]], i32 [[TMP5]], ptr @.gomp_critical_user_.reduction.var)
@@ -1304,7 +1304,7 @@ void mapInt128() {
 //
 //
 // CHECK1-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK1-SAME: () #[[ATTR7:[0-9]+]] {
+// CHECK1-SAME: () #[[ATTR6:[0-9]+]] {
 // CHECK1-NEXT:  entry:
 // CHECK1-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK1-NEXT:    ret void
@@ -2231,7 +2231,7 @@ void mapInt128() {
 //
 //
 // CHECK3-LABEL: define {{[^@]+}}@.omp_offloading.requires_reg
-// CHECK3-SAME: () #[[ATTR6:[0-9]+]] {
+// CHECK3-SAME: () #[[ATTR5:[0-9]+]] {
 // CHECK3-NEXT:  entry:
 // CHECK3-NEXT:    call void @__tgt_register_requires(i64 1)
 // CHECK3-NEXT:    ret void
@@ -2755,7 +2755,7 @@ void mapInt128() {
 // CHECK5-NEXT:    br label [[DOTOMP_REDUCTION_DEFAULT]]
 // CHECK5:       .omp.reduction.case2:
 // CHECK5-NEXT:    [[TMP9:%.*]] = load i128, ptr [[Z2]], align 16
-// CHECK5-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0) #[[ATTR6:[0-9]+]]
+// CHECK5-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0)
 // CHECK5-NEXT:    br label [[ATOMIC_CONT:%.*]]
 // CHECK5:       atomic_cont:
 // CHECK5-NEXT:    [[TMP10:%.*]] = load i128, ptr [[ATOMIC_TEMP]], align 16
@@ -2764,7 +2764,7 @@ void mapInt128() {
 // CHECK5-NEXT:    [[TMP12:%.*]] = load i128, ptr [[Z2]], align 16
 // CHECK5-NEXT:    [[ADD4:%.*]] = add nsw i128 [[TMP11]], [[TMP12]]
 // CHECK5-NEXT:    store i128 [[ADD4]], ptr [[ATOMIC_TEMP3]], align 16
-// CHECK5-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0) #[[ATTR6]]
+// CHECK5-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0)
 // CHECK5-NEXT:    br i1 [[CALL]], label [[ATOMIC_EXIT:%.*]], label [[ATOMIC_CONT]]
 // CHECK5:       atomic_exit:
 // CHECK5-NEXT:    call void @__kmpc_end_reduce(ptr @[[GLOB2]], i32 [[TMP5]], ptr @.gomp_critical_user_.reduction.var)
@@ -2847,7 +2847,7 @@ void mapInt128() {
 // CHECK5-NEXT:    br label [[DOTOMP_REDUCTION_DEFAULT]]
 // CHECK5:       .omp.reduction.case2:
 // CHECK5-NEXT:    [[TMP9:%.*]] = load i128, ptr [[Z2]], align 16
-// CHECK5-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0) #[[ATTR6]]
+// CHECK5-NEXT:    call void @__atomic_load(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], i32 noundef signext 0)
 // CHECK5-NEXT:    br label [[ATOMIC_CONT:%.*]]
 // CHECK5:       atomic_cont:
 // CHECK5-NEXT:    [[TMP10:%.*]] = load i128, ptr [[ATOMIC_TEMP]], align 16
@@ -2856,7 +2856,7 @@ void mapInt128() {
 // CHECK5-NEXT:    [[TMP12:%.*]] = load i128, ptr [[Z2]], align 16
 // CHECK5-NEXT:    [[ADD4:%.*]] = add nsw i128 [[TMP11]], [[TMP12]]
 // CHECK5-NEXT:    store i128 [[ADD4]], ptr [[ATOMIC_TEMP3]], align 16
-// CHECK5-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0) #[[ATTR6]]
+// CHECK5-NEXT:    [[CALL:%.*]] = call noundef zeroext i1 @__atomic_compare_exchange(i64 noundef 16, ptr noundef [[TMP1]], ptr noundef [[ATOMIC_TEMP]], ptr noundef [[ATOMIC_TEMP3]], i32 noundef signext 0, i32 noundef signext 0)
 // CHECK5-NEXT:    br i1 [[CALL]], label [[ATOMIC_EXIT:%.*]], label [[ATOMIC_CONT]]
 // CHECK5:       atomic_exit:
 // CHECK5-NEXT:    call void @__kmpc_end_reduce(ptr @[[GLOB2]], i32 [[TMP5]], ptr @.gomp_critical_user_.reduction.var)

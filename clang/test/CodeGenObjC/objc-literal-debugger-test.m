@@ -52,4 +52,4 @@ int main(void) {
 
 // CHECK: declare ptr @objc_msgSend(ptr, ptr, ...) [[NLB:#[0-9]+]]
 
-// CHECK: attributes [[NLB]] = { nonlazybind }
+// CHECK: attributes [[NLB]] = { noconvergent nonlazybind }

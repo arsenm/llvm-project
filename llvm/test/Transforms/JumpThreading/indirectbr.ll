@@ -6,8 +6,8 @@
   ptr blockaddress(@test2, %L1), ptr blockaddress(@test2, %L2)
 ]
 
-declare void @bar()
-declare void @baz()
+declare void @bar() noconvergent
+declare void @baz() noconvergent
 
 
 
@@ -91,4 +91,4 @@ __here3:                                          ; preds = %__here1
   ret void
 }
 
-declare i32 @printf(...) noredzone
+declare i32 @printf(...) noconvergent noredzone

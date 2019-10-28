@@ -53,8 +53,8 @@
   attributes #0 = { nounwind readnone speculatable willreturn }
   attributes #1 = { nounwind writeonly }
   attributes #2 = { nounwind readnone speculatable willreturn }
-  attributes #3 = { convergent nounwind willreturn }
-  attributes #4 = { convergent nounwind readnone willreturn }
+  attributes #3 = { nounwind willreturn }
+  attributes #4 = { nounwind readnone willreturn }
   attributes #5 = { nounwind }
 
   !llvm.dbg.cu = !{!0}

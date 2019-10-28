@@ -165,7 +165,7 @@ declare void @llvm.assume(i1)
 ; CHECK: attributes #[[ATTR2:[0-9]+]] = { nocallback norecurse nounwind "llvm.assume"="ompx_aligned_barrier" }
 ; CHECK: attributes #[[ATTR3:[0-9]+]] = { nocallback norecurse nosync nounwind }
 ; CHECK: attributes #[[ATTR4:[0-9]+]] = { nocallback }
-; CHECK: attributes #[[ATTR5:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
+; CHECK: attributes #[[ATTR5:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
 ; CHECK: attributes #[[ATTR6]] = { nounwind }
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{i32 7, !"openmp", i32 50}

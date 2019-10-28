@@ -3,6 +3,6 @@
 ; CHECK: INLINEASM &"", 1 /* sideeffect attdialect */, 12 /* clobber */, implicit-def early-clobber $df, 12 /* clobber */, implicit-def early-clobber $fpsw, 12 /* clobber */, implicit-def early-clobber $eflags
 define void @foo() {
 entry:
-  call void asm sideeffect "", "~{dirflag},~{fpsr},~{flags}"()
+  call void asm sideeffect "", "~{dirflag},~{fpsr},~{flags}"() noconvergent
   ret void
 }

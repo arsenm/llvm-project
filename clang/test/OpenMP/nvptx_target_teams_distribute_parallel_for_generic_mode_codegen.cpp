@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP6:%.*]] = load i64, ptr [[DOTCAPTURE_EXPR__CASTED]], align 8
 // CHECK1-NEXT:    store i32 0, ptr [[DOTZERO_ADDR]], align 4
 // CHECK1-NEXT:    store i32 [[TMP2]], ptr [[DOTTHREADID_TEMP_]], align 4
-// CHECK1-NEXT:    call void @__omp_outlined__(ptr [[DOTTHREADID_TEMP_]], ptr [[DOTZERO_ADDR]], i64 [[TMP4]], ptr [[TMP0]], i64 [[TMP6]]) #[[ATTR3:[0-9]+]]
+// CHECK1-NEXT:    call void @__omp_outlined__(ptr [[DOTTHREADID_TEMP_]], ptr [[DOTZERO_ADDR]], i64 [[TMP4]], ptr [[TMP0]], i64 [[TMP6]]) #[[ATTR4:[0-9]+]]
 // CHECK1-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 2)
 // CHECK1-NEXT:    ret void
 // CHECK1:       worker.exit:
@@ -292,10 +292,10 @@ int main(int argc, char **argv) {
 // CHECK1-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[I5]], align 4
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[I5]]) #[[ATTR5:[0-9]+]]
-// CHECK1-NEXT:    [[CALL11:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[TMP0]]) #[[ATTR5]]
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[I5]])
+// CHECK1-NEXT:    [[CALL11:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[TMP0]])
 // CHECK1-NEXT:    [[ADD12:%.*]] = add nsw i32 [[CALL]], [[CALL11]]
-// CHECK1-NEXT:    [[CALL13:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[ARGC_ADDR]]) #[[ATTR5]]
+// CHECK1-NEXT:    [[CALL13:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[ARGC_ADDR]])
 // CHECK1-NEXT:    [[ADD14:%.*]] = add nsw i32 [[ADD12]], [[CALL13]]
 // CHECK1-NEXT:    store i32 [[ADD14]], ptr [[TMP0]], align 4
 // CHECK1-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]
@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
 // CHECK2-NEXT:    [[TMP6:%.*]] = load i32, ptr [[DOTCAPTURE_EXPR__CASTED]], align 4
 // CHECK2-NEXT:    store i32 0, ptr [[DOTZERO_ADDR]], align 4
 // CHECK2-NEXT:    store i32 [[TMP2]], ptr [[DOTTHREADID_TEMP_]], align 4
-// CHECK2-NEXT:    call void @__omp_outlined__(ptr [[DOTTHREADID_TEMP_]], ptr [[DOTZERO_ADDR]], i32 [[TMP4]], ptr [[TMP0]], i32 [[TMP6]]) #[[ATTR3:[0-9]+]]
+// CHECK2-NEXT:    call void @__omp_outlined__(ptr [[DOTTHREADID_TEMP_]], ptr [[DOTZERO_ADDR]], i32 [[TMP4]], ptr [[TMP0]], i32 [[TMP6]]) #[[ATTR4:[0-9]+]]
 // CHECK2-NEXT:    call void @__kmpc_target_deinit(ptr @[[GLOB1]], i8 2)
 // CHECK2-NEXT:    ret void
 // CHECK2:       worker.exit:
@@ -584,10 +584,10 @@ int main(int argc, char **argv) {
 // CHECK2-NEXT:    [[MUL:%.*]] = mul nsw i32 [[TMP19]], 1
 // CHECK2-NEXT:    [[ADD:%.*]] = add nsw i32 0, [[MUL]]
 // CHECK2-NEXT:    store i32 [[ADD]], ptr [[I4]], align 4
-// CHECK2-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[I4]]) #[[ATTR5:[0-9]+]]
-// CHECK2-NEXT:    [[CALL8:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[TMP0]]) #[[ATTR5]]
+// CHECK2-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[I4]])
+// CHECK2-NEXT:    [[CALL8:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[TMP0]])
 // CHECK2-NEXT:    [[ADD9:%.*]] = add nsw i32 [[CALL]], [[CALL8]]
-// CHECK2-NEXT:    [[CALL10:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[ARGC_ADDR]]) #[[ATTR5]]
+// CHECK2-NEXT:    [[CALL10:%.*]] = call noundef i32 @_Z3fooPi(ptr noundef [[ARGC_ADDR]])
 // CHECK2-NEXT:    [[ADD11:%.*]] = add nsw i32 [[ADD9]], [[CALL10]]
 // CHECK2-NEXT:    store i32 [[ADD11]], ptr [[TMP0]], align 4
 // CHECK2-NEXT:    br label [[OMP_BODY_CONTINUE:%.*]]

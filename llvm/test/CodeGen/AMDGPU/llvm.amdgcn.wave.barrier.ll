@@ -25,4 +25,4 @@ entry:
 declare void @llvm.amdgcn.wave.barrier() #1
 
 attributes #0 = { nounwind }
-attributes #1 = { convergent nounwind }
+attributes #1 = { nounwind }

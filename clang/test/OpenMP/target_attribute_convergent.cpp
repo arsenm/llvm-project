@@ -8,6 +8,6 @@ void foo() {}
 
 #pragma omp end declare target
 
-// CHECK: Function Attrs: {{.*}}convergent{{.*}}
+// Make sure noconvergent doesn't appear
 // CHECK: define hidden void @_Z3foov() [[ATTRIBUTE_NUMBER:#[0-9]+]]
-// CHECK: attributes [[ATTRIBUTE_NUMBER]] = { {{.*}}convergent{{.*}} }
+// CHECK: attributes [[ATTRIBUTE_NUMBER]] = { mustprogress noinline nounwind optnone "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+ptx32,+sm_20" }

@@ -130,7 +130,7 @@ void test4(void) {
   // 0x02000000 - has copy/dispose helpers strong
   // CHECK-NEXT: store i32 838860800, i32* [[T0]]
   // CHECK:      [[SLOT:%.*]] = getelementptr inbounds [[BYREF_T]], [[BYREF_T]]* [[VAR]], i32 0, i32 6
-  // CHECK-NEXT: [[T0:%.*]] = call i8* @test4_source() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK-NEXT: [[T0:%.*]] = call i8* @test4_source() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T0]])
   // CHECK-NEXT: store i8* [[T0]], i8** [[SLOT]]
   // CHECK-NEXT: [[SLOT:%.*]] = getelementptr inbounds [[BYREF_T]], [[BYREF_T]]* [[VAR]], i32 0, i32 6
@@ -184,7 +184,7 @@ void test5(void) {
   // CHECK-NEXT: [[BLOCK:%.*]] = alloca [[BLOCK_T:<{.*}>]],
   // CHECK-NEXT: [[VARPTR1:%.*]] = bitcast i8** [[VAR]] to i8*
   // CHECK-NEXT: call void @llvm.lifetime.start.p0i8(i64 8, i8* [[VARPTR1]])
-  // CHECK: [[T1:%.*]] = call i8* @test5_source() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK: [[T1:%.*]] = call i8* @test5_source() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T1]])
   // CHECK-NEXT: store i8* [[T1]], i8** [[VAR]],
   // CHECK-NEXT: call void @llvm.objc.release(i8* [[T1]])
@@ -215,7 +215,7 @@ void test6(void) {
   // 0x02000000 - has copy/dispose helpers weak
   // CHECK-NEXT: store i32 1107296256, i32* [[T0]]
   // CHECK:      [[SLOT:%.*]] = getelementptr inbounds [[BYREF_T]], [[BYREF_T]]* [[VAR]], i32 0, i32 6
-  // CHECK-NEXT: [[T1:%.*]] = call i8* @test6_source() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK-NEXT: [[T1:%.*]] = call i8* @test6_source() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T1]])
   // CHECK-NEXT: call i8* @llvm.objc.initWeak(i8** [[SLOT]], i8* [[T1]])
   // CHECK-NEXT: call void @llvm.objc.release(i8* [[T1]])
@@ -261,7 +261,7 @@ void test7(void) {
   // CHECK-LABEL:    define{{.*}} void @test7()
   // CHECK:      [[VAR:%.*]] = alloca i8*,
   // CHECK-NEXT: [[BLOCK:%.*]] = alloca [[BLOCK_T:<{.*}>]],
-  // CHECK:      [[T1:%.*]] = call i8* @test7_source() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+  // CHECK:      [[T1:%.*]] = call i8* @test7_source() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
   // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(i8* [[T1]])
   // CHECK-NEXT: call i8* @llvm.objc.initWeak(i8** [[VAR]], i8* [[T1]])
   // CHECK-NEXT: call void @llvm.objc.release(i8* [[T1]])
@@ -329,7 +329,7 @@ id test9(void) {
 // CHECK-NEXT: tail call i8* @llvm.objc.autoreleaseReturnValue
 // CHECK-NEXT: ret i8*
 
-// CHECK:      call i8* @test9_produce() [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
+// CHECK:      call i8* @test9_produce() #{{[0-9]+}} [ "clang.arc.attachedcall"(i8* (i8*)* @llvm.objc.retainAutoreleasedReturnValue) ]
 // CHECK-NEXT: call void (...) @llvm.objc.clang.arc.noop.use(
 // CHECK-NEXT: ret i8*
 }
@@ -634,7 +634,7 @@ void test18(id x) {
 // CHECK-UNOPT:      [[X:%.*]] = alloca i8*,
 // CHECK-UNOPT-NEXT: [[BLOCK:%.*]] = alloca [[BLOCK_T:<{.*}>]],
 // CHECK-UNOPT-NEXT: store i8* null, i8** [[X]]
-// CHECK-UNOPT-NEXT: call void @llvm.objc.storeStrong(i8** [[X]], 
+// CHECK-UNOPT-NEXT: call void @llvm.objc.storeStrong(i8** [[X]],
 // CHECK-UNOPT: %[[BLOCK_DESCRIPTOR:.*]] = getelementptr inbounds [[BLOCK_T]], [[BLOCK_T]]* [[BLOCK]], i32 0, i32 4
 // CHECK-UNOPT: store %[[STRUCT_BLOCK_DESCRIPTOR]]* bitcast ({ i64, i64, i8*, i8*, i8*, i64 }* @[[BLOCK_DESCRIPTOR_TMP44]] to %[[STRUCT_BLOCK_DESCRIPTOR]]*), %[[STRUCT_BLOCK_DESCRIPTOR]]** %[[BLOCK_DESCRIPTOR]], align 8
 // CHECK-UNOPT:      [[SLOT:%.*]] = getelementptr inbounds [[BLOCK_T]], [[BLOCK_T]]* [[BLOCK]], i32 0, i32 5
@@ -735,7 +735,7 @@ void test20(const id x) {
 // CHECK-LABEL: define{{.*}} void @test21(
 // CHECK: %[[V6:.*]] = call i8* @llvm.objc.retainBlock(
 // CHECK: %[[V7:.*]] = bitcast i8* %[[V6]] to void ()*
-// CHECK: call void (i32, ...) @test21_callee(i32 noundef 1, void ()* noundef %[[V7]]),
+// CHECK: call void (i32, ...) @test21_callee(i32 noundef 1, void ()* noundef %[[V7]]) #{{[0-9]+}},
 
 void test21_callee(int n, ...);
 void test21(id x) {

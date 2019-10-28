@@ -41,7 +41,7 @@ define i32 @test2(i32 %x) nounwind ssp {
 ; CHECK:       bb1:
 ; CHECK-NEXT:    [[TMP1:%.*]] = add nsw i32 [[X_ADDR_17]], 1
 ; CHECK-NEXT:    [[TMP2:%.*]] = sdiv i32 [[TMP1]], [[X_ADDR_17]]
-; CHECK-NEXT:    [[TMP3:%.*]] = tail call i32 @bar() #[[ATTR1:[0-9]+]]
+; CHECK-NEXT:    [[TMP3:%.*]] = tail call i32 @bar() #[[ATTR4:[0-9]+]]
 ; CHECK-NEXT:    br label [[BB2]]
 ; CHECK:       bb2:
 ; CHECK-NEXT:    [[X_ADDR_0]] = phi i32 [ [[TMP2]], [[BB1]] ], [ [[X_ADDR_17]], [[BB]] ]
@@ -76,7 +76,7 @@ bb4:                                              ; preds = %bb2
   ret i32 %x_addr.0
 }
 
-declare i32 @bar()
+declare i32 @bar() noconvergent
 
 define i32 @test3(ptr nocapture readonly %P, i32 %i) {
 ; CHECK-LABEL: @test3(
@@ -179,10 +179,10 @@ sw.epilog:                                        ; preds = %entry, %sw.bb
 define i32 @test6(ptr nocapture readonly %P, i32 %i, i1 %cond) {
 ; CHECK-LABEL: @test6(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[ADD:%.*]] = shl nsw i32 [[I]], 1
+; CHECK-NEXT:    [[ADD:%.*]] = shl nsw i32 [[I:%.*]], 1
 ; CHECK-NEXT:    br label [[DISPATCHBB:%.*]]
 ; CHECK:       dispatchBB:
-; CHECK-NEXT:    [[IDXPROM:%.*]] = sext i32 [[I:%.*]] to i64
+; CHECK-NEXT:    [[IDXPROM:%.*]] = sext i32 [[I]] to i64
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, ptr [[P:%.*]], i64 [[IDXPROM]]
 ; CHECK-NEXT:    [[TMP0:%.*]] = load i32, ptr [[ARRAYIDX]], align 4
 ; CHECK-NEXT:    switch i32 [[I]], label [[SW_BB:%.*]] [
@@ -216,8 +216,8 @@ sw.epilog:                                        ; preds = %entry, %sw.bb
   ret i32 %sum.0
 }
 
-declare void @checkd(double)
-declare double @log(double) willreturn nounwind readnone
+declare void @checkd(double) noconvergent
+declare double @log(double) noconvergent willreturn nounwind readnone
 define void @test7(i1 %cond, double %d) {
 ; CHECK-LABEL: @test7(
 ; CHECK-NEXT:    br i1 [[COND:%.*]], label [[IF:%.*]], label [[ELSE:%.*]]
@@ -238,9 +238,9 @@ else:
   ret void
 }
 
-declare void @abort()
+declare void @abort() noconvergent
 declare { i64, i1 } @llvm.umul.with.overflow.i64(i64, i64)
-declare void @dummy(i64)
+declare void @dummy(i64) noconvergent
 ; Two uses in two different users of a single successor block. We can sink.
 define i64 @test8(i64 %c) {
 ; CHECK-LABEL: @test8(

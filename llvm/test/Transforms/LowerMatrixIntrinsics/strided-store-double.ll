@@ -74,4 +74,4 @@ declare void @llvm.matrix.column.major.store.v10f64.i64(<10 x double>, ptr, i64,
 
 ; CHECK: declare void @llvm.matrix.column.major.store.v6f64.i64(<6 x double>, ptr nocapture writeonly, i64, i1 immarg, i32 immarg, i32 immarg) #0
 ; CHECK: declare void @llvm.matrix.column.major.store.v10f64.i64(<10 x double>, ptr nocapture writeonly, i64, i1 immarg, i32 immarg, i32 immarg) #0
-; CHECK: attributes #0 = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+; CHECK: attributes #0 = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: write) }

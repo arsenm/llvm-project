@@ -43,5 +43,5 @@ false2:
   ret void
 }
 
-declare void @dummy(i32)
+declare void @dummy(i32) noconvergent
 declare void @llvm.assume(i1)

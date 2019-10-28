@@ -16,7 +16,7 @@ bb:
   %var1 = call i32 @baz()
   ret i32 %var1
 }
-declare i32 @baz()
+declare i32 @baz() noconvergent
 
 ; Function Attrs: uwtable
 ; This is an equivalent IR for a c-style example with a large function (foo)
@@ -106,8 +106,8 @@ bb14:                                             ; preds = %bb12, %bb
   ret i32 %var15
 }
 
-declare i32 @unknown(ptr %dest)
-declare i32 @unknown.as2(ptr addrspace(2) %dest)
+declare i32 @unknown(ptr %dest) noconvergent
+declare i32 @unknown.as2(ptr addrspace(2) %dest) noconvergent
 
 define i32 @sink_write_to_use(i1 %c) {
 ; CHECK-LABEL: @sink_write_to_use(
@@ -485,7 +485,7 @@ use_block:
 }
 
 
-declare i32 @bar()
-declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture)
-declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture)
+declare i32 @bar() noconvergent
+declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) noconvergent
+declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) noconvergent
 

@@ -251,5 +251,5 @@ bb4:                                              ; preds = %bb1
 }
 
 
-declare void @bar(i32)
-declare i1 @foo(i64)
+declare void @bar(i32) noconvergent
+declare i1 @foo(i64) noconvergent

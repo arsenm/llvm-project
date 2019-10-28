@@ -40,7 +40,7 @@ define weak void @__omp_offloading_fd02_404433c2_main_l5(ptr nonnull align 8 der
 ; CHECK-NEXT:    ret void
 ; CHECK:       user_code.entry:
 ; CHECK-NEXT:    [[TMP1:%.*]] = call i32 @__kmpc_global_thread_num(ptr nonnull @[[GLOB1]]) #[[ATTR3]]
-; CHECK-NEXT:    [[CALL_I:%.*]] = call double @__nv_sin(double 0x400921FB54442D18) #[[ATTR7:[0-9]+]]
+; CHECK-NEXT:    [[CALL_I:%.*]] = call double @__nv_sin(double 0x400921FB54442D18) #[[ATTR6:[0-9]+]]
 ; CHECK-NEXT:    br label [[REGION_CHECK_TID:%.*]]
 ; CHECK:       region.check.tid:
 ; CHECK-NEXT:    [[TMP2:%.*]] = call i32 @__kmpc_get_hardware_thread_id_in_block()
@@ -118,13 +118,13 @@ declare void @__kmpc_target_deinit(ptr, i8) local_unnamed_addr
 ; Function Attrs: convergent
 declare double @__nv_sin(double) local_unnamed_addr #5
 
-attributes #0 = { alwaysinline convergent norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+attributes #0 = { alwaysinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 attributes #1 = { alwaysinline mustprogress nofree norecurse nosync nounwind readnone willreturn "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 attributes #2 = { norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 attributes #3 = { nounwind }
 attributes #4 = { alwaysinline }
-attributes #5 = { convergent "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-attributes #6 = { convergent nounwind "llvm.assume"="ompx_spmd_amenable" }
+attributes #5 = { "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+attributes #6 = { nounwind "llvm.assume"="ompx_spmd_amenable" }
 
 !omp_offload.info = !{!0}
 !nvvm.annotations = !{!1}
@@ -144,14 +144,13 @@ attributes #6 = { convergent nounwind "llvm.assume"="ompx_spmd_amenable" }
 !10 = !{!"omnipotent char", !11, i64 0}
 !11 = !{!"Simple C/C++ TBAA"}
 ;.
-; CHECK: attributes #[[ATTR0]] = { alwaysinline convergent norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+; CHECK: attributes #[[ATTR0]] = { alwaysinline norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 ; CHECK: attributes #[[ATTR1]] = { alwaysinline mustprogress nofree norecurse nosync nounwind willreturn memory(none) "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 ; CHECK: attributes #[[ATTR2]] = { norecurse nounwind "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 ; CHECK: attributes #[[ATTR3]] = { nounwind }
 ; CHECK: attributes #[[ATTR4:[0-9]+]] = { alwaysinline }
-; CHECK: attributes #[[ATTR5:[0-9]+]] = { convergent "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-; CHECK: attributes #[[ATTR6:[0-9]+]] = { convergent nounwind }
-; CHECK: attributes #[[ATTR7]] = { convergent nounwind "llvm.assume"="ompx_spmd_amenable" }
+; CHECK: attributes #[[ATTR5:[0-9]+]] = { "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+; CHECK: attributes #[[ATTR6]] = { nounwind "llvm.assume"="ompx_spmd_amenable" }
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{i32 0, i32 64770, i32 1078211522, !"main", i32 5, i32 0}
 ; CHECK: [[META1:![0-9]+]] = !{ptr @__omp_offloading_fd02_404433c2_main_l5, !"kernel", i32 1}

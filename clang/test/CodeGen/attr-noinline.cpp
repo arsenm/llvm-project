@@ -52,4 +52,4 @@ void func(const S &s1, const S &s2) {
 // CHECK: call noundef zeroext i1 @_ZeqRK1SS1_({{.*}}) #[[NOINLINEATTR]]
 }
 
-// CHECK: attributes #[[NOINLINEATTR]] = { noinline }
+// CHECK: attributes #[[NOINLINEATTR]] = { noconvergent noinline }

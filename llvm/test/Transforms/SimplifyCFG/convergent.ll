@@ -2,7 +2,7 @@
 ; RUN: opt -S -passes=simplifycfg -simplifycfg-require-and-preserve-domtree=1 < %s | FileCheck %s
 ; RUN: opt -S -passes=simplifycfg < %s | FileCheck %s
 
-declare void @foo() convergent
+declare void @foo()
 
 define i32 @test_01(i32 %a) {
 ; CHECK-LABEL: @test_01(

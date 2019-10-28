@@ -44,6 +44,6 @@ bb2:                                              ; preds = %entry, %_ZN4llvm8dy
   ret i8 0
 }
 
-declare void @__assert_rtn(ptr, ptr, i32, ptr) noreturn
+declare void @__assert_rtn(ptr, ptr, i32, ptr) noconvergent noreturn
 
-declare void @_ZNK4llvm5Value4dumpEv(ptr)
+declare void @_ZNK4llvm5Value4dumpEv(ptr) noconvergent

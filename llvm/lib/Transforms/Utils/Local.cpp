@@ -3520,8 +3520,8 @@ bool llvm::inferAttributesFromOthers(Function &F) {
 
   bool Changed = false;
   // readnone + not convergent implies nosync
-  if (!F.hasFnAttribute(Attribute::NoSync) &&
-      F.doesNotAccessMemory() && !F.isConvergent()) {
+  if (!F.hasFnAttribute(Attribute::NoSync) && F.doesNotAccessMemory() &&
+      F.isNoConvergent()) {
     F.setNoSync();
     Changed = true;
   }

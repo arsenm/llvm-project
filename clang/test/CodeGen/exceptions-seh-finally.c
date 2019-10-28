@@ -258,14 +258,14 @@ void finally_within_finally(void) {
 // CHECK: invoke void @might_crash(
 
 // CHECK: call void @"?fin$0@0@finally_within_finally@@"(
-// CHECK: call void @"?fin$0@0@finally_within_finally@@"({{.*}}) [ "funclet"(
+// CHECK: call void @"?fin$0@0@finally_within_finally@@"({{.*}}) #{{[0-9]+}} [ "funclet"(
 
 // CHECK-LABEL: define internal void @"?fin$0@0@finally_within_finally@@"({{[^)]*}})
 // CHECK-SAME: [[finally_attrs]]
 // CHECK: invoke void @might_crash(
 
 // CHECK: call void @"?fin$1@0@finally_within_finally@@"(
-// CHECK: call void @"?fin$1@0@finally_within_finally@@"({{.*}}) [ "funclet"(
+// CHECK: call void @"?fin$1@0@finally_within_finally@@"({{.*}}) #{{[0-9]+}} [ "funclet"(
 
 // CHECK-LABEL: define internal void @"?fin$1@0@finally_within_finally@@"({{[^)]*}})
 // CHECK-SAME: [[finally_attrs]]
@@ -284,4 +284,4 @@ void finally_with_func(void) {
 
 // Look for the absence of noinline.  nounwind is expected; any further
 // attributes should be string attributes.
-// CHECK: attributes [[finally_attrs]] = { nounwind "{{.*}}" }
+// CHECK: attributes [[finally_attrs]] = { noconvergent nounwind "{{.*}}" }

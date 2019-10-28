@@ -393,10 +393,10 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP21:%.*]] = icmp ne i32 [[TMP20]], 0
 // CHECK1-NEXT:    br i1 [[TMP21]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR4:[0-9]+]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR5:[0-9]+]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4:[0-9]+]]
 // CHECK1-NEXT:    store i64 [[CALL]], ptr [[K]], align 8
 // CHECK1-NEXT:    [[TMP22:%.*]] = load i32, ptr [[A]], align 4
 // CHECK1-NEXT:    store i32 [[TMP22]], ptr [[A_CASTED]], align 4
@@ -404,7 +404,7 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP24:%.*]] = load i64, ptr [[K]], align 8
 // CHECK1-NEXT:    store i64 [[TMP24]], ptr [[K_CASTED]], align 8
 // CHECK1-NEXT:    [[TMP25:%.*]] = load i64, ptr [[K_CASTED]], align 8
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i64 [[TMP23]], i64 [[TMP25]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i64 [[TMP23]], i64 [[TMP25]]) #[[ATTR5]]
 // CHECK1-NEXT:    store i32 12, ptr [[LIN]], align 4
 // CHECK1-NEXT:    [[TMP26:%.*]] = load i16, ptr [[AA]], align 2
 // CHECK1-NEXT:    store i16 [[TMP26]], ptr [[AA_CASTED]], align 2
@@ -515,12 +515,12 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP87:%.*]] = icmp ne i32 [[TMP86]], 0
 // CHECK1-NEXT:    br i1 [[TMP87]], label [[OMP_OFFLOAD_FAILED9:%.*]], label [[OMP_OFFLOAD_CONT10:%.*]]
 // CHECK1:       omp_offload.failed9:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT10]]
 // CHECK1:       omp_offload.cont10:
 // CHECK1-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK1:       omp_if.else:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
 // CHECK1-NEXT:    [[TMP88:%.*]] = load i32, ptr [[A]], align 4
@@ -637,12 +637,12 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP146:%.*]] = icmp ne i32 [[TMP145]], 0
 // CHECK1-NEXT:    br i1 [[TMP146]], label [[OMP_OFFLOAD_FAILED18:%.*]], label [[OMP_OFFLOAD_CONT19:%.*]]
 // CHECK1:       omp_offload.failed18:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT19]]
 // CHECK1:       omp_offload.cont19:
 // CHECK1-NEXT:    br label [[OMP_IF_END21:%.*]]
 // CHECK1:       omp_if.else20:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_IF_END21]]
 // CHECK1:       omp_if.end21:
 // CHECK1-NEXT:    [[TMP147:%.*]] = load i32, ptr [[A]], align 4
@@ -890,7 +890,7 @@ int bar(int n){
 // CHECK1-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK1-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK1-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4]]
 // CHECK1-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK1-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK1-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -1040,7 +1040,7 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP9:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !24
 // CHECK1-NEXT:    [[TMP10:%.*]] = load ptr, ptr [[DOTCOPY_FN__ADDR_I]], align 8, !noalias !24
 // CHECK1-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTPRIVATES__ADDR_I]], align 8, !noalias !24
-// CHECK1-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR5]]
 // CHECK1-NEXT:    [[TMP12:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], align 8, !noalias !24
 // CHECK1-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], align 8, !noalias !24
 // CHECK1-NEXT:    [[TMP14:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], align 8, !noalias !24
@@ -1085,7 +1085,7 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP36:%.*]] = load i32, ptr [[TMP17]], align 4
 // CHECK1-NEXT:    store i32 [[TMP36]], ptr [[A_CASTED_I]], align 4, !noalias !24
 // CHECK1-NEXT:    [[TMP37:%.*]] = load i64, ptr [[A_CASTED_I]], align 8, !noalias !24
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i64 [[TMP33]], i64 [[TMP35]], i64 [[TMP37]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i64 [[TMP33]], i64 [[TMP35]], i64 [[TMP37]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[DOTOMP_OUTLINED__3_EXIT]]
 // CHECK1:       .omp_outlined..3.exit:
 // CHECK1-NEXT:    ret i32 0
@@ -1378,22 +1378,22 @@ int bar(int n){
 // CHECK1-NEXT:    store i32 [[N]], ptr [[N_ADDR]], align 4
 // CHECK1-NEXT:    store i32 0, ptr [[A]], align 4
 // CHECK1-NEXT:    [[TMP0:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK1-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z3fooi(i32 noundef signext [[TMP0]])
+// CHECK1-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z3fooi(i32 noundef signext [[TMP0]]) #[[ATTR4]]
 // CHECK1-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A]], align 4
 // CHECK1-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP1]], [[CALL]]
 // CHECK1-NEXT:    store i32 [[ADD]], ptr [[A]], align 4
 // CHECK1-NEXT:    [[TMP2:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK1-NEXT:    [[CALL1:%.*]] = call noundef signext i32 @_ZN2S12r1Ei(ptr noundef nonnull align 8 dereferenceable(8) [[S]], i32 noundef signext [[TMP2]])
+// CHECK1-NEXT:    [[CALL1:%.*]] = call noundef signext i32 @_ZN2S12r1Ei(ptr noundef nonnull align 8 dereferenceable(8) [[S]], i32 noundef signext [[TMP2]]) #[[ATTR4]]
 // CHECK1-NEXT:    [[TMP3:%.*]] = load i32, ptr [[A]], align 4
 // CHECK1-NEXT:    [[ADD2:%.*]] = add nsw i32 [[TMP3]], [[CALL1]]
 // CHECK1-NEXT:    store i32 [[ADD2]], ptr [[A]], align 4
 // CHECK1-NEXT:    [[TMP4:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK1-NEXT:    [[CALL3:%.*]] = call noundef signext i32 @_ZL7fstatici(i32 noundef signext [[TMP4]])
+// CHECK1-NEXT:    [[CALL3:%.*]] = call noundef signext i32 @_ZL7fstatici(i32 noundef signext [[TMP4]]) #[[ATTR4]]
 // CHECK1-NEXT:    [[TMP5:%.*]] = load i32, ptr [[A]], align 4
 // CHECK1-NEXT:    [[ADD4:%.*]] = add nsw i32 [[TMP5]], [[CALL3]]
 // CHECK1-NEXT:    store i32 [[ADD4]], ptr [[A]], align 4
 // CHECK1-NEXT:    [[TMP6:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK1-NEXT:    [[CALL5:%.*]] = call noundef signext i32 @_Z9ftemplateIiET_i(i32 noundef signext [[TMP6]])
+// CHECK1-NEXT:    [[CALL5:%.*]] = call noundef signext i32 @_Z9ftemplateIiET_i(i32 noundef signext [[TMP6]]) #[[ATTR4]]
 // CHECK1-NEXT:    [[TMP7:%.*]] = load i32, ptr [[A]], align 4
 // CHECK1-NEXT:    [[ADD6:%.*]] = add nsw i32 [[TMP7]], [[CALL5]]
 // CHECK1-NEXT:    store i32 [[ADD6]], ptr [[A]], align 4
@@ -1504,12 +1504,12 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP43:%.*]] = icmp ne i32 [[TMP42]], 0
 // CHECK1-NEXT:    br i1 [[TMP43]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK1:       omp_if.else:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
 // CHECK1-NEXT:    [[TMP44:%.*]] = mul nsw i64 1, [[TMP2]]
@@ -1612,12 +1612,12 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP35:%.*]] = icmp ne i32 [[TMP34]], 0
 // CHECK1-NEXT:    br i1 [[TMP35]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK1:       omp_if.else:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
 // CHECK1-NEXT:    [[TMP36:%.*]] = load i32, ptr [[A]], align 4
@@ -1700,12 +1700,12 @@ int bar(int n){
 // CHECK1-NEXT:    [[TMP30:%.*]] = icmp ne i32 [[TMP29]], 0
 // CHECK1-NEXT:    br i1 [[TMP30]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK1:       omp_if.else:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK1-NEXT:    br label [[OMP_IF_END]]
 // CHECK1:       omp_if.end:
 // CHECK1-NEXT:    [[TMP31:%.*]] = load i32, ptr [[A]], align 4
@@ -2066,15 +2066,15 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK3-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR4:[0-9]+]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR5:[0-9]+]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
-// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4:[0-9]+]]
 // CHECK3-NEXT:    store i64 [[CALL]], ptr [[K]], align 8
 // CHECK3-NEXT:    [[TMP20:%.*]] = load i32, ptr [[A]], align 4
 // CHECK3-NEXT:    store i32 [[TMP20]], ptr [[A_CASTED]], align 4
 // CHECK3-NEXT:    [[TMP21:%.*]] = load i32, ptr [[A_CASTED]], align 4
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i32 [[TMP21]], ptr [[K]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i32 [[TMP21]], ptr [[K]]) #[[ATTR5]]
 // CHECK3-NEXT:    store i32 12, ptr [[LIN]], align 4
 // CHECK3-NEXT:    [[TMP22:%.*]] = load i16, ptr [[AA]], align 2
 // CHECK3-NEXT:    store i16 [[TMP22]], ptr [[AA_CASTED]], align 2
@@ -2185,12 +2185,12 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP83:%.*]] = icmp ne i32 [[TMP82]], 0
 // CHECK3-NEXT:    br i1 [[TMP83]], label [[OMP_OFFLOAD_FAILED9:%.*]], label [[OMP_OFFLOAD_CONT10:%.*]]
 // CHECK3:       omp_offload.failed9:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT10]]
 // CHECK3:       omp_offload.cont10:
 // CHECK3-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK3:       omp_if.else:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
 // CHECK3-NEXT:    [[TMP84:%.*]] = load i32, ptr [[A]], align 4
@@ -2309,12 +2309,12 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP144:%.*]] = icmp ne i32 [[TMP143]], 0
 // CHECK3-NEXT:    br i1 [[TMP144]], label [[OMP_OFFLOAD_FAILED18:%.*]], label [[OMP_OFFLOAD_CONT19:%.*]]
 // CHECK3:       omp_offload.failed18:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT19]]
 // CHECK3:       omp_offload.cont19:
 // CHECK3-NEXT:    br label [[OMP_IF_END21:%.*]]
 // CHECK3:       omp_if.else20:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_IF_END21]]
 // CHECK3:       omp_if.end21:
 // CHECK3-NEXT:    [[TMP145:%.*]] = load i32, ptr [[A]], align 4
@@ -2560,7 +2560,7 @@ int bar(int n){
 // CHECK3-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK3-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK3-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4]]
 // CHECK3-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK3-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK3-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -2710,7 +2710,7 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP9:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 4, !noalias !25
 // CHECK3-NEXT:    [[TMP10:%.*]] = load ptr, ptr [[DOTCOPY_FN__ADDR_I]], align 4, !noalias !25
 // CHECK3-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTPRIVATES__ADDR_I]], align 4, !noalias !25
-// CHECK3-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR5]]
 // CHECK3-NEXT:    [[TMP12:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], align 4, !noalias !25
 // CHECK3-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], align 4, !noalias !25
 // CHECK3-NEXT:    [[TMP14:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], align 4, !noalias !25
@@ -2755,7 +2755,7 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP36:%.*]] = load i32, ptr [[TMP17]], align 4
 // CHECK3-NEXT:    store i32 [[TMP36]], ptr [[A_CASTED_I]], align 4, !noalias !25
 // CHECK3-NEXT:    [[TMP37:%.*]] = load i32, ptr [[A_CASTED_I]], align 4, !noalias !25
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i32 [[TMP33]], i32 [[TMP35]], i32 [[TMP37]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i32 [[TMP33]], i32 [[TMP35]], i32 [[TMP37]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[DOTOMP_OUTLINED__3_EXIT]]
 // CHECK3:       .omp_outlined..3.exit:
 // CHECK3-NEXT:    ret i32 0
@@ -3048,22 +3048,22 @@ int bar(int n){
 // CHECK3-NEXT:    store i32 [[N]], ptr [[N_ADDR]], align 4
 // CHECK3-NEXT:    store i32 0, ptr [[A]], align 4
 // CHECK3-NEXT:    [[TMP0:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooi(i32 noundef [[TMP0]])
+// CHECK3-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooi(i32 noundef [[TMP0]]) #[[ATTR4]]
 // CHECK3-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A]], align 4
 // CHECK3-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP1]], [[CALL]]
 // CHECK3-NEXT:    store i32 [[ADD]], ptr [[A]], align 4
 // CHECK3-NEXT:    [[TMP2:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK3-NEXT:    [[CALL1:%.*]] = call noundef i32 @_ZN2S12r1Ei(ptr noundef nonnull align 4 dereferenceable(8) [[S]], i32 noundef [[TMP2]])
+// CHECK3-NEXT:    [[CALL1:%.*]] = call noundef i32 @_ZN2S12r1Ei(ptr noundef nonnull align 4 dereferenceable(8) [[S]], i32 noundef [[TMP2]]) #[[ATTR4]]
 // CHECK3-NEXT:    [[TMP3:%.*]] = load i32, ptr [[A]], align 4
 // CHECK3-NEXT:    [[ADD2:%.*]] = add nsw i32 [[TMP3]], [[CALL1]]
 // CHECK3-NEXT:    store i32 [[ADD2]], ptr [[A]], align 4
 // CHECK3-NEXT:    [[TMP4:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK3-NEXT:    [[CALL3:%.*]] = call noundef i32 @_ZL7fstatici(i32 noundef [[TMP4]])
+// CHECK3-NEXT:    [[CALL3:%.*]] = call noundef i32 @_ZL7fstatici(i32 noundef [[TMP4]]) #[[ATTR4]]
 // CHECK3-NEXT:    [[TMP5:%.*]] = load i32, ptr [[A]], align 4
 // CHECK3-NEXT:    [[ADD4:%.*]] = add nsw i32 [[TMP5]], [[CALL3]]
 // CHECK3-NEXT:    store i32 [[ADD4]], ptr [[A]], align 4
 // CHECK3-NEXT:    [[TMP6:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK3-NEXT:    [[CALL5:%.*]] = call noundef i32 @_Z9ftemplateIiET_i(i32 noundef [[TMP6]])
+// CHECK3-NEXT:    [[CALL5:%.*]] = call noundef i32 @_Z9ftemplateIiET_i(i32 noundef [[TMP6]]) #[[ATTR4]]
 // CHECK3-NEXT:    [[TMP7:%.*]] = load i32, ptr [[A]], align 4
 // CHECK3-NEXT:    [[ADD6:%.*]] = add nsw i32 [[TMP7]], [[CALL5]]
 // CHECK3-NEXT:    store i32 [[ADD6]], ptr [[A]], align 4
@@ -3174,12 +3174,12 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP43:%.*]] = icmp ne i32 [[TMP42]], 0
 // CHECK3-NEXT:    br i1 [[TMP43]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK3:       omp_if.else:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
 // CHECK3-NEXT:    [[TMP44:%.*]] = mul nsw i32 1, [[TMP1]]
@@ -3282,12 +3282,12 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP35:%.*]] = icmp ne i32 [[TMP34]], 0
 // CHECK3-NEXT:    br i1 [[TMP35]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK3:       omp_if.else:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
 // CHECK3-NEXT:    [[TMP36:%.*]] = load i32, ptr [[A]], align 4
@@ -3370,12 +3370,12 @@ int bar(int n){
 // CHECK3-NEXT:    [[TMP30:%.*]] = icmp ne i32 [[TMP29]], 0
 // CHECK3-NEXT:    br i1 [[TMP30]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK3:       omp_if.else:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK3-NEXT:    br label [[OMP_IF_END]]
 // CHECK3:       omp_if.end:
 // CHECK3-NEXT:    [[TMP31:%.*]] = load i32, ptr [[A]], align 4
@@ -3790,7 +3790,7 @@ int bar(int n){
 // CHECK9-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK9-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK9-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR5:[0-9]+]]
+// CHECK9-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
 // CHECK9-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK9-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK9-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -3871,7 +3871,7 @@ int bar(int n){
 //
 //
 // CHECK9-LABEL: define {{[^@]+}}@_Z7get_valv
-// CHECK9-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK9-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK9-NEXT:  entry:
 // CHECK9-NEXT:    ret i64 0
 //
@@ -4555,7 +4555,7 @@ int bar(int n){
 // CHECK11-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK11-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK11-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK11-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR5:[0-9]+]]
+// CHECK11-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
 // CHECK11-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK11-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK11-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -4636,7 +4636,7 @@ int bar(int n){
 //
 //
 // CHECK11-LABEL: define {{[^@]+}}@_Z7get_valv
-// CHECK11-SAME: () #[[ATTR3:[0-9]+]] {
+// CHECK11-SAME: () #[[ATTR4:[0-9]+]] {
 // CHECK11-NEXT:  entry:
 // CHECK11-NEXT:    ret i64 0
 //
@@ -5269,10 +5269,10 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP21:%.*]] = icmp ne i32 [[TMP20]], 0
 // CHECK17-NEXT:    br i1 [[TMP21]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK17:       omp_offload.failed:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR4:[0-9]+]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR5:[0-9]+]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK17:       omp_offload.cont:
-// CHECK17-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK17-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4:[0-9]+]]
 // CHECK17-NEXT:    store i64 [[CALL]], ptr [[K]], align 8
 // CHECK17-NEXT:    [[TMP22:%.*]] = load i32, ptr [[A]], align 4
 // CHECK17-NEXT:    store i32 [[TMP22]], ptr [[A_CASTED]], align 4
@@ -5280,7 +5280,7 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP24:%.*]] = load i64, ptr [[K]], align 8
 // CHECK17-NEXT:    store i64 [[TMP24]], ptr [[K_CASTED]], align 8
 // CHECK17-NEXT:    [[TMP25:%.*]] = load i64, ptr [[K_CASTED]], align 8
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i64 [[TMP23]], i64 [[TMP25]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i64 [[TMP23]], i64 [[TMP25]]) #[[ATTR5]]
 // CHECK17-NEXT:    store i32 12, ptr [[LIN]], align 4
 // CHECK17-NEXT:    [[TMP26:%.*]] = load i16, ptr [[AA]], align 2
 // CHECK17-NEXT:    store i16 [[TMP26]], ptr [[AA_CASTED]], align 2
@@ -5391,12 +5391,12 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP87:%.*]] = icmp ne i32 [[TMP86]], 0
 // CHECK17-NEXT:    br i1 [[TMP87]], label [[OMP_OFFLOAD_FAILED9:%.*]], label [[OMP_OFFLOAD_CONT10:%.*]]
 // CHECK17:       omp_offload.failed9:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT10]]
 // CHECK17:       omp_offload.cont10:
 // CHECK17-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK17:       omp_if.else:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i64 [[TMP61]], i64 [[TMP63]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_IF_END]]
 // CHECK17:       omp_if.end:
 // CHECK17-NEXT:    [[TMP88:%.*]] = load i32, ptr [[A]], align 4
@@ -5513,12 +5513,12 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP146:%.*]] = icmp ne i32 [[TMP145]], 0
 // CHECK17-NEXT:    br i1 [[TMP146]], label [[OMP_OFFLOAD_FAILED18:%.*]], label [[OMP_OFFLOAD_CONT19:%.*]]
 // CHECK17:       omp_offload.failed18:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT19]]
 // CHECK17:       omp_offload.cont19:
 // CHECK17-NEXT:    br label [[OMP_IF_END21:%.*]]
 // CHECK17:       omp_if.else20:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i64 [[TMP90]], ptr [[B]], i64 [[TMP2]], ptr [[VLA]], ptr [[C]], i64 5, i64 [[TMP5]], ptr [[VLA1]], ptr [[D]], i64 [[TMP92]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_IF_END21]]
 // CHECK17:       omp_if.end21:
 // CHECK17-NEXT:    [[TMP147:%.*]] = load i32, ptr [[A]], align 4
@@ -5766,7 +5766,7 @@ int bar(int n){
 // CHECK17-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK17-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK17-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK17-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK17-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4]]
 // CHECK17-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK17-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK17-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -5916,7 +5916,7 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP9:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 8, !noalias !24
 // CHECK17-NEXT:    [[TMP10:%.*]] = load ptr, ptr [[DOTCOPY_FN__ADDR_I]], align 8, !noalias !24
 // CHECK17-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTPRIVATES__ADDR_I]], align 8, !noalias !24
-// CHECK17-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR5]]
 // CHECK17-NEXT:    [[TMP12:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], align 8, !noalias !24
 // CHECK17-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], align 8, !noalias !24
 // CHECK17-NEXT:    [[TMP14:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], align 8, !noalias !24
@@ -5961,7 +5961,7 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP36:%.*]] = load i32, ptr [[TMP17]], align 4
 // CHECK17-NEXT:    store i32 [[TMP36]], ptr [[A_CASTED_I]], align 4, !noalias !24
 // CHECK17-NEXT:    [[TMP37:%.*]] = load i64, ptr [[A_CASTED_I]], align 8, !noalias !24
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i64 [[TMP33]], i64 [[TMP35]], i64 [[TMP37]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i64 [[TMP33]], i64 [[TMP35]], i64 [[TMP37]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[DOTOMP_OUTLINED__3_EXIT]]
 // CHECK17:       .omp_outlined..3.exit:
 // CHECK17-NEXT:    ret i32 0
@@ -6254,22 +6254,22 @@ int bar(int n){
 // CHECK17-NEXT:    store i32 [[N]], ptr [[N_ADDR]], align 4
 // CHECK17-NEXT:    store i32 0, ptr [[A]], align 4
 // CHECK17-NEXT:    [[TMP0:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK17-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z3fooi(i32 noundef signext [[TMP0]])
+// CHECK17-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z3fooi(i32 noundef signext [[TMP0]]) #[[ATTR4]]
 // CHECK17-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A]], align 4
 // CHECK17-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP1]], [[CALL]]
 // CHECK17-NEXT:    store i32 [[ADD]], ptr [[A]], align 4
 // CHECK17-NEXT:    [[TMP2:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK17-NEXT:    [[CALL1:%.*]] = call noundef signext i32 @_ZN2S12r1Ei(ptr noundef nonnull align 8 dereferenceable(8) [[S]], i32 noundef signext [[TMP2]])
+// CHECK17-NEXT:    [[CALL1:%.*]] = call noundef signext i32 @_ZN2S12r1Ei(ptr noundef nonnull align 8 dereferenceable(8) [[S]], i32 noundef signext [[TMP2]]) #[[ATTR4]]
 // CHECK17-NEXT:    [[TMP3:%.*]] = load i32, ptr [[A]], align 4
 // CHECK17-NEXT:    [[ADD2:%.*]] = add nsw i32 [[TMP3]], [[CALL1]]
 // CHECK17-NEXT:    store i32 [[ADD2]], ptr [[A]], align 4
 // CHECK17-NEXT:    [[TMP4:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK17-NEXT:    [[CALL3:%.*]] = call noundef signext i32 @_ZL7fstatici(i32 noundef signext [[TMP4]])
+// CHECK17-NEXT:    [[CALL3:%.*]] = call noundef signext i32 @_ZL7fstatici(i32 noundef signext [[TMP4]]) #[[ATTR4]]
 // CHECK17-NEXT:    [[TMP5:%.*]] = load i32, ptr [[A]], align 4
 // CHECK17-NEXT:    [[ADD4:%.*]] = add nsw i32 [[TMP5]], [[CALL3]]
 // CHECK17-NEXT:    store i32 [[ADD4]], ptr [[A]], align 4
 // CHECK17-NEXT:    [[TMP6:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK17-NEXT:    [[CALL5:%.*]] = call noundef signext i32 @_Z9ftemplateIiET_i(i32 noundef signext [[TMP6]])
+// CHECK17-NEXT:    [[CALL5:%.*]] = call noundef signext i32 @_Z9ftemplateIiET_i(i32 noundef signext [[TMP6]]) #[[ATTR4]]
 // CHECK17-NEXT:    [[TMP7:%.*]] = load i32, ptr [[A]], align 4
 // CHECK17-NEXT:    [[ADD6:%.*]] = add nsw i32 [[TMP7]], [[CALL5]]
 // CHECK17-NEXT:    store i32 [[ADD6]], ptr [[A]], align 4
@@ -6380,12 +6380,12 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP43:%.*]] = icmp ne i32 [[TMP42]], 0
 // CHECK17-NEXT:    br i1 [[TMP43]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK17:       omp_offload.failed:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK17:       omp_offload.cont:
 // CHECK17-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK17:       omp_if.else:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i64 [[TMP6]], i64 2, i64 [[TMP2]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_IF_END]]
 // CHECK17:       omp_if.end:
 // CHECK17-NEXT:    [[TMP44:%.*]] = mul nsw i64 1, [[TMP2]]
@@ -6488,12 +6488,12 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP35:%.*]] = icmp ne i32 [[TMP34]], 0
 // CHECK17-NEXT:    br i1 [[TMP35]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK17:       omp_offload.failed:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK17:       omp_offload.cont:
 // CHECK17-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK17:       omp_if.else:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i64 [[TMP1]], i64 [[TMP3]], i64 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_IF_END]]
 // CHECK17:       omp_if.end:
 // CHECK17-NEXT:    [[TMP36:%.*]] = load i32, ptr [[A]], align 4
@@ -6576,12 +6576,12 @@ int bar(int n){
 // CHECK17-NEXT:    [[TMP30:%.*]] = icmp ne i32 [[TMP29]], 0
 // CHECK17-NEXT:    br i1 [[TMP30]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK17:       omp_offload.failed:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK17:       omp_offload.cont:
 // CHECK17-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK17:       omp_if.else:
-// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK17-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i64 [[TMP1]], i64 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK17-NEXT:    br label [[OMP_IF_END]]
 // CHECK17:       omp_if.end:
 // CHECK17-NEXT:    [[TMP31:%.*]] = load i32, ptr [[A]], align 4
@@ -6942,15 +6942,15 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP19:%.*]] = icmp ne i32 [[TMP18]], 0
 // CHECK19-NEXT:    br i1 [[TMP19]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK19:       omp_offload.failed:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR4:[0-9]+]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l103() #[[ATTR5:[0-9]+]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK19:       omp_offload.cont:
-// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4:[0-9]+]]
 // CHECK19-NEXT:    store i64 [[CALL]], ptr [[K]], align 8
 // CHECK19-NEXT:    [[TMP20:%.*]] = load i32, ptr [[A]], align 4
 // CHECK19-NEXT:    store i32 [[TMP20]], ptr [[A_CASTED]], align 4
 // CHECK19-NEXT:    [[TMP21:%.*]] = load i32, ptr [[A_CASTED]], align 4
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i32 [[TMP21]], ptr [[K]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l110(i32 [[TMP21]], ptr [[K]]) #[[ATTR5]]
 // CHECK19-NEXT:    store i32 12, ptr [[LIN]], align 4
 // CHECK19-NEXT:    [[TMP22:%.*]] = load i16, ptr [[AA]], align 2
 // CHECK19-NEXT:    store i16 [[TMP22]], ptr [[AA_CASTED]], align 2
@@ -7061,12 +7061,12 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP83:%.*]] = icmp ne i32 [[TMP82]], 0
 // CHECK19-NEXT:    br i1 [[TMP83]], label [[OMP_OFFLOAD_FAILED9:%.*]], label [[OMP_OFFLOAD_CONT10:%.*]]
 // CHECK19:       omp_offload.failed9:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT10]]
 // CHECK19:       omp_offload.cont10:
 // CHECK19-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK19:       omp_if.else:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l136(i32 [[TMP57]], i32 [[TMP59]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_IF_END]]
 // CHECK19:       omp_if.end:
 // CHECK19-NEXT:    [[TMP84:%.*]] = load i32, ptr [[A]], align 4
@@ -7185,12 +7185,12 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP144:%.*]] = icmp ne i32 [[TMP143]], 0
 // CHECK19-NEXT:    br i1 [[TMP144]], label [[OMP_OFFLOAD_FAILED18:%.*]], label [[OMP_OFFLOAD_CONT19:%.*]]
 // CHECK19:       omp_offload.failed18:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT19]]
 // CHECK19:       omp_offload.cont19:
 // CHECK19-NEXT:    br label [[OMP_IF_END21:%.*]]
 // CHECK19:       omp_if.else20:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l160(i32 [[TMP86]], ptr [[B]], i32 [[TMP1]], ptr [[VLA]], ptr [[C]], i32 5, i32 [[TMP3]], ptr [[VLA1]], ptr [[D]], i32 [[TMP88]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_IF_END21]]
 // CHECK19:       omp_if.end21:
 // CHECK19-NEXT:    [[TMP145:%.*]] = load i32, ptr [[A]], align 4
@@ -7436,7 +7436,7 @@ int bar(int n){
 // CHECK19-NEXT:    store i32 [[TMP0]], ptr [[DOTLINEAR_START]], align 4
 // CHECK19-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A_ADDR]], align 4
 // CHECK19-NEXT:    store i32 [[TMP1]], ptr [[DOTLINEAR_START1]], align 4
-// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv()
+// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i64 @_Z7get_valv() #[[ATTR4]]
 // CHECK19-NEXT:    store i64 [[CALL]], ptr [[DOTLINEAR_STEP]], align 8
 // CHECK19-NEXT:    store i64 0, ptr [[DOTOMP_LB]], align 8
 // CHECK19-NEXT:    store i64 3, ptr [[DOTOMP_UB]], align 8
@@ -7586,7 +7586,7 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP9:%.*]] = load ptr, ptr [[__CONTEXT_ADDR_I]], align 4, !noalias !25
 // CHECK19-NEXT:    [[TMP10:%.*]] = load ptr, ptr [[DOTCOPY_FN__ADDR_I]], align 4, !noalias !25
 // CHECK19-NEXT:    [[TMP11:%.*]] = load ptr, ptr [[DOTPRIVATES__ADDR_I]], align 4, !noalias !25
-// CHECK19-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void [[TMP10]](ptr [[TMP11]], ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], ptr [[DOTFIRSTPRIV_PTR_ADDR3_I]]) #[[ATTR5]]
 // CHECK19-NEXT:    [[TMP12:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR_I]], align 4, !noalias !25
 // CHECK19-NEXT:    [[TMP13:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR1_I]], align 4, !noalias !25
 // CHECK19-NEXT:    [[TMP14:%.*]] = load ptr, ptr [[DOTFIRSTPRIV_PTR_ADDR2_I]], align 4, !noalias !25
@@ -7631,7 +7631,7 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP36:%.*]] = load i32, ptr [[TMP17]], align 4
 // CHECK19-NEXT:    store i32 [[TMP36]], ptr [[A_CASTED_I]], align 4, !noalias !25
 // CHECK19-NEXT:    [[TMP37:%.*]] = load i32, ptr [[A_CASTED_I]], align 4, !noalias !25
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i32 [[TMP33]], i32 [[TMP35]], i32 [[TMP37]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z3fooi_l128(i32 [[TMP33]], i32 [[TMP35]], i32 [[TMP37]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[DOTOMP_OUTLINED__3_EXIT]]
 // CHECK19:       .omp_outlined..3.exit:
 // CHECK19-NEXT:    ret i32 0
@@ -7924,22 +7924,22 @@ int bar(int n){
 // CHECK19-NEXT:    store i32 [[N]], ptr [[N_ADDR]], align 4
 // CHECK19-NEXT:    store i32 0, ptr [[A]], align 4
 // CHECK19-NEXT:    [[TMP0:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooi(i32 noundef [[TMP0]])
+// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z3fooi(i32 noundef [[TMP0]]) #[[ATTR4]]
 // CHECK19-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A]], align 4
 // CHECK19-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP1]], [[CALL]]
 // CHECK19-NEXT:    store i32 [[ADD]], ptr [[A]], align 4
 // CHECK19-NEXT:    [[TMP2:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK19-NEXT:    [[CALL1:%.*]] = call noundef i32 @_ZN2S12r1Ei(ptr noundef nonnull align 4 dereferenceable(8) [[S]], i32 noundef [[TMP2]])
+// CHECK19-NEXT:    [[CALL1:%.*]] = call noundef i32 @_ZN2S12r1Ei(ptr noundef nonnull align 4 dereferenceable(8) [[S]], i32 noundef [[TMP2]]) #[[ATTR4]]
 // CHECK19-NEXT:    [[TMP3:%.*]] = load i32, ptr [[A]], align 4
 // CHECK19-NEXT:    [[ADD2:%.*]] = add nsw i32 [[TMP3]], [[CALL1]]
 // CHECK19-NEXT:    store i32 [[ADD2]], ptr [[A]], align 4
 // CHECK19-NEXT:    [[TMP4:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK19-NEXT:    [[CALL3:%.*]] = call noundef i32 @_ZL7fstatici(i32 noundef [[TMP4]])
+// CHECK19-NEXT:    [[CALL3:%.*]] = call noundef i32 @_ZL7fstatici(i32 noundef [[TMP4]]) #[[ATTR4]]
 // CHECK19-NEXT:    [[TMP5:%.*]] = load i32, ptr [[A]], align 4
 // CHECK19-NEXT:    [[ADD4:%.*]] = add nsw i32 [[TMP5]], [[CALL3]]
 // CHECK19-NEXT:    store i32 [[ADD4]], ptr [[A]], align 4
 // CHECK19-NEXT:    [[TMP6:%.*]] = load i32, ptr [[N_ADDR]], align 4
-// CHECK19-NEXT:    [[CALL5:%.*]] = call noundef i32 @_Z9ftemplateIiET_i(i32 noundef [[TMP6]])
+// CHECK19-NEXT:    [[CALL5:%.*]] = call noundef i32 @_Z9ftemplateIiET_i(i32 noundef [[TMP6]]) #[[ATTR4]]
 // CHECK19-NEXT:    [[TMP7:%.*]] = load i32, ptr [[A]], align 4
 // CHECK19-NEXT:    [[ADD6:%.*]] = add nsw i32 [[TMP7]], [[CALL5]]
 // CHECK19-NEXT:    store i32 [[ADD6]], ptr [[A]], align 4
@@ -8050,12 +8050,12 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP43:%.*]] = icmp ne i32 [[TMP42]], 0
 // CHECK19-NEXT:    br i1 [[TMP43]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK19:       omp_offload.failed:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK19:       omp_offload.cont:
 // CHECK19-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK19:       omp_if.else:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZN2S12r1Ei_l232(ptr [[THIS1]], i32 [[TMP5]], i32 2, i32 [[TMP1]], ptr [[VLA]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_IF_END]]
 // CHECK19:       omp_if.end:
 // CHECK19-NEXT:    [[TMP44:%.*]] = mul nsw i32 1, [[TMP1]]
@@ -8158,12 +8158,12 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP35:%.*]] = icmp ne i32 [[TMP34]], 0
 // CHECK19-NEXT:    br i1 [[TMP35]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK19:       omp_offload.failed:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK19:       omp_offload.cont:
 // CHECK19-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK19:       omp_if.else:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__ZL7fstatici_l214(i32 [[TMP1]], i32 [[TMP3]], i32 [[TMP5]], ptr [[B]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_IF_END]]
 // CHECK19:       omp_if.end:
 // CHECK19-NEXT:    [[TMP36:%.*]] = load i32, ptr [[A]], align 4
@@ -8246,12 +8246,12 @@ int bar(int n){
 // CHECK19-NEXT:    [[TMP30:%.*]] = icmp ne i32 [[TMP29]], 0
 // CHECK19-NEXT:    br i1 [[TMP30]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK19:       omp_offload.failed:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK19:       omp_offload.cont:
 // CHECK19-NEXT:    br label [[OMP_IF_END:%.*]]
 // CHECK19:       omp_if.else:
-// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR4]]
+// CHECK19-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z9ftemplateIiET_i_l197(i32 [[TMP1]], i32 [[TMP3]], ptr [[B]]) #[[ATTR5]]
 // CHECK19-NEXT:    br label [[OMP_IF_END]]
 // CHECK19:       omp_if.end:
 // CHECK19-NEXT:    [[TMP31:%.*]] = load i32, ptr [[A]], align 4

@@ -28,7 +28,7 @@ define void @bar(ptr %y2) {
 !10 = !{i64 0, i64 4, !11, i64 4, i64 4, !11}
 !11 = !{!8, !8, i64 0}
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nounwind willreturn memory(argmem: readwrite) }
 ;.
 ; CHECK: [[TBAA_STRUCT0]] = !{i64 0, i64 4, !1, i64 4, i64 4, !1}
 ; CHECK: [[META1:![0-9]+]] = !{!2, !2, i64 0}

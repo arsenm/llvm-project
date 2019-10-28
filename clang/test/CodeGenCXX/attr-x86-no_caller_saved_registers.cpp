@@ -28,4 +28,4 @@ int main(int argc, char **argv) {
 // CHECK: attributes #[[ATTRS]] = {
 // CHECK-SAME: "no_caller_saved_registers"
 // CHECK-SAME: }
-// CHECK: attributes #[[ATTRS1]] = { "no_caller_saved_registers" }
+// CHECK: attributes #[[ATTRS1]] = { noconvergent "no_caller_saved_registers" }

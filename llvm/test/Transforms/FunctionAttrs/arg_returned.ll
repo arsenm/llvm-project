@@ -149,7 +149,7 @@ return:                                           ; preds = %cond.end, %if.then3
 ; FNATTR: define ptr @ptr_scc_r1(ptr %a, ptr readnone %r, ptr nocapture readnone %b)
 ; FNATTR: define ptr @ptr_scc_r2(ptr readnone %a, ptr readnone %b, ptr readnone %r)
 ;
-;
+
 ; ptr ptr_scc_r1(ptr a, ptr b, ptr r);
 ; ptr ptr_scc_r2(ptr a, ptr b, ptr r);
 ;

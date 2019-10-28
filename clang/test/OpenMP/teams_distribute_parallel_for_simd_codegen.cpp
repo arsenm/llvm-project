@@ -288,7 +288,7 @@ int main (int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP41:%.*]] = icmp ne i32 [[TMP40]], 0
 // CHECK1-NEXT:    br i1 [[TMP41]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK1:       omp_offload.failed:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l29(i64 [[TMP2]], i64 [[TMP4]], i64 [[TMP6]], ptr @a) #[[ATTR2:[0-9]+]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l29(i64 [[TMP2]], i64 [[TMP4]], i64 [[TMP6]], ptr @a) #[[ATTR3:[0-9]+]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK1:       omp_offload.cont:
 // CHECK1-NEXT:    [[TMP42:%.*]] = load i32, ptr [[I]], align 4
@@ -358,7 +358,7 @@ int main (int argc, char **argv) {
 // CHECK1-NEXT:    [[TMP75:%.*]] = icmp ne i32 [[TMP74]], 0
 // CHECK1-NEXT:    br i1 [[TMP75]], label [[OMP_OFFLOAD_FAILED16:%.*]], label [[OMP_OFFLOAD_CONT17:%.*]]
 // CHECK1:       omp_offload.failed16:
-// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l36(ptr @a, i64 [[TMP43]], i64 [[TMP45]]) #[[ATTR2]]
+// CHECK1-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l36(ptr @a, i64 [[TMP43]], i64 [[TMP45]]) #[[ATTR3]]
 // CHECK1-NEXT:    br label [[OMP_OFFLOAD_CONT17]]
 // CHECK1:       omp_offload.cont17:
 // CHECK1-NEXT:    [[TMP76:%.*]] = load i32, ptr @a, align 4
@@ -964,7 +964,7 @@ int main (int argc, char **argv) {
 // CHECK3-NEXT:    [[TMP41:%.*]] = icmp ne i32 [[TMP40]], 0
 // CHECK3-NEXT:    br i1 [[TMP41]], label [[OMP_OFFLOAD_FAILED:%.*]], label [[OMP_OFFLOAD_CONT:%.*]]
 // CHECK3:       omp_offload.failed:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l29(i32 [[TMP2]], i32 [[TMP4]], i32 [[TMP6]], ptr @a) #[[ATTR2:[0-9]+]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l29(i32 [[TMP2]], i32 [[TMP4]], i32 [[TMP6]], ptr @a) #[[ATTR3:[0-9]+]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK3:       omp_offload.cont:
 // CHECK3-NEXT:    [[TMP42:%.*]] = load i32, ptr [[I]], align 4
@@ -1034,7 +1034,7 @@ int main (int argc, char **argv) {
 // CHECK3-NEXT:    [[TMP75:%.*]] = icmp ne i32 [[TMP74]], 0
 // CHECK3-NEXT:    br i1 [[TMP75]], label [[OMP_OFFLOAD_FAILED16:%.*]], label [[OMP_OFFLOAD_CONT17:%.*]]
 // CHECK3:       omp_offload.failed16:
-// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l36(ptr @a, i32 [[TMP43]], i32 [[TMP45]]) #[[ATTR2]]
+// CHECK3-NEXT:    call void @{{__omp_offloading_[0-9a-z]+_[0-9a-z]+}}__Z21teams_argument_globali_l36(ptr @a, i32 [[TMP43]], i32 [[TMP45]]) #[[ATTR3]]
 // CHECK3-NEXT:    br label [[OMP_OFFLOAD_CONT17]]
 // CHECK3:       omp_offload.cont17:
 // CHECK3-NEXT:    [[TMP76:%.*]] = load i32, ptr @a, align 4
@@ -2706,7 +2706,7 @@ int main (int argc, char **argv) {
 // CHECK17-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK17-NEXT:  entry:
 // CHECK17-NEXT:    [[V:%.*]] = alloca [[STRUCT_SS:%.*]], align 4
-// CHECK17-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]])
+// CHECK17-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]]) #[[ATTR3:[0-9]+]]
 // CHECK17-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -2981,7 +2981,7 @@ int main (int argc, char **argv) {
 // CHECK19-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK19-NEXT:  entry:
 // CHECK19-NEXT:    [[V:%.*]] = alloca [[STRUCT_SS:%.*]], align 4
-// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]])
+// CHECK19-NEXT:    [[CALL:%.*]] = call noundef i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]]) #[[ATTR3:[0-9]+]]
 // CHECK19-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -3251,7 +3251,7 @@ int main (int argc, char **argv) {
 // CHECK21-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK21-NEXT:  entry:
 // CHECK21-NEXT:    [[V:%.*]] = alloca [[STRUCT_SS:%.*]], align 4
-// CHECK21-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]])
+// CHECK21-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]]) #[[ATTR2:[0-9]+]]
 // CHECK21-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -3314,7 +3314,7 @@ int main (int argc, char **argv) {
 // CHECK23-SAME: () #[[ATTR0:[0-9]+]] {
 // CHECK23-NEXT:  entry:
 // CHECK23-NEXT:    [[V:%.*]] = alloca [[STRUCT_SS:%.*]], align 4
-// CHECK23-NEXT:    [[CALL:%.*]] = call noundef i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]])
+// CHECK23-NEXT:    [[CALL:%.*]] = call noundef i32 @_ZN2SSIiLi123ELx456EE3fooEv(ptr noundef nonnull align 4 dereferenceable(496) [[V]]) #[[ATTR2:[0-9]+]]
 // CHECK23-NEXT:    ret i32 [[CALL]]
 //
 //
@@ -3483,7 +3483,7 @@ int main (int argc, char **argv) {
 // CHECK25-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK25:       omp_offload.cont:
 // CHECK25-NEXT:    [[TMP43:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// CHECK25-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiLi10EEiT_(i32 noundef signext [[TMP43]])
+// CHECK25-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiLi10EEiT_(i32 noundef signext [[TMP43]]) #[[ATTR4:[0-9]+]]
 // CHECK25-NEXT:    store i32 [[CALL]], ptr [[RETVAL]], align 4
 // CHECK25-NEXT:    [[TMP44:%.*]] = load ptr, ptr [[SAVED_STACK]], align 8
 // CHECK25-NEXT:    call void @llvm.stackrestore(ptr [[TMP44]])
@@ -4120,7 +4120,7 @@ int main (int argc, char **argv) {
 // CHECK27-NEXT:    br label [[OMP_OFFLOAD_CONT]]
 // CHECK27:       omp_offload.cont:
 // CHECK27-NEXT:    [[TMP43:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// CHECK27-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiLi10EEiT_(i32 noundef [[TMP43]])
+// CHECK27-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiLi10EEiT_(i32 noundef [[TMP43]]) #[[ATTR4:[0-9]+]]
 // CHECK27-NEXT:    store i32 [[CALL]], ptr [[RETVAL]], align 4
 // CHECK27-NEXT:    [[TMP44:%.*]] = load ptr, ptr [[SAVED_STACK]], align 4
 // CHECK27-NEXT:    call void @llvm.stackrestore(ptr [[TMP44]])
@@ -4719,7 +4719,7 @@ int main (int argc, char **argv) {
 // CHECK29-NEXT:    br label [[SIMD_IF_END]]
 // CHECK29:       simd.if.end:
 // CHECK29-NEXT:    [[TMP15:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// CHECK29-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiLi10EEiT_(i32 noundef signext [[TMP15]])
+// CHECK29-NEXT:    [[CALL:%.*]] = call noundef signext i32 @_Z5tmainIiLi10EEiT_(i32 noundef signext [[TMP15]]) #[[ATTR4:[0-9]+]]
 // CHECK29-NEXT:    store i32 [[CALL]], ptr [[RETVAL]], align 4
 // CHECK29-NEXT:    [[TMP16:%.*]] = load ptr, ptr [[SAVED_STACK]], align 8
 // CHECK29-NEXT:    call void @llvm.stackrestore(ptr [[TMP16]])
@@ -4855,7 +4855,7 @@ int main (int argc, char **argv) {
 // CHECK31-NEXT:    br label [[SIMD_IF_END]]
 // CHECK31:       simd.if.end:
 // CHECK31-NEXT:    [[TMP14:%.*]] = load i32, ptr [[ARGC_ADDR]], align 4
-// CHECK31-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiLi10EEiT_(i32 noundef [[TMP14]])
+// CHECK31-NEXT:    [[CALL:%.*]] = call noundef i32 @_Z5tmainIiLi10EEiT_(i32 noundef [[TMP14]]) #[[ATTR4:[0-9]+]]
 // CHECK31-NEXT:    store i32 [[CALL]], ptr [[RETVAL]], align 4
 // CHECK31-NEXT:    [[TMP15:%.*]] = load ptr, ptr [[SAVED_STACK]], align 4
 // CHECK31-NEXT:    call void @llvm.stackrestore(ptr [[TMP15]])

@@ -4,12 +4,12 @@
 declare void @llvm.lifetime.start.p0(i64, ptr)
 declare void @llvm.lifetime.end.p0(i64, ptr)
 
-declare void @escape(ptr)
+declare void @escape(ptr) noconvergent
 
-declare void @throwing_callee_foo()
-declare void @throwing_callee_bar()
+declare void @throwing_callee_foo() noconvergent
+declare void @throwing_callee_bar() noconvergent
 
-declare i32 @__gxx_personality_v0(...)
+declare i32 @__gxx_personality_v0(...) noconvergent
 
 define void @caller(i1 %c) personality ptr @__gxx_personality_v0 {
 ; CHECK-LABEL: @caller(
@@ -81,5 +81,6 @@ end:
   resume { ptr, i32 } %i10
 }
 ;.
-; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR0:[0-9]+]] = { nocallback noconvergent nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CHECK: attributes #[[ATTR1:[0-9]+]] = { noconvergent }
 ;.

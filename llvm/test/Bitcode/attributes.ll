@@ -251,13 +251,14 @@ define dereferenceable_or_null(8) ptr @f42(ptr dereferenceable_or_null(8) %foo) 
   ret ptr %foo
 }
 
-; CHECK: define void @f43() #25
-define void @f43() convergent {
+; convergent attribute removed
+; CHECK: define void @f43() {
+define void @f43() {
   ret void
 }
 
 define void @f44() argmemonly
-; CHECK: define void @f44() #26
+; CHECK: define void @f44() #25
 {
         ret void;
 }
@@ -272,17 +273,17 @@ define "string_attribute_with_value"="value" void @f46(i32 "string_attribute_wit
   ret void
 }
 
-; CHECK: define void @f47() #27
+; CHECK: define void @f47() #26
 define void @f47() norecurse {
   ret void
 }
 
-; CHECK: define void @f48() #28
+; CHECK: define void @f48() #27
 define void @f48() inaccessiblememonly {
   ret void
 }
 
-; CHECK: define void @f49() #29
+; CHECK: define void @f49() #28
 define void @f49() inaccessiblemem_or_argmemonly {
   ret void
 }
@@ -317,57 +318,57 @@ entry:
   ret float 1.0
 }
 
-; CHECK: define ptr @f54(i32 %0) #30
+; CHECK: define ptr @f54(i32 %0) #29
 define ptr @f54(i32 %0) allocsize(0) {
   ret ptr null
 }
 
-; CHECK: define ptr @f55(i32 %0, i32 %1) #31
+; CHECK: define ptr @f55(i32 %0, i32 %1) #30
 define ptr @f55(i32 %0, i32 %1) allocsize(0, 1) {
   ret ptr null
 }
 
-; CHECK: define void @f56() #32
+; CHECK: define void @f56() #31
 define void @f56() writeonly
 {
   ret void
 }
 
-; CHECK: define void @f57() #33
+; CHECK: define void @f57() #32
 define void @f57() speculatable {
   ret void
 }
 
-; CHECK: define void @f58() #34
+; CHECK: define void @f58() #33
 define void @f58() sanitize_hwaddress
 {
         ret void;
 }
 
-; CHECK: define void @f59() #35
+; CHECK: define void @f59() #34
 define void @f59() shadowcallstack
 {
   ret void
 }
 
-; CHECK: define void @f60() #36
+; CHECK: define void @f60() #35
 define void @f60() willreturn
 {
   ret void
 }
 
-; CHECK: define void @f61() #37
+; CHECK: define void @f61() #36
 define void @f61() nofree {
   ret void
 }
 
-; CHECK: define void @f62() #38
+; CHECK: define void @f62() #37
 define void @f62() nosync
 {
   ret void
 }
 
-; CHECK: define void @f63() #39
+; CHECK: define void @f63() #38
 define void @f63() sanitize_memtag
 {
   ret void
@@ -379,7 +380,7 @@ define void @f64(ptr preallocated(i32) %a)
   ret void
 }
 
-; CHECK: define void @f65() #40
+; CHECK: define void @f65() #39
 define void @f65() null_pointer_is_valid
 {
   ret void;
@@ -397,43 +398,43 @@ define void @f67(ptr byref(i32) %a)
   ret void
 }
 
-; CHECK: define void @f68() #41
+; CHECK: define void @f68() #40
 define void @f68() mustprogress
 {
   ret void
 }
 
-; CHECK: define void @f69() #42
+; CHECK: define void @f69() #41
 define void @f69() nocallback
 {
   ret void
 }
 
-; CHECK: define void @f70() #43
+; CHECK: define void @f70() #42
 define void @f70() cold
 {
   ret void
 }
 
-; CHECK: define void @f71() #44
+; CHECK: define void @f71() #43
 define void @f71() hot
 {
   ret void
 }
 
-; CHECK: define void @f72() #45
+; CHECK: define void @f72() #44
 define void @f72() vscale_range(8)
 {
   ret void
 }
 
-; CHECK: define void @f73() #46
+; CHECK: define void @f73() #45
 define void @f73() vscale_range(1,8)
 {
   ret void
 }
 
-; CHECK: define void @f74() #47
+; CHECK: define void @f74() #46
 define void @f74() vscale_range(1,0)
 {
   ret void
@@ -445,13 +446,13 @@ define void @f76(ptr swiftasync %0)
   ret void;
 }
 
-; CHECK: define void @f77() #48
+; CHECK: define void @f77() #47
 define void @f77() nosanitize_coverage
 {
         ret void;
 }
 
-; CHECK: define void @f78() #49
+; CHECK: define void @f78() #48
 define void @f78() noprofile
 {
         ret void;
@@ -464,7 +465,7 @@ define void @f79() {
   ret void
 }
 
-; CHECK: define void @f80() #50
+; CHECK: define void @f80() #49
 define void @f80() disable_sanitizer_instrumentation
 {
         ret void;
@@ -489,7 +490,7 @@ define void @f83(<4 x ptr> align 32 %0, <vscale x 1 x ptr> align 64 %1) {
   ret void
 }
 
-; CHECK: define void @f84() #51
+; CHECK: define void @f84() #50
 define void @f84() uwtable(sync) {
         ret void;
 }
@@ -499,7 +500,7 @@ define void @f85() uwtable(async) {
         ret void;
 }
 
-; CHECK: define void @f86() #52
+; CHECK: define void @f86() #51
 define void @f86() nosanitize_bounds
 {
         ret void;
@@ -510,6 +511,11 @@ define void @f87() fn_ret_thunk_extern { ret void }
 
 ; CHECK: define void @f88() [[SKIPPROFILE:#[0-9]+]]
 define void @f88() skipprofile { ret void }
+
+; CHECK: define void @f89() #54
+define void @f89() noconvergent {
+  ret void
+}
 
 ; CHECK: attributes #0 = { noreturn }
 ; CHECK: attributes #1 = { nounwind }
@@ -536,34 +542,34 @@ define void @f88() skipprofile { ret void }
 ; CHECK: attributes #22 = { minsize }
 ; CHECK: attributes #23 = { noinline optnone }
 ; CHECK: attributes #24 = { jumptable }
-; CHECK: attributes #25 = { convergent }
-; CHECK: attributes #26 = { memory(argmem: readwrite) }
-; CHECK: attributes #27 = { norecurse }
-; CHECK: attributes #28 = { memory(inaccessiblemem: readwrite) }
-; CHECK: attributes #29 = { memory(argmem: readwrite, inaccessiblemem: readwrite) }
-; CHECK: attributes #30 = { allocsize(0) }
-; CHECK: attributes #31 = { allocsize(0,1) }
-; CHECK: attributes #32 = { memory(write) }
-; CHECK: attributes #33 = { speculatable }
-; CHECK: attributes #34 = { sanitize_hwaddress }
-; CHECK: attributes #35 = { shadowcallstack }
-; CHECK: attributes #36 = { willreturn }
-; CHECK: attributes #37 = { nofree }
-; CHECK: attributes #38 = { nosync }
-; CHECK: attributes #39 = { sanitize_memtag }
-; CHECK: attributes #40 = { null_pointer_is_valid }
-; CHECK: attributes #41 = { mustprogress }
-; CHECK: attributes #42 = { nocallback }
-; CHECK: attributes #43 = { cold }
-; CHECK: attributes #44 = { hot }
-; CHECK: attributes #45 = { vscale_range(8,8) }
-; CHECK: attributes #46 = { vscale_range(1,8) }
-; CHECK: attributes #47 = { vscale_range(1,0) }
-; CHECK: attributes #48 = { nosanitize_coverage }
-; CHECK: attributes #49 = { noprofile }
-; CHECK: attributes #50 = { disable_sanitizer_instrumentation }
-; CHECK: attributes #51 = { uwtable(sync) }
-; CHECK: attributes #52 = { nosanitize_bounds }
+; CHECK: attributes #25 = { memory(argmem: readwrite) }
+; CHECK: attributes #26 = { norecurse }
+; CHECK: attributes #27 = { memory(inaccessiblemem: readwrite) }
+; CHECK: attributes #28 = { memory(argmem: readwrite, inaccessiblemem: readwrite) }
+; CHECK: attributes #29 = { allocsize(0) }
+; CHECK: attributes #30 = { allocsize(0,1) }
+; CHECK: attributes #31 = { memory(write) }
+; CHECK: attributes #32 = { speculatable }
+; CHECK: attributes #33 = { sanitize_hwaddress }
+; CHECK: attributes #34 = { shadowcallstack }
+; CHECK: attributes #35 = { willreturn }
+; CHECK: attributes #36 = { nofree }
+; CHECK: attributes #37 = { nosync }
+; CHECK: attributes #38 = { sanitize_memtag }
+; CHECK: attributes #39 = { null_pointer_is_valid }
+; CHECK: attributes #40 = { mustprogress }
+; CHECK: attributes #41 = { nocallback }
+; CHECK: attributes #42 = { cold }
+; CHECK: attributes #43 = { hot }
+; CHECK: attributes #44 = { vscale_range(8,8) }
+; CHECK: attributes #45 = { vscale_range(1,8) }
+; CHECK: attributes #46 = { vscale_range(1,0) }
+; CHECK: attributes #47 = { nosanitize_coverage }
+; CHECK: attributes #48 = { noprofile }
+; CHECK: attributes #49 = { disable_sanitizer_instrumentation }
+; CHECK: attributes #50 = { uwtable(sync) }
+; CHECK: attributes #51 = { nosanitize_bounds }
 ; CHECK: attributes [[FNRETTHUNKEXTERN]] = { fn_ret_thunk_extern }
 ; CHECK: attributes [[SKIPPROFILE]] = { skipprofile }
+; CHECK: attributes #54 = { noconvergent }
 ; CHECK: attributes #[[NOBUILTIN]] = { nobuiltin }
