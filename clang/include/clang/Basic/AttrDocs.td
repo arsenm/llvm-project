@@ -1320,28 +1320,34 @@ of the condition.
 
 def ConvergentDocs : Documentation {
   let Category = DocCatFunction;
-  let Content = [{
-The ``convergent`` attribute can be placed on a function declaration. It is
-translated into the LLVM ``convergent`` attribute, which indicates that the call
-instructions of a function with this attribute cannot be made control-dependent
+  let Content = [{2
+
+The ``convergent`` attribute is deprecated and new code should not use
+it. This attribute used to provide semantics which are now the assumed
+default behavior in languages with convergent operations. See the
+``noconvergent`` attribute for the inverse behavior.
+
+}
+
+def NoConvergentDocs : Documentation {
+  let Category = DocCatFunction;
+  let Content = [{2
+The ``noconvergent`` attribute can be placed on a function declaration. It is
+translated into the LLVM ``noconvergent`` attribute, which indicates that the call
+instructions of a function with this attribute can be made control-dependent
 on any additional values.
 
 In languages designed for SPMD/SIMT programming model, e.g. OpenCL or CUDA,
-the call instructions of a function with this attribute must be executed by
+the call instructions of a function without this attribute must be executed by
 all work items or threads in a work group or sub group.
-
-This attribute is different from ``noduplicate`` because it allows duplicating
-function calls if it can be proved that the duplicated function calls are
-not made control-dependent on any additional values, e.g., unrolling a loop
-executed by all work items.
 
 Sample usage:
 
 .. code-block:: c
 
-  void convfunc(void) __attribute__((convergent));
+  void convfunc(void) __attribute__((noconvergent));
   // Setting it as a C++11 attribute is also valid in a C++ program.
-  // void convfunc(void) [[clang::convergent]];
+  // void convfunc(void) [[clang::noconvergent]];
 
   }];
 }
