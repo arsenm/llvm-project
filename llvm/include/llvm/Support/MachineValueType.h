@@ -409,8 +409,8 @@ namespace llvm {
     bool isOverloaded() const {
       return SimpleTy == MVT::Any  ||
              SimpleTy == MVT::iAny || SimpleTy == MVT::fAny ||
-             SimpleTy == MVT::vAny || SimpleTy == MVT::iPTRAny ||
-             isAnySizedVT();
+        SimpleTy == MVT::vAny || SimpleTy == MVT::iPTRAny;
+      // || isAnySizedVT();
     }
 
     /// Return a VT for a vector type with the same element type but

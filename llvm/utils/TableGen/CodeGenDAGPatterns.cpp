@@ -763,8 +763,26 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
                                 const TypeSetByHwMode::SetType &Legal) {
   std::set<MVT> Ovs;
 
-  auto handleVTAny = [&](unsigned Size) {
+/*
+  bool HasAnySize = false;
+  for (MVT T : Out) {
+    if (T.isAnySizedVT()) {
+      HasAnySize = true;
+      break;
+    }
+  }
 
+  if (HasAnySize) {
+    for (MVT T : Out) {
+      if (!T.isAnySizedVT())
+        Out.erase(T);
+    }
+
+    return;
+  }
+*/
+
+  auto handleVTAny = [&](unsigned Size) {
     for (MVT T : MVT::integer_valuetypes()) {
       if (T.getSizeInBits() == Size)
         Out.insert(T);
@@ -786,9 +804,11 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
     }
   };
 
-
-
   for (MVT T : Out) {
+    if (T.isAnySizedVT()) {
+      continue;
+    }
+
     if (!T.isOverloaded())
       continue;
 
@@ -834,10 +854,11 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
           if (Legal.count(T))
             Out.insert(T);
         return;
+#if 0
     case MVT::vtAny32:
       handleVTAny(32);
       return;
-
+#endif
     default:
       break;
     }
@@ -2826,6 +2847,10 @@ TreePatternNodePtr TreePattern::ParseTreePattern(Init *TheInit,
     if (Dag->getNumArgs() != 1)
       error("Type cast only takes one operand!");
 
+    if (Operator->isSubClassOf("AnySizedVT")) {
+      dbgs() << "Wheee\n";
+    }
+
     TreePatternNodePtr New =
         ParseTreePattern(Dag->getArg(0), Dag->getArgNameStr(0));
 
@@ -2833,6 +2858,10 @@ TreePatternNodePtr TreePattern::ParseTreePattern(Init *TheInit,
     assert(New->getNumTypes() == 1 && "FIXME: Unhandled");
     const CodeGenHwModes &CGH = getDAGPatterns().getTargetInfo().getHwModes();
     New->UpdateNodeType(0, getValueTypeByHwMode(Operator, CGH), *this);
+
+    if (Operator->isSubClassOf("AnySizedVT")) {
+      dbgs() << "Whoo\n";
+    }
 
     if (!OpName.empty())
       error("ValueType cast should not have a name!");
