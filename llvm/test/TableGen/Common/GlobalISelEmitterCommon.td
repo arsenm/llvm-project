@@ -7,7 +7,7 @@ class MyTargetGenericInstruction : GenericInstruction {
 }
 
 def R0 : Register<"r0"> { let Namespace = "MyTarget"; }
-def GPR32 : RegisterClass<"MyTarget", [i32], 32, (add R0)>;
+def GPR32 : RegisterClass<"MyTarget", [i32, v2i16], 32, (add R0)>;
 def GPR32Op : RegisterOperand<GPR32>;
 def F0 : Register<"f0"> { let Namespace = "MyTarget"; }
 def FPR32 : RegisterClass<"MyTarget", [f32], 32, (add F0)>;

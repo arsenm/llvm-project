@@ -188,6 +188,21 @@ def iPTR   : ValueType<0  , 254>;
 // Pseudo valuetype to represent "any type of any size".
 def Any    : ValueType<0  , 255>;
 
+// Pseudo valuetypes to represent any type of a specific size.
+class AnySizedVT<int Size, int EnumVal> : ValueType<Size, EnumVal>;
+
+def vtAny16 : AnySizedVT<16, 237>;
+def vtAny32 : AnySizedVT<32, 238>;
+def vtAny64 : AnySizedVT<64, 239>;
+def vtAny96 : AnySizedVT<96, 240>;
+def vtAny128 : AnySizedVT<128, 241>;
+def vtAny160 : AnySizedVT<160, 242>;
+def vtAny192 : AnySizedVT<192, 243>;
+def vtAny224 : AnySizedVT<225, 244>;
+def vtAny256 : AnySizedVT<256, 245>;
+def vtAny512 : AnySizedVT<512, 246>;
+def vtAny1024 : AnySizedVT<1024, 247>;
+
 /// This class is for targets that want to use pointer types in patterns
 /// with the GlobalISelEmitter.  Targets must define their own pointer
 /// derived from this class.  The scalar argument should be an

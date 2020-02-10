@@ -227,6 +227,23 @@ namespace llvm {
       // This value must be a multiple of 32.
       MAX_ALLOWED_VALUETYPE = 160,
 
+      // Any type of value as long as the bit size matches. This should only be
+      // used in tablegen patterns.
+      vtAny16 = 237,
+      vtAny32 = 238,
+      vtAny64 = 239,
+      vtAny96 = 240,
+      vtAny128 = 241,
+      vtAny160 = 242,
+      vtAny192 = 243,
+      vtAny224 = 244,
+      vtAny256 = 245,
+      vtAny512 = 246,
+      vtAny1024 = 247,
+
+      FIRST_VTANY_VALUETYPE = 237,
+      LAST_VTANY_VALUETYPE = 247,
+
       // A value of type llvm::TokenTy
       token          = 248,
 
@@ -383,11 +400,17 @@ namespace llvm {
               SimpleTy == MVT::v64i32 || SimpleTy == MVT::v32i64);
     }
 
+    bool isAnySizedVT() const {
+      return (SimpleTy >= MVT::FIRST_VTANY_VALUETYPE &&
+              SimpleTy <= MVT::LAST_VTANY_VALUETYPE);
+    }
+
     /// Return true if this is an overloaded type for TableGen.
     bool isOverloaded() const {
-      return (SimpleTy==MVT::Any  ||
-              SimpleTy==MVT::iAny || SimpleTy==MVT::fAny ||
-              SimpleTy==MVT::vAny || SimpleTy==MVT::iPTRAny);
+      return SimpleTy == MVT::Any  ||
+             SimpleTy == MVT::iAny || SimpleTy == MVT::fAny ||
+             SimpleTy == MVT::vAny || SimpleTy == MVT::iPTRAny ||
+             isAnySizedVT();
     }
 
     /// Return a VT for a vector type with the same element type but

@@ -529,6 +529,16 @@ EmitMatcher(const Matcher *N, unsigned Indent, unsigned CurrentIdx,
        << ", " << getEnumName(cast<CheckTypeMatcher>(N)->getType()) << ",\n";
     return 3;
 
+  case Matcher::CheckTypeSize: {
+    if (cast<CheckTypeMatcher>(N)->getResNo() == 0) {
+      OS << "OPC_CheckTypeSize, "
+         << cast<CheckTypeSizeMatcher>(N)->getSizeInBits() << ",\n";
+      return 2;
+    }
+    OS << "OPC_CheckTypeSizeRes, " << cast<CheckTypeMatcher>(N)->getResNo()
+       << ", " << cast<CheckTypeSizeMatcher>(N)->getSizeInBits() << ",\n";
+    return 3;
+  }
   case Matcher::CheckChildType:
     OS << "OPC_CheckChild"
        << cast<CheckChildTypeMatcher>(N)->getChildNo() << "Type, "
@@ -1014,6 +1024,7 @@ static StringRef getOpcodeString(Matcher::KindTy Kind) {
   case Matcher::CheckOpcode: return "OPC_CheckOpcode"; break;
   case Matcher::SwitchOpcode: return "OPC_SwitchOpcode"; break;
   case Matcher::CheckType: return "OPC_CheckType"; break;
+  case Matcher::CheckTypeSize: return "OPC_CheckTypeSize"; break;
   case Matcher::SwitchType: return "OPC_SwitchType"; break;
   case Matcher::CheckChildType: return "OPC_CheckChildType"; break;
   case Matcher::CheckInteger: return "OPC_CheckInteger"; break;

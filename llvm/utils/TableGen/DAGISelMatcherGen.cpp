@@ -503,9 +503,22 @@ void MatcherGen::EmitMatchCode(const TreePatternNode *N,
   // need to do a type check.  Emit the check, apply the type to NodeNoTypes and
   // reinfer any correlated types.
   SmallVector<unsigned, 2> ResultsToTypeCheck;
+  SmallVector<unsigned, 2> ResultsToTypeSizeCheck;
 
   for (unsigned i = 0, e = NodeNoTypes->getNumTypes(); i != e; ++i) {
-    if (NodeNoTypes->getExtType(i) == N->getExtType(i)) continue;
+    if (NodeNoTypes->getExtType(i) == N->getExtType(i))
+      continue;
+
+    if (N->getExtType(i).isMachineValueType()) {
+      if (N->getExtType(i).getMachineValueType().isAnySizedVT()) {
+        ResultsToTypeSizeCheck.push_back(i);
+        continue;
+      }
+    } else {
+      dbgs() << "Not MVT\n";
+      dbgs() << "Default only: " << N->getExtType(i).isDefaultOnly() << '\n';
+    }
+
     NodeNoTypes->setType(i, N->getExtType(i));
     InferPossibleTypes(ForceMode);
     ResultsToTypeCheck.push_back(i);

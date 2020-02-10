@@ -762,6 +762,32 @@ void TypeInfer::expandOverloads(TypeSetByHwMode &VTS) {
 void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
                                 const TypeSetByHwMode::SetType &Legal) {
   std::set<MVT> Ovs;
+
+  auto handleVTAny = [&](unsigned Size) {
+
+    for (MVT T : MVT::integer_valuetypes()) {
+      if (T.getSizeInBits() == Size)
+        Out.insert(T);
+    }
+
+    for (MVT T : MVT::fp_valuetypes()) {
+      if (T.getSizeInBits() == Size)
+        Out.insert(T);
+    }
+
+    for (MVT T : MVT::fp_fixedlen_vector_valuetypes()) {
+      if (T.getSizeInBits() == Size)
+        Out.insert(T);
+    }
+
+    for (MVT T : MVT::integer_fixedlen_vector_valuetypes()) {
+      if (T.getSizeInBits() == Size)
+        Out.insert(T);
+    }
+  };
+
+
+
   for (MVT T : Out) {
     if (!T.isOverloaded())
       continue;
@@ -808,8 +834,12 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
           if (Legal.count(T))
             Out.insert(T);
         return;
-      default:
-        break;
+    case MVT::vtAny32:
+      handleVTAny(32);
+      return;
+
+    default:
+      break;
     }
   }
 }

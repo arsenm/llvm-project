@@ -61,6 +61,7 @@ public:
     CheckOpcode,          // Fail if not opcode.
     SwitchOpcode,         // Dispatch based on opcode.
     CheckType,            // Fail if not correct type.
+    CheckTypeSize,        // Fail if not correct size type
     SwitchType,           // Dispatch based on type.
     CheckChildType,       // Fail if child has wrong type.
     CheckInteger,         // Fail if wrong val.
@@ -509,6 +510,45 @@ private:
   }
   bool isContradictoryImpl(const Matcher *M) const override;
 };
+
+
+/// CheckTypeSizeMatcher - This checks to see if the current node has the
+/// specified type at the specified result, if not it fails to match.
+class CheckTypeSizeMatcher : public Matcher {
+  MVT::SimpleValueType Type;
+  unsigned ResNo;
+public:
+  CheckTypeSizeMatcher(MVT::SimpleValueType type, unsigned resno)
+    : Matcher(CheckTypeSize), Type(type), ResNo(resno) {
+    assert(MVT(type).isAnySizedVT());
+  }
+
+  //MVT::SimpleValueType getType() const { return Type; }
+  unsigned getSizeInBits() const {
+    switch (Type) {
+    case MVT::vtAny16:
+      return 16;
+    case MVT::vtAny32:
+      return 32;
+    default:
+      llvm_unreachable("unhandled");
+    }
+  }
+
+  unsigned getResNo() const { return ResNo; }
+
+  static bool classof(const Matcher *N) {
+    return N->getKind() == CheckTypeSize;
+  }
+
+private:
+  void printImpl(raw_ostream &OS, unsigned indent) const override;
+  bool isEqualImpl(const Matcher *M) const override {
+    return cast<CheckTypeSizeMatcher>(M)->Type == Type;
+  }
+  bool isContradictoryImpl(const Matcher *M) const override;
+};
+
 
 /// SwitchTypeMatcher - Switch based on the current node's type, dispatching
 /// to one matcher per case.  If the type doesn't match any of the cases,
