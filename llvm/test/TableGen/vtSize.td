@@ -7,10 +7,14 @@ include "llvm/Target/Target.td"
 include "GlobalISelEmitterCommon.td"
 
 
-def ANYLOAD : I<(outs GPR32:$dst), (ins GPR32:$src1), []>;
+def ANYLOAD32 : I<(outs GPR32:$dst), (ins GPR32:$src1), []>;
+def ANYLOAD64 : I<(outs GPR64:$dst), (ins GPR32:$src1), []>;
 
 def : Pat<(vtAny32 (load GPR32:$src)),
-       (ANYLOAD GPR32:$src)>;
+       (ANYLOAD32 GPR32:$src)>;
+
+def : Pat<(vtAny64 (load GPR32:$src)),
+       (ANYLOAD64 GPR32:$src)>;
 
 
 //def ANYLOAD2 : I<(outs GPR32:$dst), (ins GPR32:$src1),

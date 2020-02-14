@@ -270,14 +270,6 @@ void TypeSetByHwMode::dump() const {
 }
 
 bool TypeSetByHwMode::intersect(SetType &Out, const SetType &In) {
-#if 0
-  if (In.count(MVT::vtAny32) || Out.count(MVT::vtAny32)) {
-    Out.clear();
-    Out.insert(MVT::vtAny32);
-    return true;
-  }
-#endif
-
   if (In.count(MVT::vtAny32) || Out.count(MVT::vtAny32)) {
     if (Out.count(MVT::vtAny32) && Out.size() == 1) {
       return false;
@@ -285,6 +277,17 @@ bool TypeSetByHwMode::intersect(SetType &Out, const SetType &In) {
 
     Out.clear();
     Out.insert(MVT::vtAny32);
+    return true;
+  }
+
+
+  if (In.count(MVT::vtAny64) || Out.count(MVT::vtAny64)) {
+    if (Out.count(MVT::vtAny64) && Out.size() == 1) {
+      return false;
+    }
+
+    Out.clear();
+    Out.insert(MVT::vtAny64);
     return true;
   }
 
