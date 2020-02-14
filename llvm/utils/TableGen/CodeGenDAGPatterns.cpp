@@ -150,6 +150,7 @@ bool TypeSetByHwMode::constrain(const TypeSetByHwMode &VTS) {
   for (auto &I : *this) {
     unsigned M = I.first;
     SetType &S = I.second;
+
     if (VTS.hasMode(M) || VTS.hasDefault()) {
       Changed |= intersect(I.second, VTS.get(M));
     } else if (!S.empty()) {
@@ -269,6 +270,25 @@ void TypeSetByHwMode::dump() const {
 }
 
 bool TypeSetByHwMode::intersect(SetType &Out, const SetType &In) {
+#if 0
+  if (In.count(MVT::vtAny32) || Out.count(MVT::vtAny32)) {
+    Out.clear();
+    Out.insert(MVT::vtAny32);
+    return true;
+  }
+#endif
+
+  if (In.count(MVT::vtAny32) || Out.count(MVT::vtAny32)) {
+    if (Out.count(MVT::vtAny32) && Out.size() == 1) {
+      return false;
+    }
+
+    Out.clear();
+    Out.insert(MVT::vtAny32);
+    return true;
+  }
+
+
   bool OutP = Out.count(MVT::iPTR), InP = In.count(MVT::iPTR);
   auto Int = [&In](MVT T) -> bool { return !In.count(T); };
 
@@ -763,7 +783,7 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
                                 const TypeSetByHwMode::SetType &Legal) {
   std::set<MVT> Ovs;
 
-/*
+#if 0
   bool HasAnySize = false;
   for (MVT T : Out) {
     if (T.isAnySizedVT()) {
@@ -778,9 +798,11 @@ void TypeInfer::expandOverloads(TypeSetByHwMode::SetType &Out,
         Out.erase(T);
     }
 
+    dbgs() << "expandOverloads: " << Out.size() << '\n';
+    dbgs() << "poop: " << *Out.begin() << '\n';
     return;
   }
-*/
+#endif
 
   auto handleVTAny = [&](unsigned Size) {
     for (MVT T : MVT::integer_valuetypes()) {
@@ -2847,6 +2869,8 @@ TreePatternNodePtr TreePattern::ParseTreePattern(Init *TheInit,
     if (Dag->getNumArgs() != 1)
       error("Type cast only takes one operand!");
 
+    bool IsAnySize = Operator->isSubClassOf("AnySizedVT");
+
     if (Operator->isSubClassOf("AnySizedVT")) {
       dbgs() << "Wheee\n";
     }
@@ -2856,11 +2880,14 @@ TreePatternNodePtr TreePattern::ParseTreePattern(Init *TheInit,
 
     // Apply the type cast.
     assert(New->getNumTypes() == 1 && "FIXME: Unhandled");
-    const CodeGenHwModes &CGH = getDAGPatterns().getTargetInfo().getHwModes();
-    New->UpdateNodeType(0, getValueTypeByHwMode(Operator, CGH), *this);
 
-    if (Operator->isSubClassOf("AnySizedVT")) {
-      dbgs() << "Whoo\n";
+    // If this matches any type of the size, don't try to infer anything.
+    if (!IsAnySize) {
+      const CodeGenHwModes &CGH = getDAGPatterns().getTargetInfo().getHwModes();
+      New->UpdateNodeType(0, getValueTypeByHwMode(Operator, CGH), *this);
+    } else {
+      const CodeGenHwModes &CGH = getDAGPatterns().getTargetInfo().getHwModes();
+      New->UpdateNodeType(0, getValueTypeByHwMode(Operator, CGH), *this);
     }
 
     if (!OpName.empty())
