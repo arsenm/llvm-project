@@ -605,16 +605,42 @@ class ThreeOpFrag<SDPatternOperator op1, SDPatternOperator op2> : PatFrag<
   let PredicateCodeUsesOperands = 1;
 
   // The divergence predicate is irrelevant in GlobalISel, as we have
-  // proper register bank checks. We also force all VOP instruction
-  // operands to VGPR, so we should not need to check the constant bus
-  // restriction.
+  // proper register bank checks. We just need to verify the constant
+  // bus restriction when all the sources are considered.
   //
   // FIXME: With unlucky SGPR operands, we could penalize code by
   // blocking folding SGPR->VGPR copies later.
   // FIXME: There's no register bank verifier
-  // FIXME: Should add a way for the emitter to recognize this is a
-  // trivially true predicate to eliminate the check.
-  let GISelPredicateCode = [{return true;}];
+  let GISelPredicateCode = [{
+    // The pattern may be commuted, but the predicate will always be
+    // called as if the node structure in the original pattern was
+    // used, so the nested node will always be the LHS operand.
+    MachineInstr *InnerOp = MRI.getVRegDef(MI.getOperand(1).getReg());
+    Register Src0 = InnerOp->getOperand(1).getReg();
+    Register Src1 = InnerOp->getOperand(2).getReg();
+    Register Src2 = MI.getOperand(2).getReg();
+
+    // FIXME: Since we're not folding immediates here, inline
+    // immediates in an SGPR which will be folded later count as a
+    // constant bus use. We should probably be rematerializing all
+    // inline immediates on the use reg bank to avoid this mattering.
+
+    // This uses AMDGPU::V_ADD3_U32, but all three operand
+    // instructions have the same constant bus limit.
+    const int ConstantBusLimit
+      = Subtarget->getConstantBusLimit(AMDGPU::V_ADD3_U32);
+
+    int ConstantBusUses = 0;
+    for (Register Src : {Src0, Src1, Src2}) {
+      const RegisterBank *RegBank = RBI.getRegBank(Src, MRI, TRI);
+      if (RegBank->getID() == AMDGPU::SGPRRegBankID) {
+        if (++ConstantBusUses > ConstantBusLimit)
+          return false;
+      }
+    }
+
+    return true;
+  }];
 }
 
 let SubtargetPredicate = isGFX9Plus in {
