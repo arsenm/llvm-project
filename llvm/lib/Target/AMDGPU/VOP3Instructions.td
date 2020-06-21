@@ -615,7 +615,14 @@ class ThreeOpFrag<SDPatternOperator op1, SDPatternOperator op2> : PatFrag<
     // The pattern may be commuted, but the predicate will always be
     // called as if the node structure in the original pattern was
     // used, so the nested node will always be the LHS operand.
+    dbgs() << "Predicate code called: " << MI << '\n';
+    //    return true;
+
+
     MachineInstr *InnerOp = MRI.getVRegDef(MI.getOperand(1).getReg());
+    //dbgs() << "InnerOp: " << *InnerOp << '\n';
+    //return false;
+
     Register Src0 = InnerOp->getOperand(1).getReg();
     Register Src1 = InnerOp->getOperand(2).getReg();
     Register Src2 = MI.getOperand(2).getReg();
