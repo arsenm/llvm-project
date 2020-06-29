@@ -2025,12 +2025,15 @@ public:
 class GenericInstructionPredicateMatcher : public InstructionPredicateMatcher {
 protected:
   TreePredicateFn Predicate;
+  SmallVector<std::string, 4> Operands;
 
 public:
   GenericInstructionPredicateMatcher(unsigned InsnVarID,
-                                     TreePredicateFn Predicate)
+                                     TreePredicateFn Predicate,
+                                     ArrayRef<std::string> Ops)
       : InstructionPredicateMatcher(IPM_GenericPredicate, InsnVarID),
-        Predicate(Predicate) {}
+        Predicate(Predicate),
+        Operands(Ops.begin(), Ops.end()) {}
 
   static bool classof(const InstructionPredicateMatcher *P) {
     return P->getKind() == IPM_GenericPredicate;
@@ -2043,6 +2046,27 @@ public:
   }
   void emitPredicateOpcodes(MatchTable &Table,
                             RuleMatcher &Rule) const override {
+    assert(Predicate.usesOperands() == !Operands.empty());
+
+    if (!Operands.empty()) {
+      unsigned NumOps = Operands.size();
+
+      Table << MatchTable::Opcode("GIM_CheckCxxInsnPredicateWithOperands")
+            << MatchTable::Comment("MI") << MatchTable::IntValue(InsnVarID)
+            << MatchTable::Comment("FnId")
+            << MatchTable::NamedValue(getEnumNameForPredicate(Predicate))
+            << MatchTable::Comment("NumOperands") << MatchTable::IntValue(NumOps);
+
+      for (const std::string &OpName : Operands) {
+        const OperandMatcher &OpMatcher = Rule.getOperandMatcher(OpName);
+        Table << MatchTable::Comment(OpName) <<
+                 MatchTable::IntValue(OpMatcher.getOpIdx());
+      }
+
+      Table << MatchTable::LineBreak;
+      return;
+    }
+
     Table << MatchTable::Opcode("GIM_CheckCxxInsnPredicate")
           << MatchTable::Comment("MI") << MatchTable::IntValue(InsnVarID)
           << MatchTable::Comment("FnId")
@@ -3759,7 +3783,22 @@ Expected<InstructionMatcher &> GlobalISelEmitter::createAndImportSelDAGMatcher(
     }
 
     if (Predicate.hasGISelPredicateCode()) {
-      InsnMatcher.addPredicate<GenericInstructionPredicateMatcher>(Predicate);
+      SmallVector<std::string, 4> OperandIndices;
+      if (Predicate.usesOperands()) {
+        TreePattern *TP = Predicate.getOrigPatFragRecord();
+        for (unsigned i = 0; i < TP->getNumArgs(); ++i) {
+#if 0
+          std::string Name =
+          ("pred:" + Twine(Call.Scope) + ":" + TP->getArgName(i)).str();
+          OperandIndices.push_back(Name);
+#endif
+          //OperandIndices.push_back(TP->getArgName(i));
+
+          //OperandIndices.push_back(SrcChild->getOperator()->getName());
+        }
+      }
+
+      InsnMatcher.addPredicate<GenericInstructionPredicateMatcher>(Predicate, OperandIndices);
       continue;
     }
 
