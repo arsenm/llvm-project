@@ -2046,10 +2046,12 @@ public:
   }
   void emitPredicateOpcodes(MatchTable &Table,
                             RuleMatcher &Rule) const override {
-    assert(Predicate.usesOperands() == !Operands.empty());
+    //assert(Predicate.usesOperands() == !Operands.empty());
 
-    if (!Operands.empty()) {
+    //if (!Operands.empty()) {
+    if (Predicate.usesOperands()) {
       unsigned NumOps = Operands.size();
+
 
       Table << MatchTable::Opcode("GIM_CheckCxxInsnPredicateWithOperands")
             << MatchTable::Comment("MI") << MatchTable::IntValue(InsnVarID)
@@ -3785,6 +3787,12 @@ Expected<InstructionMatcher &> GlobalISelEmitter::createAndImportSelDAGMatcher(
     if (Predicate.hasGISelPredicateCode()) {
       SmallVector<std::string, 4> OperandIndices;
       if (Predicate.usesOperands()) {
+
+        for (const ScopedName &Name : Src->getNamesAsPredicateArg()) {
+          OperandIndices.push_back(("pred:" + Twine(Name.getScope()) + ":" + Name.getIdentifier()).str());
+        }
+
+#if 0
         TreePattern *TP = Predicate.getOrigPatFragRecord();
         for (unsigned i = 0; i < TP->getNumArgs(); ++i) {
 #if 0
@@ -3792,10 +3800,11 @@ Expected<InstructionMatcher &> GlobalISelEmitter::createAndImportSelDAGMatcher(
           ("pred:" + Twine(Call.Scope) + ":" + TP->getArgName(i)).str();
           OperandIndices.push_back(Name);
 #endif
-          //OperandIndices.push_back(TP->getArgName(i));
+          OperandIndices.push_back(TP->getArgName(i));
 
           //OperandIndices.push_back(SrcChild->getOperator()->getName());
         }
+#endif
       }
 
       InsnMatcher.addPredicate<GenericInstructionPredicateMatcher>(Predicate, OperandIndices);

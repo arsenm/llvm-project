@@ -116,6 +116,8 @@ def sub3_pat : PatFrag<
   let GISelPredicateCode = [{
     return doesComplexCheck(MI);
   }];
+
+  let PredicateCodeUsesOperands = 1;
 }
 
 // CHECK: GIM_Try, /*On fail goto*//*Label 2*/ {{[0-9]+}}, // Rule ID 0 //
