@@ -2043,6 +2043,13 @@ void Verifier::verifyParameterAttrs(AttributeSet Attrs, Type *Ty,
       Check(Attrs.getByValType()->isSized(&Visited),
             "Attribute 'byval' does not support unsized types!", V);
     }
+
+    if (Attrs.hasAttribute(Attribute::StructRet)) {
+      SmallPtrSet<Type *, 4> Visited;
+      Check(Attrs.getStructRetType()->isSized(&Visited),
+            "Attribute 'sret' does not support unsized types!", V);
+    }
+
     if (Attrs.hasAttribute(Attribute::ByRef)) {
       SmallPtrSet<Type *, 4> Visited;
       Check(Attrs.getByRefType()->isSized(&Visited),

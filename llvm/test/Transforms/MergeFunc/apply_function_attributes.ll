@@ -1,6 +1,6 @@
 ; RUN: opt -S -passes=mergefunc < %s | FileCheck %s
 
-%Opaque_type = type opaque
+%Empty_type = type {}
 %S2i = type <{ i64, i64 }>
 %D2i = type <{ i64, i64 }>
 %Di = type <{ i32 }>

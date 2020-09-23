@@ -357,10 +357,10 @@ entry:
 ; Test10 triggered assertion when the compiler try to get the size of the
 ; opaque type of *x, where the x is the formal argument with attribute 'sret'.
 
-%opaque = type opaque
+%empty = type {}
 declare void @foo(ptr noalias nocapture)
 
-define void @test10(ptr noalias nocapture sret(%opaque) %x, i32 %y) {
+define void @test10(ptr noalias nocapture sret(%empty) %x, i32 %y) {
 ; CHECK-LABEL: @test10(
 ; CHECK-NEXT:    [[A:%.*]] = alloca i32, align 4
 ; CHECK-NEXT:    store i32 [[Y:%.*]], ptr [[A]], align 4

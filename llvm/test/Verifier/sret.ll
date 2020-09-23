@@ -9,3 +9,8 @@ declare void @b(ptr %a, ptr %b, ptr sret(i32) %c)
 ; CHECK: Attribute 'sret(i32)' applied to incompatible type!
 ; CHECK-NEXT: ptr @not_ptr
 declare void @not_ptr(i32 sret(i32) %x)
+
+%opaque.ty = type opaque
+
+declare void @c(%opaque.ty* sret(%opaque.ty) %a)
+; CHECK: Attribute 'sret' does not support unsized types!
