@@ -807,7 +807,7 @@ SizeOffsetType ObjectSizeOffsetVisitor::visitAllocaInst(AllocaInst &I) {
 SizeOffsetType ObjectSizeOffsetVisitor::visitArgument(Argument &A) {
   Type *MemoryTy = A.getPointeeInMemoryValueType();
   // No interprocedural analysis is done at the moment.
-  if (!MemoryTy|| !MemoryTy->isSized()) {
+  if (!MemoryTy) {
     ++ObjectVisitorArgument;
     return unknown();
   }

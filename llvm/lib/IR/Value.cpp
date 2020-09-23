@@ -853,10 +853,8 @@ uint64_t Value::getPointerDereferenceableBytes(const DataLayout &DL,
     if (DerefBytes == 0) {
       // Handle byval/byref/inalloca/preallocated arguments
       if (Type *ArgMemTy = A->getPointeeInMemoryValueType()) {
-        if (ArgMemTy->isSized()) {
-          // FIXME: Why isn't this the type alloc size?
-          DerefBytes = DL.getTypeStoreSize(ArgMemTy).getKnownMinSize();
-        }
+        // FIXME: Why isn't this the type alloc size?
+        DerefBytes = DL.getTypeStoreSize(ArgMemTy).getKnownMinSize();
       }
     }
 
@@ -949,8 +947,7 @@ Align Value::getPointerAlignment(const DataLayout &DL) const {
     if (!Alignment && A->hasStructRetAttr()) {
       // An sret parameter has at least the ABI alignment of the return type.
       Type *EltTy = A->getParamStructRetType();
-      if (EltTy->isSized())
-        return DL.getABITypeAlign(EltTy);
+      return DL.getABITypeAlign(EltTy);
     }
     return Alignment.valueOrOne();
   } else if (const AllocaInst *AI = dyn_cast<AllocaInst>(this)) {
