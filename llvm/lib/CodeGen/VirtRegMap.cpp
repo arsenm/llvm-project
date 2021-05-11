@@ -240,8 +240,10 @@ void VirtRegRewriter::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addPreserved<LiveStacks>();
   AU.addRequired<VirtRegMap>();
 
-  if (!ClearVirtRegs)
+  if (!ClearVirtRegs) {
     AU.addPreserved<LiveDebugVariables>();
+    AU.addPreserved<VirtRegMap>();
+  }
 
   MachineFunctionPass::getAnalysisUsage(AU);
 }

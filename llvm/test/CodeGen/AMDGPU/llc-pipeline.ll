@@ -365,7 +365,6 @@
 ; GCN-O1-NEXT:         Greedy Register Allocator
 ; GCN-O1-NEXT:         Virtual Register Rewriter
 ; GCN-O1-NEXT:         SI lower SGPR spill instructions
-; GCN-O1-NEXT:         Virtual Register Map
 ; GCN-O1-NEXT:         Live Register Matrix
 ; GCN-O1-NEXT:         Machine Optimization Remark Emitter
 ; GCN-O1-NEXT:         Greedy Register Allocator
@@ -653,7 +652,6 @@
 ; GCN-O1-OPTS-NEXT:         Greedy Register Allocator
 ; GCN-O1-OPTS-NEXT:         Virtual Register Rewriter
 ; GCN-O1-OPTS-NEXT:         SI lower SGPR spill instructions
-; GCN-O1-OPTS-NEXT:         Virtual Register Map
 ; GCN-O1-OPTS-NEXT:         Live Register Matrix
 ; GCN-O1-OPTS-NEXT:         Machine Optimization Remark Emitter
 ; GCN-O1-OPTS-NEXT:         Greedy Register Allocator
@@ -942,7 +940,6 @@
 ; GCN-O2-NEXT:         Greedy Register Allocator
 ; GCN-O2-NEXT:         Virtual Register Rewriter
 ; GCN-O2-NEXT:         SI lower SGPR spill instructions
-; GCN-O2-NEXT:         Virtual Register Map
 ; GCN-O2-NEXT:         Live Register Matrix
 ; GCN-O2-NEXT:         Machine Optimization Remark Emitter
 ; GCN-O2-NEXT:         Greedy Register Allocator
@@ -1244,7 +1241,6 @@
 ; GCN-O3-NEXT:         Greedy Register Allocator
 ; GCN-O3-NEXT:         Virtual Register Rewriter
 ; GCN-O3-NEXT:         SI lower SGPR spill instructions
-; GCN-O3-NEXT:         Virtual Register Map
 ; GCN-O3-NEXT:         Live Register Matrix
 ; GCN-O3-NEXT:         Machine Optimization Remark Emitter
 ; GCN-O3-NEXT:         Greedy Register Allocator
