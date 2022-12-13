@@ -645,7 +645,7 @@ static bool hasSourceMods(const SDNode *N) {
   // problematic because bitcasts are used to legalize all stores to integer
   // types.
   case ISD::BITCAST:
-    llvm_unreachable("should have been special cased");
+    return false;
   case ISD::INTRINSIC_WO_CHAIN: {
     switch (cast<ConstantSDNode>(N->getOperand(0))->getZExtValue()) {
     case Intrinsic::amdgcn_interp_p1:
@@ -657,6 +657,13 @@ static bool hasSourceMods(const SDNode *N) {
     default:
       return true;
     }
+  }
+  case ISD::BITCAST: {
+#if 0
+    if (N->hasOneUse())
+      return hasSourceMods(*N->use_begin());
+#endif
+    return false;
   }
   case ISD::SELECT:
     return selectSupportsSourceMods(N);
@@ -3772,13 +3779,21 @@ AMDGPUTargetLowering::foldFreeOpFromSelect(TargetLowering::DAGCombinerInfo &DCI,
   SDValue Cond = N.getOperand(0);
   SDValue LHS = N.getOperand(1);
   SDValue RHS = N.getOperand(2);
-
   EVT VT = N.getValueType();
-  if ((LHS.getOpcode() == ISD::FABS && RHS.getOpcode() == ISD::FABS) ||
-      (LHS.getOpcode() == ISD::FNEG && RHS.getOpcode() == ISD::FNEG)) {
+
+
+#if 0
+    // If we don't have a better option, can do an fneg of a select source.
+  //if (!AMDGPUTargetLowering::allUsesHaveSourceMods(N.getNode()))
+  if (!shouldFoldFNegIntoSrc(N, N.getNode()))
+    return SDValue();
+#endif
+
+  if (((LHS.getOpcode() == ISD::FABS && RHS.getOpcode() == ISD::FABS) ||
+       (LHS.getOpcode() == ISD::FNEG && RHS.getOpcode() == ISD::FNEG))) {
+    // XXX multi use check test?
     if (!AMDGPUTargetLowering::allUsesHaveSourceMods(N.getNode()))
       return SDValue();
-
     return distributeOpThroughSelect(DCI, LHS.getOpcode(),
                                      SDLoc(N), Cond, LHS, RHS);
   }
@@ -3791,8 +3806,8 @@ AMDGPUTargetLowering::foldFreeOpFromSelect(TargetLowering::DAGCombinerInfo &DCI,
 
   // TODO: Support vector constants.
   ConstantFPSDNode *CRHS = dyn_cast<ConstantFPSDNode>(RHS);
-  if ((LHS.getOpcode() == ISD::FNEG || LHS.getOpcode() == ISD::FABS) && CRHS &&
-      !selectSupportsSourceMods(N.getNode())) {
+  if ((LHS.getOpcode() == ISD::FNEG || LHS.getOpcode() == ISD::FABS) && CRHS
+      /*&& !AMDGPUTargetLowering::shouldFoldFNegIntoSrc(N.getNode(), LHS)*/) {
     SDLoc SL(N);
     // If one side is an fneg/fabs and the other is a constant, we can push the
     // fneg/fabs down. If it's an fabs, the constant needs to be non-negative.
