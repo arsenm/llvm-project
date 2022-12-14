@@ -9327,6 +9327,11 @@ ABIArgInfo AMDGPUABIInfo::classifyReturnType(QualType RetTy) const {
         return ABIArgInfo::getDirect(llvm::ArrayType::get(I32Ty, 2));
       }
 
+      if (Size <= 128) {
+        llvm::Type *I32Ty = llvm::Type::getInt32Ty(getVMContext());
+        return ABIArgInfo::getDirect(llvm::ArrayType::get(I32Ty, 4));
+      }
+
       if (numRegsForType(RetTy) <= MaxNumRegsForArgsRet)
         return ABIArgInfo::getDirect();
     }
