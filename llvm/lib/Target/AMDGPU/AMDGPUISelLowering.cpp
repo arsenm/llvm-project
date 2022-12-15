@@ -3797,6 +3797,7 @@ AMDGPUTargetLowering::foldFreeOpFromSelect(TargetLowering::DAGCombinerInfo &DCI,
     return distributeOpThroughSelect(DCI, LHS.getOpcode(),
                                      SDLoc(N), Cond, LHS, RHS);
   }
+#endif
 
   bool Inv = false;
   if (RHS.getOpcode() == ISD::FABS || RHS.getOpcode() == ISD::FNEG) {
@@ -4340,8 +4341,11 @@ SDValue AMDGPUTargetLowering::performFNegCombine(SDNode *N,
 #endif
 
 #if 0
-    if (!N0.hasOneUse())
+    if (!N0.hasOneUse()) // Missing test
       DAG.ReplaceAllUsesWith(N0, DAG.getNode(ISD::FNEG, SL, VT, Res));
+#endif
+
+    //DCI.AddToWorklist(.getNode());
     return Res;
 #endif
   }
