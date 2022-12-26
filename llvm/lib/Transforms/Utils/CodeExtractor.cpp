@@ -60,6 +60,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/Transforms/Utils/Local.h"
 #include <cassert>
 #include <cstdint>
 #include <iterator>
@@ -649,17 +650,23 @@ void CodeExtractor::findInputsOutputs(ValueSet &Inputs, ValueSet &Outputs,
     // If a used value is defined outside the region, it's an input.  If an
     // instruction is used outside the region, it's an output.
     for (Instruction &II : *BB) {
+      unsigned OpIdx = 0;
       for (auto &OI : II.operands()) {
         Value *V = OI;
-        if (!SinkCands.count(V) && definedInCaller(Blocks, V))
+        if (!SinkCands.count(V) && definedInCaller(Blocks, V)
+            && canReplaceOperandWithVariable(&II, OpIdx)
+          )
           Inputs.insert(V);
       }
 
-      for (User *U : II.users())
+      ++OpIdx;
+
+      for (User *U : II.users()) {
         if (!definedInRegion(Blocks, U)) {
           Outputs.insert(&II);
           break;
         }
+      }
     }
   }
 }

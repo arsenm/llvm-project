@@ -778,34 +778,103 @@ static void moveFunctionData(Function &Old, Function &New,
 /// single Constant across all OutlinableRegions similar to \p C.
 /// \param [out] Inputs - The list containing the global value numbers of the
 /// arguments needed for the region of code.
-static bool findConstants(IRSimilarityCandidate &C, DenseSet<unsigned> &NotSame,
+static bool findConstants(IRSimilarityCandidate &C, const DenseSet<unsigned> &NotSame,
                           std::vector<unsigned> &Inputs) {
   bool FoundImmArg = false;
   DenseSet<unsigned> Seen;
+  //DenseMap<std::pair<Intrinsic::ID, unsigned>, unsigned> SeenImmArg;
+  DenseMap<std::pair<Intrinsic::ID, unsigned>, Constant *> SeenImmArg;
   // Iterate over the instructions, and find what constants will need to be
   // extracted into arguments.
+
+
+  dbgs() << "Extract size " << std::distance(C.begin(), C.end()) << '\n';
+  for (IRInstructionDataList::iterator IDIt = C.begin(), EndIDIt = C.end();
+       IDIt != EndIDIt; IDIt++) {
+    dbgs() <<  "extract " << *IDIt->Inst << '\n';
+  }
+
+
   for (IRInstructionDataList::iterator IDIt = C.begin(), EndIDIt = C.end();
        IDIt != EndIDIt; IDIt++) {
 
     unsigned OpIdx = 0;
+    bool FoundImmArgLocal = false;
     for (Value *V : (*IDIt).OperVals) {
+
       // Since these are stored before any outlining, they will be in the
       // global value numbering.
       unsigned GVN = *C.getGVN(V);
       if (isa<Constant>(V)) {
-        if (NotSame.contains(GVN) && !Seen.contains(GVN)) {
-          if (!canReplaceOperandWithVariable(IDIt->Inst, OpIdx))
-            FoundImmArg = true;
+        if (NotSame.contains(GVN)) {
+          dbgs() << "Not same DOES contain " << *V << '\n';
+          if (canReplaceOperandWithVariable(IDIt->Inst, OpIdx)) {
+            if (!Seen.contains(GVN)) { // xx combine with insert
+              Inputs.push_back(GVN);
+              Seen.insert(GVN);
+            }
+          } else {
+            dbgs() << "Insert immarg " << *V << " op " << OpIdx << " In " << *IDIt->Inst
+                   << " GVN " << GVN
+                   << '\n';
+            // immarg needs to match the same value in the same index of every
+            // opcode use.
+            if (SeenImmArg.insert({{cast<IntrinsicInst>(IDIt->Inst)->getIntrinsicID(), OpIdx}, cast<Constant>(V)}).first->second != cast<Constant>(V)) {
+              dbgs() << "Found not unique immarg " << *V << " In " << *IDIt->Inst << '\n';
 
-          Inputs.push_back(GVN);
-          Seen.insert(GVN);
+              FoundImmArg = true;
+              FoundImmArgLocal = true;
+            }
+          }
+        } else {
+          dbgs() << "Not same does NOT contain " << *V << '\n';
+
+          if (!canReplaceOperandWithVariable(IDIt->Inst, OpIdx)) {
+            // immarg needs to match the same value in the same index of every
+            // opcode use.
+            dbgs() << "Second Insert immarg " << *V << " op " << OpIdx << " In " << *IDIt->Inst
+                   << " GVN " << GVN
+                   << '\n';
+
+            if (SeenImmArg.insert({{cast<IntrinsicInst>(IDIt->Inst)->getIntrinsicID(), OpIdx}, cast<Constant>(V)}).first->second != cast<Constant>(V)) {
+              dbgs() << "  Found not unique immarg " << *V << " In " << *IDIt->Inst << '\n';
+
+              FoundImmArg = true;
+              FoundImmArgLocal = true;
+            }
+          }
+
+
         }
+
+
+
       }
 
       ++OpIdx;
     }
+
+#if 0
+    if (FoundImmArgLocal) {
+      IDIt->Inst;
+
+      unsigned OpIdx = 0;
+      for (Value *V : (*IDIt).OperVals) {
+        if (!canReplaceOperandWithVariable(IDIt->Inst, OpIdx)) {
+          FoundImmArg = true;
+        }
+
+        ++OpIdx;
+      }
+    }
+#endif
   }
 
+  dbgs() << "SeenImmArg size " << SeenImmArg.size() << '\n';
+
+  for (auto X : SeenImmArg) {
+    dbgs() << "  " << X.first.first << ", " << X.first.second << ", " << *X.second << '\n';
+  }
 
   return FoundImmArg;
 }
@@ -926,6 +995,7 @@ static void getCodeExtractorArguments(
   // TODO: For well behaved intrinsics with immarg operands, you could issue
   // multiple and select on the results.
   if (findConstants(C, NotSame, InputGVNs)) {
+    LLVM_DEBUG(dbgs() << "Ignoring constant with immarg user\n");
     Region.IgnoreRegion = true;
     return;
   }
@@ -1003,6 +1073,13 @@ findExtractedInputToOverallInputMapping(OutlinableRegion &Region,
       if (AggArgIt != Group.CanonicalNumberToAggArg.end())
         Region.AggArgToConstant.insert(std::make_pair(AggArgIt->second, CST));
       else {
+
+#if 0
+        if (canReplaceOperandWithVariable()) {
+
+        }
+#endif
+
         Group.CanonicalNumberToAggArg.insert(
             std::make_pair(CanonicalNumber, TypeIndex));
         Region.AggArgToConstant.insert(std::make_pair(TypeIndex, CST));
@@ -1572,7 +1649,7 @@ static BasicBlock *findOrCreatePHIBlock(OutlinableGroup &Group, Value *RetVal) {
   PhiBlockForRetVal = Group.PHIBlocks.find(RetVal);
   if (PhiBlockForRetVal != Group.PHIBlocks.end())
     return PhiBlockForRetVal->second;
-  
+
   // If we did not find a block, we create one, and insert it into the
   // overall function and record it.
   bool Inserted = false;
