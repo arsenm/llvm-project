@@ -24,6 +24,7 @@
 #include "llvm/IR/PassManager.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/Utils/Local.h"
 #include <optional>
 #include <vector>
 
@@ -777,24 +778,36 @@ static void moveFunctionData(Function &Old, Function &New,
 /// single Constant across all OutlinableRegions similar to \p C.
 /// \param [out] Inputs - The list containing the global value numbers of the
 /// arguments needed for the region of code.
-static void findConstants(IRSimilarityCandidate &C, DenseSet<unsigned> &NotSame,
+static bool findConstants(IRSimilarityCandidate &C, DenseSet<unsigned> &NotSame,
                           std::vector<unsigned> &Inputs) {
+  bool FoundImmArg = false;
   DenseSet<unsigned> Seen;
   // Iterate over the instructions, and find what constants will need to be
   // extracted into arguments.
   for (IRInstructionDataList::iterator IDIt = C.begin(), EndIDIt = C.end();
        IDIt != EndIDIt; IDIt++) {
+
+    unsigned OpIdx = 0;
     for (Value *V : (*IDIt).OperVals) {
       // Since these are stored before any outlining, they will be in the
       // global value numbering.
       unsigned GVN = *C.getGVN(V);
-      if (isa<Constant>(V))
+      if (isa<Constant>(V)) {
         if (NotSame.contains(GVN) && !Seen.contains(GVN)) {
+          if (!canReplaceOperandWithVariable(IDIt->Inst, OpIdx))
+            FoundImmArg = true;
+
           Inputs.push_back(GVN);
           Seen.insert(GVN);
         }
+      }
+
+      ++OpIdx;
     }
   }
+
+
+  return FoundImmArg;
 }
 
 /// Find the GVN for the inputs that have been found by the CodeExtractor.
@@ -910,7 +923,12 @@ static void getCodeExtractorArguments(
     return;
   }
 
-  findConstants(C, NotSame, InputGVNs);
+  // TODO: For well behaved intrinsics with immarg operands, you could issue
+  // multiple and select on the results.
+  if (findConstants(C, NotSame, InputGVNs)) {
+    Region.IgnoreRegion = true;
+    return;
+  }
 
   mapInputsToGVNs(C, OverallInputs, OutputMappings, InputGVNs);
 
