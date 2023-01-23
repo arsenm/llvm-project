@@ -567,7 +567,6 @@ static bool fnegFoldsIntoOpcode(unsigned Opc) {
   case ISD::FMAXNUM:
   case ISD::FMINNUM_IEEE:
   case ISD::FMAXNUM_IEEE:
-  case ISD::SELECT:
   case ISD::FSIN:
   case ISD::FTRUNC:
   case ISD::FRINT:
@@ -583,6 +582,9 @@ static bool fnegFoldsIntoOpcode(unsigned Opc) {
   case AMDGPUISD::FMED3:
     // TODO: handle llvm.amdgcn.fma.legacy
     return true;
+  case ISD::SELECT:
+    return true;
+    //return VT == MVT::f32;
   case ISD::BITCAST:
     llvm_unreachable("bitcast is special cased");
   default:
