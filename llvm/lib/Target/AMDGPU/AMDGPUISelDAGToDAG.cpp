@@ -2596,6 +2596,16 @@ bool AMDGPUDAGToDAGISel::SelectVOP3ModsImpl(SDValue In, SDValue &Src,
   if (Src.getOpcode() == ISD::FNEG) {
     Mods |= SISrcMods::NEG;
     Src = Src.getOperand(0);
+  } else {
+    Src = stripBitcast(Src);
+    if (Src.getOpcode() == ISD::XOR) {
+      // Match an integer fneg
+      auto *SignMask = dyn_cast<ConstantSDNode>(Src.getOperand(1));
+      if (SignMask && SignMask->getAPIntValue().isSignMask()) {
+        Mods |= SISrcMods::NEG;
+        Src = Src.getOperand(0);
+      }
+    }
   }
 
   if (AllowAbs && Src.getOpcode() == ISD::FABS) {
