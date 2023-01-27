@@ -638,13 +638,14 @@ static bool hasSourceMods(const SDNode *N) {
   case ISD::INLINEASM:
   case ISD::INLINEASM_BR:
   case AMDGPUISD::DIV_SCALE:
-  case ISD::INTRINSIC_W_CHAIN:
+  case ISD::INTRINSIC_W_CHAIN: // FIXME: Should be false
+    return true;
 
   // TODO: Should really be looking at the users of the bitcast. These are
   // problematic because bitcasts are used to legalize all stores to integer
   // types.
   case ISD::BITCAST:
-    return false;
+    llvm_unreachable("should have been special cased");
   case ISD::INTRINSIC_WO_CHAIN: {
     switch (cast<ConstantSDNode>(N->getOperand(0))->getZExtValue()) {
     case Intrinsic::amdgcn_interp_p1:
@@ -678,6 +679,12 @@ bool AMDGPUTargetLowering::allUsesHaveSourceMods(const SDNode *N,
 
   // XXX - Should this limit number of uses to check?
   for (const SDNode *U : N->uses()) {
+    if (U->getOpcode() == ISD::BITCAST) {
+      if (!allUsesHaveSourceMods(U, CostThreshold))
+        return false;
+      continue;
+    }
+
     if (!hasSourceMods(U))
       return false;
 
