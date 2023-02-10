@@ -3776,6 +3776,8 @@ AMDGPUTargetLowering::foldFreeOpFromSelect(TargetLowering::DAGCombinerInfo &DCI,
     // Careful: if the neg can be folded up, don't try to pull it back down.
     bool ShouldFoldNeg = true;
 
+    // !LHS.hasOneUse()
+
     if (NewLHS.hasOneUse()) {
       unsigned Opc = NewLHS.getOpcode();
       if (LHS.getOpcode() == ISD::FNEG && fnegFoldsIntoOp(Opc))
@@ -3817,6 +3819,65 @@ AMDGPUTargetLowering::foldFreeOpFromSelect(TargetLowering::DAGCombinerInfo &DCI,
   return SDValue();
 }
 
+/// Inverse the logic of foldFreeOpFromSelect
+static bool shouldPullFNegFromSelect(SDNode *FNeg, SDValue LHS, SDValue RHS) {
+  ConstantFPSDNode *CLHS = dyn_cast<ConstantFPSDNode>(LHS);
+  ConstantFPSDNode *CRHS = dyn_cast<ConstantFPSDNode>(RHS);
+#if 0
+  if (!fnegFoldsIntoOp(LHS.getOpcode()) && CRHS && CRHS->isNegative())
+    return true;
+#endif
+
+  return AMDGPUTargetLowering::allUsesHaveSourceMods(FNeg);
+#if 0
+
+
+
+
+
+  bool ShouldFoldNeg = true;
+  if (LHS.hasOneUse()) {
+    unsigned Opc = LHS.getOpcode();
+    if (fnegFoldsIntoOp(LHS.getOpcode()) && fnegFoldsIntoOp(Opc)) {
+
+    }
+
+    if (LHS.getOpcode() == ISD::FABS && Opc == ISD::FMUL)
+      ShouldFoldNeg = false;
+  }
+
+  if (ShouldFoldNeg) {
+    if (!CRHS->isNegative())
+      return false;
+
+    if (!AMDGPUTargetLowering::allUsesHaveSourceMods(FNeg))
+      return false;
+  }
+
+
+  if (CRHS && CRHS->isNegative()) {
+
+  }
+
+  if (fnegFoldsIntoOp(LHS.getOpcode()))
+    return true;
+
+#if 0
+  if (LHS.hasOneUse()) {
+    if (!fnegFoldsIntoOp(LHS.getOpcode()))
+      return true;
+  }
+#endif
+
+  if (CRHS) {
+    if (!CRHS->isNegative())
+      return false;
+  }
+#endif
+
+
+  return true;
+}
 SDValue AMDGPUTargetLowering::performSelectCombine(SDNode *N,
                                                    DAGCombinerInfo &DCI) const {
   if (SDValue Folded = foldFreeOpFromSelect(DCI, SDValue(N, 0)))
@@ -4137,6 +4198,113 @@ SDValue AMDGPUTargetLowering::performFNegCombine(SDNode *N,
     // fneg (select c, a, b) -> select c, (fneg a), (fneg b)
     // TODO: Invert conditions of foldFreeOpFromSelect
     return SDValue();
+#endif
+#if 0
+    if (VT == MVT::f32)
+      return SDValue();
+#endif
+
+    SDLoc SL(N);
+    SDValue Cond = N0.getOperand(0);
+    SDValue LHS = N0.getOperand(1);
+    SDValue RHS = N0.getOperand(2);
+
+
+#if 0
+    if ((isConstantCheaperToNegate(LHS) && (RHS.getOpcode() == ISD::FNEG &&
+                                            RHS.getOpcode() == ISD::FABS)) ||
+        (isConstantCheaperToNegate(RHS) && (RHS.getOpcode() == ISD::FNEG &&
+                                            RHS.getOpcode() == ISD::FABS))) {
+#endif
+    if (isConstantCheaperToNegate(LHS) ||
+        isConstantCheaperToNegate(RHS)) {
+/*
+    if (shouldPullFNegFromSelect(N, LHS, RHS) ||
+        shouldPullFNegFromSelect(N, RHS, LHS))
+      return SDValue();
+*/
+
+      // TODO: Use getNegatedExpression
+      SDValue NewLHS = DAG.getNode(ISD::FNEG, SL, VT, LHS);
+      SDValue NewRHS = DAG.getNode(ISD::FNEG, SL, VT, RHS);
+
+      SDValue Res = DAG.getNode(ISD::SELECT, SL, VT, Cond,
+                                NewLHS, NewRHS);
+
+      if (!N0.hasOneUse())
+        DAG.ReplaceAllUsesWith(N0, DAG.getNode(ISD::FNEG, SL, VT, Res));
+      return Res;
+    }
+
+    return SDValue();
+
+#if 0
+    if (isConstantCostlierToNegate(LHS)) {
+      NewRHS = getCheaperNegatedExpression(RHS, DAG, DCI.isAfterLegalizeDAG(),
+                                           DAG.shouldOptForSize());
+      if (!NewRHS)
+        return SDValue();
+      NewLHS = DAG.getNode(ISD::FNEG, SL, VT, LHS);
+    } else {
+      NewLHS = DAG.getNode(ISD::FNEG, SL, VT, LHS);
+    }
+
+    if (isConstantCostlierToNegate(RHS)) {
+      NewLHS = getCheaperNegatedExpression(LHS, DAG, DCI.isAfterLegalizeDAG(),
+                                           DAG.shouldOptForSize());
+      if (!NewLHS)
+        return SDValue();
+      NewRHS = DAG.getNode(ISD::FNEG, SL, VT, RHS);
+    } else {
+      NewRHS = DAG.getNode(ISD::FNEG, SL, VT, RHS);
+    }
+#endif
+
+#if 0
+    SDValue CheapLHS = getCheaperNegatedExpression(LHS, DAG, DCI.isAfterLegalizeDAG(),
+                                                   DAG.shouldOptForSize());
+    if (!CheapLHS)
+      return SDValue();
+
+    SDValue CheapRHS = getCheaperNegatedExpression(RHS, DAG, DCI.isAfterLegalizeDAG(),
+                                                   DAG.shouldOptForSize());
+    if (!CheapRHS)
+      return SDValue();
+#endif
+
+    /*
+  TargetLowering::NegatibleCost CostLHS =
+      TargetLowering::NegatibleCost::Expensive;
+  TargetLowering::NegatibleCost CostRHS =
+      TargetLowering::NegatibleCost::Expensive;
+
+  SDValue NegLHS =
+      TLI.getNegatedExpression(LHS, DAG, DCI.isAfterLegalizeDAG(), DAG.shouldOptForSize(),
+                               CostLHS);
+  if (!NegLHS)
+    return SDValue();
+
+    */
+#if 1
+    //SDValue Res = DAG.getNode(ISD::SELECT, SL, VT, Cond, NewLHS, NewRHS);
+#endif
+#if 0
+    SDValue Res = DAG.getNode(ISD::SELECT, SL, VT, Cond,
+                              CheapLHS, CheapRHS);
+#endif
+
+#if 0
+    SDValue Res = getCheaperOrNeutralNegatedExpression(N0, DAG, DCI.isAfterLegalizeDAG(),
+                                                   DAG.shouldOptForSize());
+    if (!Res)
+      return SDValue();
+#endif
+
+#if 0
+    if (!N0.hasOneUse())
+      DAG.ReplaceAllUsesWith(N0, DAG.getNode(ISD::FNEG, SL, VT, Res));
+    return Res;
+#endif
   }
   default:
     return SDValue();
