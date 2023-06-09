@@ -425,7 +425,7 @@ class ThreeOpFragSDAG<SDPatternOperator op1, SDPatternOperator op2> : PatFrag<
   // When the inner operation is used multiple times, selecting 3-op
   // instructions may still be beneficial -- if the other users can be
   // combined similarly. Let's be conservative for now.
-  (op2 (HasOneUseBinOp<op1> node:$x, node:$y), node:$z),
+  (op2 (op1 node:$x, node:$y), node:$z),
   [{
     // Only use VALU ops when the result is divergent.
     if (!N->isDivergent())
@@ -599,7 +599,7 @@ foreach Index = [0, 1, 2, 3] in {
 
 class ThreeOp_i32_Pats <SDPatternOperator op1, SDPatternOperator op2, Instruction inst> : GCNPat <
   // This matches (op2 (op1 i32:$src0, i32:$src1), i32:$src2) with conditions.
-  (ThreeOpFrag<op1, op2> i32:$src0, i32:$src1, i32:$src2),
+  (ThreeOpFrag<HasOneUseBinOp<op1>, op2> i32:$src0, i32:$src1, i32:$src2),
   (inst VSrc_b32:$src0, VSrc_b32:$src1, VSrc_b32:$src2)
 >;
 
@@ -614,7 +614,7 @@ def : ThreeOp_i32_Pats<xor, add, V_XAD_U32_e64>;
 
 let SubtargetPredicate = isGFX940Plus in
 def : GCNPat<
-  (ThreeOpFrag<shl_0_to_4, add> i64:$src0, i32:$src1, i64:$src2),
+  (ThreeOpFrag<HasOneUseBinOp<shl_0_to_4>, add> i64:$src0, i32:$src1, i64:$src2),
   (V_LSHL_ADD_U64_e64 VSrc_b64:$src0, VSrc_b32:$src1, VSrc_b64:$src2)
 >;
 
@@ -642,11 +642,26 @@ def : OpSelBinOpClampPat<saddsat, V_ADD_I16_e64>;
 def : OpSelBinOpClampPat<ssubsat, V_SUB_I16_e64>;
 } // End SubtargetPredicate = isGFX9Plus
 
+// TODO: Only fold with multiple uses for full speed models
+class MulFoldToMadOp<SDPatternOperator op> : PatFrag<
+  (ops node:$src0, node:$src1),
+  (op $src0, $src1),
+  [{ return all_of(N->uses(), [](const SDNode *U) -> bool {
+                     return U->getOpcode() == ISD::ADD;
+                   });
+  }]> {
+
+  let GISelPredicateCode = [{
+    llvm_unreachable("todo");
+  }];
+}
+
+
 // FIXME: GlobalISel in general does not handle instructions with 2 results,
 // so it cannot use these patterns.
 multiclass IMAD32_Pats <VOP3_Pseudo inst> {
   def : GCNPat <
-        (ThreeOpFrag<mul, add> i32:$src0, i32:$src1, i32:$src2),
+        (ThreeOpFrag<MulFoldToMadOp<mul>, add> i32:$src0, i32:$src1, i32:$src2),
         (EXTRACT_SUBREG (inst $src0, $src1,
                               (REG_SEQUENCE SReg_64, // Use scalar and let it be legalized
                                             $src2, sub0,
@@ -659,7 +674,7 @@ multiclass IMAD32_Pats <VOP3_Pseudo inst> {
   // FIXME: GlobalISel pattern exporter fails to export a pattern like this and asserts,
   // make it SDAG only.
   def : GCNPat <
-        (ThreeOpFragSDAG<mul, add> i32:$src0, i32:$src1, (i32 imm:$src2)),
+        (ThreeOpFragSDAG<MulFoldToMadOp<mul>, add> i32:$src0, i32:$src1, (i32 imm:$src2)),
         (EXTRACT_SUBREG (inst $src0, $src1, (i64 (as_i64imm $src2)), 0 /* clamp */), sub0)
         >;
 }
