@@ -730,6 +730,10 @@ static void EmitAtomicOp(CodeGenFunction &CGF, AtomicExpr *E, Address Dest,
       CGF.Builder.CreateAtomicRMW(Op, Ptr, LoadVal1, Order, Scope);
   RMWI->setVolatile(E->isVolatile());
 
+  if (RMWI->isFloatingPointOperation()) {
+    CGF.getTargetHooks().setTargetAtomicMetadata(CGF, *RMWI);
+  }
+
   // For __atomic_*_fetch operations, perform the operation again to
   // determine the value which was written.
   llvm::Value *Result = RMWI;
