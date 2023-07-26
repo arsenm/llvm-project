@@ -37,12 +37,12 @@ define void @foo(ptr %arg, ptr %arg1, i40 %arg2, ptr %arg3, i32 %arg4) #0 {
 ; CHECK-NEXT:    movl %r8d, %r14d
 ; CHECK-NEXT:    movq %rcx, {{[-0-9]+}}(%r{{[sb]}}p) # 8-byte Spill
 ; CHECK-NEXT:    movq %rdx, {{[-0-9]+}}(%r{{[sb]}}p) # 8-byte Spill
-; CHECK-NEXT:    movq %rsi, %r12
+; CHECK-NEXT:    movq %rsi, %r13
 ; CHECK-NEXT:    movq %rdi, %r15
 ; CHECK-NEXT:    incl %r14d
 ; CHECK-NEXT:    xorl %ebx, %ebx
-; CHECK-NEXT:    # implicit-def: $rax
-; CHECK-NEXT:    # kill: killed $rax
+; CHECK-NEXT:    # implicit-def: $r12
+; CHECK-NEXT:    movq %rsi, {{[-0-9]+}}(%r{{[sb]}}p) # 8-byte Spill
 ; CHECK-NEXT:    jmp .LBB0_3
 ; CHECK-NEXT:    .p2align 4, 0x90
 ; CHECK-NEXT:  .LBB0_1: # %bb17
@@ -55,39 +55,42 @@ define void @foo(ptr %arg, ptr %arg1, i40 %arg2, ptr %arg3, i32 %arg4) #0 {
 ; CHECK-NEXT:    callq _Znwm@PLT
 ; CHECK-NEXT:    shlq $4, %r15
 ; CHECK-NEXT:    addq {{[-0-9]+}}(%r{{[sb]}}p), %r15 # 8-byte Folded Reload
-; CHECK-NEXT:    movq {{[-0-9]+}}(%r{{[sb]}}p), %rdx # 8-byte Reload
-; CHECK-NEXT:    movq %rdx, %rcx
+; CHECK-NEXT:    movq %r12, %rcx
 ; CHECK-NEXT:    shrq $32, %rcx
 ; CHECK-NEXT:    movb %cl, 12(%rax)
-; CHECK-NEXT:    movl %edx, 8(%rax)
+; CHECK-NEXT:    movl %r12d, 8(%rax)
 ; CHECK-NEXT:    movq %r15, %rbx
 ; CHECK-NEXT:    movq %r13, %r15
+; CHECK-NEXT:    movq {{[-0-9]+}}(%r{{[sb]}}p), %r13 # 8-byte Reload
 ; CHECK-NEXT:    decl %r14d
-; CHECK-NEXT:    je .LBB0_7
+; CHECK-NEXT:    je .LBB0_8
 ; CHECK-NEXT:  .LBB0_3: # %bb7
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    callq widget@PLT
-; CHECK-NEXT:    cmpb $-5, (%r12)
-; CHECK-NEXT:    jb .LBB0_5
-; CHECK-NEXT:  # %bb.4: # %bb12
+; CHECK-NEXT:    cmpb $-5, (%r13)
+; CHECK-NEXT:    jae .LBB0_5
+; CHECK-NEXT:  # %bb.4: # in Loop: Header=BB0_3 Depth=1
+; CHECK-NEXT:    movl %r12d, %r12d
+; CHECK-NEXT:    cmpq %r15, %rbx
+; CHECK-NEXT:    jbe .LBB0_1
+; CHECK-NEXT:    jmp .LBB0_7
+; CHECK-NEXT:    .p2align 4, 0x90
+; CHECK-NEXT:  .LBB0_5: # %bb12
 ; CHECK-NEXT:    # in Loop: Header=BB0_3 Depth=1
 ; CHECK-NEXT:    movq 0, %rax
 ; CHECK-NEXT:    movq 8, %rax
-; CHECK-NEXT:    movq {{[-0-9]+}}(%r{{[sb]}}p), %rax # 8-byte Reload
-; CHECK-NEXT:    movq %rax, {{[-0-9]+}}(%r{{[sb]}}p) # 8-byte Spill
-; CHECK-NEXT:  .LBB0_5: # %bb14
-; CHECK-NEXT:    # in Loop: Header=BB0_3 Depth=1
+; CHECK-NEXT:    movq {{[-0-9]+}}(%r{{[sb]}}p), %r12 # 8-byte Reload
 ; CHECK-NEXT:    cmpq %r15, %rbx
 ; CHECK-NEXT:    jbe .LBB0_1
-; CHECK-NEXT:  # %bb.6: # in Loop: Header=BB0_3 Depth=1
+; CHECK-NEXT:  .LBB0_7: # in Loop: Header=BB0_3 Depth=1
 ; CHECK-NEXT:    xorl %eax, %eax
 ; CHECK-NEXT:    xorl %ebx, %ebx
 ; CHECK-NEXT:    decl %r14d
 ; CHECK-NEXT:    jne .LBB0_3
-; CHECK-NEXT:  .LBB0_7: # %bb21
+; CHECK-NEXT:  .LBB0_8: # %bb21
 ; CHECK-NEXT:    cmpb $0, 12(%rax)
-; CHECK-NEXT:    jne .LBB0_9
-; CHECK-NEXT:  # %bb.8: # %bb26
+; CHECK-NEXT:    jne .LBB0_10
+; CHECK-NEXT:  # %bb.9: # %bb26
 ; CHECK-NEXT:    addq $24, %rsp
 ; CHECK-NEXT:    popq %rbx
 ; CHECK-NEXT:    popq %r12
@@ -97,7 +100,7 @@ define void @foo(ptr %arg, ptr %arg1, i40 %arg2, ptr %arg3, i32 %arg4) #0 {
 ; CHECK-NEXT:    popq %rbp
 ; CHECK-NEXT:    .cfi_def_cfa %rsp, 8
 ; CHECK-NEXT:    retq
-; CHECK-NEXT:  .LBB0_9: # %bb25
+; CHECK-NEXT:  .LBB0_10: # %bb25
 ; CHECK-NEXT:    .cfi_def_cfa %rbp, 16
 ; CHECK-NEXT:    movq %r15, %rdi
 ; CHECK-NEXT:    callq pluto@PLT
