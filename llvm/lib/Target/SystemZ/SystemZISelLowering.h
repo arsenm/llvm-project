@@ -481,6 +481,11 @@ public:
     // LD, and having the full constant in memory enables reg/mem opcodes.
     return VT != MVT::f64;
   }
+
+  bool mergeStoresAfterLegalization(EVT MemVT) const override;
+  bool canMergeStoresTo(unsigned AS, EVT MemVT,
+                        const MachineFunction &MF) const override;
+
   bool hasInlineStackProbe(const MachineFunction &MF) const override;
   AtomicExpansionKind shouldCastAtomicLoadInIR(LoadInst *LI) const override;
   AtomicExpansionKind shouldCastAtomicStoreInIR(StoreInst *SI) const override;

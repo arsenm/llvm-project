@@ -119,6 +119,10 @@ SystemZTargetLowering::SystemZTargetLowering(const TargetMachine &TM,
       addRegisterClass(MVT::i128, &SystemZ::VR128BitRegClass);
   }
 
+  if (!Subtarget.hasVector()) {
+    addRegisterClass(MVT::v2i64, &SystemZ::GR128BitRegClass);
+  }
+
   // Compute derived properties from the register classes
   computeRegisterProperties(Subtarget.getRegisterInfo());
 
@@ -714,6 +718,29 @@ SystemZTargetLowering::SystemZTargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::GET_ROUNDING, MVT::i32, Custom);
 
+  if (!Subtarget.hasVector()) {
+#if 1
+    for (unsigned Op = 0; Op < ISD::BUILTIN_OP_END; ++Op) {
+      switch (Op) {
+      case ISD::SCALAR_TO_VECTOR:
+      case ISD::BUILD_VECTOR:
+        // case ISD::EXTRACT_SUBVECTOR:
+        // case ISD::INSERT_SUBVECTOR:
+        break;
+      default:
+        setOperationAction(Op, MVT::v2i64, Expand);
+        break;
+      }
+    }
+
+    setOperationAction(ISD::STORE, MVT::v2i64, Custom);
+    setOperationAction(ISD::LOAD, MVT::v2i64, Custom);
+
+    setOperationAction(ISD::EXTRACT_VECTOR_ELT, MVT::v2i64, Custom);
+    setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v2i64, Custom);
+#endif
+  }
+
   // Codes for which we want to perform some z-specific combinations.
   setTargetDAGCombine({ISD::ZERO_EXTEND,
                        ISD::SIGN_EXTEND,
@@ -924,6 +951,18 @@ bool SystemZTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
     return true;
 
   return SystemZVectorConstantInfo(Imm).isVectorConstantLegal(Subtarget);
+}
+
+bool SystemZTargetLowering::mergeStoresAfterLegalization(EVT MemVT) const {
+  // We want to avoid putting split v2i64 stores back together.
+  return Subtarget.hasVector() || MemVT != MVT::i64;
+}
+
+bool SystemZTargetLowering::canMergeStoresTo(unsigned AS, EVT MemVT,
+                                             const MachineFunction &MF) const {
+  // FIXME: This API is really bad and the default behavior is to infinite
+  // loop for most any custom store lowering.
+  return Subtarget.hasVector() || MemVT != MVT::v2i64;
 }
 
 /// Returns true if stack probing through inline assembly is requested.
@@ -1551,10 +1590,7 @@ static SDValue lowerI128ToGR128(SelectionDAG &DAG, SDValue In) {
     std::tie(Lo, Hi) = DAG.SplitScalar(In, DL, MVT::i64, MVT::i64);
   }
 
-  // FIXME: If v2i64 were a legal type, we could use it instead of
-  // Untyped here.  This might enable improved folding.
-  SDNode *Pair = DAG.getMachineNode(SystemZ::PAIR128, DL,
-                                    MVT::Untyped, Hi, Lo);
+  SDNode *Pair = DAG.getMachineNode(SystemZ::PAIR128, DL, MVT::v2i64, Hi, Lo);
   return SDValue(Pair, 0);
 }
 
@@ -3180,7 +3216,7 @@ static void lowerMUL_LOHI32(SelectionDAG &DAG, const SDLoc &DL, unsigned Extend,
 static void lowerGR128Binary(SelectionDAG &DAG, const SDLoc &DL, EVT VT,
                              unsigned Opcode, SDValue Op0, SDValue Op1,
                              SDValue &Even, SDValue &Odd) {
-  SDValue Result = DAG.getNode(Opcode, DL, MVT::Untyped, Op0, Op1);
+  SDValue Result = DAG.getNode(Opcode, DL, MVT::v2i64, Op0, Op1);
   bool Is32Bit = is32Bit(VT);
   Even = DAG.getTargetExtractSubreg(SystemZ::even128(Is32Bit), DL, VT, Result);
   Odd = DAG.getTargetExtractSubreg(SystemZ::odd128(Is32Bit), DL, VT, Result);
@@ -5835,9 +5871,17 @@ SystemZTargetLowering::buildVector(SelectionDAG &DAG, const SDLoc &DL, EVT VT,
 
 SDValue SystemZTargetLowering::lowerBUILD_VECTOR(SDValue Op,
                                                  SelectionDAG &DAG) const {
-  auto *BVN = cast<BuildVectorSDNode>(Op.getNode());
-  SDLoc DL(Op);
   EVT VT = Op.getValueType();
+  if (!Subtarget.hasVector()) {
+    // FIXME: This should just be legal
+    assert(VT == MVT::v2i64);
+    return Op;
+  }
+
+  assert(Subtarget.hasVector());
+
+  SDLoc DL(Op);
+  auto *BVN = cast<BuildVectorSDNode>(Op.getNode());
 
   if (BVN->isConstant()) {
     if (SystemZVectorConstantInfo(BVN).isVectorConstantLegal(Subtarget))
@@ -5905,6 +5949,16 @@ SDValue SystemZTargetLowering::lowerSCALAR_TO_VECTOR(SDValue Op,
                      Op.getOperand(0), DAG.getConstant(0, DL, MVT::i32));
 }
 
+static bool isInBoundsConstantVectorIndex(EVT VecVT, SDValue IdxOp) {
+  if (auto *CIndexN = dyn_cast<ConstantSDNode>(IdxOp)) {
+    uint64_t Index = CIndexN->getZExtValue();
+    unsigned Mask = VecVT.getVectorNumElements() - 1;
+    return Index <= Mask;
+  }
+
+  return false;
+}
+
 SDValue SystemZTargetLowering::lowerINSERT_VECTOR_ELT(SDValue Op,
                                                       SelectionDAG &DAG) const {
   // Handle insertions of floating-point values.
@@ -5920,12 +5974,11 @@ SDValue SystemZTargetLowering::lowerINSERT_VECTOR_ELT(SDValue Op,
   if (VT == MVT::v2f64 &&
       Op1.getOpcode() != ISD::BITCAST &&
       Op1.getOpcode() != ISD::ConstantFP &&
-      Op2.getOpcode() == ISD::Constant) {
-    uint64_t Index = Op2->getAsZExtVal();
-    unsigned Mask = VT.getVectorNumElements() - 1;
-    if (Index <= Mask)
-      return Op;
-  }
+      isInBoundsConstantVectorIndex(VT, Op2))
+    return Op;
+
+  if (VT == MVT::v2i64 && !Subtarget.hasVector())
+    return isInBoundsConstantVectorIndex(VT, Op2) ? Op : SDValue();
 
   // Otherwise bitcast to the equivalent integer form and insert via a GPR.
   MVT IntVT = MVT::getIntegerVT(VT.getScalarSizeInBits());
@@ -5947,12 +6000,11 @@ SystemZTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
   EVT VecVT = Op0.getValueType();
 
   // Extractions of constant indices can be done directly.
-  if (auto *CIndexN = dyn_cast<ConstantSDNode>(Op1)) {
-    uint64_t Index = CIndexN->getZExtValue();
-    unsigned Mask = VecVT.getVectorNumElements() - 1;
-    if (Index <= Mask)
-      return Op;
-  }
+  if (isInBoundsConstantVectorIndex(VecVT, Op1))
+    return Op;
+
+  if (VecVT == MVT::v2i64 && !Subtarget.hasVector())
+    return SDValue();
 
   // Otherwise bitcast to the equivalent integer form and extract via a GPR.
   MVT IntVT = MVT::getIntegerVT(VT.getSizeInBits());
@@ -6121,6 +6173,16 @@ SDValue SystemZTargetLowering::lowerREADCYCLECOUNTER(SDValue Op,
 SDValue SystemZTargetLowering::LowerOperation(SDValue Op,
                                               SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
+  case ISD::STORE: {
+    assert(!Subtarget.hasVector() &&
+           Op.getOperand(1).getValueType() == MVT::v2i64);
+    return scalarizeVectorStore(cast<StoreSDNode>(Op), DAG);
+  }
+  case ISD::LOAD: {
+    assert(!Subtarget.hasVector() && Op.getValueType() == MVT::v2i64);
+    auto [NewValue, NewChain] = scalarizeVectorLoad(cast<LoadSDNode>(Op), DAG);
+    return DAG.getMergeValues({NewValue, NewChain}, SDLoc(Op));
+  }
   case ISD::FRAMEADDR:
     return lowerFRAMEADDR(Op, DAG);
   case ISD::RETURNADDR:
@@ -6302,7 +6364,7 @@ SystemZTargetLowering::LowerOperationWrapper(SDNode *N,
   switch (N->getOpcode()) {
   case ISD::ATOMIC_LOAD: {
     SDLoc DL(N);
-    SDVTList Tys = DAG.getVTList(MVT::Untyped, MVT::Other);
+    SDVTList Tys = DAG.getVTList(MVT::v2i64, MVT::Other);
     SDValue Ops[] = { N->getOperand(0), N->getOperand(1) };
     MachineMemOperand *MMO = cast<AtomicSDNode>(N)->getMemOperand();
     SDValue Res = DAG.getMemIntrinsicNode(SystemZISD::ATOMIC_LOAD_128,
@@ -6338,7 +6400,7 @@ SystemZTargetLowering::LowerOperationWrapper(SDNode *N,
   }
   case ISD::ATOMIC_CMP_SWAP_WITH_SUCCESS: {
     SDLoc DL(N);
-    SDVTList Tys = DAG.getVTList(MVT::Untyped, MVT::i32, MVT::Other);
+    SDVTList Tys = DAG.getVTList(MVT::v2i64, MVT::i32, MVT::Other);
     SDValue Ops[] = { N->getOperand(0), N->getOperand(1),
                       lowerI128ToGR128(DAG, N->getOperand(2)),
                       lowerI128ToGR128(DAG, N->getOperand(3)) };

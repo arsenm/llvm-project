@@ -127,7 +127,7 @@ defm GRX32 : SystemZRegClass<"GRX32", [i32], 32,
 // On machines without SIMD support, i128 is not a legal type, so model the
 // register pairs as untyped instead.
 // XPLINK64: Allocate all registers in natural order
-defm GR128 : SystemZRegClass<"GR128", [untyped], 128,
+defm GR128 : SystemZRegClass<"GR128", [v2i64], 128,
                              (add R0Q, R2Q, R4Q, R12Q, R10Q, R8Q, R6Q, R14Q),
                              [(add R0Q, R2Q, R4Q, R6Q, R8Q, R10Q, R12Q, R14Q)]>;
 

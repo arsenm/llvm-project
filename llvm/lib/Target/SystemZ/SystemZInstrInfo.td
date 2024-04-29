@@ -8,6 +8,7 @@
 
 def IsTargetXPLINK64      : Predicate<"Subtarget->isTargetXPLINK64()">;
 def IsTargetELF           : Predicate<"Subtarget->isTargetELF()">;
+def NoVector              : Predicate<"!Subtarget->hasVector()">;
 
 //===----------------------------------------------------------------------===//
 // Stack allocation
@@ -477,7 +478,7 @@ let canFoldAsLoad = 1, SimpleBDXLoad = 1, mayLoad = 1 in {
 
   // These instructions are split after register allocation, so we don't
   // want a custom inserter.
-  let Has20BitOffset = 1, HasIndex = 1, Is128Bit = 1 in {
+  let Has20BitOffset = 1, HasIndex = 1, Is128Bit = 1, Predicates = [NoVector] in {
     def L128 : Pseudo<(outs GR128:$dst), (ins bdxaddr20only128:$src),
                       [(set GR128:$dst, (load bdxaddr20only128:$src))]>;
   }
@@ -521,7 +522,7 @@ let SimpleBDXStore = 1, mayStore = 1 in {
 
   // These instructions are split after register allocation, so we don't
   // want a custom inserter.
-  let Has20BitOffset = 1, HasIndex = 1, Is128Bit = 1 in {
+  let Has20BitOffset = 1, HasIndex = 1, Is128Bit = 1, Predicates = [NoVector] in {
     def ST128 : Pseudo<(outs), (ins GR128:$src, bdxaddr20only128:$dst),
                        [(store GR128:$src, bdxaddr20only128:$dst)]>;
   }
@@ -2347,3 +2348,32 @@ foreach V = [ "E", "NE", "H", "NH", "L", "NL", "HE", "NHE", "LE", "NLE",
   defm BRULAsm#V : MnemonicCondBranchAlias <CV<V>, "br#l", "jg#", "att">;
   defm BRUL_HLASMAsm#V : MnemonicCondBranchAlias <CV<V>, "br#l", "jl#", "hlasm">;
 }
+
+
+let Predicates = [NoVector] in {
+
+def : Pat<
+  (extractelt v2i64:$src, 1),
+  (EXTRACT_SUBREG $src, subreg_l64)
+>;
+
+def : Pat<
+  (extractelt v2i64:$src, 0),
+  (EXTRACT_SUBREG $src, subreg_h64)
+>;
+
+def : Pat<
+  (insertelt v2i64:$src, i64:$idx, 1),
+  (INSERT_SUBREG $src, $idx, subreg_l64)
+>;
+
+def : Pat<
+  (insertelt v2i64:$src, i64:$idx, 0),
+  (INSERT_SUBREG $src, $idx, subreg_h64)
+>;
+}
+
+def : Pat<
+  (v2i64 (build_vector i64:$hi64, i64:$lo64)),
+  (REG_SEQUENCE GR128Bit, $hi64, subreg_h64, $lo64, subreg_l64)
+>;

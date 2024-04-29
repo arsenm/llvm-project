@@ -1730,14 +1730,17 @@ void SystemZDAGToDAGISel::Select(SDNode *Node) {
 
   case ISD::BUILD_VECTOR: {
     auto *BVN = cast<BuildVectorSDNode>(Node);
-    SystemZVectorConstantInfo VCI(BVN);
-    if (VCI.isVectorConstantLegal(*Subtarget)) {
-      loadVectorConstant(VCI, Node);
-      return;
+    if (BVN->isConstant()) {
+      SystemZVectorConstantInfo VCI(BVN);
+      if (VCI.isVectorConstantLegal(*Subtarget)) {
+        loadVectorConstant(VCI, BVN);
+        return;
+      }
     }
-    break;
-  }
 
+    SelectCode(BVN);
+    return;
+  }
   case ISD::ConstantFP: {
     APFloat Imm = cast<ConstantFPSDNode>(Node)->getValueAPF();
     if (Imm.isZero() || Imm.isNegZero())
