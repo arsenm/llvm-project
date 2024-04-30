@@ -116,6 +116,8 @@ def CC_SystemZ_ELF : CallingConv<[
   // so we have to use a custom handler.
   CCIfType<[i64], CCCustom<"CC_SystemZ_I128Indirect">>,
 
+  CCIfNoVector<CCIfType<[v2i64], CCCustom<"CC_SystemZ_I128Indirect">>>,
+
   // The first 5 integer arguments are passed in R2-R6.  Note that R6
   // is call-saved.
   CCIfType<[i32], CCAssignToReg<[R2L, R3L, R4L, R5L, R6L]>>,
@@ -145,7 +147,10 @@ def CC_SystemZ_ELF : CallingConv<[
              CCAssignToStack<16, 8>>>,
 
   // Other arguments are passed in 8-byte-aligned 8-byte stack slots.
-  CCIfType<[i32, i64, f32, f64], CCAssignToStack<8, 8>>
+  CCIfType<[i32, i64, f32, f64], CCAssignToStack<8, 8>>,
+
+  CCIfType<[v2i64], CCPassIndirect<i64>>
+//  CCIfType<[v2i64], CCAssignToStack<16, 8>>
 ]>;
 
 //===----------------------------------------------------------------------===//
@@ -250,9 +255,14 @@ def CC_SystemZ_XPLINK64 : CallingConv<[
 
   // Force i128 values to the stack and pass i64 pointers to them.
   CCIfType<[i128], CCPassIndirect<i64>>,
+
   // If i128 is not legal, such values are already split into two i64 here,
   // so we have to use a custom handler.
   CCIfType<[i64], CCCustom<"CC_SystemZ_I128Indirect">>,
+
+  //CCIfNoVector<CCIfType<[v2i64], CCCustom<"CC_SystemZ_I128Indirect">>>,
+  CCIfNoVector<CCIfType<[v2i64], CCPassIndirect<i64>>>,
+
   // The first 3 integer arguments are passed in registers R1D-R3D.
   // The rest will be passed in the user area. The address offset of the user
   // area can be found in register R4D.
@@ -287,7 +297,12 @@ def CC_SystemZ_XPLINK64 : CallingConv<[
   // Vector arguments are passed in 8-byte-alinged 16-byte stack slots too.
   CCIfSubtarget<"hasVector()",
     CCIfType<[v16i8, v8i16, v4i32, v2i64, v4f32, v2f64],
-             CCAssignToStack<16, 8>>>
+             CCAssignToStack<16, 8>>>,
+
+             //  CCIfType<[v2i64], CCPassIndirect<i64>>
+//  CCIfType<[v2i64],
+//           CCAssignToStack<16, 8>>
+
 ]>;
 
 //===----------------------------------------------------------------------===//
