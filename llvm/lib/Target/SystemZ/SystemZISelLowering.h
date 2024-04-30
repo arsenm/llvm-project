@@ -465,6 +465,11 @@ public:
   bool convertSetCCLogicToBitwiseLogic(EVT VT) const override {
     return VT.isScalarInteger();
   }
+
+  bool aggressivelyPreferBuildVectorSources(EVT VecVT) const override {
+    return true;
+  }
+
   EVT getSetCCResultType(const DataLayout &DL, LLVMContext &,
                          EVT) const override;
   bool isFMAFasterThanFMulAndFAdd(const MachineFunction &MF,
