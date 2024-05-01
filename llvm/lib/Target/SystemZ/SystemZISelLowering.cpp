@@ -735,6 +735,7 @@ SystemZTargetLowering::SystemZTargetLowering(const TargetMachine &TM,
 
     setOperationAction(ISD::STORE, MVT::v2i64, Custom);
     setOperationAction(ISD::LOAD, MVT::v2i64, Custom);
+    setOperationAction(ISD::BITCAST, MVT::v2i64, Expand);
 
     setOperationAction(ISD::EXTRACT_VECTOR_ELT, MVT::v2i64, Custom);
     setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v2i64, Custom);
