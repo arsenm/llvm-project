@@ -60,7 +60,10 @@ def RetCC_SystemZ_ELF : CallingConv<[
   // to one of these types during type legalization.
   CCIfSubtarget<"hasVector()",
     CCIfType<[v16i8, v8i16, v4i32, v2i64, v4f32, v2f64],
-             CCAssignToReg<[V24, V26, V28, V30, V25, V27, V29, V31]>>>
+             CCAssignToReg<[V24, V26, V28, V30, V25, V27, V29, V31]>>>,
+
+  // For the !hasVector case, treat v2i64 as-if scalarized
+  CCIfType<[v2i64], CCAssignToReg<[R2Q, R4Q]>>
 ]>;
 
 //===----------------------------------------------------------------------===//
