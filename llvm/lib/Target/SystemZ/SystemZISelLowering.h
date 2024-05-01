@@ -486,6 +486,9 @@ public:
   bool canMergeStoresTo(unsigned AS, EVT MemVT,
                         const MachineFunction &MF) const override;
 
+  bool isLoadBitCastBeneficial(EVT LoadVT, EVT BitcastVT,
+                               const SelectionDAG &DAG, const MachineMemOperand &MMO) const override;
+
   bool hasInlineStackProbe(const MachineFunction &MF) const override;
   AtomicExpansionKind shouldCastAtomicLoadInIR(LoadInst *LI) const override;
   AtomicExpansionKind shouldCastAtomicStoreInIR(StoreInst *SI) const override;

@@ -966,6 +966,19 @@ bool SystemZTargetLowering::canMergeStoresTo(unsigned AS, EVT MemVT,
   return Subtarget.hasVector() || MemVT != MVT::v2i64;
 }
 
+bool SystemZTargetLowering::isLoadBitCastBeneficial(EVT LoadVT, EVT BitcastVT,
+                                                    const SelectionDAG &DAG,
+                                                    const MachineMemOperand &MMO) const {
+#if 0
+  if (
+    LoadVT.isSimple() && BitcastVT.isSimple() &&
+    getRepRegClassFor(LoadVT.getSimpleVT()) != getRepRegClassFor(BitcastVT.getSimpleVT()))
+    //if (LoadVT == MVT::f128 && BitcastVT == MVT::v2i64 && Subtarget.hasVector())
+    return false;
+#endif
+  return TargetLowering::isLoadBitCastBeneficial(LoadVT, BitcastVT, DAG, MMO);
+}
+
 /// Returns true if stack probing through inline assembly is requested.
 bool SystemZTargetLowering::hasInlineStackProbe(const MachineFunction &MF) const {
   // If the function specifically requests inline stack probes, emit them.
