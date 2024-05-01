@@ -63,7 +63,9 @@ def RetCC_SystemZ_ELF : CallingConv<[
              CCAssignToReg<[V24, V26, V28, V30, V25, V27, V29, V31]>>>,
 
   // For the !hasVector case, treat v2i64 as-if scalarized
-  CCIfType<[v2i64], CCAssignToReg<[R2Q, R4Q]>>
+  //  CCIfType<[v2i64], CCAssignToRegWithShadow<[R2D, R4D], [R3D, R5D]>>
+  CCIfType<[v2i64], CCCustom<"CC_SystemZ_AssignV2I64ToGPR">>
+ //   CCIfType<[v2i64], CCPromoteToType<i64>>
 ]>;
 
 //===----------------------------------------------------------------------===//

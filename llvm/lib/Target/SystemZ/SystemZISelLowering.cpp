@@ -2227,9 +2227,9 @@ SystemZTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   SDValue Glue;
   SmallVector<SDValue, 4> RetOps;
   RetOps.push_back(Chain);
-  for (unsigned I = 0, E = RetLocs.size(); I != E; ++I) {
+  for (unsigned I = 0, realRVLocIdx = 0, E = RetLocs.size(); I != E; ++I, ++realRVLocIdx) {
     CCValAssign &VA = RetLocs[I];
-    SDValue RetValue = OutVals[I];
+    SDValue RetValue = OutVals[realRVLocIdx];
 
     // Make the return register live on exit.
     assert(VA.isRegLoc() && "Can only return in registers!");
@@ -2239,9 +2239,27 @@ SystemZTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
 
     // Chain and glue the copies together.
     Register Reg = VA.getLocReg();
-    Chain = DAG.getCopyToReg(Chain, DL, Reg, RetValue, Glue);
-    Glue = Chain.getValue(1);
-    RetOps.push_back(DAG.getRegister(Reg, VA.getLocVT()));
+
+    if (VA.needsCustom() && VA.getValVT() == MVT::v2i64 && VA.getLocVT() == MVT::i64) {
+      assert(!Subtarget.hasVector());
+
+      SmallVector<SDValue, 2> RetElts;
+      DAG.ExtractVectorElements(RetValue, RetElts, 0, 2, MVT::i64);
+
+      Chain = DAG.getCopyToReg(Chain, DL, Reg, RetElts[0], Glue);
+      Glue = Chain.getValue(1);
+      RetOps.push_back(DAG.getRegister(Reg, VA.getLocVT()));
+
+      CCValAssign &VA1 = RetLocs[++I];
+      Register Reg1 = VA1.getLocReg();
+      Chain = DAG.getCopyToReg(Chain, DL, Reg1, RetElts[1], Glue);
+      Glue = Chain.getValue(1);
+      RetOps.push_back(DAG.getRegister(Reg1, VA.getLocVT()));
+    } else {
+      Chain = DAG.getCopyToReg(Chain, DL, Reg, RetValue, Glue);
+      Glue = Chain.getValue(1);
+      RetOps.push_back(DAG.getRegister(Reg, VA.getLocVT()));
+    }
   }
 
   // Update chain and glue.

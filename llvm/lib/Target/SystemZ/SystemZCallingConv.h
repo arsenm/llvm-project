@@ -202,6 +202,64 @@ inline bool CC_XPLINK64_Allocate128BitVararg(unsigned &ValNo, MVT &ValVT,
   return false;
 }
 
+inline bool CC_SystemZ_AssignV2I64ToGPR(unsigned ValNo, MVT ValVT, MVT LocVT,
+                                        CCValAssign::LocInfo LocInfo,
+                                        ISD::ArgFlagsTy ArgFlags, CCState &State) {
+  assert(!State.getMachineFunction().getSubtarget<SystemZSubtarget>().hasVector());
+
+  if (LocVT == MVT::v2i64) {
+    static const MCPhysReg HiRegList[] = { SystemZ::R2D, SystemZ::R4D };
+    static const MCPhysReg LoRegList[] = { SystemZ::R3D, SystemZ::R5D };
+
+    MCPhysReg Reg = State.AllocateReg(HiRegList, LoRegList);
+    if (Reg == 0)
+      return false;
+
+    unsigned i;
+    for (i = 0; i < 2; ++i) {
+      if (HiRegList[i] == Reg)
+        break;
+    }
+
+    LocVT = MVT::i64;
+
+    State.addLoc(CCValAssign::getCustomReg(ValNo, ValVT, Reg, LocVT, LocInfo));
+    State.addLoc(CCValAssign::getCustomReg(ValNo, ValVT, LoRegList[i],
+                                           LocVT, LocInfo));
+    return true;
+
+
+#if 0
+    SmallVectorImpl<CCValAssign> &PendingMembers = State.getPendingLocs();
+
+
+    for (unsigned I = 0; I != SystemZ::ELFNumArgGPRs; ++I) {
+
+
+    }
+
+    MCPhysReg Allocated0 = State.AllocateReg(SystemZ::ELFArgGPRs);
+    if (!Allocated0)
+      return false;
+
+    MCPhysReg Allocated1 = State.AllocateReg(SystemZ::ELFArgGPRs);
+    if (!Allocated1) {
+      State.DeallocateReg(Allocated0);
+      return false;
+    }
+
+    State.addLoc(CCValAssign::getCustomReg(ValNo, MVT::i64, Allocated0,
+                                           MVT::i64, LocInfo));
+    State.addLoc(CCValAssign::getCustomReg(ValNo, MVT::i64, Allocated1,
+                                           MVT::i64, LocInfo));
+
+    return true;
+#endif
+  }
+
+  return false;
+}
+
 inline bool RetCC_SystemZ_Error(unsigned &, MVT &, MVT &,
                                 CCValAssign::LocInfo &, ISD::ArgFlagsTy &,
                                 CCState &) {
