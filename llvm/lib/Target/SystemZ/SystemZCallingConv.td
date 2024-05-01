@@ -13,8 +13,10 @@ class CCIfExtend<CCAction A>
 
 class CCIfSubtarget<string F, CCAction A>
   : CCIf<!strconcat("static_cast<const SystemZSubtarget&>"
-                    "(State.getMachineFunction().getSubtarget()).", F),
-         A>;
+                    "(State.getMachineFunction().getSubtarget()).", F), A>;
+
+class CCIfNoVector<CCAction A>
+  : CCIf<"!State.getMachineFunction().getSubtarget<SystemZSubtarget>().hasVector()", A>;
 
 // Match if this specific argument is a fixed (i.e. named) argument.
 class CCIfFixed<CCAction A>
