@@ -1378,12 +1378,17 @@ Instruction *InstCombinerImpl::visitStoreInst(StoreInst &SI) {
   // If the RHS is an alloca with a single use, zapify the store, making the
   // alloca dead.
   if (Ptr->hasOneUse()) {
-    if (isa<AllocaInst>(Ptr))
-      return eraseInstFromFunction(SI);
-    if (GetElementPtrInst *GEP = dyn_cast<GetElementPtrInst>(Ptr)) {
-      if (isa<AllocaInst>(GEP->getOperand(0))) {
-        if (GEP->getOperand(0)->hasOneUse())
-          return eraseInstFromFunction(SI);
+    Value *StrippedPtr = Ptr->stripPointerCasts();
+    if (StrippedPtr->hasOneUse()) {
+      if (isa<AllocaInst>(StrippedPtr))
+        return eraseInstFromFunction(SI);
+
+      if (GetElementPtrInst *GEP = dyn_cast<GetElementPtrInst>(StrippedPtr)) {
+        Value *Strip = GEP->getOperand(0)->stripPointerCasts();
+        if (isa<AllocaInst>(Strip)) {
+          if (Strip->hasOneUse())
+            return eraseInstFromFunction(SI);
+        }
       }
     }
   }
