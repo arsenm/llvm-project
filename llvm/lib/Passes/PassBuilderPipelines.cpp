@@ -283,7 +283,7 @@ static cl::opt<bool> EnableConstraintElimination(
         "Enable pass to eliminate conditions based on linear constraints"));
 
 static cl::opt<AttributorRunOption> AttributorRun(
-    "attributor-enable", cl::Hidden, cl::init(AttributorRunOption::NONE),
+    "attributor-enable", cl::Hidden, cl::init(AttributorRunOption::LIGHT),
     cl::desc("Enable the attributor inter-procedural deduction pass"),
     cl::values(clEnumValN(AttributorRunOption::FULL, "full",
                           "enable all full attributor runs"),
@@ -988,16 +988,17 @@ PassBuilder::buildInlinerPipeline(OptimizationLevel Level,
   // valuable as the inliner doesn't currently care whether it is inlining an
   // invoke or a call.
 
-  if (AttributorRun & AttributorRunOption::CGSCC)
-    MainCGPipeline.addPass(AttributorCGSCCPass());
-  else if (AttributorRun & AttributorRunOption::CGSCC_LIGHT)
-    MainCGPipeline.addPass(AttributorLightCGSCCPass());
-
   // Deduce function attributes. We do another run of this after the function
   // simplification pipeline, so this only needs to run when it could affect the
   // function simplification pipeline, which is only the case with recursive
   // functions.
-  MainCGPipeline.addPass(PostOrderFunctionAttrsPass(/*SkipNonRecursive*/ true));
+  if (AttributorRun & AttributorRunOption::CGSCC)
+    MainCGPipeline.addPass(AttributorCGSCCPass());
+  else if (AttributorRun & AttributorRunOption::CGSCC_LIGHT)
+    MainCGPipeline.addPass(AttributorLightCGSCCPass());
+  else
+    MainCGPipeline.addPass(
+        PostOrderFunctionAttrsPass(/*SkipNonRecursive*/ true));
 
   // When at O3 add argument promotion to the pass pipeline.
   // FIXME: It isn't at all clear why this should be limited to O3.
