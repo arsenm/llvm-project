@@ -211,6 +211,8 @@ libclc_configure_source_list(OPENCL_GENERIC_SOURCES
   subgroup/sub_group_non_uniform_reduce.cl
   subgroup/sub_group_scan_exclusive.cl
   subgroup/sub_group_scan_inclusive.cl
+  subgroup/sub_group_non_uniform_scan_exclusive.cl
+  subgroup/sub_group_non_uniform_scan_inclusive.cl
   subgroup/subgroup.cl
   synchronization/sub_group_barrier.cl
   synchronization/work_group_barrier.cl

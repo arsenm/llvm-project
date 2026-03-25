@@ -8,16 +8,7 @@
 
 #if defined(__CLC_SCALAR)
 
-#if defined(__CLC_GEN_S)
-#define __CLC_GEN_MAX (__CLC_GENTYPE)((1LL << (__CLC_GENSIZE - 1)) - 1LL)
-#define __CLC_GEN_MIN (__CLC_GENTYPE)(-(1LL << (__CLC_GENSIZE - 1)))
-#elif defined(__CLC_GEN_U)
-#define __CLC_GEN_MAX (__CLC_GENTYPE)((1ull << __CLC_GENSIZE) - 1ull)
-#define __CLC_GEN_MIN (__CLC_GENTYPE)0
-#elif defined(__CLC_FPSIZE)
-#define __CLC_GEN_MIN -INFINITY
-#define __CLC_GEN_MAX INFINITY
-#endif
+#include "clc/shared/gentype_limits.h"
 
 _CLC_DEF _CLC_OVERLOAD __CLC_GENTYPE __CLC_FUNCTION_INCLUSIVE(__CLC_GENTYPE x) {
   uint l = __clc_get_sub_group_local_id();
