@@ -14,145 +14,105 @@
 #include "clc/shared/clc_min.h"
 #include "clc/subgroup/clc_sub_group_non_uniform_scan.h"
 #include "clc/subgroup/clc_subgroup.h"
-
-
-#define __CLC_BODY "clc_amdgpu_ds_bpermute.inc"
-#include "clc/integer/gentype.inc"
-
-#define __CLC_BODY "clc_amdgpu_ds_bpermute.inc"
-#include "clc/math/gentype.inc"
+#include <gpuintrin.h>
 
 //------------------------------------------------------------------------------
 //  Integer and fp add
 //------------------------------------------------------------------------------
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_add
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_add
-#define __CLC_FUNCTION_IMPL(x, y) ((x) + (y))
-#define __CLC_SUBGROUP_SCAN_ID_VAL (__CLC_GENTYPE)0
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_add(uint value) {
+  return __gpu_suffix_scan_sum_u32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_add(ulong value) {
+  return __gpu_suffix_scan_sum_u64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/math/gentype.inc"
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_min(uint value) {
+  return __gpu_suffix_scan_min_u32(__gpu_lane_mask(), value);
+}
 
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_min(ulong value) {
+  return __gpu_suffix_scan_min_u64(__gpu_lane_mask(), value);
+}
 
-//------------------------------------------------------------------------------
-//  Integer and fp mul
-//------------------------------------------------------------------------------
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_mul
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_mul
-#define __CLC_FUNCTION_IMPL(x, y) ((x) * (y))
-#define __CLC_SUBGROUP_SCAN_ID_VAL (__CLC_GENTYPE)1
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_max(uint value) {
+  return __gpu_suffix_scan_max_u32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_max(ulong value) {
+  return __gpu_suffix_scan_max_u64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/math/gentype.inc"
 
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
 
-//------------------------------------------------------------------------------
-//  Integer and fp min
-//------------------------------------------------------------------------------
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_and(uint value) {
+  return __gpu_suffix_scan_and_u32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_min
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_min
-#define __CLC_FUNCTION_IMPL(x, y) __clc_min(x, y)
-#define __CLC_SUBGROUP_SCAN_ID_VAL __CLC_GEN_MAX
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_and(ulong value) {
+  return __gpu_suffix_scan_and_u64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
-#undef __CLC_FUNCTION_IMPL
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_or(uint value) {
+  return __gpu_suffix_scan_or_u32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_IMPL(x, y) __clc_fmin(x, y)
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/math/gentype.inc"
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_or(ulong value) {
+  return __gpu_suffix_scan_or_u64(__gpu_lane_mask(), value);
+}
 
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
 
-//------------------------------------------------------------------------------
-//  Integer and fp max
-//------------------------------------------------------------------------------
+_CLC_DEF _CLC_OVERLOAD uint
+__clc_sub_group_non_uniform_scan_inclusive_xor(uint value) {
+  return __gpu_suffix_scan_xor_u32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_max
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_max
-#define __CLC_FUNCTION_IMPL(x, y) __clc_max(x, y)
-#define __CLC_SUBGROUP_SCAN_ID_VAL __CLC_GEN_MIN
+_CLC_DEF _CLC_OVERLOAD ulong
+__clc_sub_group_non_uniform_scan_inclusive_xor(ulong value) {
+  return __gpu_suffix_scan_xor_u64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
-#undef __CLC_FUNCTION_IMPL
+_CLC_DEF _CLC_OVERLOAD float
+__clc_sub_group_non_uniform_scan_inclusive_add(float value) {
+  return __gpu_suffix_scan_sum_f32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_IMPL(x, y) __clc_fmax(x, y)
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/math/gentype.inc"
+_CLC_DEF _CLC_OVERLOAD double
+__clc_sub_group_non_uniform_scan_inclusive_add(double value) {
+  return __gpu_suffix_scan_sum_f64(__gpu_lane_mask(), value);
+}
 
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
 
-//------------------------------------------------------------------------------
-//  and
-//------------------------------------------------------------------------------
+_CLC_DEF _CLC_OVERLOAD float
+__clc_sub_group_non_uniform_scan_inclusive_min(float value) {
+  return __gpu_suffix_scan_minnum_f32(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_and
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_and
-#define __CLC_FUNCTION_IMPL(x, y) ((x) & (y))
-#define __CLC_SUBGROUP_SCAN_ID_VAL (__CLC_GENTYPE)~0
+_CLC_DEF _CLC_OVERLOAD double
+__clc_sub_group_non_uniform_scan_inclusive_min(double value) {
+  return __gpu_suffix_scan_minnum_f64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
 
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
+_CLC_DEF _CLC_OVERLOAD float
+__clc_sub_group_non_uniform_scan_inclusive_max(float value) {
+  return __gpu_suffix_scan_maxnum_f32(__gpu_lane_mask(), value);
+}
 
-//------------------------------------------------------------------------------
-//  or
-//------------------------------------------------------------------------------
+_CLC_DEF _CLC_OVERLOAD double
+__clc_sub_group_non_uniform_scan_inclusive_max(double value) {
+  return __gpu_suffix_scan_maxnum_f64(__gpu_lane_mask(), value);
+}
 
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_or
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_or
-#define __CLC_FUNCTION_IMPL(x, y) ((x) | (y))
-#define __CLC_SUBGROUP_SCAN_ID_VAL (__CLC_GENTYPE)0
-
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
-
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
-
-//------------------------------------------------------------------------------
-//  xor
-//------------------------------------------------------------------------------
-
-#define __CLC_FUNCTION_INCLUSIVE __clc_sub_group_non_uniform_scan_inclusive_xor
-#define __CLC_FUNCTION_EXCLUSIVE __clc_sub_group_non_uniform_scan_exclusive_xor
-#define __CLC_FUNCTION_IMPL(x, y) ((x) & (y))
-#define __CLC_SUBGROUP_SCAN_ID_VAL (__CLC_GENTYPE)0
-
-#define __CLC_BODY "clc_sub_group_non_uniform_scan.inc"
-#include "clc/integer/gentype.inc"
-
-#undef __CLC_FUNCTION_INCLUSIVE
-#undef __CLC_FUNCTION_EXCLUSIVE
-#undef __CLC_FUNCTION_IMPL
-#undef __CLC_SUBGROUP_SCAN_ID_VAL
