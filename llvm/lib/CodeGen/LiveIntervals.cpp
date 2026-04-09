@@ -542,8 +542,6 @@ bool LiveIntervals::shrinkToUses(LiveInterval *li,
 
 bool LiveIntervals::computeDeadValues(LiveInterval &LI,
                                       SmallVectorImpl<MachineInstr*> *dead) {
-  bool MayHaveSplitComponents = false;
-
   for (VNInfo *VNI : LI.valnos) {
     if (VNI->isUnused())
       continue;
@@ -579,9 +577,9 @@ bool LiveIntervals::computeDeadValues(LiveInterval &LI,
         dead->push_back(MI);
       }
     }
-    MayHaveSplitComponents = true;
+
   }
-  return MayHaveSplitComponents;
+  return true;
 }
 
 void LiveIntervals::shrinkToUses(LiveInterval::SubRange &SR, Register Reg) {
