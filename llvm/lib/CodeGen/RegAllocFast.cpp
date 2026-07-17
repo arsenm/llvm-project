@@ -1612,6 +1612,24 @@ void RegAllocFastImpl::findAndSortDefOperandIndexes(const MachineInstr &MI) {
   });
 }
 
+// Returns true if MI has a tied, not-undef subregister def whose register (a
+// physreg once assigned) overlaps PhysReg. A read-undef subregister def emits an
+// implicit def of its super-register; that implicit def must not free PhysReg
+// while the companion tied use is still pending. \p PhysReg is the register of
+// the def operand currently being freed.
+static bool hasTiedSubRegDef(const MachineInstr &MI, MCRegister PhysReg,
+                             const TargetRegisterInfo &TRI) {
+  for (const MachineOperand &MO : MI.all_defs()) {
+    if (!MO.isReg() || !MO.getSubReg() || !MO.isTied() ||
+        getTiedOperand(MI, MO).isUndef())
+      continue;
+    Register DefReg = MO.getReg();
+    if (DefReg.isPhysical() && TRI.regsOverlap(DefReg, PhysReg))
+      return true;
+  }
+  return false;
+}
+
 void RegAllocFastImpl::allocateInstruction(MachineInstr &MI) {
   // Backwards, a def frees a register and a use occupies it. The phases:
   // * pre-assigned physreg defs
@@ -1759,6 +1777,15 @@ void RegAllocFastImpl::allocateInstruction(MachineInstr &MI) {
       if (isLiveThroughDef(MI, MO))
         continue;
       if (!Reg)
+        continue;
+      // A read-undef subregister def adds an implicit def of its super-register.
+      // When the same instruction has a tied, not-undef def of a subregister of
+      // that register (as with an MFMA accumulator carrying EARLY_CLOBBER_ALIASES
+      // on a subregister of an inflated tuple), the tied use has not been
+      // processed yet. Freeing the register here via the implicit super-def
+      // would drop that assignment and leave the tied use unallocated. Skip it;
+      // the tied subregister def keeps the register live.
+      if (Reg.isPhysical() && hasTiedSubRegDef(MI, Reg, *TRI))
         continue;
       if (Reg.isVirtual()) {
         assert(!shouldAllocateRegister(Reg));
