@@ -34,8 +34,12 @@ namespace MCOI {
 /// corresponding high-order hex digit specifying the constraint value.
 /// This allows for a maximum of 3 constraints.
 enum OperandConstraint {
-  TIED_TO = 0,  // Must be allocated the same register as specified value.
-  EARLY_CLOBBER // If present, operand is an early clobber register.
+  TIED_TO = 0,   // Must be allocated the same register as specified value.
+  EARLY_CLOBBER, // If present, operand is an early clobber register.
+  EARLY_CLOBBER_ALIASES // Def must be allocated a register that either exactly
+                        // aliases the specified operand's register or is
+                        // completely disjoint from it, never partially
+                        // overlapping. Stores the paired operand index.
 };
 
 // Define a macro to produce each constraint value.
@@ -44,6 +48,12 @@ enum OperandConstraint {
 
 #define MCOI_EARLY_CLOBBER \
   (1 << MCOI::EARLY_CLOBBER)
+
+// The paired operand index must fit in the 4-bit value nibble (<= 15), the same
+// latent limit that applies to MCOI_TIED_TO.
+#define MCOI_EARLY_CLOBBER_ALIASES(op) \
+  ((1 << MCOI::EARLY_CLOBBER_ALIASES) | \
+   ((op) << (4 + MCOI::EARLY_CLOBBER_ALIASES * 4)))
 
 /// These are flags set on operands, but should be considered
 /// private, all access should go through the MCOperandInfo accessors.

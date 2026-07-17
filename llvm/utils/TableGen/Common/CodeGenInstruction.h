@@ -29,7 +29,7 @@ class CodeGenTarget;
 class CGIOperandList {
 public:
   class ConstraintInfo {
-    enum { None, EarlyClobber, Tied } Kind = None;
+    enum { None, EarlyClobber, Tied, EarlyClobberAliases } Kind = None;
     unsigned OtherTiedOperand = 0;
 
   public:
@@ -49,19 +49,30 @@ public:
       return I;
     }
 
+    static ConstraintInfo getEarlyClobberAliases(unsigned Op) {
+      ConstraintInfo I;
+      I.Kind = EarlyClobberAliases;
+      I.OtherTiedOperand = Op;
+      return I;
+    }
+
     bool isNone() const { return Kind == None; }
     bool isEarlyClobber() const { return Kind == EarlyClobber; }
     bool isTied() const { return Kind == Tied; }
+    bool isEarlyClobberAliases() const {
+      return Kind == EarlyClobberAliases;
+    }
 
     unsigned getTiedOperand() const {
-      assert(isTied());
+      assert(isTied() || isEarlyClobberAliases());
       return OtherTiedOperand;
     }
 
     bool operator==(const ConstraintInfo &RHS) const {
       if (Kind != RHS.Kind)
         return false;
-      if (Kind == Tied && OtherTiedOperand != RHS.OtherTiedOperand)
+      if ((Kind == Tied || Kind == EarlyClobberAliases) &&
+          OtherTiedOperand != RHS.OtherTiedOperand)
         return false;
       return true;
     }

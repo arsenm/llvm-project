@@ -220,6 +220,9 @@ InstrInfoEmitter::GetOperandInfo(const CodeGenInstruction &Inst) {
         Res += "0";
       } else if (Constraint.isEarlyClobber()) {
         Res += "MCOI_EARLY_CLOBBER";
+      } else if (Constraint.isEarlyClobberAliases()) {
+        Res += "MCOI_EARLY_CLOBBER_ALIASES(" +
+               utostr(Constraint.getTiedOperand()) + ")";
       } else {
         assert(Constraint.isTied());
         Res += "MCOI_TIED_TO(" + utostr(Constraint.getTiedOperand()) + ")";

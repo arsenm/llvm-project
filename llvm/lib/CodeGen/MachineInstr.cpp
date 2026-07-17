@@ -276,6 +276,15 @@ void MachineInstr::addOperand(MachineFunction &MF, const MachineOperand &Op) {
       // Tie uses to defs as indicated in MCInstrDesc.
       if (NewMO->isUse()) {
         int DefIdx = MCID->getOperandConstraint(OpNo, MCOI::TIED_TO);
+        if (DefIdx == -1) {
+          // An EARLY_CLOBBER_ALIASES constraint is materialized as an
+          // ordinary tie: the def and this use share a single coalesced live
+          // range by default. The relaxation (that the allocator may instead
+          // give them fully disjoint registers) stays in the MCInstrDesc and is
+          // queried on demand; the def is deliberately NOT marked early-clobber.
+          DefIdx =
+              MCID->getOperandConstraint(OpNo, MCOI::EARLY_CLOBBER_ALIASES);
+        }
         if (DefIdx != -1)
           tieOperands(DefIdx, OpNo);
       }

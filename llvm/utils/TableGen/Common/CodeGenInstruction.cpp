@@ -377,7 +377,15 @@ static void ParseConstraint(StringRef CStr, CGIOperandList &Ops,
                                        "' cannot have multiple constraints!");
 
   unsigned DestFlatOpNo = Ops.getFlattenedOperandNumber(DestOp);
-  auto NewConstraint = CGIOperandList::ConstraintInfo::getTied(DestFlatOpNo);
+  // A tied constraint on an instruction marked MayAliasEarlyClobber becomes an
+  // "early clobber aliases" constraint: the def may share the source's register
+  // (alias it exactly) or be fully disjoint from it, but never partially
+  // overlap.
+  auto NewConstraint =
+      Rec->getValueAsBit("MayAliasEarlyClobber")
+          ? CGIOperandList::ConstraintInfo::getEarlyClobberAliases(
+                DestFlatOpNo)
+          : CGIOperandList::ConstraintInfo::getTied(DestFlatOpNo);
 
   // Check that the earlier operand is not the target of another tie
   // before making it the target of this one.

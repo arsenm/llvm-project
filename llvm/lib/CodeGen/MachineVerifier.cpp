@@ -2668,7 +2668,59 @@ MachineVerifier::visitMachineOperand(const MachineOperand *MO, unsigned MONum) {
     }
 
     int TiedTo = MCID.getOperandConstraint(MONum, MCOI::TIED_TO);
-    if (TiedTo != -1) {
+    int ECAliasesDef =
+        MCID.getOperandConstraint(MONum, MCOI::EARLY_CLOBBER_ALIASES);
+    if (ECAliasesDef != -1) {
+      // An EARLY_CLOBBER_ALIASES use (this operand) names the paired def, which
+      // must be allocated a register either exactly equal to this use's
+      // register or completely disjoint from it, never partially overlapping.
+      // The equal endpoint is materialized as a tie; the allocator may break
+      // the tie into a disjoint (untied) pair. Both are legal; only a partial
+      // overlap is not.
+      if (MO->isReg() && MO->getReg()) {
+        const MachineOperand &MODef = MI->getOperand(ECAliasesDef);
+        if (!MODef.isReg())
+          report("EARLY_CLOBBER_ALIASES def must be a register", &MODef,
+                 ECAliasesDef);
+        else if (MO->isTied()) {
+          // Tied (equal) endpoint: def and use must occupy exactly the same
+          // registers. Reuse the standard tied-operand consistency checks below
+          // by falling through is not possible here, so verify directly.
+          if (unsigned(ECAliasesDef) != MI->findTiedOperandIdx(MONum))
+            report("Tied def doesn't match MCInstrDesc", MO, MONum);
+          else if (MO->getReg().isPhysical()) {
+            if (MODef.getReg().isPhysical() && MODef.getReg() != MO->getReg())
+              report("Tied physical registers must match.", &MODef,
+                     ECAliasesDef);
+          } else if (MODef.getReg().isVirtual() &&
+                     MO->getReg() == MODef.getReg() &&
+                     MO->getSubReg() != MODef.getSubReg()) {
+            report("Tied virtual registers must not have mismatched "
+                   "subregisters.",
+                   &MODef, ECAliasesDef);
+          }
+        } else if (MODef.getReg()) {
+          // Broken-tie (disjoint) endpoint: resolve each operand to its
+          // physical register (applying any subregister index) and require
+          // equal-or-disjoint at reg-unit granularity, catching partial
+          // overlaps including same-vreg mismatched-subregister aliasing.
+          auto ResolveReg = [&](const MachineOperand &O) -> MCRegister {
+            Register R = O.getReg();
+            if (R.isVirtual())
+              return MCRegister();
+            return O.getSubReg() ? TRI->getSubReg(R.asMCReg(), O.getSubReg())
+                                 : R.asMCReg();
+          };
+          MCRegister DefReg = ResolveReg(MODef);
+          MCRegister UseReg = ResolveReg(*MO);
+          if (DefReg && UseReg && DefReg != UseReg &&
+              TRI->regsOverlap(DefReg, UseReg))
+            report("EARLY_CLOBBER_ALIASES operands must be equal or "
+                   "disjoint, never partially overlapping.",
+                   MO, MONum);
+        }
+      }
+    } else if (TiedTo != -1) {
       if (!MO->isReg())
         report("Tied use must be a register", MO, MONum);
       else if (!MO->isTied())
@@ -2743,7 +2795,11 @@ MachineVerifier::visitMachineOperand(const MachineOperand *MO, unsigned MONum) {
 
       if (MONum < MCID.getNumDefs()) {
         if (OtherIdx < MCID.getNumOperands()) {
-          if (-1 == MCID.getOperandConstraint(OtherIdx, MCOI::TIED_TO))
+          // An EARLY_CLOBBER_ALIASES constraint materializes its equal endpoint
+          // as a tie, so it also legitimizes a tied def/use pair here.
+          if (-1 == MCID.getOperandConstraint(OtherIdx, MCOI::TIED_TO) &&
+              -1 == MCID.getOperandConstraint(OtherIdx,
+                                              MCOI::EARLY_CLOBBER_ALIASES))
             report("Explicit def tied to explicit use without tie constraint",
                    MO, MONum);
         } else {

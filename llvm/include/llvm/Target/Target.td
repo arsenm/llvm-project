@@ -743,6 +743,14 @@ class Instruction : InstructionEncoding {
   ///   discussion of inline assembly constraint strings.
   string Constraints = "";
 
+  /// When set, a "$src = $dst" tied constraint on this instruction is
+  /// interpreted as EARLY_CLOBBER_ALIASES instead of TIED_TO: the tied def
+  /// must be allocated a register that is either identical to the source
+  /// operand's register or completely disjoint from it, never partially
+  /// overlapping. This models hardware (e.g. AMDGPU MFMA accumulators) where
+  /// src and dst may alias exactly or not at all, but must never partly overlap.
+  bit MayAliasEarlyClobber = false;
+
   /// This is used by `getBinaryCodeForInstr` to fixup the instruction encoding
   /// for the instruction.
   /// It is called with the following signature, expecting to return the new
