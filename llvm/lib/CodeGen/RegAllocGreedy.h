@@ -438,6 +438,12 @@ private:
     void report(MachineOptimizationRemarkMissed &R);
   };
 
+  /// After allocation, rewrite EARLY_CLOBBER_ALIASES ties whose def and paired
+  /// use were assigned disjoint registers into their untied (early-clobber)
+  /// endpoint, deleting the now-redundant accumulator copy. Safety is proven
+  /// before any IR is edited, so there is never a partial/rolled-back state.
+  void breakEarlyClobberAliasTies();
+
   /// Compute statistic for a basic block.
   RAGreedyStats computeStats(MachineBasicBlock &MBB);
 

@@ -2895,6 +2895,162 @@ void RAGreedy::RAGreedyStats::report(MachineOptimizationRemarkMissed &R) {
   }
 }
 
+void RAGreedy::breakEarlyClobberAliasTies() {
+  // The equal endpoint of an EARLY_CLOBBER_ALIASES operand is materialized as a
+  // tie (dst == src2), satisfied by a copy of the accumulator into the tied
+  // register:
+  //     %tied = COPY %src
+  //     %tied = MFMA ..., %tied(tied-def 0)
+  // When the allocator placed %tied and %src in disjoint registers anyway, the
+  // copy is pure waste. Rewrite the instruction into its untied (early-clobber,
+  // disjoint) endpoint that reads %src directly, and delete the copy.
+  //
+  // Breaking the tie shrinks %tied's live range (it loses its copy def) and
+  // extends %src's (it gains the MFMA use). The shrink can never create new
+  // interference; the extension over [Copy, MFMA) is the only thing that can.
+  // We therefore prove safety BEFORE mutating any IR: unassign the two vregs,
+  // probe the extension segment against %src's physreg, and only commit when it
+  // is free. If not, we simply re-assign the untouched intervals (no IR was
+  // edited, so this is always clean).
+  SmallVector<MachineInstr *, 8> Candidates;
+  for (MachineBasicBlock &MBB : *MF)
+    for (MachineInstr &MI : MBB) {
+      const MCInstrDesc &MCID = MI.getDesc();
+      for (unsigned OpNo = 0, E = MCID.getNumOperands(); OpNo != E; ++OpNo)
+        if (MCID.getOperandConstraint(OpNo, MCOI::EARLY_CLOBBER_ALIASES) != -1) {
+          Candidates.push_back(&MI);
+          break;
+        }
+    }
+
+  for (MachineInstr *MI : Candidates) {
+    const MCInstrDesc &MCID = MI->getDesc();
+    int UseIdx = -1, DefIdx = -1;
+    for (unsigned OpNo = 0, E = MCID.getNumOperands(); OpNo != E; ++OpNo) {
+      int Paired = MCID.getOperandConstraint(OpNo, MCOI::EARLY_CLOBBER_ALIASES);
+      if (Paired != -1) {
+        UseIdx = OpNo;
+        DefIdx = Paired;
+        break;
+      }
+    }
+    if (UseIdx < 0 || DefIdx < 0)
+      continue;
+
+    MachineOperand &UseMO = MI->getOperand(UseIdx);
+    MachineOperand &DefMO = MI->getOperand(DefIdx);
+    if (!UseMO.isReg() || !DefMO.isReg() || !UseMO.isTied())
+      continue;
+
+    Register TiedReg = UseMO.getReg();
+    if (!TiedReg.isVirtual() || DefMO.getReg() != TiedReg)
+      continue;
+    if (UseMO.getSubReg() || DefMO.getSubReg())
+      continue;
+
+    // Locate the tie-satisfying copy: the other full-register def of %tied.
+    MachineInstr *Copy = nullptr;
+    for (MachineInstr &DI : MRI->def_instructions(TiedReg)) {
+      if (&DI == MI)
+        continue;
+      if (!DI.isFullCopy() || DI.getOperand(0).getReg() != TiedReg ||
+          DI.getOperand(0).getSubReg()) {
+        Copy = nullptr;
+        break;
+      }
+      Copy = &DI;
+    }
+    if (!Copy)
+      continue;
+
+    Register SrcReg = Copy->getOperand(1).getReg();
+    if (!SrcReg.isVirtual() || Copy->getOperand(1).getSubReg() ||
+        SrcReg == TiedReg)
+      continue;
+
+    // The src2 operand slot requires a specific register class. The tie forced
+    // %tied's class there; %src may be a different (e.g. AV vs VGPR) class that
+    // is not legal for the slot. Only untie when %src is legal for the operand,
+    // otherwise reading it directly would be an illegal register.
+    const TargetRegisterClass *OpRC =
+        MI->getRegClassConstraint(UseIdx, TII, TRI);
+    if (OpRC && !OpRC->hasSubClassEq(MRI->getRegClass(SrcReg)))
+      continue;
+
+    MCRegister TiedPhys = VRM->getPhys(TiedReg);
+    MCRegister SrcPhys = VRM->getPhys(SrcReg);
+    if (!TiedPhys || !SrcPhys || TRI->regsOverlap(TiedPhys, SrcPhys))
+      continue;
+
+    // Slots involved: the copy's def slot (start of the segment untying makes
+    // dead), the MFMA's early-clobber def slot (where %tied is now defined), and
+    // the MFMA's regular use slot (where %src is now read directly).
+    SlotIndex CopyIdx = LIS->getInstructionIndex(*Copy).getRegSlot();
+    SlotIndex MFMAEarlyIdx = LIS->getInstructionIndex(*MI).getRegSlot(true);
+    SlotIndex MFMAUseIdx = LIS->getInstructionIndex(*MI).getRegSlot(false);
+    if (!CopyIdx.isValid() || !MFMAEarlyIdx.isValid() ||
+        MFMAEarlyIdx <= CopyIdx)
+      continue;
+
+    // Prove the extension is free at SrcPhys before touching any IR. Detach the
+    // two vregs from the matrix so the probe ignores their own (soon-to-change)
+    // ranges; nothing else about them is modified on the reject path.
+    LiveInterval &TiedLI = LIS->getInterval(TiedReg);
+    LiveInterval &SrcLI = LIS->getInterval(SrcReg);
+    Matrix->unassign(TiedLI);
+    Matrix->unassign(SrcLI);
+    if (Matrix->checkInterference(CopyIdx, MFMAUseIdx, SrcPhys)) {
+      // Not safe: no IR or interval was edited, just restore the assignments.
+      Matrix->assign(SrcLI, SrcPhys);
+      Matrix->assign(TiedLI, TiedPhys);
+      continue;
+    }
+
+    LLVM_DEBUG(dbgs() << "Breaking EARLY_CLOBBER_ALIASES tie on " << *MI
+                      << "  src2 <- " << printReg(SrcReg, TRI) << " ("
+                      << printReg(SrcPhys, TRI) << "), dropping copy " << *Copy);
+
+    // Rewrite to the disjoint endpoint: read %src directly, early-clobber the
+    // def, and drop the now-dead copy.
+    MI->untieRegOperand(UseIdx);
+    UseMO.setReg(SrcReg);
+    DefMO.setIsEarlyClobber(true);
+    LIS->RemoveMachineInstrFromMaps(*Copy);
+    Copy->eraseFromParent();
+
+    if (TiedLI.hasSubRanges() || SrcLI.hasSubRanges()) {
+      // Subrange maintenance across the untie is intricate (per-lane shrink of
+      // %tied and extend of %src). These cases are rare, so recompute the two
+      // intervals from scratch rather than risk an inconsistent incremental
+      // edit. Physregs are unchanged.
+      LIS->removeInterval(TiedReg);
+      LIS->removeInterval(SrcReg);
+      Matrix->assign(LIS->createAndComputeVirtRegInterval(SrcReg), SrcPhys);
+      Matrix->assign(LIS->createAndComputeVirtRegInterval(TiedReg), TiedPhys);
+    } else {
+      // Common case: update both ranges incrementally.
+      //  - %tied was defined by the copy (value live over [Copy, MFMA)) and
+      //    redefined at the MFMA. Removing the copy deletes exactly that value.
+      //  - %src now has a use at the MFMA; extend its range to that read.
+      LIS->removeVRegDefAt(TiedLI, CopyIdx);
+      LIS->extendToIndices(SrcLI, MFMAUseIdx);
+
+      // Marking the def early-clobber moved it from the register slot to the
+      // (earlier) early-clobber slot; update %tied's remaining (MFMA) def valno.
+      if (LiveRange::Segment *S = TiedLI.find(MFMAUseIdx);
+          S != TiedLI.end() && S->start == MFMAUseIdx) {
+        assert(S->valno && S->valno->def == MFMAUseIdx);
+        S->start = MFMAEarlyIdx;
+        S->valno->def = MFMAEarlyIdx;
+      }
+
+      // Physregs are unchanged; reattach the updated ranges to the matrix.
+      Matrix->assign(SrcLI, SrcPhys);
+      Matrix->assign(TiedLI, TiedPhys);
+    }
+  }
+}
+
 RAGreedy::RAGreedyStats RAGreedy::computeStats(MachineBasicBlock &MBB) {
   RAGreedyStats Stats;
   const MachineFrameInfo &MFI = MF->getFrameInfo();
@@ -3113,6 +3269,10 @@ bool RAGreedy::run(MachineFunction &mf) {
 
   allocatePhysRegs();
   tryHintsRecoloring();
+
+  // Relax EARLY_CLOBBER_ALIASES ties into their disjoint endpoint where the
+  // allocator already produced disjoint registers, eliminating the tie-copy.
+  breakEarlyClobberAliasTies();
 
   if (VerifyEnabled)
     MF->verify(LIS, Indexes, "Before post optimization", &errs());
