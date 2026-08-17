@@ -633,15 +633,25 @@ public:
   /// register.
   LLVM_ABI void replaceRegWith(Register FromReg, Register ToReg);
 
-  /// getVRegDef - Return the machine instr that defines the specified virtual
-  /// register or null if none is found.  This assumes that the code is in SSA
-  /// form, so there should only be one definition.
-  LLVM_ABI LLVM_READONLY MachineInstr *getVRegDef(Register Reg) const;
+  /// Return the machine instr that defines the specified virtual register or
+  /// null if none is found.  This assumes that the code is in SSA form, so
+  /// there should only be one definition.
+  LLVM_READONLY MachineInstr *getVRegDef(Register Reg) const {
+    def_instr_iterator I = def_instr_begin(Reg);
+    return I == def_instr_end() ? nullptr : &*I;
+  }
 
-  /// getUniqueVRegDef - Return the unique machine instr that defines the
-  /// specified virtual register or null if none is found.  If there are
-  /// multiple definitions or no definition, return null.
-  LLVM_ABI LLVM_READONLY MachineInstr *getUniqueVRegDef(Register Reg) const;
+  /// Return the unique machine instr that defines the specified virtual
+  /// register or null if none is found.  If there are multiple definitions or
+  /// no definition, return null.
+  LLVM_READONLY MachineInstr *getUniqueVRegDef(Register Reg) const {
+    if (def_empty(Reg))
+      return nullptr;
+    def_instr_iterator I = def_instr_begin(Reg);
+    if (std::next(I) != def_instr_end())
+      return nullptr;
+    return &*I;
+  }
 
   /// Return the machine basic block in which the specified virtual register is
   /// defined, or null if it has no definition. This assumes SSA form.

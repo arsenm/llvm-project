@@ -398,30 +398,6 @@ void MachineRegisterInfo::replaceRegWith(Register FromReg, Register ToReg) {
   }
 }
 
-/// getVRegDef - Return the machine instr that defines the specified virtual
-/// register or null if none is found.  This assumes that the code is in SSA
-/// form, so there should only be one definition.
-MachineInstr *MachineRegisterInfo::getVRegDef(Register Reg) const {
-  // Since we are in SSA form, we can use the first definition.
-  def_instr_iterator I = def_instr_begin(Reg);
-  if (I == def_instr_end())
-    return nullptr;
-  assert(std::next(I) == def_instr_end() &&
-         "getVRegDef assumes at most one definition");
-  return &*I;
-}
-
-/// getUniqueVRegDef - Return the unique machine instr that defines the
-/// specified virtual register or null if none is found.  If there are
-/// multiple definitions or no definition, return null.
-MachineInstr *MachineRegisterInfo::getUniqueVRegDef(Register Reg) const {
-  if (def_empty(Reg)) return nullptr;
-  def_instr_iterator I = def_instr_begin(Reg);
-  if (std::next(I) != def_instr_end())
-    return nullptr;
-  return &*I;
-}
-
 bool MachineRegisterInfo::hasOneNonDBGUse(Register RegNo) const {
   return hasSingleElement(use_nodbg_operands(RegNo));
 }
