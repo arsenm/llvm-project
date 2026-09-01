@@ -1081,9 +1081,27 @@ public:
     using reference = value_type &;
 
   private:
+    // Current node. Op is the authoritative pointer used on the hot paths;
+    // (OpUser, OpUserIdx) mirror it as (user instruction, operand index) and
+    // are kept in sync so the iterator does not depend on
+    // MachineOperand::ParentMI for its identity/comparison.
     MachineOperand *Op = nullptr;
+    MachineInstr *OpUser = nullptr;
+    unsigned OpUserIdx = 0;
 
-    explicit defusechain_iterator(MachineOperand *op) : Op(op) {
+    void setOp(MachineOperand *NewOp) {
+      Op = NewOp;
+      if (NewOp) {
+        OpUser = NewOp->getParent();
+        OpUserIdx = NewOp->getOperandNo();
+      } else {
+        OpUser = nullptr;
+        OpUserIdx = 0;
+      }
+    }
+
+    explicit defusechain_iterator(MachineOperand *op) {
+      setOp(op);
       // If the first node isn't one we're interested in, advance to one that
       // we are interested in.
       if (op) {
@@ -1096,29 +1114,30 @@ public:
 
     void advance() {
       assert(Op && "Cannot increment end iterator!");
-      Op = getNextOperandForReg(Op);
+      MachineOperand *NextOp = getNextOperandForReg(Op);
 
       // All defs come before the uses, so stop def_iterator early.
       if (!ReturnUses) {
-        if (Op) {
-          if (Op->isUse())
-            Op = nullptr;
+        if (NextOp) {
+          if (NextOp->isUse())
+            NextOp = nullptr;
           else
-            assert(!Op->isDebug() && "Can't have debug defs");
+            assert(!NextOp->isDebug() && "Can't have debug defs");
         }
       } else {
         // If this is an operand we don't care about, skip it.
-        while (Op && ((!ReturnDefs && Op->isDef()) ||
-                      (SkipDebug && Op->isDebug())))
-          Op = getNextOperandForReg(Op);
+        while (NextOp && ((!ReturnDefs && NextOp->isDef()) ||
+                          (SkipDebug && NextOp->isDebug())))
+          NextOp = getNextOperandForReg(NextOp);
       }
+      setOp(NextOp);
     }
 
   public:
     defusechain_iterator() = default;
 
     bool operator==(const defusechain_iterator &x) const {
-      return Op == x.Op;
+      return OpUser == x.OpUser && OpUserIdx == x.OpUserIdx;
     }
     bool operator!=(const defusechain_iterator &x) const {
       return !operator==(x);
@@ -1130,16 +1149,16 @@ public:
       if (ByOperand)
         advance();
       else if (ByInstr) {
-        MachineInstr *P = Op->getParent();
+        MachineInstr *P = OpUser;
         do {
           advance();
-        } while (Op && Op->getParent() == P);
+        } while (Op && OpUser == P);
       } else {
         MachineBasicBlock::instr_iterator P =
-            getBundleStart(Op->getParent()->getIterator());
+            getBundleStart(OpUser->getIterator());
         do {
           advance();
-        } while (Op && getBundleStart(Op->getParent()->getIterator()) == P);
+        } while (Op && getBundleStart(OpUser->getIterator()) == P);
       }
 
       return *this;
@@ -1152,7 +1171,7 @@ public:
     /// MachineInstr.
     unsigned getOperandNo() const {
       assert(Op && "Cannot dereference end iterator!");
-      return Op - &Op->getParent()->getOperand(0);
+      return OpUserIdx;
     }
 
     // Retrieve a reference to the current operand.
@@ -1185,9 +1204,26 @@ public:
     using reference = value_type &;
 
   private:
+    // Current node. Op is the authoritative pointer used on the hot paths;
+    // (OpUser, OpUserIdx) mirror it so the iterator does not depend on
+    // MachineOperand::ParentMI for its identity/comparison.
     MachineOperand *Op = nullptr;
+    MachineInstr *OpUser = nullptr;
+    unsigned OpUserIdx = 0;
 
-    explicit defusechain_instr_iterator(MachineOperand *op) : Op(op) {
+    void setOp(MachineOperand *NewOp) {
+      Op = NewOp;
+      if (NewOp) {
+        OpUser = NewOp->getParent();
+        OpUserIdx = NewOp->getOperandNo();
+      } else {
+        OpUser = nullptr;
+        OpUserIdx = 0;
+      }
+    }
+
+    explicit defusechain_instr_iterator(MachineOperand *op) {
+      setOp(op);
       // If the first node isn't one we're interested in, advance to one that
       // we are interested in.
       if (op) {
@@ -1200,29 +1236,30 @@ public:
 
     void advance() {
       assert(Op && "Cannot increment end iterator!");
-      Op = getNextOperandForReg(Op);
+      MachineOperand *NextOp = getNextOperandForReg(Op);
 
       // All defs come before the uses, so stop def_iterator early.
       if (!ReturnUses) {
-        if (Op) {
-          if (Op->isUse())
-            Op = nullptr;
+        if (NextOp) {
+          if (NextOp->isUse())
+            NextOp = nullptr;
           else
-            assert(!Op->isDebug() && "Can't have debug defs");
+            assert(!NextOp->isDebug() && "Can't have debug defs");
         }
       } else {
         // If this is an operand we don't care about, skip it.
-        while (Op && ((!ReturnDefs && Op->isDef()) ||
-                      (SkipDebug && Op->isDebug())))
-          Op = getNextOperandForReg(Op);
+        while (NextOp && ((!ReturnDefs && NextOp->isDef()) ||
+                          (SkipDebug && NextOp->isDebug())))
+          NextOp = getNextOperandForReg(NextOp);
       }
+      setOp(NextOp);
     }
 
   public:
     defusechain_instr_iterator() = default;
 
     bool operator==(const defusechain_instr_iterator &x) const {
-      return Op == x.Op;
+      return OpUser == x.OpUser && OpUserIdx == x.OpUserIdx;
     }
     bool operator!=(const defusechain_instr_iterator &x) const {
       return !operator==(x);
@@ -1232,16 +1269,16 @@ public:
     defusechain_instr_iterator &operator++() {          // Preincrement
       assert(Op && "Cannot increment end iterator!");
       if (ByInstr) {
-        MachineInstr *P = Op->getParent();
+        MachineInstr *P = OpUser;
         do {
           advance();
-        } while (Op && Op->getParent() == P);
+        } while (Op && OpUser == P);
       } else {
         MachineBasicBlock::instr_iterator P =
-            getBundleStart(Op->getParent()->getIterator());
+            getBundleStart(OpUser->getIterator());
         do {
           advance();
-        } while (Op && getBundleStart(Op->getParent()->getIterator()) == P);
+        } while (Op && getBundleStart(OpUser->getIterator()) == P);
       }
 
       return *this;
@@ -1254,8 +1291,8 @@ public:
     MachineInstr &operator*() const {
       assert(Op && "Cannot dereference end iterator!");
       if (!ByInstr)
-        return *getBundleStart(Op->getParent()->getIterator());
-      return *Op->getParent();
+        return *getBundleStart(OpUser->getIterator());
+      return *OpUser;
     }
 
     MachineInstr *operator->() const { return &operator*(); }
