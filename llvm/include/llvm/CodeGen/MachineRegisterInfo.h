@@ -1081,9 +1081,26 @@ public:
     using reference = value_type &;
 
   private:
-    MachineOperand *Op = nullptr;
+    // Current node, tracked as (user instruction, operand index).
+    MachineInstr *OpUser = nullptr;
+    unsigned OpUserIdx = 0;
 
-    explicit defusechain_iterator(MachineOperand *op) : Op(op) {
+    MachineOperand *getOp() const {
+      return OpUser ? &OpUser->getOperand(OpUserIdx) : nullptr;
+    }
+
+    void setOp(MachineOperand *Op) {
+      if (Op) {
+        OpUser = Op->getParent();
+        OpUserIdx = Op->getOperandNo();
+      } else {
+        OpUser = nullptr;
+        OpUserIdx = 0;
+      }
+    }
+
+    explicit defusechain_iterator(MachineOperand *op) {
+      setOp(op);
       // If the first node isn't one we're interested in, advance to one that
       // we are interested in.
       if (op) {
@@ -1095,6 +1112,7 @@ public:
     }
 
     void advance() {
+      MachineOperand *Op = getOp();
       assert(Op && "Cannot increment end iterator!");
       Op = getNextOperandForReg(Op);
 
@@ -1112,13 +1130,14 @@ public:
                       (SkipDebug && Op->isDebug())))
           Op = getNextOperandForReg(Op);
       }
+      setOp(Op);
     }
 
   public:
     defusechain_iterator() = default;
 
     bool operator==(const defusechain_iterator &x) const {
-      return Op == x.Op;
+      return OpUser == x.OpUser && OpUserIdx == x.OpUserIdx;
     }
     bool operator!=(const defusechain_iterator &x) const {
       return !operator==(x);
@@ -1126,20 +1145,20 @@ public:
 
     // Iterator traversal: forward iteration only
     defusechain_iterator &operator++() {          // Preincrement
-      assert(Op && "Cannot increment end iterator!");
+      assert(OpUser && "Cannot increment end iterator!");
       if (ByOperand)
         advance();
       else if (ByInstr) {
-        MachineInstr *P = Op->getParent();
+        MachineInstr *P = OpUser;
         do {
           advance();
-        } while (Op && Op->getParent() == P);
+        } while (OpUser && OpUser == P);
       } else {
         MachineBasicBlock::instr_iterator P =
-            getBundleStart(Op->getParent()->getIterator());
+            getBundleStart(OpUser->getIterator());
         do {
           advance();
-        } while (Op && getBundleStart(Op->getParent()->getIterator()) == P);
+        } while (OpUser && getBundleStart(OpUser->getIterator()) == P);
       }
 
       return *this;
@@ -1151,19 +1170,19 @@ public:
     /// getOperandNo - Return the operand # of this MachineOperand in its
     /// MachineInstr.
     unsigned getOperandNo() const {
-      assert(Op && "Cannot dereference end iterator!");
-      return Op - &Op->getParent()->getOperand(0);
+      assert(OpUser && "Cannot dereference end iterator!");
+      return OpUserIdx;
     }
 
     // Retrieve a reference to the current operand.
     MachineOperand &operator*() const {
-      assert(Op && "Cannot dereference end iterator!");
-      return *Op;
+      assert(OpUser && "Cannot dereference end iterator!");
+      return OpUser->getOperand(OpUserIdx);
     }
 
     MachineOperand *operator->() const {
-      assert(Op && "Cannot dereference end iterator!");
-      return Op;
+      assert(OpUser && "Cannot dereference end iterator!");
+      return &OpUser->getOperand(OpUserIdx);
     }
   };
 
@@ -1185,9 +1204,26 @@ public:
     using reference = value_type &;
 
   private:
-    MachineOperand *Op = nullptr;
+    // Current node, tracked as (user instruction, operand index).
+    MachineInstr *OpUser = nullptr;
+    unsigned OpUserIdx = 0;
 
-    explicit defusechain_instr_iterator(MachineOperand *op) : Op(op) {
+    MachineOperand *getOp() const {
+      return OpUser ? &OpUser->getOperand(OpUserIdx) : nullptr;
+    }
+
+    void setOp(MachineOperand *Op) {
+      if (Op) {
+        OpUser = Op->getParent();
+        OpUserIdx = Op->getOperandNo();
+      } else {
+        OpUser = nullptr;
+        OpUserIdx = 0;
+      }
+    }
+
+    explicit defusechain_instr_iterator(MachineOperand *op) {
+      setOp(op);
       // If the first node isn't one we're interested in, advance to one that
       // we are interested in.
       if (op) {
@@ -1199,6 +1235,7 @@ public:
     }
 
     void advance() {
+      MachineOperand *Op = getOp();
       assert(Op && "Cannot increment end iterator!");
       Op = getNextOperandForReg(Op);
 
@@ -1216,13 +1253,14 @@ public:
                       (SkipDebug && Op->isDebug())))
           Op = getNextOperandForReg(Op);
       }
+      setOp(Op);
     }
 
   public:
     defusechain_instr_iterator() = default;
 
     bool operator==(const defusechain_instr_iterator &x) const {
-      return Op == x.Op;
+      return OpUser == x.OpUser && OpUserIdx == x.OpUserIdx;
     }
     bool operator!=(const defusechain_instr_iterator &x) const {
       return !operator==(x);
@@ -1230,18 +1268,18 @@ public:
 
     // Iterator traversal: forward iteration only
     defusechain_instr_iterator &operator++() {          // Preincrement
-      assert(Op && "Cannot increment end iterator!");
+      assert(OpUser && "Cannot increment end iterator!");
       if (ByInstr) {
-        MachineInstr *P = Op->getParent();
+        MachineInstr *P = OpUser;
         do {
           advance();
-        } while (Op && Op->getParent() == P);
+        } while (OpUser && OpUser == P);
       } else {
         MachineBasicBlock::instr_iterator P =
-            getBundleStart(Op->getParent()->getIterator());
+            getBundleStart(OpUser->getIterator());
         do {
           advance();
-        } while (Op && getBundleStart(Op->getParent()->getIterator()) == P);
+        } while (OpUser && getBundleStart(OpUser->getIterator()) == P);
       }
 
       return *this;
@@ -1252,10 +1290,10 @@ public:
 
     // Retrieve a reference to the current operand.
     MachineInstr &operator*() const {
-      assert(Op && "Cannot dereference end iterator!");
+      assert(OpUser && "Cannot dereference end iterator!");
       if (!ByInstr)
-        return *getBundleStart(Op->getParent()->getIterator());
-      return *Op->getParent();
+        return *getBundleStart(OpUser->getIterator());
+      return *OpUser;
     }
 
     MachineInstr *operator->() const { return &operator*(); }
