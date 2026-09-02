@@ -321,8 +321,8 @@ R600TargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
 
   case R600::BRANCH_COND_f32: {
     MachineInstr *NewMI =
-        BuildMI(*BB, I, BB->findDebugLoc(I), TII->get(R600::PRED_X),
-                R600::PREDICATE_BIT)
+        BuildMI(*BB, BB->getBlockEndInsertPt(), BB->findDebugLoc(I),
+                TII->get(R600::PRED_X), R600::PREDICATE_BIT)
             .add(MI.getOperand(1))
             .addImm(R600::PRED_SETNE)
             .addImm(0); // Flags
@@ -335,8 +335,8 @@ R600TargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
 
   case R600::BRANCH_COND_i32: {
     MachineInstr *NewMI =
-        BuildMI(*BB, I, BB->findDebugLoc(I), TII->get(R600::PRED_X),
-                R600::PREDICATE_BIT)
+        BuildMI(*BB, BB->getBlockEndInsertPt(), BB->findDebugLoc(I),
+                TII->get(R600::PRED_X), R600::PREDICATE_BIT)
             .add(MI.getOperand(1))
             .addImm(R600::PRED_SETNE_INT)
             .addImm(0); // Flags

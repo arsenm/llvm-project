@@ -160,6 +160,34 @@ public:
                               MachineBasicBlock *BlockToInsertTo,
                               MachineBasicBlock::iterator PointToInsertTo,
                               const DebugLoc &DL);
+  // As above, but creates the destination SGPR register on demand.
+  bool tryMoveVGPRConstToSGPR(MachineOperand &MO,
+                              MachineBasicBlock *BlockToInsertTo,
+                              MachineBasicBlock::iterator PointToInsertTo,
+                              const DebugLoc &DL) {
+    return tryMoveVGPRConstToSGPR(MO, Register(), BlockToInsertTo,
+                                  PointToInsertTo, DL);
+  }
+
+  // Replace a VGPR operand \p MO feeding an SGPR result (a PHI, REG_SEQUENCE,
+  // or SUCC_ARGS operand) with an analyzed VGPR-to-SGPR copy inserted at
+  // \p PointToInsertTo in \p BlockToInsertTo, so the V2S scorer can decide
+  // between a readfirstlane and moving the chain to VALU.
+  void convertVGPROperandToSGPR(MachineOperand &MO,
+                                MachineBasicBlock *BlockToInsertTo,
+                                MachineBasicBlock::iterator PointToInsertTo,
+                                const DebugLoc &DL);
+
+  // Whether \p ArgReg has a use that would become illegal if the register's
+  // class were changed to the equivalent VGPR class (an SGPR-defining COPY or a
+  // non-VALU SGPR use), which cannot be lowered across the block-argument edge.
+
+  // Invoke \p Fn(MO, ArgReg) for each SUCC_ARGS operand \p MO of \p MI that
+  // forwards a VGPR-capable value to the successor's SGPR block argument
+  // \p ArgReg.
+  void
+  forEachSuccArgToSGPR(MachineInstr &MI,
+                       function_ref<void(MachineOperand &, Register)> Fn) const;
 };
 
 class SIFixSGPRCopiesLegacy : public MachineFunctionPass {
@@ -675,6 +703,17 @@ bool SIFixSGPRCopies::run(MachineFunction &MF) {
 
         break;
       }
+      case AMDGPU::SUCC_ARGS: {
+        // SUCC_ARGS forwards values to a successor's block arguments. For a
+        // VGPR value forwarded to an SGPR block argument, insert an analyzed
+        // VGPR-to-SGPR copy on the operand, as the PHI case does for a VGPR PHI
+        // operand. If the copy is later moved to VALU, moveToVALU propagates
+        // the VGPR class across the edge to the block argument.
+        forEachSuccArgToSGPR(MI, [&](MachineOperand &MO, Register ArgReg) {
+          convertVGPROperandToSGPR(MO, &MBB, I, MI.getDebugLoc());
+        });
+        break;
+      }
       case AMDGPU::WQM:
       case AMDGPU::STRICT_WQM:
       case AMDGPU::SOFT_WQM:
@@ -691,26 +730,13 @@ bool SIFixSGPRCopies::run(MachineFunction &MF) {
               continue;
 
             if (TRI->hasVectorRegisters(SrcRC)) {
-              const TargetRegisterClass *DestRC =
-                  TRI->getEquivalentSGPRClass(SrcRC);
-              Register NewDst = MRI->createVirtualRegister(DestRC);
               MachineBasicBlock *BlockToInsertCopy =
                   MI.isPHI() ? MI.getOperand(MO.getOperandNo() + 1).getMBB()
                              : &MBB;
               MachineBasicBlock::iterator PointToInsertCopy =
                   MI.isPHI() ? BlockToInsertCopy->getFirstInstrTerminator() : I;
-
-              const DebugLoc &DL = MI.getDebugLoc();
-              if (!tryMoveVGPRConstToSGPR(MO, NewDst, BlockToInsertCopy,
-                                          PointToInsertCopy, DL)) {
-                MachineInstr *NewCopy =
-                    BuildMI(*BlockToInsertCopy, PointToInsertCopy, DL,
-                            TII->get(AMDGPU::COPY), NewDst)
-                        .addReg(MO.getReg());
-                MO.setReg(NewDst);
-                analyzeVGPRToSGPRCopy(NewCopy);
-                PHISources.insert(NewCopy);
-              }
+              convertVGPROperandToSGPR(MO, BlockToInsertCopy, PointToInsertCopy,
+                                       MI.getDebugLoc());
             }
           }
         }
@@ -807,6 +833,7 @@ bool SIFixSGPRCopies::run(MachineFunction &MF) {
   for (auto *MI : PHINodes) {
     processPHINode(*MI);
   }
+
   while (!Relegalize.empty())
     TII->legalizeOperands(*Relegalize.pop_back_val(), MDT);
 
@@ -890,6 +917,9 @@ bool SIFixSGPRCopies::tryMoveVGPRConstToSGPR(
 
   const TargetRegisterClass *SrcRC =
       MRI->getRegClass(MaybeVGPRConstMO.getReg());
+  // Create the destination only now that a move will actually be emitted.
+  if (!DstReg)
+    DstReg = MRI->createVirtualRegister(TRI->getEquivalentSGPRClass(SrcRC));
   unsigned MoveSize = TRI->getRegSizeInBits(*SrcRC);
   unsigned MoveOp =
       MoveSize == 64 ? AMDGPU::S_MOV_B64_IMM_PSEUDO : AMDGPU::S_MOV_B32;
@@ -899,6 +929,40 @@ bool SIFixSGPRCopies::tryMoveVGPRConstToSGPR(
     DefMI->eraseFromParent();
   MaybeVGPRConstMO.setReg(DstReg);
   return true;
+}
+
+void SIFixSGPRCopies::convertVGPROperandToSGPR(
+    MachineOperand &MO, MachineBasicBlock *BlockToInsertTo,
+    MachineBasicBlock::iterator PointToInsertTo, const DebugLoc &DL) {
+  if (tryMoveVGPRConstToSGPR(MO, BlockToInsertTo, PointToInsertTo, DL))
+    return;
+
+  const TargetRegisterClass *SrcRC = MRI->getRegClass(MO.getReg());
+  Register NewDst =
+      MRI->createVirtualRegister(TRI->getEquivalentSGPRClass(SrcRC));
+  MachineInstr *NewCopy = BuildMI(*BlockToInsertTo, PointToInsertTo, DL,
+                                  TII->get(AMDGPU::COPY), NewDst)
+                              .addReg(MO.getReg());
+  MO.setReg(NewDst);
+  analyzeVGPRToSGPRCopy(NewCopy);
+  PHISources.insert(NewCopy);
+}
+
+void SIFixSGPRCopies::forEachSuccArgToSGPR(
+    MachineInstr &MI, function_ref<void(MachineOperand &, Register)> Fn) const {
+  MachineBasicBlock *Succ = MI.getOperand(0).getMBB();
+  for (unsigned Idx = 1, E = MI.getNumOperands(); Idx != E; ++Idx) {
+    MachineOperand &MO = MI.getOperand(Idx);
+    if (!MO.isReg() || !MO.getReg().isVirtual())
+      continue;
+    const TargetRegisterClass *SrcRC = MRI->getRegClass(MO.getReg());
+    if (SrcRC == &AMDGPU::VReg_1RegClass || !TRI->hasVectorRegisters(SrcRC))
+      continue;
+    Register ArgReg = Succ->getBlockArg(Idx - 1);
+    if (!TRI->isSGPRReg(*MRI, ArgReg))
+      continue;
+    Fn(MO, ArgReg);
+  }
 }
 
 bool SIFixSGPRCopies::lowerSpecialCase(MachineInstr &MI,
@@ -1004,8 +1068,23 @@ void SIFixSGPRCopies::analyzeVGPRToSGPRCopy(MachineInstr* MI) {
     SiblingPenalty[Inst].insert(Info.ID);
 
     SmallVector<MachineInstr *, 4> Users;
-    if ((TII->isSALU(*Inst) && Inst->isCompare()) ||
-        (Inst->isCopy() && Inst->getOperand(0).getReg() == AMDGPU::SCC)) {
+    if (Inst->isSuccArgs()) {
+      // A SUCC_ARGS forwards values to a successor's block arguments; a block
+      // argument has no defining instruction, so bridge the analysis across
+      // the edge by treating the argument as this instruction's result and
+      // following its uses. This lets a uniform value forwarded to an SGPR
+      // block argument keep the argument in SGPR (lowered with a
+      // readfirstlane) rather than always moving it to the VGPR class.
+      MachineBasicBlock *Succ = Inst->getOperand(0).getMBB();
+      for (unsigned Idx = 1, E = Inst->getNumOperands(); Idx != E; ++Idx) {
+        Register ArgReg = Succ->getBlockArg(Idx - 1);
+        if (TRI->isSGPRReg(*MRI, ArgReg))
+          for (auto &U : MRI->use_instructions(ArgReg))
+            Users.push_back(&U);
+      }
+    } else if ((TII->isSALU(*Inst) && Inst->isCompare()) ||
+               (Inst->isCopy() &&
+                Inst->getOperand(0).getReg() == AMDGPU::SCC)) {
       auto I = Inst->getIterator();
       auto E = Inst->getParent()->end();
       while (++I != E &&

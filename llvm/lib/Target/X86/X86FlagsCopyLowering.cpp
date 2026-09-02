@@ -913,8 +913,13 @@ void X86FlagsCopyLoweringImpl::rewriteMI(MachineBasicBlock &MBB,
   std::tie(CondReg, Inverted) =
       getCondOrInverseInReg(MBB, Pos, Loc, CC, CondRegs);
 
-  // Insert a direct test of the saved register.
-  insertTest(*MI.getParent(), MI.getIterator(), MI.getDebugLoc(), CondReg);
+  // Insert a direct test of the saved register. The test is not a terminator,
+  // so when the user is a branch it must be placed before any SUCC_ARGS cluster
+  // rather than between the cluster and the terminators.
+  MachineBasicBlock &UseMBB = *MI.getParent();
+  MachineBasicBlock::iterator TestInsertPos =
+      MI.isTerminator() ? UseMBB.getFirstSuccArgs() : MI.getIterator();
+  insertTest(UseMBB, TestInsertPos, MI.getDebugLoc(), CondReg);
 
   // Rewrite the instruction to use the !ZF flag from the test, and then kill
   // its use of the flags afterward.

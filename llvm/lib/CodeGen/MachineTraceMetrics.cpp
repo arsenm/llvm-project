@@ -713,6 +713,10 @@ static bool getDataDeps(const MachineInstr &UseMI,
       HasPhysRegs = true;
       continue;
     }
+    // A block-argument register is defined by its block, not by an
+    // instruction, so it has no in-trace data dependency (like a live-in).
+    if (!MRI->getOneDef(Reg))
+      continue;
     // Collect virtual register reads.
     if (MO.readsReg())
       Deps.push_back(DataDep(MRI, Reg, MO.getOperandNo()));
@@ -734,7 +738,10 @@ static void getPHIDeps(const MachineInstr &UseMI,
   for (unsigned i = 1; i != UseMI.getNumOperands(); i += 2) {
     if (UseMI.getOperand(i + 1).getMBB() == Pred) {
       Register Reg = UseMI.getOperand(i).getReg();
-      Deps.push_back(DataDep(MRI, Reg, i));
+      // A block-argument register is defined by its block, not by an
+      // instruction, so it has no in-trace data dependency (like a live-in).
+      if (MRI->getOneDef(Reg))
+        Deps.push_back(DataDep(MRI, Reg, i));
       return;
     }
   }
