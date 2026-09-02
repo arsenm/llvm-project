@@ -166,6 +166,8 @@ private:
   /// This is valid for all operand types, when the operand is in an instr.
   MachineInstr *ParentMI = nullptr;
 
+  void *SizeProxyPad = nullptr;
+
   /// Contents union - This contains the payload for the various operand types.
   union ContentsUnion {
     ContentsUnion() {}
@@ -216,7 +218,7 @@ private:
                   "Contents should be at most two pointers");
     static_assert(sizeof(MachineOperand) <=
                       alignTo<alignof(int64_t)>(2 * sizeof(unsigned) +
-                                                3 * sizeof(void *)),
+                                                4 * sizeof(void *)),
                   "MachineOperand too big. Should be Kind, SmallContents, "
                   "ParentMI, and Contents");
   }
