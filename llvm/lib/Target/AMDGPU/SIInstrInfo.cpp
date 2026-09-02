@@ -8229,6 +8229,18 @@ void SIInstrInfo::handleCopyToPhysHelper(
   }
 }
 
+// Scan backwards from a terminator over the terminators and SUCC_ARGS cluster
+// to the block-end insertion point, without rescanning from the block end.
+static MachineBasicBlock::iterator
+getSuccArgsClusterInsertPt(MachineInstr &Term) {
+  MachineBasicBlock &MBB = *Term.getParent();
+  MachineBasicBlock::iterator I(Term);
+  while (I != MBB.begin() &&
+         (std::prev(I)->isTerminator() || std::prev(I)->isSuccArgs()))
+    --I;
+  return I;
+}
+
 void SIInstrInfo::moveToVALUImpl(
     SIInstrWorklist &Worklist, MachineDominatorTree *MDT, MachineInstr &Inst,
     DenseMap<MachineInstr *, V2PhysSCopyInfo> &WaterFalls,
@@ -8404,7 +8416,8 @@ void SIInstrInfo::moveToVALUImpl(
     Register CondReg = Inst.getOperand(1).getReg();
     bool IsSCC = CondReg == AMDGPU::SCC;
     const AMDGPU::LaneMaskConstants &LMC = AMDGPU::LaneMaskConstants::get(ST);
-    BuildMI(*MBB, Inst, Inst.getDebugLoc(), get(LMC.AndOpc), LMC.VccReg)
+    BuildMI(*MBB, getSuccArgsClusterInsertPt(Inst), Inst.getDebugLoc(),
+            get(LMC.AndOpc), LMC.VccReg)
         .addReg(LMC.ExecReg)
         .addReg(IsSCC ? LMC.VccReg : CondReg);
     Inst.removeOperand(1);
@@ -9726,6 +9739,22 @@ void SIInstrInfo::addUsersToMoveToVALUWorklist(
     SIInstrWorklist &Worklist) const {
   for (MachineOperand &MO : make_early_inc_range(MRI.use_operands(DstReg))) {
     MachineInstr &UseMI = *MO.getParent();
+
+    // A SUCC_ARGS operand forwards a value to a block argument of the
+    // successor. The block argument has no defining instruction, so propagate
+    // the move across the edge here: give the block-argument register the
+    // equivalent VGPR class and process its users, exactly as a PHI result is
+    // handled when a PHI operand becomes a VGPR.
+    if (UseMI.isSuccArgs()) {
+      MachineBasicBlock *Succ = UseMI.getOperand(0).getMBB();
+      Register ArgReg = Succ->getBlockArg(MO.getOperandNo() - 1);
+      const TargetRegisterClass *ArgRC = MRI.getRegClass(ArgReg);
+      if (RI.isSGPRClass(ArgRC) && ArgRC != &AMDGPU::VReg_1RegClass) {
+        MRI.setRegClass(ArgReg, RI.getEquivalentVGPRClass(ArgRC));
+        addUsersToMoveToVALUWorklist(ArgReg, MRI, Worklist);
+      }
+      continue;
+    }
 
     unsigned OpNo = 0;
 

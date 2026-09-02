@@ -104,6 +104,14 @@ private:
                   DenseMap<Register, RegSubRegPair> &LocalVRMap,
                   SmallVectorImpl<std::pair<Register, RegSubRegPair>> &Copies,
                   const DenseSet<Register> &UsedByPhi, bool Remove);
+  void processBlockArgs(
+      MachineBasicBlock *TailBB, MachineBasicBlock *PredBB,
+      DenseMap<Register, RegSubRegPair> &LocalVRMap,
+      SmallVectorImpl<std::pair<Register, RegSubRegPair>> &Copies,
+      const DenseSet<Register> &UsedByPhi, bool Remove);
+  void forwardSuccArgsAcrossSimpleBB(MachineBasicBlock *TailBB,
+                                     MachineBasicBlock *NewTarget,
+                                     MachineBasicBlock *PredBB);
   void duplicateInstruction(MachineInstr *MI, MachineBasicBlock *TailBB,
                             MachineBasicBlock *PredBB,
                             DenseMap<Register, RegSubRegPair> &LocalVRMap,

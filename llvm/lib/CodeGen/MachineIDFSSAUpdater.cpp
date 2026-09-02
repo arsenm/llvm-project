@@ -183,3 +183,7 @@ void MachineIDFSSAUpdater::calculate() {
 Register MachineIDFSSAUpdater::getValueInMiddleOfBlock(MachineBasicBlock *BB) {
   return computeValue(BB, /*IsLiveOut=*/false);
 }
+
+Register MachineIDFSSAUpdater::getValueAtEndOfBlock(MachineBasicBlock *BB) {
+  return computeValue(BB, /*IsLiveOut=*/true);
+}

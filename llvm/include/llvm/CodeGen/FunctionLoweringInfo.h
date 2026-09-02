@@ -182,6 +182,12 @@ public:
   std::vector<std::pair<MachineInstr*, Register>> PHINodesToUpdate;
   unsigned OrigNumPHINodesToUpdate;
 
+  /// The block-arguments analogue of PHINodesToUpdate: each entry is a
+  /// (successor, source register) value the current block forwards, in
+  /// block-argument order. FinishBasicBlock emits one SUCC_ARGS per successor.
+  std::vector<std::pair<MachineBasicBlock *, Register>> SuccArgsToUpdate;
+  unsigned OrigNumSuccArgsToUpdate;
+
   /// If the current MBB is a landing pad, the exception pointer and exception
   /// selector registers are copied into these virtual registers by
   /// SelectionDAGISel::PrepareEHLandingPad().
@@ -209,6 +215,11 @@ public:
   bool isExportedInst(const Value *V) const {
     return ValueMap.count(V);
   }
+
+  /// useBlockArgs - Return true if PHI nodes should be lowered to MLIR-style
+  /// block arguments (SUCC_ARGS plus a block-owned argument list) instead of
+  /// machine PHI instructions. Controlled by the -sdag-use-block-args option.
+  LLVM_ABI static bool useBlockArgs();
 
   MachineBasicBlock *getMBB(const BasicBlock *BB) const {
     assert(BB->getNumber() < MBBMap.size() && "uninitialized MBBMap?");
