@@ -396,9 +396,9 @@ bool MachineCSEImpl::PhysRegDefsReach(MachineInstr *CSMI, MachineInstr *MI,
 }
 
 bool MachineCSEImpl::isCSECandidate(MachineInstr *MI) {
-  if (MI->isPosition() || MI->isPHI() || MI->isImplicitDef() || MI->isKill() ||
-      MI->isInlineAsm() || MI->isDebugInstr() || MI->isJumpTableDebugInfo() ||
-      MI->isFakeUse())
+  if (MI->isPosition() || MI->isPHI() || MI->isSuccArgs() ||
+      MI->isImplicitDef() || MI->isKill() || MI->isInlineAsm() ||
+      MI->isDebugInstr() || MI->isJumpTableDebugInfo() || MI->isFakeUse())
     return false;
 
   // Ignore copies.
@@ -874,7 +874,7 @@ bool MachineCSEImpl::ProcessBlockPRE(MachineDominatorTree *DT,
         if (!isProfitableToCSE(NewReg, VReg, CMBB, &MI))
           continue;
         MachineInstr &NewMI =
-            TII->duplicate(*CMBB, CMBB->getFirstTerminator(), MI);
+            TII->duplicate(*CMBB, CMBB->getBlockEndInsertPt(), MI);
 
         // When hoisting, make sure we don't carry the debug location of
         // the original instruction, as that's not correct and can cause

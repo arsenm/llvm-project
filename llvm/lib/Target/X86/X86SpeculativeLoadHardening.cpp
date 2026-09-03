@@ -298,28 +298,48 @@ static MachineBasicBlock &splitEdge(MachineBasicBlock &MBB,
   // Hook up the edge from the new basic block to the old successor in the CFG.
   NewMBB.addSuccessor(&Succ);
 
-  // Fix PHI nodes in Succ so they refer to NewMBB instead of MBB.
-  for (MachineInstr &MI : Succ) {
-    if (!MI.isPHI())
-      break;
-    for (int OpIdx = 1, NumOps = MI.getNumOperands(); OpIdx < NumOps;
-         OpIdx += 2) {
-      MachineOperand &OpV = MI.getOperand(OpIdx);
-      MachineOperand &OpMBB = MI.getOperand(OpIdx + 1);
-      assert(OpMBB.isMBB() && "Block operand to a PHI is not a block!");
-      if (OpMBB.getMBB() != &MBB)
-        continue;
-
-      // If this is the last edge to the succesor, just replace MBB in the PHI
-      if (SuccCount == 1) {
-        OpMBB.setMBB(&NewMBB);
+  // Update the incoming-value bookkeeping for the redirected edge. Block
+  // arguments and PHI nodes are mutually exclusive within a function, so handle
+  // whichever representation this function uses.
+  if (MF.getProperties().hasUsesBlockArgs()) {
+    // With block arguments the forwarded values live in a SUCC_ARGS in the
+    // predecessor. The MBB -> Succ edge is now the NewMBB -> Succ edge, so move
+    // the SUCC_ARGS into NewMBB to keep exactly one per predecessor edge.
+    // SuccCount > 1 (multiple edges from MBB to Succ) cannot occur here: block
+    // arguments require a single SUCC_ARGS per edge.
+    assert(SuccCount == 1 &&
+           "block arguments require a unique predecessor edge");
+    for (MachineInstr &MI : make_early_inc_range(MBB.succ_args())) {
+      if (MI.getOperand(0).getMBB() == &Succ) {
+        MI.removeFromParent();
+        NewMBB.insert(NewMBB.getFirstTerminator(), &MI);
         break;
       }
+    }
+  } else {
+    // Fix PHI nodes in Succ so they refer to NewMBB instead of MBB.
+    for (MachineInstr &MI : Succ) {
+      if (!MI.isPHI())
+        break;
+      for (int OpIdx = 1, NumOps = MI.getNumOperands(); OpIdx < NumOps;
+           OpIdx += 2) {
+        MachineOperand &OpV = MI.getOperand(OpIdx);
+        MachineOperand &OpMBB = MI.getOperand(OpIdx + 1);
+        assert(OpMBB.isMBB() && "Block operand to a PHI is not a block!");
+        if (OpMBB.getMBB() != &MBB)
+          continue;
 
-      // Otherwise, append a new pair of operands for the new incoming edge.
-      MI.addOperand(MF, OpV);
-      MI.addOperand(MF, MachineOperand::CreateMBB(&NewMBB));
-      break;
+        // If this is the last edge to the succesor, just replace MBB in the PHI
+        if (SuccCount == 1) {
+          OpMBB.setMBB(&NewMBB);
+          break;
+        }
+
+        // Otherwise, append a new pair of operands for the new incoming edge.
+        MI.addOperand(MF, OpV);
+        MI.addOperand(MF, MachineOperand::CreateMBB(&NewMBB));
+        break;
+      }
     }
   }
 

@@ -15,6 +15,7 @@
 #include "llvm/CodeGen/PHIElimination.h"
 #include "PHIEliminationUtils.h"
 #include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/LoopInfo.h"
@@ -86,6 +87,10 @@ class PHIEliminationImpl {
   /// in predecessor basic blocks.
   bool EliminatePHINodes(MachineFunction &MF, MachineBasicBlock &MBB);
 
+  /// Lower the block arguments of \p MBB by inserting copies, consuming the
+  /// matching SUCC_ARGS in each predecessor.
+  bool lowerBlockArgs(MachineFunction &MF, MachineBasicBlock &MBB);
+
   void LowerPHINode(MachineBasicBlock &MBB,
                     MachineBasicBlock::iterator LastPHIIt,
                     bool AllEdgesCritical);
@@ -116,6 +121,11 @@ class PHIEliminationImpl {
 
   // Defs of PHI sources which are implicit_def.
   SmallPtrSet<MachineInstr *, 4> ImpDefs;
+
+  // Registers forwarded by a SUCC_ARGS to a block argument. Their LiveVariables
+  // info is recomputed after all block arguments are lowered, since a forwarded
+  // value's live range may shrink once its SUCC_ARGS uses are removed.
+  SmallSetVector<Register, 8> BlockArgSrcRegs;
 
   // Map reusable lowered PHI node -> incoming join register.
   using LoweredPHIMap =
@@ -252,8 +262,10 @@ bool PHIEliminationImpl::run(MachineFunction &MF) {
         // Set the bit for this register for each MBB where it is
         // live-through or live-in (killed).
         Register VirtReg = Register::index2VirtReg(Index);
-        MachineInstr *DefMI = MRI->getVRegDef(VirtReg);
-        if (!DefMI)
+        // Block-argument registers are defined by a block rather than an
+        // instruction, so getVRegDef() is null; use getDefBlock().
+        MachineBasicBlock *DefMBB = MRI->getDefBlock(VirtReg);
+        if (!DefMBB)
           continue;
         LiveVariables::VarInfo &VI = LV->getVarInfo(VirtReg);
         SparseBitVector<>::iterator AliveBlockItr = VI.AliveBlocks.begin();
@@ -264,7 +276,6 @@ bool PHIEliminationImpl::run(MachineFunction &MF) {
         }
         // The register is live into an MBB in which it is killed but not
         // defined. See comment for VarInfo in LiveVariables.h.
-        MachineBasicBlock *DefMBB = DefMI->getParent();
         if (VI.Kills.size() > 1 ||
             (!VI.Kills.empty() && VI.Kills.front()->getParent() != DefMBB))
           for (auto *MI : VI.Kills)
@@ -284,9 +295,23 @@ bool PHIEliminationImpl::run(MachineFunction &MF) {
   if (LV || LIS)
     analyzePHINodes(MF);
 
-  // Eliminate PHI instructions by inserting copies into predecessor blocks.
-  for (auto &MBB : MF)
+  // Eliminate PHI instructions or block arguments by inserting copies into
+  // predecessor blocks.
+  for (auto &MBB : MF) {
     Changed |= EliminatePHINodes(MF, MBB);
+    Changed |= lowerBlockArgs(MF, MBB);
+  }
+
+  if (LV) {
+    // A forwarded value's live range may have shrunk once its SUCC_ARGS uses
+    // were removed.
+    for (Register SrcReg : BlockArgSrcRegs) {
+      if (MRI->hasOneDef(SrcReg))
+        LV->recomputeForSingleDefVirtReg(SrcReg);
+    }
+  }
+
+  BlockArgSrcRegs.clear();
 
   // Remove dead IMPLICIT_DEF instructions.
   for (MachineInstr *DefMI : ImpDefs) {
@@ -310,6 +335,7 @@ bool PHIEliminationImpl::run(MachineFunction &MF) {
   VRegPHIUseCount.clear();
 
   MF.getProperties().setNoPHIs();
+  MF.getProperties().reset(MachineFunctionProperties::Property::UsesBlockArgs);
 
   return Changed;
 }
@@ -339,6 +365,118 @@ bool PHIEliminationImpl::EliminatePHINodes(MachineFunction &MF,
 
   while (MBB.front().isPHI())
     LowerPHINode(MBB, LastPHIIt, AllEdgesCritical);
+
+  return true;
+}
+
+static bool isImplicitlyDefined(Register VirtReg,
+                                const MachineRegisterInfo &MRI);
+
+bool PHIEliminationImpl::lowerBlockArgs(MachineFunction &MF,
+                                        MachineBasicBlock &MBB) {
+  if (MBB.getBlockArgs().empty())
+    return false;
+
+  // Unlike LowerPHINode, this does not yet maintain LiveIntervals for the
+  // inserted copies. No in-tree pipeline hits this: the default configuration
+  // computes LiveIntervals after PHI elimination, and even -early-live-intervals
+  // adds the LiveIntervals pass after this one. Assert so a caller that does
+  // have LiveIntervals live fails loudly here instead of silently corrupting
+  // intervals; extend this to update LIS like LowerPHINode does if that arises.
+  assert(!LIS && "block-argument lowering does not update LiveIntervals");
+
+  // Critical edges are not split: the incoming register is dead on every other
+  // outgoing edge, so the copy is correct in the predecessor as-is.
+  const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+  MachineBasicBlock::iterator AfterPHIsIt = MBB.SkipPHIsAndLabels(MBB.begin());
+
+  // Snapshot the arguments; the copies below mutate the block. Do not clear the
+  // block-argument set yet: the SrcUndef test below relies on isBlockArgDef to
+  // recognize a still-def-less block-argument source, and a self-referential
+  // forward (a back edge whose SUCC_ARGS forwards one of this block's own
+  // arguments) would otherwise be misclassified as undef. Clear it only after
+  // all copies are emitted.
+  SmallVector<Register, 4> Args(MBB.getBlockArgs());
+
+  // Emit the destination copies at the top of the block first, then the source
+  // copies in the predecessors. A self-referential back edge makes MBB its own
+  // predecessor; emitting all reads (destination copies) before any writes
+  // (source copies) keeps the loop-carried values correct and, for the
+  // predecessor that is MBB, keeps the source copies from landing above a
+  // destination copy that still needs the old value.
+  SmallVector<Register, 4> IncomingRegs(Args.size());
+  for (unsigned ArgNo = 0, E = Args.size(); ArgNo != E; ++ArgNo) {
+    Register DestReg = Args[ArgNo];
+    assert(DestReg.isVirtual() && "Block argument must be a virtual register");
+
+    const TargetRegisterClass *RC = MRI->getRegClass(DestReg);
+    Register IncomingReg = MRI->createVirtualRegister(RC);
+    IncomingRegs[ArgNo] = IncomingReg;
+
+    MachineInstr *DestCopy = TII->createPHIDestinationCopy(
+        MBB, AfterPHIsIt, DebugLoc(), IncomingReg, DestReg);
+    if (SI)
+      SI->insertMachineInstrInMaps(*DestCopy);
+
+    // The incoming register is defined once per predecessor and killed by the
+    // destination copy at the top of this block, mirroring PHI elimination.
+    if (LV) {
+      LV->addVirtualRegisterKilled(IncomingReg, *DestCopy);
+      // Before lowering, the block argument had no defining instruction and its
+      // liveness was derived from the SUCC_ARGS reads in the predecessors. Now
+      // that it is defined by the destination copy, recompute its live range.
+      BlockArgSrcRegs.insert(DestReg);
+    }
+  }
+
+  // Look up each predecessor's SUCC_ARGS once and index it by argument, rather
+  // than rescanning for every argument: the forwarder depends only on the edge,
+  // not the argument. Emitting the source copies in argument order at a fixed
+  // per-predecessor insert point matches the previous emission order.
+  for (MachineBasicBlock *Pred : MBB.predecessors()) {
+    MachineInstr *SA = Pred->findSuccArgs(&MBB);
+    assert(SA && "predecessor missing SUCC_ARGS for block with arguments");
+    for (unsigned ArgNo = 0, E = Args.size(); ArgNo != E; ++ArgNo) {
+      Register IncomingReg = IncomingRegs[ArgNo];
+      const MachineOperand &SrcMO = SA->getOperand(ArgNo + 1);
+      Register SrcReg = SrcMO.getReg();
+      // A source that is itself a block argument has no def yet (its defining
+      // copy is materialized when its own block is lowered), so it must not be
+      // mistaken for an implicitly-defined (undef) value.
+      bool SrcUndef = SrcMO.isUndef() || (!MRI->isBlockArgDef(SrcReg) &&
+                                          isImplicitlyDefined(SrcReg, *MRI));
+
+      MachineBasicBlock::iterator InsertPos =
+          findPHICopyInsertPoint(Pred, &MBB, SrcReg);
+      MachineInstr *SrcInstr;
+      if (SrcUndef) {
+        // An undef forwarded value (explicitly undef, or defined only by an
+        // IMPLICIT_DEF) has no real def to copy from; emit an IMPLICIT_DEF for
+        // the shared incoming register, as PHI lowering does.
+        SrcInstr = BuildMI(*Pred, InsertPos, DebugLoc(),
+                           TII->get(TargetOpcode::IMPLICIT_DEF), IncomingReg);
+      } else {
+        SrcInstr = TII->createPHISourceCopy(*Pred, InsertPos, nullptr, SrcReg,
+                                            SrcMO.getSubReg(), IncomingReg);
+        if (LV && SrcReg.isVirtual())
+          BlockArgSrcRegs.insert(SrcReg);
+      }
+      if (SI)
+        SI->insertMachineInstrInMaps(*SrcInstr);
+    }
+  }
+
+  // All source copies are emitted; the block-argument registers now have real
+  // defs, so drop them from the block-argument set.
+  MBB.clearBlockArgs();
+
+  for (MachineBasicBlock *Pred : MBB.predecessors()) {
+    while (MachineInstr *SA = Pred->findSuccArgs(&MBB)) {
+      if (SI)
+        SI->removeMachineInstrFromMaps(*SA);
+      SA->eraseFromParent();
+    }
+  }
 
   return true;
 }
@@ -803,92 +941,126 @@ void PHIEliminationImpl::analyzePHINodes(const MachineFunction &MF) {
 bool PHIEliminationImpl::SplitPHIEdges(
     MachineFunction &MF, MachineBasicBlock &MBB, MachineLoopInfo *MLI,
     std::vector<SparseBitVector<>> *LiveInSets, MachineDomTreeUpdater &MDTU) {
-  if (MBB.empty() || !MBB.front().isPHI() || MBB.isEHPad())
-    return false; // Quick exit for basic blocks without PHIs.
+  bool HasPHIs = !MBB.empty() && MBB.front().isPHI();
+  // Block arguments are the dual of PHIs and need the same critical-edge
+  // splitting: their incoming values are forwarded by each predecessor's
+  // SUCC_ARGS, and without splitting the copy lands in a shared predecessor
+  // where its live range interferes with the block's other outgoing edges.
+  bool HasBlockArgs = MBB.hasBlockArgs();
+  if ((!HasPHIs && !HasBlockArgs) || MBB.isEHPad())
+    return false; // Quick exit for basic blocks without PHIs or block args.
 
   const MachineLoop *CurLoop = MLI ? MLI->getLoopFor(&MBB) : nullptr;
   bool IsLoopHeader = CurLoop && &MBB == CurLoop->getHeader();
 
   bool Changed = false;
+
+  // Decide whether to split the critical edge PreMBB -> MBB carrying value Reg,
+  // and do so. DebugMI is the PHI or SUCC_ARGS the value comes from, for
+  // logging. Returns true if the edge was split.
+  auto TrySplitEdge = [&](Register Reg, MachineBasicBlock *PreMBB,
+                          const MachineInstr &DebugMI) -> bool {
+    // Is there a critical edge from PreMBB to MBB?
+    if (PreMBB->succ_size() == 1)
+      return false;
+
+    // Avoid splitting backedges of loops. It would introduce small
+    // out-of-line blocks into the loop which is very bad for code placement.
+    if (PreMBB == &MBB && !SplitAllCriticalEdges)
+      return false;
+    const MachineLoop *PreLoop = MLI ? MLI->getLoopFor(PreMBB) : nullptr;
+    if (IsLoopHeader && PreLoop == CurLoop && !SplitAllCriticalEdges)
+      return false;
+
+    // LV doesn't consider a phi use live-out, so isLiveOut only returns true
+    // when the source register is live-out for some other reason than a phi
+    // use. That means the copy we will insert in PreMBB won't be a kill, and
+    // there is a risk it may not be coalesced away.
+    //
+    // If the copy would be a kill, there is no need to split the edge.
+    bool ShouldSplit = isLiveOutPastPHIs(Reg, PreMBB);
+    if (!ShouldSplit && !NoPhiElimLiveOutEarlyExit)
+      return false;
+    if (ShouldSplit) {
+      LLVM_DEBUG(dbgs() << printReg(Reg) << " live-out before critical edge "
+                        << printMBBReference(*PreMBB) << " -> "
+                        << printMBBReference(MBB) << ": " << DebugMI);
+    }
+
+    // If Reg is not live-in to MBB, it means it must be live-in to some
+    // other PreMBB successor, and we can avoid the interference by splitting
+    // the edge.
+    //
+    // If Reg *is* live-in to MBB, the interference is inevitable and a copy
+    // is likely to be left after coalescing. If we are looking at a loop
+    // exiting edge, split it so we won't insert code in the loop, otherwise
+    // don't bother.
+    ShouldSplit = ShouldSplit && !isLiveIn(Reg, &MBB);
+
+    // Check for a loop exiting edge.
+    if (!ShouldSplit && CurLoop != PreLoop) {
+      LLVM_DEBUG({
+        dbgs() << "Split wouldn't help, maybe avoid loop copies?\n";
+        if (PreLoop)
+          dbgs() << "PreLoop: " << *PreLoop;
+        if (CurLoop)
+          dbgs() << "CurLoop: " << *CurLoop;
+      });
+      // This edge could be entering a loop, exiting a loop, or it could be
+      // both: Jumping directly form one loop to the header of a sibling
+      // loop.
+      // Split unless this edge is entering CurLoop from an outer loop.
+      ShouldSplit = PreLoop && !PreLoop->contains(CurLoop);
+    }
+    if (!ShouldSplit && !SplitAllCriticalEdges)
+      return false;
+    MachineBasicBlock *NewBB;
+    if (P)
+      NewBB = PreMBB->SplitCriticalEdge(&MBB, *P, LiveInSets, &MDTU);
+    else
+      NewBB = PreMBB->SplitCriticalEdge(&MBB, *MFAM, LiveInSets, &MDTU);
+    if (!NewBB) {
+      LLVM_DEBUG(dbgs() << "Failed to split critical edge.\n");
+      return false;
+    }
+
+    // Patch up MBFI after split if it is available.
+    if (MBFI) {
+      assert(MBPI);
+      MBFI->onEdgeSplit(*PreMBB, *NewBB, *MBPI);
+    }
+
+    ++NumCriticalEdgesSplit;
+    return true;
+  };
+
   for (MachineBasicBlock::iterator BBI = MBB.begin(), BBE = MBB.end();
        BBI != BBE && BBI->isPHI(); ++BBI) {
-    for (unsigned i = 1, e = BBI->getNumOperands(); i != e; i += 2) {
-      Register Reg = BBI->getOperand(i).getReg();
-      MachineBasicBlock *PreMBB = BBI->getOperand(i + 1).getMBB();
-      // Is there a critical edge from PreMBB to MBB?
-      if (PreMBB->succ_size() == 1)
-        continue;
+    for (unsigned i = 1, e = BBI->getNumOperands(); i != e; i += 2)
+      Changed |= TrySplitEdge(BBI->getOperand(i).getReg(),
+                              BBI->getOperand(i + 1).getMBB(), *BBI);
+  }
 
-      // Avoid splitting backedges of loops. It would introduce small
-      // out-of-line blocks into the loop which is very bad for code placement.
-      if (PreMBB == &MBB && !SplitAllCriticalEdges)
-        continue;
-      const MachineLoop *PreLoop = MLI ? MLI->getLoopFor(PreMBB) : nullptr;
-      if (IsLoopHeader && PreLoop == CurLoop && !SplitAllCriticalEdges)
-        continue;
-
-      // LV doesn't consider a phi use live-out, so isLiveOut only returns true
-      // when the source register is live-out for some other reason than a phi
-      // use. That means the copy we will insert in PreMBB won't be a kill, and
-      // there is a risk it may not be coalesced away.
-      //
-      // If the copy would be a kill, there is no need to split the edge.
-      bool ShouldSplit = isLiveOutPastPHIs(Reg, PreMBB);
-      if (!ShouldSplit && !NoPhiElimLiveOutEarlyExit)
-        continue;
-      if (ShouldSplit) {
-        LLVM_DEBUG(dbgs() << printReg(Reg) << " live-out before critical edge "
-                          << printMBBReference(*PreMBB) << " -> "
-                          << printMBBReference(MBB) << ": " << *BBI);
+  // Split critical edges into a block with arguments. Each predecessor forwards
+  // the arguments' incoming values through its SUCC_ARGS; splitting is decided
+  // per forwarded value exactly as for a PHI operand. Iterate predecessors
+  // first so a split (which relocates the SUCC_ARGS into the new block) does
+  // not disturb the traversal; snapshot the list since splitting mutates it.
+  if (HasBlockArgs) {
+    unsigned NumArgs = MBB.getNumBlockArgs();
+    SmallVector<MachineBasicBlock *, 8> Preds(MBB.predecessors());
+    for (MachineBasicBlock *PreMBB : Preds) {
+      MachineInstr *SA = PreMBB->findSuccArgs(&MBB);
+      assert(SA && "predecessor of a block with arguments has no SUCC_ARGS");
+      for (unsigned I = 0; I != NumArgs; ++I) {
+        if (TrySplitEdge(SA->getOperand(I + 1).getReg(), PreMBB, *SA)) {
+          Changed = true;
+          break; // The edge is gone; move to the next predecessor.
+        }
       }
-
-      // If Reg is not live-in to MBB, it means it must be live-in to some
-      // other PreMBB successor, and we can avoid the interference by splitting
-      // the edge.
-      //
-      // If Reg *is* live-in to MBB, the interference is inevitable and a copy
-      // is likely to be left after coalescing. If we are looking at a loop
-      // exiting edge, split it so we won't insert code in the loop, otherwise
-      // don't bother.
-      ShouldSplit = ShouldSplit && !isLiveIn(Reg, &MBB);
-
-      // Check for a loop exiting edge.
-      if (!ShouldSplit && CurLoop != PreLoop) {
-        LLVM_DEBUG({
-          dbgs() << "Split wouldn't help, maybe avoid loop copies?\n";
-          if (PreLoop)
-            dbgs() << "PreLoop: " << *PreLoop;
-          if (CurLoop)
-            dbgs() << "CurLoop: " << *CurLoop;
-        });
-        // This edge could be entering a loop, exiting a loop, or it could be
-        // both: Jumping directly form one loop to the header of a sibling
-        // loop.
-        // Split unless this edge is entering CurLoop from an outer loop.
-        ShouldSplit = PreLoop && !PreLoop->contains(CurLoop);
-      }
-      if (!ShouldSplit && !SplitAllCriticalEdges)
-        continue;
-      MachineBasicBlock *NewBB;
-      if (P)
-        NewBB = PreMBB->SplitCriticalEdge(&MBB, *P, LiveInSets, &MDTU);
-      else
-        NewBB = PreMBB->SplitCriticalEdge(&MBB, *MFAM, LiveInSets, &MDTU);
-      if (!NewBB) {
-        LLVM_DEBUG(dbgs() << "Failed to split critical edge.\n");
-        continue;
-      }
-
-      // Patch up MBFI after split if it is available.
-      if (MBFI) {
-        assert(MBPI);
-        MBFI->onEdgeSplit(*PreMBB, *NewBB, *MBPI);
-      }
-
-      Changed = true;
-      ++NumCriticalEdgesSplit;
     }
   }
+
   return Changed;
 }
 

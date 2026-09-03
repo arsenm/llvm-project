@@ -74,6 +74,10 @@ public:
 
   /// See SSAUpdater::GetValueInMiddleOfBlock description.
   LLVM_ABI Register getValueInMiddleOfBlock(MachineBasicBlock *BB);
+
+  /// Return the value that is live out of the end of \p BB, i.e. the value an
+  /// on-edge use in a successor of \p BB (such as a SUCC_ARGS forwarder) sees.
+  LLVM_ABI Register getValueAtEndOfBlock(MachineBasicBlock *BB);
 };
 
 } // end namespace llvm

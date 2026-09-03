@@ -137,14 +137,22 @@ public:
   /// Returns the Tail predecessor for the  False side.
   MachineBasicBlock *getFPred() const { return FBB == Tail ? Head : FBB; }
 
-  /// Information about each phi in the Tail block.
+  /// Information about each value merged in the Tail block. This is either a
+  /// PHI instruction (PHI != nullptr) or a block argument of Tail
+  /// (PHI == nullptr, described by DstReg and ArgIdx).
   struct PHIInfo {
     MachineInstr *PHI;
+    Register DstReg;
+    unsigned ArgIdx;
     Register TReg, FReg;
     // Latencies from Cond+Branch, TReg, and FReg to DstReg.
     int CondCycles = 0, TCycles = 0, FCycles = 0;
 
-    PHIInfo(MachineInstr *phi) : PHI(phi) {}
+    PHIInfo(MachineInstr *phi)
+        : PHI(phi), DstReg(phi->getOperand(0).getReg()), ArgIdx(~0U) {}
+    PHIInfo(Register DstReg, unsigned ArgIdx)
+        : PHI(nullptr), DstReg(DstReg), ArgIdx(ArgIdx) {}
+    bool isBlockArg() const { return PHI == nullptr; }
   };
 
   SmallVector<PHIInfo, 8> PHIs;
@@ -245,6 +253,12 @@ bool SSAIfConv::canSpeculateInstrs(MachineBasicBlock *MBB) {
   for (MachineInstr &MI :
        llvm::make_range(MBB->begin(), MBB->getFirstTerminator())) {
     if (MI.isDebugInstr())
+      continue;
+
+    // SUCC_ARGS forwards block-argument values on the edge to Tail; it is not
+    // speculated but rewritten during conversion, so it does not block
+    // if-conversion.
+    if (MI.isSuccArgs())
       continue;
 
     if (++InstrCount > BlockInstrLimit && !Stress) {
@@ -406,7 +420,11 @@ bool SSAIfConv::findInsertionPoint() {
   // Only track RegUnits that are also in ClobberedRegUnits.
   LiveRegUnits.clear();
   SmallVector<MCRegister, 8> Reads;
-  MachineBasicBlock::iterator FirstTerm = Head->getFirstTerminator();
+  // Speculated instructions must not be inserted into or after Head's SUCC_ARGS
+  // cluster, which must stay immediately before the terminators. Treat the
+  // first SUCC_ARGS (or the first terminator when there are none) as the
+  // boundary.
+  MachineBasicBlock::iterator FirstTerm = Head->getFirstSuccArgs();
   MachineBasicBlock::iterator I = Head->end();
   MachineBasicBlock::iterator B = Head->begin();
   while (I != B) {
@@ -439,8 +457,10 @@ bool SSAIfConv::findInsertionPoint() {
         if (ClobberedRegUnits.test(static_cast<unsigned>(Unit)))
           LiveRegUnits.insert(Unit);
 
-    // We can't insert before a terminator.
-    if (I != FirstTerm && I->isTerminator())
+    // We can't insert before a terminator, nor into the SUCC_ARGS cluster;
+    // FirstTerm (the cluster start, or the first terminator when there is no
+    // cluster) is the earliest allowed boundary.
+    if (I != FirstTerm && (I->isTerminator() || I->isSuccArgs()))
       continue;
 
     // Some of the clobbered registers are live before I, not a valid insertion
@@ -464,7 +484,15 @@ bool SSAIfConv::findInsertionPoint() {
   return false;
 }
 
-
+/// Return \p Pred's SUCC_ARGS instruction that forwards values to \p Succ, or
+/// null if there is none.
+static MachineInstr *findSuccArgs(MachineBasicBlock &Pred,
+                                  const MachineBasicBlock &Succ) {
+  for (MachineInstr &MI : Pred.succ_args())
+    if (MI.getOperand(0).getMBB() == &Succ)
+      return &MI;
+  return nullptr;
+}
 
 /// canConvertIf - analyze the sub-cfg rooted in MBB, and return true if it is
 /// a potential candidate for if-conversion. Fill out the internal state.
@@ -510,9 +538,12 @@ bool SSAIfConv::canConvertIf(MachineBasicBlock *MBB, bool Predicate) {
   }
 
   // This is a triangle or a diamond.
-  // Skip if we cannot predicate and there are no phis skip as there must be
-  // side effects that can only be handled with predication.
-  if (!Predicate && (Tail->empty() || !Tail->front().isPHI())) {
+  // Skip if we cannot predicate and there are no merged values (phis or block
+  // arguments) as there must be side effects that can only be handled with
+  // predication.
+  bool HasMergedValues =
+      Tail->hasBlockArgs() || (!Tail->empty() && Tail->front().isPHI());
+  if (!Predicate && !HasMergedValues) {
     LLVM_DEBUG(dbgs() << "No phis in tail.\n");
     return false;
   }
@@ -560,11 +591,36 @@ bool SSAIfConv::canConvertIf(MachineBasicBlock *MBB, bool Predicate) {
     assert(PI.FReg.isVirtual() && "Bad PHI");
 
     // Get target information.
-    if (!TII->canInsertSelect(*Head, Cond, PI.PHI->getOperand(0).getReg(),
-                              PI.TReg, PI.FReg, PI.CondCycles, PI.TCycles,
-                              PI.FCycles)) {
+    if (!TII->canInsertSelect(*Head, Cond, PI.DstReg, PI.TReg, PI.FReg,
+                              PI.CondCycles, PI.TCycles, PI.FCycles)) {
       LLVM_DEBUG(dbgs() << "Can't convert: " << *PI.PHI);
       return false;
+    }
+  }
+
+  // The same for block arguments of Tail: each argument's value is forwarded by
+  // a SUCC_ARGS operand in each predecessor, positionally matching the argument
+  // order. If either predecessor is missing its SUCC_ARGS the block cannot be
+  // converted.
+  if (Tail->hasBlockArgs()) {
+    MachineInstr *TPredSA = findSuccArgs(*TPred, *Tail);
+    MachineInstr *FPredSA = findSuccArgs(*FPred, *Tail);
+    if (!TPredSA || !FPredSA)
+      return false;
+    for (unsigned Idx = 0, E = Tail->getNumBlockArgs(); Idx != E; ++Idx) {
+      PHIs.emplace_back(Tail->getBlockArg(Idx), Idx);
+      PHIInfo &PI = PHIs.back();
+      PI.TReg = TPredSA->getOperand(Idx + 1).getReg();
+      PI.FReg = FPredSA->getOperand(Idx + 1).getReg();
+      if (!PI.TReg.isVirtual() || !PI.FReg.isVirtual()) {
+        LLVM_DEBUG(dbgs() << "Can't convert block arg " << printReg(PI.DstReg));
+        return false;
+      }
+      if (!TII->canInsertSelect(*Head, Cond, PI.DstReg, PI.TReg, PI.FReg,
+                                PI.CondCycles, PI.TCycles, PI.FCycles)) {
+        LLVM_DEBUG(dbgs() << "Can't convert block arg " << printReg(PI.DstReg));
+        return false;
+      }
     }
   }
 
@@ -649,24 +705,48 @@ void SSAIfConv::replacePHIInstrs() {
   MachineBasicBlock::iterator FirstTerm = Head->getFirstTerminator();
   assert(FirstTerm != Head->end() && "No terminators");
   DebugLoc HeadDL = FirstTerm->getDebugLoc();
+  // Selects feeding a Tail block argument must be inserted before Head's
+  // SUCC_ARGS cluster (which is immediately before the terminators) so the
+  // cluster stays contiguous. This is the terminator point when Head has no
+  // SUCC_ARGS, so it is NFC for the pure-PHI case.
+  MachineBasicBlock::iterator InsertPt = Head->getFirstSuccArgs();
 
-  // Convert all PHIs to select instructions inserted before FirstTerm.
+  // Convert all merged values (PHIs or block arguments) to select instructions
+  // inserted before InsertPt.
+  SmallVector<unsigned, 8> ArgsToRemove;
   for (PHIInfo &PI : PHIs) {
-    LLVM_DEBUG(dbgs() << "If-converting " << *PI.PHI);
-    Register DstReg = PI.PHI->getOperand(0).getReg();
+    LLVM_DEBUG(if (!PI.isBlockArg()) dbgs() << "If-converting " << *PI.PHI);
+    // For a block argument, the select must define a fresh register and the
+    // block-argument register's uses are rewritten to it; the argument (defined
+    // by the block, not an instruction) is then removed. For a PHI, the select
+    // can define the PHI's result directly before the PHI is erased.
+    Register DstReg =
+        PI.isBlockArg()
+            ? MRI->createVirtualRegister(MRI->getRegClass(PI.DstReg))
+            : PI.DstReg;
     if (hasSameValue(*MRI, TII, PI.TReg, PI.FReg)) {
       // We do not need the select instruction if both incoming values are
       // equal, but we do need a COPY.
-      BuildMI(*Head, FirstTerm, HeadDL, TII->get(TargetOpcode::COPY), DstReg)
+      BuildMI(*Head, InsertPt, HeadDL, TII->get(TargetOpcode::COPY), DstReg)
           .addReg(PI.TReg);
     } else {
-      TII->insertSelect(*Head, FirstTerm, HeadDL, DstReg, Cond, PI.TReg,
+      TII->insertSelect(*Head, InsertPt, HeadDL, DstReg, Cond, PI.TReg,
                         PI.FReg);
     }
-    LLVM_DEBUG(dbgs() << "          --> " << *std::prev(FirstTerm));
-    PI.PHI->eraseFromParent();
-    PI.PHI = nullptr;
+    LLVM_DEBUG(dbgs() << "          --> " << *std::prev(InsertPt));
+    if (PI.isBlockArg()) {
+      MRI->replaceRegWith(PI.DstReg, DstReg);
+      ArgsToRemove.push_back(PI.ArgIdx);
+    } else {
+      PI.PHI->eraseFromParent();
+      PI.PHI = nullptr;
+    }
   }
+  // Remove block arguments in descending index order so earlier removals do not
+  // shift the indices of later ones.
+  llvm::sort(ArgsToRemove, std::greater<unsigned>());
+  for (unsigned Idx : ArgsToRemove)
+    Tail->removeBlockArgAndUpdateSuccArgs(Idx);
 }
 
 /// rewritePHIOperands - When there are additional Tail predecessors, insert
@@ -677,23 +757,53 @@ void SSAIfConv::rewritePHIOperands() {
   assert(FirstTerm != Head->end() && "No terminators");
   DebugLoc HeadDL = FirstTerm->getDebugLoc();
 
-  // Convert all PHIs to select instructions inserted before FirstTerm.
+  // Convert all merged values to select instructions inserted before Head's
+  // SUCC_ARGS cluster (which is right before the terminators, so this is the
+  // terminator point in the pure-PHI case: NFC).
   for (PHIInfo &PI : PHIs) {
     Register DstReg;
 
-    LLVM_DEBUG(dbgs() << "If-converting " << *PI.PHI);
     if (hasSameValue(*MRI, TII, PI.TReg, PI.FReg)) {
       // We do not need the select instruction if both incoming values are
       // equal.
       DstReg = PI.TReg;
     } else {
-      Register PHIDst = PI.PHI->getOperand(0).getReg();
-      DstReg = MRI->createVirtualRegister(MRI->getRegClass(PHIDst));
-      TII->insertSelect(*Head, FirstTerm, HeadDL,
-                         DstReg, Cond, PI.TReg, PI.FReg);
-      LLVM_DEBUG(dbgs() << "          --> " << *std::prev(FirstTerm));
+      MachineBasicBlock::iterator InsertPt = Head->getFirstSuccArgs();
+      DstReg = MRI->createVirtualRegister(MRI->getRegClass(PI.DstReg));
+      TII->insertSelect(*Head, InsertPt, HeadDL, DstReg, Cond, PI.TReg,
+                        PI.FReg);
+      LLVM_DEBUG(dbgs() << "          --> " << *std::prev(InsertPt));
     }
 
+    if (PI.isBlockArg()) {
+      // The block argument stays (other predecessors still feed it). Head must
+      // feed it the select result on its (kept) edge to Tail. In a triangle,
+      // Head already has a full SUCC_ARGS to Tail, so replace its forwarded
+      // operand for this argument. In a diamond, Head gains a new edge to Tail,
+      // so the SUCC_ARGS is built incrementally as the block arguments are
+      // processed in ascending index order: append this argument's operand,
+      // creating the SUCC_ARGS on the first one.
+      MachineInstr *HeadSA = findSuccArgs(*Head, *Tail);
+      if (!HeadSA) {
+        HeadSA = BuildMI(*Head, Head->getFirstSuccArgs(), HeadDL,
+                         TII->get(TargetOpcode::SUCC_ARGS))
+                     .addMBB(Tail);
+      }
+      // getOperand(0) is the successor block; operand ArgIdx + 1 forwards this
+      // argument. It already exists when Head had a complete SUCC_ARGS (the
+      // triangle case); otherwise we are extending a freshly built one.
+      if (PI.ArgIdx + 1 < HeadSA->getNumOperands())
+        HeadSA->getOperand(PI.ArgIdx + 1).setReg(DstReg);
+      else {
+        assert(
+            PI.ArgIdx + 1 == HeadSA->getNumOperands() &&
+            "SUCC_ARGS operands must be appended in ascending argument order");
+        MachineInstrBuilder(*Head->getParent(), HeadSA).addReg(DstReg);
+      }
+      continue;
+    }
+
+    LLVM_DEBUG(dbgs() << "If-converting " << *PI.PHI);
     // Rewrite PHI operands TPred -> (DstReg, Head), remove FPred.
     for (unsigned i = PI.PHI->getNumOperands(); i != 1; i -= 2) {
       MachineBasicBlock *MBB = PI.PHI->getOperand(i-1).getMBB();
@@ -756,16 +866,18 @@ void SSAIfConv::convertIf(SmallVectorImpl<MachineBasicBlock *> &RemoveBlocks,
   if (TBB != Tail && FBB != Tail)
     clearRepeatedKillFlagsFromTBB(TBB, FBB);
 
-  // Move all instructions into Head, except for the terminators.
+  // Move all instructions into Head, except for the SUCC_ARGS cluster and the
+  // terminators. The SUCC_ARGS feeders are rewritten below and dropped with the
+  // block, not speculated into Head.
   if (TBB != Tail) {
     if (Predicate)
       PredicateBlock(TBB, /*ReversePredicate=*/false);
-    Head->splice(InsertionPoint, TBB, TBB->begin(), TBB->getFirstTerminator());
+    Head->splice(InsertionPoint, TBB, TBB->begin(), TBB->getFirstSuccArgs());
   }
   if (FBB != Tail) {
     if (Predicate)
       PredicateBlock(FBB, /*ReversePredicate=*/true);
-    Head->splice(InsertionPoint, FBB, FBB->begin(), FBB->getFirstTerminator());
+    Head->splice(InsertionPoint, FBB, FBB->begin(), FBB->getFirstSuccArgs());
   }
   // Are there extra Tail predecessors?
   bool ExtraPreds = Tail->pred_size() != 2;
@@ -1197,7 +1309,11 @@ bool EarlyIfConverter::shouldConvertIf() {
         if (Reg.isPhysical())
           return false;
 
+        // A block-argument register has no defining instruction; its value is
+        // forwarded per-edge by SUCC_ARGS and so is not loop-invariant.
         MachineInstr *Def = MRI->getVRegDef(Reg);
+        if (!Def)
+          return false;
         return CurrentLoop->isLoopInvariant(*Def) ||
                all_of(Def->operands(), [&](MachineOperand &Op) {
                  if (Op.isImm())
@@ -1209,7 +1325,7 @@ bool EarlyIfConverter::shouldConvertIf() {
                    return false;
 
                  MachineInstr *Def = MRI->getVRegDef(Reg);
-                 return CurrentLoop->isLoopInvariant(*Def);
+                 return Def && CurrentLoop->isLoopInvariant(*Def);
                });
       }))
     return false;
@@ -1292,10 +1408,33 @@ bool EarlyIfConverter::shouldConvertIf() {
   CriticalPathInfo TBlock{};
   CriticalPathInfo FBlock{};
   bool ShouldConvert = true;
+  // Depth at which a feeder register becomes available in a predecessor trace.
+  // A block-argument feeder is defined by an ordinary instruction in the
+  // predecessor; if it has no def (itself a block argument / live-in) it is
+  // available at entry.
+  auto FeederDepth = [&](MachineTraceMetrics::Trace &T,
+                         Register R) -> unsigned {
+    if (MachineInstr *Def = MRI->getVRegDef(R))
+      return T.getInstrCycles(*Def).Depth;
+    return 0;
+  };
   for (SSAIfConv::PHIInfo &PI : IfConv.PHIs) {
-    unsigned Slack = TailTrace.getInstrSlack(*PI.PHI);
-    unsigned MaxDepth = Slack + TailTrace.getInstrCycles(*PI.PHI).Depth;
-    LLVM_DEBUG(dbgs() << "Slack " << Slack << ":\t" << *PI.PHI);
+    unsigned MaxDepth, TDepthRaw, FDepthRaw;
+    if (PI.isBlockArg()) {
+      // A block argument is a merge value available at Tail entry, with no
+      // instruction of its own. Allow the select to be produced any time up to
+      // the tail's critical path, and take the input depths from the feeder
+      // definitions in the predecessor traces.
+      MaxDepth = TailTrace.getCriticalPath();
+      TDepthRaw = FeederDepth(TBBTrace, PI.TReg);
+      FDepthRaw = FeederDepth(FBBTrace, PI.FReg);
+    } else {
+      unsigned Slack = TailTrace.getInstrSlack(*PI.PHI);
+      MaxDepth = Slack + TailTrace.getInstrCycles(*PI.PHI).Depth;
+      LLVM_DEBUG(dbgs() << "Slack " << Slack << ":\t" << *PI.PHI);
+      TDepthRaw = TBBTrace.getPHIDepth(*PI.PHI);
+      FDepthRaw = FBBTrace.getPHIDepth(*PI.PHI);
+    }
 
     // The condition is pulled into the critical path.
     unsigned CondDepth = adjCycles(BranchDepth, PI.CondCycles);
@@ -1311,7 +1450,7 @@ bool EarlyIfConverter::shouldConvertIf() {
     }
 
     // The TBB value is pulled into the critical path.
-    unsigned TDepth = adjCycles(TBBTrace.getPHIDepth(*PI.PHI), PI.TCycles);
+    unsigned TDepth = adjCycles(TDepthRaw, PI.TCycles);
     if (TDepth > MaxDepth) {
       unsigned Extra = TDepth - MaxDepth;
       LLVM_DEBUG(dbgs() << "TBB data adds " << Extra << " cycles.\n");
@@ -1324,7 +1463,7 @@ bool EarlyIfConverter::shouldConvertIf() {
     }
 
     // The FBB value is pulled into the critical path.
-    unsigned FDepth = adjCycles(FBBTrace.getPHIDepth(*PI.PHI), PI.FCycles);
+    unsigned FDepth = adjCycles(FDepthRaw, PI.FCycles);
     if (FDepth > MaxDepth) {
       unsigned Extra = FDepth - MaxDepth;
       LLVM_DEBUG(dbgs() << "FBB data adds " << Extra << " cycles.\n");

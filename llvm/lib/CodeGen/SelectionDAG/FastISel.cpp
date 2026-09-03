@@ -180,6 +180,11 @@ static bool isRegUsedByPhiNodes(Register DefReg,
   for (auto &P : FuncInfo.PHINodesToUpdate)
     if (P.second == DefReg)
       return true;
+  // A value forwarded to a successor's block arguments is used by a SUCC_ARGS
+  // not yet emitted, so it is not dead.
+  for (auto &P : FuncInfo.SuccArgsToUpdate)
+    if (P.second == DefReg)
+      return true;
   return false;
 }
 
@@ -1610,6 +1615,7 @@ bool FastISel::selectInstruction(const Instruction *I) {
     // We remove them because SelectionDAGISel will generate them again.
     removeDeadLocalValueCode(SavedLastLocalValue);
     FuncInfo.PHINodesToUpdate.resize(FuncInfo.OrigNumPHINodesToUpdate);
+    FuncInfo.SuccArgsToUpdate.resize(FuncInfo.OrigNumSuccArgsToUpdate);
   }
   return false;
 }
@@ -2192,8 +2198,14 @@ Register FastISel::fastEmitZExtFromI1(MVT VT, Register Op0) {
 /// might result in multiple MBB's for one BB.  As such, the start of the
 /// BB might correspond to a different MBB than the end.
 bool FastISel::handlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
+  // With block arguments there are no machine PHIs to update; forwarded values
+  // are recorded in SuccArgsToUpdate and emitted as SUCC_ARGS by
+  // FinishBasicBlock.
+  const bool UseBlockArgs = FunctionLoweringInfo::useBlockArgs();
+
   SmallPtrSet<MachineBasicBlock *, 4> SuccsHandled;
   FuncInfo.OrigNumPHINodesToUpdate = FuncInfo.PHINodesToUpdate.size();
+  FuncInfo.OrigNumSuccArgsToUpdate = FuncInfo.SuccArgsToUpdate.size();
 
   // Check successor nodes' PHI nodes that expect a constant to be available
   // from this block.
@@ -2207,7 +2219,10 @@ bool FastISel::handlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
     if (!SuccsHandled.insert(SuccMBB).second)
       continue;
 
-    MachineBasicBlock::iterator MBBI = SuccMBB->begin();
+    // Machine PHIs are pre-created at the top of the successor; block arguments
+    // are not, so there is no instruction to walk.
+    MachineBasicBlock::iterator MBBI =
+        UseBlockArgs ? SuccMBB->end() : SuccMBB->begin();
 
     // At this point we know that there is a 1-1 correspondence between LLVM PHI
     // nodes and Machine PHI nodes, but the incoming operands have not been
@@ -2228,6 +2243,7 @@ bool FastISel::handlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
         // Handle integer promotions, though, because they're common and easy.
         if (!(VT == MVT::i1 || VT == MVT::i8 || VT == MVT::i16)) {
           FuncInfo.PHINodesToUpdate.resize(FuncInfo.OrigNumPHINodesToUpdate);
+          FuncInfo.SuccArgsToUpdate.resize(FuncInfo.OrigNumSuccArgsToUpdate);
           return false;
         }
       }
@@ -2243,9 +2259,13 @@ bool FastISel::handlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
       Register Reg = getRegForValue(PHIOp);
       if (!Reg) {
         FuncInfo.PHINodesToUpdate.resize(FuncInfo.OrigNumPHINodesToUpdate);
+        FuncInfo.SuccArgsToUpdate.resize(FuncInfo.OrigNumSuccArgsToUpdate);
         return false;
       }
-      FuncInfo.PHINodesToUpdate.emplace_back(&*MBBI++, Reg);
+      if (UseBlockArgs)
+        FuncInfo.SuccArgsToUpdate.emplace_back(SuccMBB, Reg);
+      else
+        FuncInfo.PHINodesToUpdate.emplace_back(&*MBBI++, Reg);
       MIMD = {};
     }
   }
