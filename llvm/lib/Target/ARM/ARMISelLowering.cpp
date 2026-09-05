@@ -11640,16 +11640,6 @@ ARMTargetLowering::EmitStructByval(MachineInstr &MI,
   Register destLoop = MRI.createVirtualRegister(TRC);
   Register destPhi = MRI.createVirtualRegister(TRC);
 
-  BuildMI(*BB, BB->begin(), dl, TII->get(ARM::PHI), varPhi)
-    .addReg(varLoop).addMBB(loopMBB)
-    .addReg(varEnd).addMBB(entryBB);
-  BuildMI(BB, dl, TII->get(ARM::PHI), srcPhi)
-    .addReg(srcLoop).addMBB(loopMBB)
-    .addReg(src).addMBB(entryBB);
-  BuildMI(BB, dl, TII->get(ARM::PHI), destPhi)
-    .addReg(destLoop).addMBB(loopMBB)
-    .addReg(dest).addMBB(entryBB);
-
   //   [scratch, srcLoop] = LDR_POST(srcPhi, UnitSize)
   //   [destLoop] = STR_POST(scratch, destPhi, UnitSiz)
   Register scratch = MRI.createVirtualRegister(IsNeon ? VecTRC : TRC);
@@ -11683,6 +11673,13 @@ ARMTargetLowering::EmitStructByval(MachineInstr &MI,
   // loopMBB can loop back to loopMBB or fall through to exitMBB.
   BB->addSuccessor(loopMBB);
   BB->addSuccessor(exitMBB);
+
+  //   varPhi = PHI(varLoop, varEnd)
+  //   srcPhi = PHI(srcLoop, src)
+  //   destPhi = PHI(destLoop, dst)
+  TII->buildValueMerge(*BB, varPhi, {{varLoop, loopMBB}, {varEnd, entryBB}});
+  TII->buildValueMerge(*BB, srcPhi, {{srcLoop, loopMBB}, {src, entryBB}});
+  TII->buildValueMerge(*BB, destPhi, {{destLoop, loopMBB}, {dest, entryBB}});
 
   // Add epilogue to handle BytesLeft.
   BB = exitMBB;
@@ -11898,48 +11895,29 @@ static void genTPLoopBody(MachineBasicBlock *TpLoopBody,
                           MachineRegisterInfo &MRI, Register OpSrcReg,
                           Register OpDestReg, Register ElementCountReg,
                           Register TotalIterationsReg, bool IsMemcpy) {
-  // First insert 4 PHI nodes for: Current pointer to Src (if memcpy), Dest
-  // array, loop iteration counter, predication counter.
+  // Registers merged by 4 loop-header value merges: Current pointer to Src (if
+  // memcpy), Dest array, loop iteration counter, predication counter. The
+  // merges are built at the end, after the loop body.
 
   Register SrcPhiReg, CurrSrcReg;
   if (IsMemcpy) {
     //  Current position in the src array
     SrcPhiReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
     CurrSrcReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
-    BuildMI(TpLoopBody, Dl, TII->get(ARM::PHI), SrcPhiReg)
-        .addUse(OpSrcReg)
-        .addMBB(TpEntry)
-        .addUse(CurrSrcReg)
-        .addMBB(TpLoopBody);
   }
 
   // Current position in the dest array
   Register DestPhiReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
   Register CurrDestReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
-  BuildMI(TpLoopBody, Dl, TII->get(ARM::PHI), DestPhiReg)
-      .addUse(OpDestReg)
-      .addMBB(TpEntry)
-      .addUse(CurrDestReg)
-      .addMBB(TpLoopBody);
 
   // Current loop counter
   Register LoopCounterPhiReg = MRI.createVirtualRegister(&ARM::GPRlrRegClass);
   Register RemainingLoopIterationsReg =
       MRI.createVirtualRegister(&ARM::GPRlrRegClass);
-  BuildMI(TpLoopBody, Dl, TII->get(ARM::PHI), LoopCounterPhiReg)
-      .addUse(TotalIterationsReg)
-      .addMBB(TpEntry)
-      .addUse(RemainingLoopIterationsReg)
-      .addMBB(TpLoopBody);
 
   // Predication counter
   Register PredCounterPhiReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
   Register RemainingElementsReg = MRI.createVirtualRegister(&ARM::rGPRRegClass);
-  BuildMI(TpLoopBody, Dl, TII->get(ARM::PHI), PredCounterPhiReg)
-      .addUse(ElementCountReg)
-      .addMBB(TpEntry)
-      .addUse(RemainingElementsReg)
-      .addMBB(TpLoopBody);
 
   // Pass predication counter to VCTP
   Register VccrReg = MRI.createVirtualRegister(&ARM::VCCRRegClass);
@@ -11992,6 +11970,20 @@ static void genTPLoopBody(MachineBasicBlock *TpLoopBody,
   BuildMI(TpLoopBody, Dl, TII->get(ARM::t2B))
       .addMBB(TpExit)
       .add(predOps(ARMCC::AL));
+
+  // Insert the 4 loop-header value merges for: Current pointer to Src (if
+  // memcpy), Dest array, loop iteration counter, predication counter.
+  if (IsMemcpy)
+    TII->buildValueMerge(*TpLoopBody, SrcPhiReg,
+                         {{OpSrcReg, TpEntry}, {CurrSrcReg, TpLoopBody}});
+  TII->buildValueMerge(*TpLoopBody, DestPhiReg,
+                       {{OpDestReg, TpEntry}, {CurrDestReg, TpLoopBody}});
+  TII->buildValueMerge(*TpLoopBody, LoopCounterPhiReg,
+                       {{TotalIterationsReg, TpEntry},
+                        {RemainingLoopIterationsReg, TpLoopBody}});
+  TII->buildValueMerge(
+      *TpLoopBody, PredCounterPhiReg,
+      {{ElementCountReg, TpEntry}, {RemainingElementsReg, TpLoopBody}});
 }
 
 bool ARMTargetLowering::supportKCFIBundles() const {
@@ -12289,11 +12281,9 @@ ARMTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
     //   %Result = phi [ %FalseValue, copy0MBB ], [ %TrueValue, thisMBB ]
     //  ...
     BB = sinkMBB;
-    BuildMI(*BB, BB->begin(), dl, TII->get(ARM::PHI), MI.getOperand(0).getReg())
-        .addReg(MI.getOperand(1).getReg())
-        .addMBB(copy0MBB)
-        .addReg(MI.getOperand(2).getReg())
-        .addMBB(thisMBB);
+    TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                         {{MI.getOperand(1).getReg(), copy0MBB},
+                          {MI.getOperand(2).getReg(), thisMBB}});
 
     MI.eraseFromParent(); // The pseudo instruction is gone now.
     return BB;

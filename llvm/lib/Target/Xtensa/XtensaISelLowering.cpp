@@ -1621,12 +1621,9 @@ XtensaTargetLowering::emitSelectCC(MachineInstr &MI,
   //   %Result = phi [ %FalseValue, CopyMBB ], [ %TrueValue, MBB ]
   //  ...
 
-  BuildMI(*SinkMBB, SinkMBB->begin(), DL, TII.get(Xtensa::PHI),
-          MI.getOperand(0).getReg())
-      .addReg(FalseValue.getReg())
-      .addMBB(CopyMBB)
-      .addReg(TrueValue.getReg())
-      .addMBB(MBB);
+  TII.buildValueMerge(
+      *SinkMBB, MI.getOperand(0).getReg(),
+      {{FalseValue.getReg(), CopyMBB}, {TrueValue.getReg(), MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return SinkMBB;

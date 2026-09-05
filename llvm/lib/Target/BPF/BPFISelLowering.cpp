@@ -1206,11 +1206,9 @@ BPFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   //  %Result = phi [ %FalseValue, Copy0MBB ], [ %TrueValue, ThisMBB ]
   // ...
   BB = Copy1MBB;
-  BuildMI(*BB, BB->begin(), DL, TII.get(BPF::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(5).getReg())
-      .addMBB(Copy0MBB)
-      .addReg(MI.getOperand(4).getReg())
-      .addMBB(ThisMBB);
+  TII.buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                      {{MI.getOperand(5).getReg(), Copy0MBB},
+                       {MI.getOperand(4).getReg(), ThisMBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;

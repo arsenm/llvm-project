@@ -82,6 +82,44 @@ void TargetInstrInfo::insertNoop(MachineBasicBlock &MBB,
   llvm_unreachable("Target didn't implement insertNoop!");
 }
 
+void TargetInstrInfo::forwardSuccArgs(
+    MachineBasicBlock &Pred, MachineBasicBlock &SuccBB,
+    ArrayRef<std::pair<Register, bool>> Regs) const {
+  MachineInstr *SuccArgs = Pred.findSuccArgs(&SuccBB);
+  if (!SuccArgs)
+    SuccArgs = BuildMI(Pred, Pred.getBlockEndInsertPt(), DebugLoc(),
+                       get(TargetOpcode::SUCC_ARGS))
+                   .addMBB(&SuccBB);
+  MachineInstrBuilder MIB(*Pred.getParent(), SuccArgs);
+  for (auto [Reg, IsUndef] : Regs)
+    MIB.addReg(Reg, getUndefRegState(IsUndef));
+}
+
+MachineInstr *TargetInstrInfo::buildValueMerge(
+    MachineBasicBlock &JoinBB, Register DstReg,
+    ArrayRef<std::pair<Register, MachineBasicBlock *>> Incomings) const {
+  MachineFunction &MF = *JoinBB.getParent();
+
+  if (!MF.getProperties().hasUsesBlockArgs()) {
+    // Insert after any existing PHIs so that repeated calls append in source
+    // order, matching hand-written PHI-insertion loops.
+    MachineInstrBuilder MIB =
+        BuildMI(JoinBB, JoinBB.getFirstNonPHI(), DebugLoc(),
+                get(TargetOpcode::PHI), DstReg);
+    for (auto [Reg, Pred] : Incomings)
+      MIB.addReg(Reg).addMBB(Pred);
+    return MIB;
+  }
+
+  // Each predecessor of JoinBB appears once in Incomings, so forward one value
+  // per edge.
+  for (auto [Reg, Pred] : Incomings)
+    forwardSuccArgs(*Pred, JoinBB, {{Reg, /*IsUndef=*/false}});
+  JoinBB.addBlockArg(DstReg);
+  // Block arguments have no defining instruction to return.
+  return nullptr;
+}
+
 /// insertNoops - Insert noops into the instruction stream at the specified
 /// point.
 void TargetInstrInfo::insertNoops(MachineBasicBlock &MBB,

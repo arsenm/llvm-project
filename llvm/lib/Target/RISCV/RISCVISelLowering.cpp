@@ -26314,17 +26314,14 @@ EmitLoweredCascadedSelect(MachineInstr &First, MachineInstr &Second,
 
   Register DestReg = Second.getOperand(0).getReg();
   Register Op2Reg4 = Second.getOperand(4).getReg();
-  BuildMI(*SinkMBB, SinkMBB->begin(), DL, TII.get(RISCV::PHI), DestReg)
-      .addReg(Op2Reg4)
-      .addMBB(ThisMBB)
-      .addReg(Op1Reg4)
-      .addMBB(FirstMBB)
-      .addReg(Op1Reg5)
-      .addMBB(SecondMBB);
 
   // Now remove the Select_FPRX_s.
   First.eraseFromParent();
   Second.eraseFromParent();
+
+  TII.buildValueMerge(
+      *SinkMBB, DestReg,
+      {{Op2Reg4, ThisMBB}, {Op1Reg4, FirstMBB}, {Op1Reg5, SecondMBB}});
   return SinkMBB;
 }
 
@@ -26459,24 +26456,24 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
   // IfFalseMBB just falls through to TailMBB.
   IfFalseMBB->addSuccessor(TailMBB);
 
-  // Create PHIs for all of the select pseudo-instructions.
+  // Create value merges for all of the select pseudo-instructions.
+  SmallVector<std::array<Register, 3>, 4> Merges;
   auto SelectMBBI = MI.getIterator();
   auto SelectEnd = std::next(LastSelectPseudo->getIterator());
-  auto InsertionPoint = TailMBB->begin();
   while (SelectMBBI != SelectEnd) {
     auto Next = std::next(SelectMBBI);
     if (RISCVInstrInfo::isSelectPseudo(*SelectMBBI)) {
-      // %Result = phi [ %TrueValue, HeadMBB ], [ %FalseValue, IfFalseMBB ]
-      BuildMI(*TailMBB, InsertionPoint, SelectMBBI->getDebugLoc(),
-              TII.get(RISCV::PHI), SelectMBBI->getOperand(0).getReg())
-          .addReg(SelectMBBI->getOperand(4).getReg())
-          .addMBB(HeadMBB)
-          .addReg(SelectMBBI->getOperand(5).getReg())
-          .addMBB(IfFalseMBB);
+      Merges.push_back({SelectMBBI->getOperand(0).getReg(),
+                        SelectMBBI->getOperand(4).getReg(),
+                        SelectMBBI->getOperand(5).getReg()});
       SelectMBBI->eraseFromParent();
     }
     SelectMBBI = Next;
   }
+
+  // %Result = phi [ %TrueValue, HeadMBB ], [ %FalseValue, IfFalseMBB ]
+  for (auto &M : Merges)
+    TII.buildValueMerge(*TailMBB, M[0], {{M[1], HeadMBB}, {M[2], IfFalseMBB}});
 
   F->getProperties().resetNoPHIs();
   return TailMBB;
@@ -26679,11 +26676,7 @@ static MachineBasicBlock *emitFROUND(MachineInstr &MI, MachineBasicBlock *MBB,
   BuildMI(CvtMBB, DL, TII.get(FSGNJOpc), CvtReg).addReg(I2FReg).addReg(SrcReg);
 
   // Merge the results.
-  BuildMI(*DoneMBB, DoneMBB->begin(), DL, TII.get(RISCV::PHI), DstReg)
-      .addReg(SrcReg)
-      .addMBB(MBB)
-      .addReg(CvtReg)
-      .addMBB(CvtMBB);
+  TII.buildValueMerge(*DoneMBB, DstReg, {{SrcReg, MBB}, {CvtReg, CvtMBB}});
 
   MI.eraseFromParent();
   return DoneMBB;

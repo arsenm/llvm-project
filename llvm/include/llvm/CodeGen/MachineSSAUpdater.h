@@ -52,6 +52,15 @@ private:
   const TargetInstrInfo *TII = nullptr;
   MachineRegisterInfo *MRI = nullptr;
 
+  /// When the function uses the block-argument representation, the PHIs the
+  /// updater builds are illegal in the final IR. They are used only as scratch
+  /// during construction and lowered to block arguments plus SUCC_ARGS
+  /// forwarders when the updater finishes. \p BlockArgPHIs collects those
+  /// scratch PHIs (InsertedPHIs is redirected here in that mode).
+  MachineFunction *MF = nullptr;
+  bool UsesBlockArgs = false;
+  SmallVector<MachineInstr *, 8> BlockArgPHIs;
+
 public:
   /// MachineSSAUpdater constructor.  If InsertedPHIs is specified, it will be
   /// filled in with all PHI Nodes created by rewriting.
@@ -112,6 +121,11 @@ private:
   // for debug values, which cannot modify Codegen.
   Register GetValueAtEndOfBlockInternal(MachineBasicBlock *BB,
                                         bool ExistingValueOnly = false);
+
+  /// Lower the scratch PHIs the updater built into block arguments plus
+  /// SUCC_ARGS forwarders. Runs when the updater is destroyed, once all uses
+  /// have been rewritten. No-op unless the function uses block arguments.
+  void lowerBlockArgPHIs();
 };
 
 } // end namespace llvm
