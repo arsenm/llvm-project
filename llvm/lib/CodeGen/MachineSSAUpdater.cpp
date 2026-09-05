@@ -41,11 +41,20 @@ static AvailableValsTy &getAvailableVals(void *AV) {
 }
 
 MachineSSAUpdater::MachineSSAUpdater(MachineFunction &MF,
-                                     SmallVectorImpl<MachineInstr*> *NewPHI)
-  : InsertedPHIs(NewPHI), TII(MF.getSubtarget().getInstrInfo()),
-    MRI(&MF.getRegInfo()) {}
+                                     SmallVectorImpl<MachineInstr *> *NewPHI)
+    : InsertedPHIs(NewPHI), TII(MF.getSubtarget().getInstrInfo()),
+      MRI(&MF.getRegInfo()), MF(&MF),
+      UsesBlockArgs(MF.getProperties().hasUsesBlockArgs()) {
+  // Under the block-argument representation PHIs are illegal in the final IR.
+  // The updater still builds them as scratch and lowers them to block arguments
+  // when it finishes, so collect every PHI it creates regardless of whether the
+  // caller asked for its own record.
+  if (UsesBlockArgs)
+    InsertedPHIs = &BlockArgPHIs;
+}
 
 MachineSSAUpdater::~MachineSSAUpdater() {
+  lowerBlockArgPHIs();
   delete static_cast<AvailableValsTy*>(AV);
 }
 
@@ -253,6 +262,36 @@ void MachineSSAUpdater::RewriteUse(MachineOperand &U) {
     }
   }
   U.setReg(NewVR);
+}
+
+void MachineSSAUpdater::lowerBlockArgPHIs() {
+  if (!UsesBlockArgs)
+    return;
+
+  for (MachineInstr *PHI : BlockArgPHIs) {
+    assert(PHI->isPHI() && "expected a PHI to lower");
+    MachineBasicBlock *BB = PHI->getParent();
+
+    // Forward each incoming value from its predecessor's SUCC_ARGS.
+    for (unsigned I = 1, E = PHI->getNumOperands(); I != E; I += 2) {
+      Register SrcReg = PHI->getOperand(I).getReg();
+      unsigned SrcSubReg = PHI->getOperand(I).getSubReg();
+      MachineBasicBlock *PredBB = PHI->getOperand(I + 1).getMBB();
+
+      MachineInstr *SuccArgs = PredBB->findSuccArgs(BB);
+      if (!SuccArgs)
+        SuccArgs = BuildMI(*PredBB, PredBB->getBlockEndInsertPt(), DebugLoc(),
+                           TII->get(TargetOpcode::SUCC_ARGS))
+                       .addMBB(BB);
+      MachineInstrBuilder(*MF, SuccArgs).addReg(SrcReg, {}, SrcSubReg);
+    }
+
+    // The PHI's def register becomes a block argument; uses already refer to
+    // it.
+    BB->addBlockArg(PHI->getOperand(0).getReg());
+    PHI->eraseFromParent();
+  }
+  BlockArgPHIs.clear();
 }
 
 namespace llvm {

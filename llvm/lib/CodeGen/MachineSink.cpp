@@ -661,8 +661,8 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
     return true;
 
   // BreakPHIEdge is true if all the uses are in the successor MBB being sunken
-  // into and they are all PHI nodes. In this case, machine-sink must break
-  // the critical edge first. e.g.
+  // into and they are all PHI nodes (or SUCC_ARGS forwarding into MBB). In this
+  // case, machine-sink must break the critical edge first. e.g.
   //
   // %bb.1:
   //   Predecessors according to CFG: %bb.0
@@ -678,6 +678,11 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
         MachineInstr *UseInst = MO.getParent();
         unsigned OpNo = MO.getOperandNo();
         MachineBasicBlock *UseBlock = UseInst->getParent();
+        if (UseInst->isSuccArgs()) {
+          // Like a PHI, a SUCC_ARGS use lives on the edge from its block to
+          // its successor (operand 0).
+          return UseBlock == DefMBB && UseInst->getOperand(0).getMBB() == MBB;
+        }
         return UseBlock == MBB && UseInst->isPHI() &&
                UseInst->getOperand(OpNo + 1).getMBB() == DefMBB;
       })) {
@@ -694,6 +699,9 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
       // PHI nodes use the operand in the predecessor block, not the block with
       // the PHI.
       UseBlock = UseInst->getOperand(OpNo + 1).getMBB();
+    } else if (UseInst->isSuccArgs()) {
+      // The use lives on the edge from UseBlock to its successor, so it is not
+      // a local use even in DefMBB. UseBlock is already the predecessor block.
     } else if (UseBlock == DefMBB) {
       LocalUse = true;
       return false;

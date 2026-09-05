@@ -2184,6 +2184,31 @@ public:
     return TargetOpcode::COPY;
   }
 
+  /// Forward the values \p Regs, each a (value register, is-undef) pair, from
+  /// predecessor \p Pred to block arguments of \p SuccBB, by appending them to
+  /// \p Pred's single SUCC_ARGS for that edge (creating the SUCC_ARGS if none
+  /// exists yet, and reusing it for all \p Regs so the edge is scanned only
+  /// once). Used to fill block arguments' incoming values one edge at a time,
+  /// e.g. a loop header whose back-edge values are only known after the loop
+  /// body and its terminator have been built. \p Pred's terminators must
+  /// already be in place, since the SUCC_ARGS is placed in the
+  /// terminator-adjacent cluster.
+  LLVM_ABI void forwardSuccArgs(MachineBasicBlock &Pred,
+                                MachineBasicBlock &SuccBB,
+                                ArrayRef<std::pair<Register, bool>> Regs) const;
+
+  /// Merge the values \p Incomings, each a (value register, predecessor block)
+  /// pair, into \p DstReg at the start of \p JoinBB. In the default PHI
+  /// representation this builds a PHI in \p JoinBB and returns it. When the
+  /// function uses block arguments \p DstReg is made a block argument of
+  /// \p JoinBB and each value is forwarded from its predecessor's SUCC_ARGS
+  /// instead, and nullptr is returned (a block argument has no defining
+  /// instruction). Every predecessor of \p JoinBB must be represented exactly
+  /// once in \p Incomings.
+  LLVM_ABI MachineInstr *buildValueMerge(
+      MachineBasicBlock &JoinBB, Register DstReg,
+      ArrayRef<std::pair<Register, MachineBasicBlock *>> Incomings) const;
+
   /// During PHI eleimination lets target to make necessary checks and
   /// insert the copy to the PHI destination register in a target specific
   /// manner.

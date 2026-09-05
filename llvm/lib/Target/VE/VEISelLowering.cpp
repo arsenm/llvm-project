@@ -2219,13 +2219,6 @@ VETargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
       .addImm(0);
   MainMBB->addSuccessor(SinkMBB);
 
-  // SinkMBB:
-  BuildMI(*SinkMBB, SinkMBB->begin(), DL, TII->get(VE::PHI), DstReg)
-      .addReg(MainDestReg)
-      .addMBB(MainMBB)
-      .addReg(RestoreDestReg)
-      .addMBB(RestoreMBB);
-
   // RestoreMBB:
   // Restore BP from buf[3] iff this function is using BP.  The address of
   // buf is in SX10.
@@ -2244,6 +2237,10 @@ VETargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
       .addImm(1);
   BuildMI(RestoreMBB, DL, TII->get(VE::BRCFLa_t)).addMBB(SinkMBB);
   RestoreMBB->addSuccessor(SinkMBB);
+
+  // SinkMBB:
+  TII->buildValueMerge(*SinkMBB, DstReg,
+                       {{MainDestReg, MainMBB}, {RestoreDestReg, RestoreMBB}});
 
   MI.eraseFromParent();
   return SinkMBB;

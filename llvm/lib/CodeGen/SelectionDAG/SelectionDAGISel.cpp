@@ -18,6 +18,7 @@
 #include "llvm/ADT/PostOrderIterator.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/StringRef.h"
@@ -1957,6 +1958,7 @@ void SelectionDAGISel::SelectAllBasicBlocks(const Function &Fn) {
       FastIS->finishBasicBlock();
     FinishBasicBlock();
     FuncInfo->PHINodesToUpdate.clear();
+    FuncInfo->SuccArgsToUpdate.clear();
     ElidedArgCopyInstrs.clear();
   }
 
@@ -1973,6 +1975,34 @@ void SelectionDAGISel::SelectAllBasicBlocks(const Function &Fn) {
   SDB->SPDescriptor.resetPerFunctionState();
 }
 
+// Emit a single SUCC_ARGS in \p PredMBB forwarding to \p SuccMBB the values
+// recorded in \p SuccArgsToUpdate, in block-argument order.
+static void emitSuccArgs(
+    MachineFunction &MF, MachineBasicBlock *PredMBB, MachineBasicBlock *SuccMBB,
+    ArrayRef<std::pair<MachineBasicBlock *, Register>> SuccArgsToUpdate) {
+  if (SuccMBB->getBlockArgs().empty())
+    return;
+
+  // The verifier requires exactly one SUCC_ARGS per edge, but the switch/
+  // jump-table/bit-test flush loops can revisit an edge the main loop already
+  // handled, so skip edges that already have one.
+  for (const MachineInstr &MI : PredMBB->succ_args()) {
+    if (MI.getOperand(0).getMBB() == SuccMBB)
+      return;
+  }
+
+  const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+  MachineInstrBuilder MIB =
+      BuildMI(*PredMBB, PredMBB->getFirstTerminator(), DebugLoc(),
+              TII->get(TargetOpcode::SUCC_ARGS))
+          .addMBB(SuccMBB);
+
+  for (const auto &Entry : SuccArgsToUpdate) {
+    if (Entry.first == SuccMBB)
+      MIB.addReg(Entry.second);
+  }
+}
+
 void
 SelectionDAGISel::FinishBasicBlock() {
   LLVM_DEBUG(dbgs() << "Total amount of phi nodes to update: "
@@ -1984,14 +2014,25 @@ SelectionDAGISel::FinishBasicBlock() {
              << ")\n");
 
   // Next, now that we know what the last MBB the LLVM BB expanded is, update
-  // PHI nodes in successors.
-  for (unsigned i = 0, e = FuncInfo->PHINodesToUpdate.size(); i != e; ++i) {
-    MachineInstrBuilder PHI(*MF, FuncInfo->PHINodesToUpdate[i].first);
-    assert(PHI->isPHI() &&
-           "This is not a machine PHI node that we are updating!");
-    if (!FuncInfo->MBB->isSuccessor(PHI->getParent()))
-      continue;
-    PHI.addReg(FuncInfo->PHINodesToUpdate[i].second).addMBB(FuncInfo->MBB);
+  // PHI nodes in successors (or emit SUCC_ARGS for the block-arguments path).
+  if (FunctionLoweringInfo::useBlockArgs()) {
+    SmallPtrSet<MachineBasicBlock *, 4> SuccsHandled;
+    for (const auto &Entry : FuncInfo->SuccArgsToUpdate) {
+      MachineBasicBlock *SuccMBB = Entry.first;
+      if (!FuncInfo->MBB->isSuccessor(SuccMBB))
+        continue;
+      if (SuccsHandled.insert(SuccMBB).second)
+        emitSuccArgs(*MF, FuncInfo->MBB, SuccMBB, FuncInfo->SuccArgsToUpdate);
+    }
+  } else {
+    for (unsigned i = 0, e = FuncInfo->PHINodesToUpdate.size(); i != e; ++i) {
+      MachineInstrBuilder PHI(*MF, FuncInfo->PHINodesToUpdate[i].first);
+      assert(PHI->isPHI() &&
+             "This is not a machine PHI node that we are updating!");
+      if (!FuncInfo->MBB->isSuccessor(PHI->getParent()))
+        continue;
+      PHI.addReg(FuncInfo->PHINodesToUpdate[i].second).addMBB(FuncInfo->MBB);
+    }
   }
 
   // Handle stack protector.
@@ -2107,6 +2148,39 @@ SelectionDAGISel::FinishBasicBlock() {
       }
     }
 
+    if (FunctionLoweringInfo::useBlockArgs()) {
+      // Emit SUCC_ARGS for the block arguments of the successors reached from
+      // this bit-test block, mirroring the PHI update below. The default block
+      // is reached from the header (BTB.Parent) by its range check, and - for
+      // non-contiguous ranges - from the last case block. Each case block also
+      // branches to its target.
+      SmallSet<std::pair<MachineBasicBlock *, MachineBasicBlock *>, 8>
+          EdgesHandled;
+      auto EmitEdge = [&](MachineBasicBlock *Pred, MachineBasicBlock *Succ) {
+        if (EdgesHandled.insert({Pred, Succ}).second)
+          emitSuccArgs(*MF, Pred, Succ, FuncInfo->SuccArgsToUpdate);
+      };
+      for (const auto &Entry : FuncInfo->SuccArgsToUpdate) {
+        MachineBasicBlock *SuccMBB = Entry.first;
+        if (SuccMBB == BTB.Default) {
+          // The header's range check branches to the default. BTB.Parent is a
+          // block materialized during bit-test lowering, distinct from the
+          // block the main FinishBasicBlock loop processed, so its edge is not
+          // handled there.
+          if (BTB.Parent->isSuccessor(SuccMBB))
+            EmitEdge(BTB.Parent, SuccMBB);
+          // The extra edge from the last case block for non-contiguous ranges.
+          if (!BTB.ContiguousRange)
+            EmitEdge(BTB.Cases.back().ThisBB, SuccMBB);
+        }
+        // Case BBs branch to their targets.
+        for (const SwitchCG::BitTestCase &BT : BTB.Cases)
+          if (BT.ThisBB->isSuccessor(SuccMBB))
+            EmitEdge(BT.ThisBB, SuccMBB);
+      }
+      continue;
+    }
+
     // Update PHI Nodes
     for (const std::pair<MachineInstr *, Register> &P :
          FuncInfo->PHINodesToUpdate) {
@@ -2158,6 +2232,32 @@ SelectionDAGISel::FinishBasicBlock() {
     SDB->clear();
     CodeGenAndEmitDAG();
 
+    if (FunctionLoweringInfo::useBlockArgs()) {
+      // Emit SUCC_ARGS for the block arguments of the successors reached from
+      // the jump-table lowering, mirroring the PHI update below. The table
+      // targets are successors of the jump-table block (FuncInfo->MBB). The
+      // default block is reached from the range-check header, which may be a
+      // block materialized during jump-table lowering, distinct from the block
+      // the main FinishBasicBlock loop processed, so its edge is not handled
+      // there.
+      MachineBasicBlock *HeaderBB = SDB->SL->JTCases[i].first.HeaderBB;
+      MachineBasicBlock *DefaultBB = SDB->SL->JTCases[i].second.Default;
+      SmallSet<std::pair<MachineBasicBlock *, MachineBasicBlock *>, 8>
+          EdgesHandled;
+      auto EmitEdge = [&](MachineBasicBlock *Pred, MachineBasicBlock *Succ) {
+        if (EdgesHandled.insert({Pred, Succ}).second)
+          emitSuccArgs(*MF, Pred, Succ, FuncInfo->SuccArgsToUpdate);
+      };
+      for (const auto &Entry : FuncInfo->SuccArgsToUpdate) {
+        MachineBasicBlock *SuccMBB = Entry.first;
+        if (FuncInfo->MBB->isSuccessor(SuccMBB))
+          EmitEdge(FuncInfo->MBB, SuccMBB);
+        if (SuccMBB == DefaultBB && HeaderBB->isSuccessor(SuccMBB))
+          EmitEdge(HeaderBB, SuccMBB);
+      }
+      continue;
+    }
+
     // Update PHI Nodes
     for (unsigned pi = 0, pe = FuncInfo->PHINodesToUpdate.size();
          pi != pe; ++pi) {
@@ -2208,19 +2308,28 @@ SelectionDAGISel::FinishBasicBlock() {
       FuncInfo->InsertPt = FuncInfo->MBB->end();
       // FuncInfo->MBB may have been removed from the CFG if a branch was
       // constant folded.
-      if (ThisBB->isSuccessor(FuncInfo->MBB)) {
-        for (MachineBasicBlock::iterator
-             MBBI = FuncInfo->MBB->begin(), MBBE = FuncInfo->MBB->end();
-             MBBI != MBBE && MBBI->isPHI(); ++MBBI) {
-          MachineInstrBuilder PHI(*MF, MBBI);
-          // This value for this PHI node is recorded in PHINodesToUpdate.
-          for (unsigned pn = 0; ; ++pn) {
-            assert(pn != FuncInfo->PHINodesToUpdate.size() &&
-                   "Didn't find PHI entry!");
-            if (FuncInfo->PHINodesToUpdate[pn].first == PHI) {
-              PHI.addReg(FuncInfo->PHINodesToUpdate[pn].second).addMBB(ThisBB);
-              break;
-            }
+      if (!ThisBB->isSuccessor(FuncInfo->MBB))
+        continue;
+
+      if (FunctionLoweringInfo::useBlockArgs()) {
+        // Emit a SUCC_ARGS in the (possibly split) case block for the
+        // successor's block arguments, standing in for the edge from the
+        // original block before switch expansion.
+        emitSuccArgs(*MF, ThisBB, Succ, FuncInfo->SuccArgsToUpdate);
+        continue;
+      }
+
+      for (MachineBasicBlock::iterator MBBI = FuncInfo->MBB->begin(),
+                                       MBBE = FuncInfo->MBB->end();
+           MBBI != MBBE && MBBI->isPHI(); ++MBBI) {
+        MachineInstrBuilder PHI(*MF, MBBI);
+        // This value for this PHI node is recorded in PHINodesToUpdate.
+        for (unsigned pn = 0;; ++pn) {
+          assert(pn != FuncInfo->PHINodesToUpdate.size() &&
+                 "Didn't find PHI entry!");
+          if (FuncInfo->PHINodesToUpdate[pn].first == PHI) {
+            PHI.addReg(FuncInfo->PHINodesToUpdate[pn].second).addMBB(ThisBB);
+            break;
           }
         }
       }

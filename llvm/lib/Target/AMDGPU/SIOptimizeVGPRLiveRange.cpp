@@ -507,13 +507,24 @@ void SIOptimizeVGPRLiveRange::optimizeLiveRange(
   const auto *RC = MRI->getRegClass(Reg);
   Register NewReg = MRI->createVirtualRegister(RC);
   Register UndefReg = MRI->createVirtualRegister(RC);
-  MachineInstrBuilder PHI = BuildMI(*Flow, Flow->getFirstNonPHI(), DebugLoc(),
-                                    TII->get(TargetOpcode::PHI), NewReg);
-  for (auto *Pred : Flow->predecessors()) {
-    if (Pred == If)
-      PHI.addReg(Reg).addMBB(Pred);
-    else
-      PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
+  // NewReg merges Reg (from the THEN region, entering via If) with undef on the
+  // other edges. Represent it as a block argument fed by SUCC_ARGS when the
+  // function uses block arguments, otherwise as a PHI.
+  if (Flow->getParent()->getProperties().hasUsesBlockArgs()) {
+    for (MachineBasicBlock *Pred : Flow->predecessors()) {
+      bool IsUndef = Pred != If;
+      TII->forwardSuccArgs(*Pred, *Flow, {{IsUndef ? UndefReg : Reg, IsUndef}});
+    }
+    Flow->addBlockArg(NewReg);
+  } else {
+    MachineInstrBuilder PHI = BuildMI(*Flow, Flow->getFirstNonPHI(), DebugLoc(),
+                                      TII->get(TargetOpcode::PHI), NewReg);
+    for (MachineBasicBlock *Pred : Flow->predecessors()) {
+      if (Pred == If)
+        PHI.addReg(Reg).addMBB(Pred);
+      else
+        PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
+    }
   }
 
   // Replace all uses in the ELSE region or the PHIs in ENDIF block
@@ -540,6 +551,18 @@ void SIOptimizeVGPRLiveRange::optimizeLiveRange(
     // Replace uses in Else region
     if (ElseBlocks.contains(UseBlock))
       O.setReg(NewReg);
+  }
+
+  // With block arguments the merge is a SUCC_ARGS in each predecessor and a
+  // block-argument def in Flow, giving Reg and NewReg a different live-range
+  // shape than the PHI representation the updateLiveRange* helpers model;
+  // recompute both from scratch (recompute understands block-argument defs and
+  // SUCC_ARGS on-edge uses).
+  if (Flow->getParent()->getProperties().hasUsesBlockArgs()) {
+    if (MRI->hasOneDef(Reg) || MRI->isBlockArgDef(Reg))
+      LV->recomputeForSingleDefVirtReg(Reg);
+    LV->recomputeForSingleDefVirtReg(NewReg);
+    return;
   }
 
   // The optimized Reg is not alive through Flow blocks anymore.
@@ -570,10 +593,40 @@ void SIOptimizeVGPRLiveRange::optimizeWaterfallLiveRange(
       O.setReg(NewReg);
   }
 
+  // NewReg merges Reg (from outside the loop) with undef on the back-edge(s),
+  // so the value is not preserved across iterations. Represent it as a block
+  // argument fed by SUCC_ARGS when the function uses block arguments, otherwise
+  // as a PHI.
+  if (LoopHeader->getParent()->getProperties().hasUsesBlockArgs()) {
+    // Kill the loop uses of NewReg (its value dies within the loop; the
+    // back-edge forwards undef).
+    for (MachineInstr *MI : reverse(Instructions)) {
+      if (MI->readsRegister(NewReg, TRI)) {
+        MI->addRegisterKilled(NewReg, TRI);
+        break;
+      }
+    }
+    for (MachineBasicBlock *Pred : LoopHeader->predecessors()) {
+      bool IsUndef = Blocks.contains(Pred);
+      TII->forwardSuccArgs(*Pred, *LoopHeader,
+                           {{IsUndef ? UndefReg : Reg, IsUndef}});
+    }
+    LoopHeader->addBlockArg(NewReg);
+    // The merge is now a SUCC_ARGS in each predecessor and a block-argument def
+    // in the loop header, giving Reg and NewReg a different live-range shape
+    // than the PHI representation the manual maintenance below models;
+    // recompute both from scratch (recompute understands block-argument defs
+    // and SUCC_ARGS on-edge uses).
+    if (MRI->hasOneDef(Reg) || MRI->isBlockArgDef(Reg))
+      LV->recomputeForSingleDefVirtReg(Reg);
+    LV->recomputeForSingleDefVirtReg(NewReg);
+    return;
+  }
+
   MachineInstrBuilder PHI =
       BuildMI(*LoopHeader, LoopHeader->getFirstNonPHI(), DebugLoc(),
               TII->get(TargetOpcode::PHI), NewReg);
-  for (auto *Pred : LoopHeader->predecessors()) {
+  for (MachineBasicBlock *Pred : LoopHeader->predecessors()) {
     if (Blocks.contains(Pred))
       PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
     else

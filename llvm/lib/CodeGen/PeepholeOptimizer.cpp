@@ -926,7 +926,17 @@ bool PeepholeOptimizer::optimizeExtInstr(
         RC = MRI->getRegClass(UseMI->getOperand(0).getReg());
 
       Register NewVR = MRI->createVirtualRegister(RC);
-      BuildMI(*UseMBB, UseMI, UseMI->getDebugLoc(),
+      // The COPY is neither a terminator nor a SUCC_ARGS, so when the use is a
+      // terminator or a SUCC_ARGS operand it must be inserted before the whole
+      // SUCC_ARGS cluster rather than within it or between it and the
+      // terminators.
+
+      // FIXME: The isTerminator check probably not needed
+      MachineBasicBlock::iterator InsertPt =
+          (UseMI->isTerminator() || UseMI->isSuccArgs())
+              ? UseMBB->getFirstSuccArgs()
+              : MachineBasicBlock::iterator(UseMI);
+      BuildMI(*UseMBB, InsertPt, UseMI->getDebugLoc(),
               TII->get(TargetOpcode::COPY), NewVR)
           .addReg(DstReg, {}, SubIdx);
       if (UseSrcSubIdx)
