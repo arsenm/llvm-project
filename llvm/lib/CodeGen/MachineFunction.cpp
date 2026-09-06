@@ -105,6 +105,7 @@ static const char *getPropertyName(MachineFunctionProperties::Property Prop) {
   case P::FailsVerification: return "FailsVerification";
   case P::FailedRegAlloc: return "FailedRegAlloc";
   case P::TracksDebugUserValues: return "TracksDebugUserValues";
+  case P::UsesBlockArgs: return "UsesBlockArgs";
   }
   // clang-format on
   llvm_unreachable("Invalid machine function property");
@@ -557,6 +558,7 @@ MachineFunction::CreateMachineBasicBlock(const BasicBlock *BB,
 /// Delete the given MachineBasicBlock.
 void MachineFunction::deleteMachineBasicBlock(MachineBasicBlock *MBB) {
   assert(MBB->getParent() == this && "MBB parent mismatch!");
+  MBB->clearBlockArgs();
   // Clean up any references to MBB in jump tables before deleting it.
   if (JumpTableInfo)
     JumpTableInfo->RemoveMBBFromJumpTables(MBB);
@@ -1221,24 +1223,6 @@ auto MachineFunction::salvageCopySSAImpl(MachineInstr &MI)
   auto State = GetRegAndSubreg(MI);
   auto CurInst = MI.getIterator();
   SmallVector<unsigned, 4> SubregsSeen;
-  while (true) {
-    // If we've found a copy from a physreg, first portion of search is over.
-    if (!State.first.isVirtual())
-      break;
-
-    // Record any subregister qualifier.
-    if (State.second)
-      SubregsSeen.push_back(State.second);
-
-    MachineInstr *Inst = MRI.getVRegDef(State.first);
-    assert(Inst && "Virtual register has no def");
-    CurInst = Inst->getIterator();
-
-    // Any non-copy instruction is the defining instruction we're seeking.
-    if (!Inst->isCopyLike() && !TII.isCopyLikeInstr(*Inst))
-      break;
-    State = GetRegAndSubreg(*Inst);
-  };
 
   // Helper lambda to apply additional subregister substitutions to a known
   // instruction/operand pair. Adds new (fake) substitutions so that we can
@@ -1257,6 +1241,39 @@ auto MachineFunction::salvageCopySSAImpl(MachineInstr &MI)
       P = {NewInstrNumber, 0};
     }
     return P;
+  };
+
+  while (true) {
+    // If we've found a copy from a physreg, first portion of search is over.
+    if (!State.first.isVirtual())
+      break;
+
+    // Record any subregister qualifier.
+    if (State.second)
+      SubregsSeen.push_back(State.second);
+
+    // A block argument has no defining instruction; its value arrives on the
+    // incoming edges, like a PHI. Record it with a DBG_PHI at the top of its
+    // block; PHI elimination converts that into a DebugPHIPositions entry when
+    // it lowers the block argument to copies.
+    if (MRI.isBlockArgDef(State.first)) {
+      MachineBasicBlock &InsertBB = *MRI.getDefBlock(State.first);
+      auto Builder = BuildMI(InsertBB, InsertBB.getFirstNonPHI(), DebugLoc(),
+                             TII.get(TargetOpcode::DBG_PHI));
+      Builder.addReg(State.first);
+      unsigned NewNum = getNewDebugInstrNum();
+      Builder.addImm(NewNum);
+      return ApplySubregisters({NewNum, 0u});
+    }
+
+    MachineInstr *Inst = MRI.getVRegDef(State.first);
+    assert(Inst && "Virtual register has no def");
+    CurInst = Inst->getIterator();
+
+    // Any non-copy instruction is the defining instruction we're seeking.
+    if (!Inst->isCopyLike() && !TII.isCopyLikeInstr(*Inst))
+      break;
+    State = GetRegAndSubreg(*Inst);
   };
 
   // If we managed to find the defining instruction after COPYs, return an

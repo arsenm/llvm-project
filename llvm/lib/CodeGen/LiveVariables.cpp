@@ -156,7 +156,7 @@ void LiveVariables::MarkVirtRegAliveInBlock(VarInfo &VRInfo,
 
 void LiveVariables::HandleVirtRegUse(Register Reg, MachineBasicBlock *MBB,
                                      MachineInstr &MI) {
-  assert(MRI->getVRegDef(Reg) && "Register use before def!");
+  assert(MRI->getDefBlock(Reg) && "Register use before def!");
 
   unsigned BBNum = MBB->getNumber();
 
@@ -652,8 +652,17 @@ void LiveVariables::recomputeForSingleDefVirtReg(Register Reg) {
   VI.AliveBlocks.clear();
   VI.Kills.clear();
 
-  MachineInstr &DefMI = *MRI->getUniqueVRegDef(Reg);
-  MachineBasicBlock &DefBB = *DefMI.getParent();
+  // A block argument has no defining instruction; it is defined at the entry of
+  // its owning block. getBlockArgDef returns the owning block for a block
+  // argument and null otherwise, so a single lookup distinguishes the two
+  // cases.
+  MachineInstr *DefMI = nullptr;
+  MachineBasicBlock *DefBBPtr = MRI->getBlockArgDef(Reg);
+  if (!DefBBPtr) {
+    DefMI = MRI->getUniqueVRegDef(Reg);
+    DefBBPtr = DefMI->getParent();
+  }
+  MachineBasicBlock &DefBB = *DefBBPtr;
 
   // Initialize a worklist of BBs that Reg is live-to-end of. (Here
   // "live-to-end" means Reg is live at the end of a block even if it is only
@@ -685,11 +694,14 @@ void LiveVariables::recomputeForSingleDefVirtReg(Register Reg) {
 
   // Handle the case where all uses have been removed.
   if (NumRealUses == 0) {
-    VI.Kills.push_back(&DefMI);
-    DefMI.addRegisterDead(Reg, nullptr);
+    if (DefMI) {
+      VI.Kills.push_back(DefMI);
+      DefMI->addRegisterDead(Reg, nullptr);
+    }
     return;
   }
-  DefMI.clearRegisterDeads(Reg);
+  if (DefMI)
+    DefMI->clearRegisterDeads(Reg);
 
   // Iterate over the worklist adding blocks to AliveBlocks.
   bool LiveToEndOfDefBB = false;
@@ -717,8 +729,9 @@ void LiveVariables::recomputeForSingleDefVirtReg(Register Reg) {
     for (auto &MI : reverse(UseBB)) {
       if (MI.isDebugOrPseudoInstr())
         continue;
+      // PHIs are not kills.
       if (MI.isPHI())
-        break;
+        continue;
       if (MI.readsVirtualRegister(Reg)) {
         assert(!MI.killsRegister(Reg, /*TRI=*/nullptr));
         MI.addRegisterKilled(Reg, nullptr);
@@ -882,5 +895,24 @@ void LiveVariables::addNewBlock(MachineBasicBlock *BB,
           BBI->getOperand(i).readsReg())
         getVarInfo(BBI->getOperand(i).getReg())
           .AliveBlocks.set(NumNew);
+  }
+
+  // With block arguments the forwarded values are carried by a SUCC_ARGS, which
+  // is moved from DomBB into the new block BB when the edge is split. The use
+  // therefore moves out of DomBB and into BB, where the value is now killed. BB
+  // is a kill block (live-in, not live-through), so it is not added to
+  // AliveBlocks; its kill is recorded via the relocated instruction. If the
+  // value is defined outside DomBB it was previously live-in and killed in
+  // DomBB, which now becomes live-through and must be marked.
+  if (MachineInstr *MI = BB->findSuccArgs(SuccBB)) {
+    for (const MachineOperand &MO : drop_begin(MI->operands())) {
+      if (!MO.readsReg() || !MO.getReg().isVirtual())
+        continue;
+      MachineBasicBlock *DefBB = MRI->getDefBlock(MO.getReg());
+      if (DefBB != DomBB) {
+        LiveVariables::VarInfo &VI = getVarInfo(MO.getReg());
+        VI.AliveBlocks.set(DomBB->getNumber());
+      }
+    }
   }
 }

@@ -251,6 +251,19 @@ MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
   return I;
 }
 
+MachineBasicBlock::iterator MachineBasicBlock::getFirstSuccArgs() {
+  // SUCC_ARGS are clustered contiguously immediately before the terminators,
+  // mirroring how PHIs are clustered at the top of a block. Walk backward from
+  // the first terminator over that cluster; the result is the first SUCC_ARGS,
+  // or the first terminator if there are none. Nothing (not even a debug
+  // instruction) may be interspersed in the cluster, so the succ_args() range
+  // yields only SUCC_ARGS.
+  iterator B = begin(), I = getFirstTerminator();
+  while (I != B && std::prev(I)->isSuccArgs())
+    --I;
+  return I;
+}
+
 MachineBasicBlock::instr_iterator MachineBasicBlock::getFirstInstrTerminator() {
   instr_iterator B = instr_begin(), E = instr_end(), I = E;
   while (I != B && ((--I)->isTerminator() || I->isDebugInstr()))
@@ -1289,6 +1302,20 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
     TII->insertBranch(*NMBB, Succ, nullptr, Cond, DL);
   }
 
+  // Block arguments and PHI nodes are mutually exclusive within a function.
+  // With block arguments the forwarded values are carried by this block's
+  // SUCC_ARGS. The edge to Succ now runs through NMBB, so move the SUCC_ARGS
+  // into NMBB: a SUCC_ARGS must live in the immediate predecessor of the block
+  // whose arguments it feeds, and after the split that predecessor is NMBB.
+  if (MachineInstr *SA = findSuccArgs(Succ)) {
+    // Relocating a SUCC_ARGS only maintains LiveVariables (below), not
+    // LiveIntervals/SlotIndexes. That is sound only because block arguments
+    // exist solely before PHI elimination, where neither is live.
+    assert(!LIS && "SUCC_ARGS relocation does not update LiveIntervals");
+    SA->removeFromParent();
+    NMBB->insert(NMBB->getFirstTerminator(), SA);
+  }
+
   // Fix PHI nodes in Succ so they refer to NMBB instead of this.
   Succ->replacePhiUsesWith(this, NMBB);
 
@@ -1806,6 +1833,39 @@ MachineBasicBlock::getEndClobberMask(const TargetRegisterInfo *TRI) const {
   // which does not preserve any registers. If there are no successors, we don't
   // care what kind of return it is, putting a mask after it is a no-op.
   return isReturnBlock() && !succ_empty() ? TRI->getNoPreservedMask() : nullptr;
+}
+
+void MachineBasicBlock::addBlockArg(Register Reg) {
+  BlockArgs.push_back(Reg);
+  getParent()->getRegInfo().setBlockArgDef(Reg, this);
+}
+
+void MachineBasicBlock::clearBlockArgs() {
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  for (Register Reg : BlockArgs)
+    MRI.clearBlockArgDef(Reg);
+  BlockArgs.clear();
+}
+
+void MachineBasicBlock::removeBlockArgAndUpdateSuccArgs(unsigned I) {
+  assert(I < BlockArgs.size() && "Block argument index out of range");
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  MRI.clearBlockArgDef(BlockArgs[I]);
+  BlockArgs.erase(BlockArgs.begin() + I);
+
+  // Drop the matching forwarded operand (index I + 1, past the successor MBB
+  // operand) from each predecessor's SUCC_ARGS that targets this block. If that
+  // leaves a SUCC_ARGS with no forwarded values (only the successor operand),
+  // erase it.
+  for (MachineBasicBlock *Pred : predecessors()) {
+    MachineInstr *SA = Pred->findSuccArgs(this);
+    if (!SA)
+      continue;
+    assert(I + 1 < SA->getNumOperands() && "SUCC_ARGS operand count mismatch");
+    SA->removeOperand(I + 1);
+    if (SA->getNumOperands() == 1)
+      SA->eraseFromParent();
+  }
 }
 
 void MachineBasicBlock::clearLiveIns() {

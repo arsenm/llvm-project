@@ -3439,12 +3439,9 @@ SparcTargetLowering::expandSelectCC(MachineInstr &MI, MachineBasicBlock *BB,
   IfFalseMBB->addSuccessor(SinkMBB);
 
   // %Result = phi [ %TrueValue, ThisMBB ], [ %FalseValue, IfFalseMBB ]
-  BuildMI(*SinkMBB, SinkMBB->begin(), dl, TII.get(SP::PHI),
-          MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(1).getReg())
-      .addMBB(ThisMBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(IfFalseMBB);
+  TII.buildValueMerge(*SinkMBB, MI.getOperand(0).getReg(),
+                      {{MI.getOperand(1).getReg(), ThisMBB},
+                       {MI.getOperand(2).getReg(), IfFalseMBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return SinkMBB;

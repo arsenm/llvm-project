@@ -687,6 +687,7 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   MachineBasicBlock *MBB = MI.getParent();
   MachineFunction::iterator It = ++MBB->getIterator();
   MachineFunction *F = MBB->getParent();
+  const bool UsesBlockArgs = F->getProperties().hasUsesBlockArgs();
   const BasicBlock *BB = MBB->getBasicBlock();
 
   MachineBasicBlock *FalseMBB = F->CreateMachineBasicBlock(BB);
@@ -716,12 +717,10 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   // Add the sink block to the false block successors.
   FalseMBB->addSuccessor(SinkMBB);
 
-  MachineInstrBuilder MIB;
   MachineBasicBlock::iterator MIItBegin = MachineBasicBlock::iterator(MI);
   MachineBasicBlock::iterator MIItEnd =
       std::next(MachineBasicBlock::iterator(LastCMOV));
   MachineBasicBlock::iterator FalseInsertionPoint = FalseMBB->begin();
-  MachineBasicBlock::iterator SinkInsertionPoint = SinkMBB->begin();
 
   // First we need to insert an explicit load on the false path for any memory
   // operand. We also need to potentially do register rewriting here, but it is
@@ -836,6 +835,17 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   // destination registers, and the registers that went into the PHI.
   DenseMap<Register, std::pair<Register, Register>> RegRewriteTable;
 
+  // Compute the merge for each CMOV first, then build them after erasing the
+  // CMOVs. buildValueMerge may insert a SUCC_ARGS into MBB (the block that held
+  // the CMOVs) under block arguments, so materializing the merges inside the
+  // loop would splice new instructions into the range being walked.
+  struct MergeSpec {
+    Register DestReg;
+    Register Op1Reg;
+    Register Op2Reg;
+    unsigned DebugInstrNum;
+  };
+  SmallVector<MergeSpec, 4> Merges;
   for (MachineBasicBlock::iterator MIIt = MIItBegin; MIIt != MIItEnd; ++MIIt) {
     Register DestReg = MIIt->getOperand(0).getReg();
     Register Op1Reg = MIIt->getOperand(1).getReg();
@@ -855,34 +865,37 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
     if (Op2Itr != RegRewriteTable.end())
       Op2Reg = Op2Itr->second.second;
 
-    //  SinkMBB:
-    //   %Result = phi [ %FalseValue, FalseMBB ], [ %TrueValue, MBB ]
-    //  ...
-    MIB = BuildMI(*SinkMBB, SinkInsertionPoint, DL, TII->get(X86::PHI), DestReg)
-              .addReg(Op1Reg)
-              .addMBB(FalseMBB)
-              .addReg(Op2Reg)
-              .addMBB(MBB);
-    (void)MIB;
-    LLVM_DEBUG(dbgs() << "\tFrom: "; MIIt->dump());
-    LLVM_DEBUG(dbgs() << "\tTo: "; MIB->dump());
+    Merges.push_back({DestReg, Op1Reg, Op2Reg, MIIt->peekDebugInstrNum()});
 
-    // debug-info: we can just copy the instr-ref number from one instruction
-    // to the other, seeing how it's a one-for-one substitution.
-    if (unsigned InstrNum = MIIt->peekDebugInstrNum())
-      MIB->setDebugInstrNum(InstrNum);
-
-    // Add this PHI to the rewrite table.
+    // Add this merge to the rewrite table.
     RegRewriteTable[DestReg] = std::make_pair(Op1Reg, Op2Reg);
   }
 
   // Reset the NoPHIs property if a PHI was inserted to prevent a conflict with
-  // the MachineVerifier during testing.
-  if (MIItBegin != MIItEnd)
+  // the MachineVerifier during testing. Block arguments keep the no-PHI form.
+  if (MIItBegin != MIItEnd && !UsesBlockArgs)
     F->getProperties().resetNoPHIs();
 
-  // Now remove the CMOV(s).
+  // Now remove the CMOV(s), then build the merges: under block arguments
+  // buildValueMerge forwards a value from MBB with a SUCC_ARGS, which must not
+  // land inside the erased CMOV range.
   MBB->erase(MIItBegin, MIItEnd);
+
+  for (const MergeSpec &M : Merges) {
+    //  SinkMBB:
+    //   %Result = phi [ %FalseValue, FalseMBB ], [ %TrueValue, MBB ]
+    //  ...
+    // Under block arguments this instead makes DestReg a block argument of
+    // SinkMBB fed by SUCC_ARGS, and returns nullptr.
+    MachineInstr *Merge = TII->buildValueMerge(
+        *SinkMBB, M.DestReg, {{M.Op1Reg, FalseMBB}, {M.Op2Reg, MBB}});
+
+    // debug-info: we can just copy the instr-ref number from one instruction to
+    // the other, seeing how it's a one-for-one substitution. A block argument
+    // has no defining instruction to carry the number.
+    if (M.DebugInstrNum && Merge)
+      Merge->setDebugInstrNum(M.DebugInstrNum);
+  }
 
   // Add new basic blocks to MachineLoopInfo.
   if (MachineLoop *L = MLI->getLoopFor(MBB)) {

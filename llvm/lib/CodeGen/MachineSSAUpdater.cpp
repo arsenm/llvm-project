@@ -41,9 +41,10 @@ static AvailableValsTy &getAvailableVals(void *AV) {
 }
 
 MachineSSAUpdater::MachineSSAUpdater(MachineFunction &MF,
-                                     SmallVectorImpl<MachineInstr*> *NewPHI)
-  : InsertedPHIs(NewPHI), TII(MF.getSubtarget().getInstrInfo()),
-    MRI(&MF.getRegInfo()) {}
+                                     SmallVectorImpl<MachineInstr *> *NewPHI)
+    : InsertedPHIs(NewPHI), TII(MF.getSubtarget().getInstrInfo()),
+      MRI(&MF.getRegInfo()), MF(&MF),
+      UsesBlockArgs(MF.getProperties().hasUsesBlockArgs()) {}
 
 MachineSSAUpdater::~MachineSSAUpdater() {
   delete static_cast<AvailableValsTy*>(AV);
@@ -104,6 +105,32 @@ Register LookForIdenticalPHI(MachineBasicBlock *BB,
     if (Same)
       return I->getOperand(0).getReg();
     ++I;
+  }
+  return Register();
+}
+
+/// lookForIdenticalBlockArg - The block-argument analog of LookForIdenticalPHI:
+/// if BB already has a block argument whose forwarded values (read from each
+/// predecessor's SUCC_ARGS) match PredValues, return that argument's register.
+static Register lookForIdenticalBlockArg(
+    MachineBasicBlock *BB,
+    SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &PredValues) {
+  AvailableValsTy AVals;
+  for (const auto &[SrcBB, SrcReg] : PredValues)
+    AVals[SrcBB] = SrcReg;
+
+  ArrayRef<Register> Args = BB->getBlockArgs();
+  for (unsigned ArgIdx = 0, E = Args.size(); ArgIdx != E; ++ArgIdx) {
+    bool Same = true;
+    for (MachineBasicBlock *PredBB : BB->predecessors()) {
+      MachineInstr *SA = PredBB->findSuccArgs(BB);
+      if (!SA || AVals.lookup(PredBB) != SA->getOperand(ArgIdx + 1).getReg()) {
+        Same = false;
+        break;
+      }
+    }
+    if (Same)
+      return Args[ArgIdx];
   }
   return Register();
 }
@@ -181,14 +208,33 @@ Register MachineSSAUpdater::GetValueInMiddleOfBlock(MachineBasicBlock *BB,
   if (SingularValue)
     return SingularValue;
 
-  // If an identical PHI is already in BB, just reuse it.
-  Register DupPHI = LookForIdenticalPHI(BB, PredValues);
-  if (DupPHI)
-    return DupPHI;
+  // If an identical join is already in BB, just reuse it.
+  Register DupJoin = UsesBlockArgs ? lookForIdenticalBlockArg(BB, PredValues)
+                                   : LookForIdenticalPHI(BB, PredValues);
+  if (DupJoin)
+    return DupJoin;
 
   // If we cannot create new instructions, return $noreg now.
   if (ExistingValueOnly)
     return Register();
+
+  // With the block-argument representation, materialize a block argument and
+  // forward each predecessor's value through a SUCC_ARGS instead of a PHI.
+  if (UsesBlockArgs) {
+    Register Reg = MRI->createVirtualRegister(RegAttrs);
+    BB->addBlockArg(Reg);
+    for (const auto &[SrcBB, SrcReg] : PredValues) {
+      MachineInstr *SuccArgs = SrcBB->findSuccArgs(BB);
+      if (!SuccArgs)
+        SuccArgs = BuildMI(*SrcBB, SrcBB->getBlockEndInsertPt(), DebugLoc(),
+                           TII->get(TargetOpcode::SUCC_ARGS))
+                       .addMBB(BB);
+      MachineInstrBuilder(*MF, SuccArgs).addReg(SrcReg);
+    }
+    LLVM_DEBUG(dbgs() << "  Inserted block arg: " << printReg(Reg) << " in "
+                      << printMBBReference(*BB) << '\n');
+    return Reg;
+  }
 
   // Otherwise, we do need a PHI: insert one now.
   MachineBasicBlock::iterator Loc = BB->empty() ? BB->end() : BB->begin();
@@ -255,6 +301,26 @@ void MachineSSAUpdater::RewriteUse(MachineOperand &U) {
   U.setReg(NewVR);
 }
 
+void MachineSSAUpdater::emitPendingBlockArgs() {
+  if (PendingBlockArgs.empty())
+    return;
+
+  AvailableValsTy &AvailableVals = getAvailableVals(AV);
+  for (auto [BB, Reg] : PendingBlockArgs) {
+    // Each predecessor forwards its live-out value - the value the placement
+    // algorithm recorded in AvailableVals - through a SUCC_ARGS to BB.
+    for (MachineBasicBlock *PredBB : BB->predecessors()) {
+      MachineInstr *SuccArgs = PredBB->findSuccArgs(BB);
+      if (!SuccArgs)
+        SuccArgs = BuildMI(*PredBB, PredBB->getBlockEndInsertPt(), DebugLoc(),
+                           TII->get(TargetOpcode::SUCC_ARGS))
+                       .addMBB(BB);
+      MachineInstrBuilder(*MF, SuccArgs).addReg(AvailableVals.lookup(PredBB));
+    }
+  }
+  PendingBlockArgs.clear();
+}
+
 namespace llvm {
 
 /// SSAUpdaterTraits<MachineSSAUpdater> - Traits for the SSAUpdaterImpl
@@ -317,10 +383,19 @@ public:
     return NewDef->getOperand(0).getReg();
   }
 
-  /// CreateEmptyPHI - Create a PHI instruction that defines a new register.
-  /// Add it into the specified block and return the register.
+  /// CreateEmptyPHI - Create a join in BB that defines a new register. With the
+  /// block-argument representation this is a block argument whose SUCC_ARGS
+  /// forwarders are filled afterwards by emitPendingBlockArgs (the template's
+  /// operand-filling pass is skipped because ValueIsNewPHI returns null for a
+  /// block argument); otherwise it is an empty machine PHI.
   static Register CreateEmptyPHI(MachineBasicBlock *BB, unsigned NumPreds,
                                  MachineSSAUpdater *Updater) {
+    if (Updater->UsesBlockArgs) {
+      Register Reg = Updater->MRI->createVirtualRegister(Updater->RegAttrs);
+      BB->addBlockArg(Reg);
+      Updater->PendingBlockArgs.emplace_back(BB, Reg);
+      return Reg;
+    }
     MachineBasicBlock::iterator Loc = BB->empty() ? BB->end() : BB->begin();
     MachineInstr *PHI =
         InsertNewDef(TargetOpcode::PHI, BB, Loc, Updater->RegAttrs,
@@ -329,7 +404,8 @@ public:
   }
 
   /// AddPHIOperand - Add the specified value as an operand of the PHI for
-  /// the specified predecessor block.
+  /// the specified predecessor block. Unreachable with block arguments, where
+  /// forwarders are emitted by emitPendingBlockArgs instead.
   static void AddPHIOperand(MachineInstr *PHI, Register Val,
                             MachineBasicBlock *Pred) {
     MachineInstrBuilder(*Pred->getParent(), PHI).addReg(Val).addMBB(Pred);
@@ -379,5 +455,10 @@ MachineSSAUpdater::GetValueAtEndOfBlockInternal(MachineBasicBlock *BB,
     return ExistingVal;
 
   SSAUpdaterImpl<MachineSSAUpdater> Impl(this, &AvailableVals, InsertedPHIs);
-  return Impl.GetValue(BB);
+  Register Res = Impl.GetValue(BB);
+  // The placement algorithm created block arguments but skipped filling their
+  // incoming values (a block argument is not a PHI). Emit their SUCC_ARGS
+  // forwarders now that AvailableVals is fully populated.
+  emitPendingBlockArgs();
+  return Res;
 }

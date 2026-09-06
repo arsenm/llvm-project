@@ -500,11 +500,9 @@ Mips16TargetLowering::emitSel16(unsigned Opc, MachineInstr &MI,
   //  ...
   BB = sinkMBB;
 
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(1).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(copy0MBB);
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(1).getReg(), thisMBB},
+                        {MI.getOperand(2).getReg(), copy0MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;
@@ -564,11 +562,9 @@ Mips16TargetLowering::emitSelT16(unsigned Opc1, unsigned Opc2, MachineInstr &MI,
   //  ...
   BB = sinkMBB;
 
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(1).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(copy0MBB);
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(1).getReg(), thisMBB},
+                        {MI.getOperand(2).getReg(), copy0MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;
@@ -630,11 +626,9 @@ Mips16TargetLowering::emitSeliT16(unsigned Opc1, unsigned Opc2,
   //  ...
   BB = sinkMBB;
 
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(1).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(copy0MBB);
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(1).getReg(), thisMBB},
+                        {MI.getOperand(2).getReg(), copy0MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;

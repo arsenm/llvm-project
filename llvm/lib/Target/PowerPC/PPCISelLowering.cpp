@@ -13775,13 +13775,12 @@ PPCTargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
   BuildMI(mainMBB, DL, TII->get(PPC::LI), mainDstReg).addImm(0);
   mainMBB->addSuccessor(sinkMBB);
 
-  // sinkMBB:
-  BuildMI(*sinkMBB, sinkMBB->begin(), DL,
-          TII->get(PPC::PHI), DstReg)
-    .addReg(mainDstReg).addMBB(mainMBB)
-    .addReg(restoreDstReg).addMBB(thisMBB);
-
   MI.eraseFromParent();
+
+  // sinkMBB:
+  TII->buildValueMerge(*sinkMBB, DstReg,
+                       {{mainDstReg, mainMBB}, {restoreDstReg, thisMBB}});
+
   return sinkMBB;
 }
 
@@ -14193,13 +14192,11 @@ static MachineBasicBlock *emitSelect(MachineInstr &MI, MachineBasicBlock *BB,
   BB = copy0MBB;
   BB->addSuccessor(sinkMBB);
 
-  // sinkMBB: PHI instruction
+  // sinkMBB: value merge
   BB = sinkMBB;
-  BuildMI(*BB, BB->begin(), dl, TII->get(PPC::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(3).getReg())
-      .addMBB(copy0MBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(thisMBB);
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(3).getReg(), copy0MBB},
+                        {MI.getOperand(2).getReg(), thisMBB}});
   MI.eraseFromParent();
   return BB;
 }

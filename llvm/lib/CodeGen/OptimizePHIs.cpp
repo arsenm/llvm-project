@@ -13,6 +13,7 @@
 
 #include "llvm/CodeGen/OptimizePHIs.h"
 #include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
@@ -31,6 +32,7 @@ using namespace llvm;
 
 STATISTIC(NumPHICycles, "Number of PHI cycles replaced");
 STATISTIC(NumDeadPHICycles, "Number of dead PHI cycles");
+STATISTIC(NumBlockArgCycles, "Number of block-argument cycles replaced");
 
 namespace {
 
@@ -44,10 +46,13 @@ public:
 private:
   using InstrSet = SmallPtrSet<MachineInstr *, 16>;
   using InstrSetIterator = SmallPtrSetIterator<MachineInstr *>;
+  using RegSet = SmallSet<Register, 16>;
 
   bool IsSingleValuePHICycle(MachineInstr *MI, Register &SingleValReg,
                              InstrSet &PHIsInCycle);
   bool IsDeadPHICycle(MachineInstr *MI, InstrSet &PHIsInCycle);
+  bool IsSingleValueBlockArgCycle(Register ArgReg, Register &SingleValReg,
+                                  RegSet &ArgsInCycle);
   bool OptimizeBB(MachineBasicBlock &MBB);
 };
 
@@ -176,6 +181,68 @@ bool OptimizePHIs::IsDeadPHICycle(MachineInstr *MI, InstrSet &PHIsInCycle) {
   return true;
 }
 
+/// IsSingleValueBlockArgCycle - The block-argument dual of
+/// IsSingleValuePHICycle: check if ArgReg is a block argument whose forwarded
+/// SUCC_ARGS values are all copies of SingleValReg, possibly via copies through
+/// other block arguments.
+bool OptimizePHIs::IsSingleValueBlockArgCycle(Register ArgReg,
+                                              Register &SingleValReg,
+                                              RegSet &ArgsInCycle) {
+  MachineBasicBlock *MBB = MRI->getBlockArgDef(ArgReg);
+  assert(MBB && "IsSingleValueBlockArgCycle expects a block argument");
+
+  // See if we already saw this argument.
+  if (!ArgsInCycle.insert(ArgReg).second)
+    return true;
+
+  // Don't scan crazily complex things.
+  if (ArgsInCycle.size() == 16)
+    return false;
+
+  ArrayRef<Register> Args = MBB->getBlockArgs();
+  unsigned ArgIdx = llvm::find(Args, ArgReg) - Args.begin();
+  if (ArgIdx == Args.size())
+    return false;
+
+  // Scan the forwarded value in each predecessor's SUCC_ARGS.
+  for (MachineBasicBlock *Pred : MBB->predecessors()) {
+    MachineInstr *SA = nullptr;
+    for (MachineInstr &MI : Pred->succ_args()) {
+      if (MI.getOperand(0).getMBB() == MBB) {
+        SA = &MI;
+        break;
+      }
+    }
+    if (!SA)
+      return false;
+
+    Register SrcReg = SA->getOperand(ArgIdx + 1).getReg();
+    if (SrcReg == ArgReg)
+      continue;
+
+    // Skip over register-to-register moves.
+    MachineInstr *SrcMI = MRI->getVRegDef(SrcReg);
+    if (SrcMI && SrcMI->isCopy() && !SrcMI->getOperand(1).getSubReg() &&
+        SrcMI->getOperand(1).getReg().isVirtual()) {
+      SrcReg = SrcMI->getOperand(1).getReg();
+      SrcMI = MRI->getVRegDef(SrcReg);
+    }
+    if (SrcReg == ArgReg)
+      continue;
+
+    if (MRI->isBlockArgDef(SrcReg)) {
+      if (!IsSingleValueBlockArgCycle(SrcReg, SingleValReg, ArgsInCycle))
+        return false;
+    } else {
+      // Fail if there is more than one non-blockarg/non-move register.
+      if (SingleValReg && SingleValReg != SrcReg)
+        return false;
+      SingleValReg = SrcReg;
+    }
+  }
+  return true;
+}
+
 /// OptimizeBB - Remove dead PHI cycles and PHI cycles that can be replaced by
 /// a single value.
 bool OptimizePHIs::OptimizeBB(MachineBasicBlock &MBB) {
@@ -216,6 +283,33 @@ bool OptimizePHIs::OptimizeBB(MachineBasicBlock &MBB) {
       ++NumDeadPHICycles;
       Changed = true;
     }
+  }
+
+  // Apply the same single-value cycle fold to block arguments. Walk backwards
+  // so removing an argument does not shift the indices still to be visited.
+  for (unsigned I = MBB.getNumBlockArgs(); I-- != 0;) {
+    Register ArgReg = MBB.getBlockArg(I);
+    Register SingleValReg;
+    RegSet ArgsInCycle;
+    if (!IsSingleValueBlockArgCycle(ArgReg, SingleValReg, ArgsInCycle) ||
+        !SingleValReg)
+      continue;
+
+    // Every predecessor forwards a value for the argument, so like a PHI
+    // operand the single value's def dominates the uses; no dominance check is
+    // needed. Reject an undef value.
+    MachineInstr *DefMI = MRI->getVRegDef(SingleValReg);
+    if (!DefMI || DefMI->isImplicitDef())
+      continue;
+
+    if (!MRI->constrainRegClass(SingleValReg, MRI->getRegClass(ArgReg)))
+      continue;
+
+    MRI->replaceRegWith(ArgReg, SingleValReg);
+    MBB.removeBlockArgAndUpdateSuccArgs(I);
+    MRI->clearKillFlags(SingleValReg);
+    ++NumBlockArgCycles;
+    Changed = true;
   }
   return Changed;
 }
