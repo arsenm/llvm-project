@@ -1437,11 +1437,9 @@ XCoreTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   //   %Result = phi [ %FalseValue, copy0MBB ], [ %TrueValue, thisMBB ]
   //  ...
   BB = sinkMBB;
-  BuildMI(*BB, BB->begin(), dl, TII.get(XCore::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(3).getReg())
-      .addMBB(copy0MBB)
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(thisMBB);
+  TII.buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                      {{MI.getOperand(3).getReg(), copy0MBB},
+                       {MI.getOperand(2).getReg(), thisMBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;

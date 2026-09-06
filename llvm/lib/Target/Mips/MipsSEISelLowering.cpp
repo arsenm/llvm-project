@@ -3278,13 +3278,9 @@ MipsSETargetLowering::emitBPOSGE32(MachineInstr &MI,
   BuildMI(*TBB, TBB->end(), DL, TII->get(Mips::ADDiu), VR1)
     .addReg(Mips::ZERO).addImm(1);
 
-  // Insert phi function to $Sink.
-  BuildMI(*Sink, Sink->begin(), DL, TII->get(Mips::PHI),
-          MI.getOperand(0).getReg())
-      .addReg(VR2)
-      .addMBB(FBB)
-      .addReg(VR1)
-      .addMBB(TBB);
+  // Insert value merge to $Sink.
+  TII->buildValueMerge(*Sink, MI.getOperand(0).getReg(),
+                       {{VR2, FBB}, {VR1, TBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return Sink;
@@ -3347,13 +3343,9 @@ MachineBasicBlock *MipsSETargetLowering::emitMSACBranchPseudo(
   BuildMI(*TBB, TBB->end(), DL, TII->get(Mips::ADDiu), RD2)
     .addReg(Mips::ZERO).addImm(1);
 
-  // Insert phi function to $Sink.
-  BuildMI(*Sink, Sink->begin(), DL, TII->get(Mips::PHI),
-          MI.getOperand(0).getReg())
-      .addReg(RD1)
-      .addMBB(FBB)
-      .addReg(RD2)
-      .addMBB(TBB);
+  // Insert value merge to $Sink.
+  TII->buildValueMerge(*Sink, MI.getOperand(0).getReg(),
+                       {{RD1, FBB}, {RD2, TBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return Sink;

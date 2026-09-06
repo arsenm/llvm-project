@@ -926,7 +926,14 @@ bool PeepholeOptimizer::optimizeExtInstr(
         RC = MRI->getRegClass(UseMI->getOperand(0).getReg());
 
       Register NewVR = MRI->createVirtualRegister(RC);
-      BuildMI(*UseMBB, UseMI, UseMI->getDebugLoc(),
+      // A SUCC_ARGS use lives in the block's SUCC_ARGS cluster, which must stay
+      // adjacent to the terminators. The COPY is neither, so insert it before
+      // the whole cluster rather than within it. Any other use (including a
+      // terminator) takes the COPY immediately before itself, as before.
+      MachineBasicBlock::iterator InsertPt =
+          UseMI->isSuccArgs() ? UseMBB->getFirstSuccArgs()
+                              : MachineBasicBlock::iterator(UseMI);
+      BuildMI(*UseMBB, InsertPt, UseMI->getDebugLoc(),
               TII->get(TargetOpcode::COPY), NewVR)
           .addReg(DstReg, {}, SubIdx);
       if (UseSrcSubIdx)

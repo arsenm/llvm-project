@@ -36827,9 +36827,8 @@ static MachineBasicBlock *emitXBegin(MachineInstr &MI, MachineBasicBlock *MBB,
 
   // sinkMBB:
   //  DstReg := phi(mainDstReg/mainBB, fallDstReg/fallBB)
-  BuildMI(*sinkMBB, sinkMBB->begin(), MIMD, TII->get(X86::PHI), DstReg)
-      .addReg(mainDstReg).addMBB(mainMBB)
-      .addReg(fallDstReg).addMBB(fallMBB);
+  TII->buildValueMerge(*sinkMBB, DstReg,
+                       {{mainDstReg, mainMBB}, {fallDstReg, fallMBB}});
 
   MI.eraseFromParent();
   return sinkMBB;
@@ -37101,12 +37100,11 @@ X86TargetLowering::EmitVAARGWithCustomInserter(MachineInstr &MI,
       .addReg(NextAddrReg)
       .setMemRefs(StoreOnlyMMO);
 
-  // If we branched, emit the PHI to the front of endMBB.
+  // If we branched, emit the value merge to the front of endMBB.
   if (offsetMBB) {
-    BuildMI(*endMBB, endMBB->begin(), MIMD,
-            TII->get(X86::PHI), DestReg)
-      .addReg(OffsetDestReg).addMBB(offsetMBB)
-      .addReg(OverflowDestReg).addMBB(overflowMBB);
+    TII->buildValueMerge(
+        *endMBB, DestReg,
+        {{OffsetDestReg, offsetMBB}, {OverflowDestReg, overflowMBB}});
   }
 
   // Erase the pseudo instruction
@@ -37169,15 +37167,15 @@ static bool isCMOVPseudo(MachineInstr &MI) {
   }
 }
 
-// Helper function, which inserts PHI functions into SinkMBB:
+// Helper function, which inserts value merges into SinkMBB:
 //   %Result(i) = phi [ %FalseValue(i), FalseMBB ], [ %TrueValue(i), TrueMBB ],
 // where %FalseValue(i) and %TrueValue(i) are taken from the consequent CMOVs
-// in [MIItBegin, MIItEnd) range. It returns the last MachineInstrBuilder for
-// the last PHI function inserted.
-static MachineInstrBuilder createPHIsForCMOVsInSinkBB(
-    MachineBasicBlock::iterator MIItBegin, MachineBasicBlock::iterator MIItEnd,
-    MachineBasicBlock *TrueMBB, MachineBasicBlock *FalseMBB,
-    MachineBasicBlock *SinkMBB) {
+// in [MIItBegin, MIItEnd) range.
+static void createPHIsForCMOVsInSinkBB(MachineBasicBlock::iterator MIItBegin,
+                                       MachineBasicBlock::iterator MIItEnd,
+                                       MachineBasicBlock *TrueMBB,
+                                       MachineBasicBlock *FalseMBB,
+                                       MachineBasicBlock *SinkMBB) {
   MachineFunction *MF = TrueMBB->getParent();
   const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
   const MIMetadata MIMD(*MIItBegin);
@@ -37185,17 +37183,19 @@ static MachineInstrBuilder createPHIsForCMOVsInSinkBB(
   X86::CondCode CC = X86::CondCode(MIItBegin->getOperand(3).getImm());
   X86::CondCode OppCC = X86::GetOppositeBranchCondition(CC);
 
-  MachineBasicBlock::iterator SinkInsertionPoint = SinkMBB->begin();
-
-  // As we are creating the PHIs, we have to be careful if there is more than
-  // one.  Later CMOVs may reference the results of earlier CMOVs, but later
-  // PHIs have to reference the individual true/false inputs from earlier PHIs.
-  // That also means that PHI construction must work forward from earlier to
-  // later, and that the code must maintain a mapping from earlier PHI's
-  // destination registers, and the registers that went into the PHI.
+  // As we are creating the value merges, we have to be careful if there is more
+  // than one.  Later CMOVs may reference the results of earlier CMOVs, but
+  // later merges have to reference the individual true/false inputs from
+  // earlier merges.  That also means that construction must work forward from
+  // earlier to later, and that the code must maintain a mapping from earlier
+  // merge destination registers, and the registers that went into the merge.
   DenseMap<Register, std::pair<Register, Register>> RegRewriteTable;
-  MachineInstrBuilder MIB;
 
+  // Compute the merge for each CMOV first, then build them. buildValueMerge may
+  // insert a SUCC_ARGS into TrueMBB/FalseMBB, and TrueMBB is the block being
+  // iterated here, so materializing the merges inside the loop would splice new
+  // instructions into the range being walked.
+  SmallVector<std::pair<Register, std::array<Register, 2>>, 4> Merges;
   for (MachineBasicBlock::iterator MIIt = MIItBegin; MIIt != MIItEnd; ++MIIt) {
     Register DestReg = MIIt->getOperand(0).getReg();
     Register Op1Reg = MIIt->getOperand(1).getReg();
@@ -37203,7 +37203,7 @@ static MachineInstrBuilder createPHIsForCMOVsInSinkBB(
 
     // If this CMOV we are generating is the opposite condition from
     // the jump we generated, then we have to swap the operands for the
-    // PHI that is going to be generated.
+    // merge that is going to be generated.
     if (MIIt->getOperand(3).getImm() == OppCC)
       std::swap(Op1Reg, Op2Reg);
 
@@ -37213,18 +37213,20 @@ static MachineInstrBuilder createPHIsForCMOVsInSinkBB(
     if (auto It = RegRewriteTable.find(Op2Reg); It != RegRewriteTable.end())
       Op2Reg = It->second.second;
 
-    MIB =
-        BuildMI(*SinkMBB, SinkInsertionPoint, MIMD, TII->get(X86::PHI), DestReg)
-            .addReg(Op1Reg)
-            .addMBB(FalseMBB)
-            .addReg(Op2Reg)
-            .addMBB(TrueMBB);
+    Merges.push_back({DestReg, {Op1Reg, Op2Reg}});
 
-    // Add this PHI to the rewrite table.
+    // Add this merge to the rewrite table.
     RegRewriteTable[DestReg] = std::make_pair(Op1Reg, Op2Reg);
   }
 
-  return MIB;
+  // Remove the CMOVs before building the merges: buildValueMerge may forward a
+  // value from TrueMBB (the block that held the CMOVs) with a SUCC_ARGS, and
+  // that forwarder must not fall inside the erased CMOV range.
+  TrueMBB->erase(MIItBegin, MIItEnd);
+
+  for (auto &[DestReg, Ops] : Merges)
+    TII->buildValueMerge(*SinkMBB, DestReg,
+                         {{Ops[0], FalseMBB}, {Ops[1], TrueMBB}});
 }
 
 // Lower cascaded selects in form of (SecondCmov (FirstCMOV F, T, cc1), T, cc2).
@@ -37363,16 +37365,12 @@ X86TargetLowering::EmitLoweredCascadedSelect(MachineInstr &FirstCMOV,
   Register DestReg = SecondCascadedCMOV.getOperand(0).getReg();
   Register Op1Reg = FirstCMOV.getOperand(1).getReg();
   Register Op2Reg = FirstCMOV.getOperand(2).getReg();
-  MachineInstrBuilder MIB =
-      BuildMI(*SinkMBB, SinkMBB->begin(), MIMD, TII->get(X86::PHI), DestReg)
-          .addReg(Op1Reg)
-          .addMBB(SecondInsertedMBB)
-          .addReg(Op2Reg)
-          .addMBB(ThisMBB);
-
-  // The second SecondInsertedMBB provides the same incoming value as the
-  // FirstInsertedMBB (the True operand of the SELECT_CC/CMOV nodes).
-  MIB.addReg(FirstCMOV.getOperand(2).getReg()).addMBB(FirstInsertedMBB);
+  // FirstInsertedMBB provides the same incoming value as SecondInsertedMBB (the
+  // True operand of the SELECT_CC/CMOV nodes).
+  TII->buildValueMerge(*SinkMBB, DestReg,
+                       {{Op1Reg, SecondInsertedMBB},
+                        {Op2Reg, ThisMBB},
+                        {FirstCMOV.getOperand(2).getReg(), FirstInsertedMBB}});
 
   // Now remove the CMOVs.
   FirstCMOV.eraseFromParent();
@@ -37516,10 +37514,8 @@ X86TargetLowering::EmitLoweredSelect(MachineInstr &MI,
   MachineBasicBlock::iterator MIItBegin = MachineBasicBlock::iterator(MI);
   MachineBasicBlock::iterator MIItEnd =
       std::next(MachineBasicBlock::iterator(LastCMOV));
+  // createPHIsForCMOVsInSinkBB removes the CMOV(s) once it has read them.
   createPHIsForCMOVsInSinkBB(MIItBegin, MIItEnd, ThisMBB, FalseMBB, SinkMBB);
-
-  // Now remove the CMOV(s).
-  ThisMBB->erase(MIItBegin, MIItEnd);
 
   return SinkMBB;
 }
@@ -37744,12 +37740,8 @@ X86TargetLowering::EmitLoweredSegAlloca(MachineInstr &MI,
   bumpMBB->addSuccessor(continueMBB);
 
   // Take care of the PHI nodes.
-  BuildMI(*continueMBB, continueMBB->begin(), MIMD, TII->get(X86::PHI),
-          MI.getOperand(0).getReg())
-      .addReg(mallocPtrVReg)
-      .addMBB(mallocMBB)
-      .addReg(bumpSPPtrVReg)
-      .addMBB(bumpMBB);
+  TII->buildValueMerge(*continueMBB, MI.getOperand(0).getReg(),
+                       {{mallocPtrVReg, mallocMBB}, {bumpSPPtrVReg, bumpMBB}});
 
   // Delete the original pseudo instruction.
   MI.eraseFromParent();
@@ -38166,13 +38158,6 @@ X86TargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
   BuildMI(mainMBB, MIMD, TII->get(X86::MOV32r0), mainDstReg);
   mainMBB->addSuccessor(sinkMBB);
 
-  // sinkMBB:
-  BuildMI(*sinkMBB, sinkMBB->begin(), MIMD, TII->get(X86::PHI), DstReg)
-      .addReg(mainDstReg)
-      .addMBB(mainMBB)
-      .addReg(restoreDstReg)
-      .addMBB(restoreMBB);
-
   // restoreMBB:
   if (RegInfo->hasBasePointer(*MF)) {
     const bool Uses64BitFramePtr = Subtarget.isTarget64BitLP64();
@@ -38188,6 +38173,12 @@ X86TargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
   BuildMI(restoreMBB, MIMD, TII->get(X86::MOV32ri), restoreDstReg).addImm(1);
   BuildMI(restoreMBB, MIMD, TII->get(X86::JMP_1)).addMBB(sinkMBB);
   restoreMBB->addSuccessor(sinkMBB);
+
+  // sinkMBB:
+  // Built after the predecessors are complete so any SUCC_ARGS forwarder lands
+  // in the terminator-adjacent cluster.
+  TII->buildValueMerge(*sinkMBB, DstReg,
+                       {{mainDstReg, mainMBB}, {restoreDstReg, restoreMBB}});
 
   MI.eraseFromParent();
   return sinkMBB;
@@ -38363,11 +38354,6 @@ X86TargetLowering::emitLongJmpShadowStackFix(MachineInstr &MI,
   // iterations of incssp until we finish fixing the shadow stack.
   Register DecReg = MRI.createVirtualRegister(PtrRC);
   Register CounterReg = MRI.createVirtualRegister(PtrRC);
-  BuildMI(fixShadowLoopMBB, MIMD, TII->get(X86::PHI), CounterReg)
-      .addReg(SspAfterShlReg)
-      .addMBB(fixShadowLoopPrepareMBB)
-      .addReg(DecReg)
-      .addMBB(fixShadowLoopMBB);
 
   // Every iteration we increase the SSP by 128.
   BuildMI(fixShadowLoopMBB, MIMD, TII->get(IncsspOpc)).addReg(Value128InReg);
@@ -38382,6 +38368,13 @@ X86TargetLowering::emitLongJmpShadowStackFix(MachineInstr &MI,
       .addImm(X86::COND_NE);
   fixShadowLoopMBB->addSuccessor(sinkMBB);
   fixShadowLoopMBB->addSuccessor(fixShadowLoopMBB);
+
+  // Build the value merge after the loop body so any SUCC_ARGS forwarder lands
+  // in the terminator-adjacent cluster; the destination PHI (in the default
+  // representation) is still inserted at the top of the block.
+  TII->buildValueMerge(
+      *fixShadowLoopMBB, CounterReg,
+      {{SspAfterShlReg, fixShadowLoopPrepareMBB}, {DecReg, fixShadowLoopMBB}});
 
   return sinkMBB;
 }
