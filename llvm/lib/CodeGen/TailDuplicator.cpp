@@ -383,6 +383,103 @@ void TailDuplicator::processPHI(
     MI->setDesc(TII->get(TargetOpcode::IMPLICIT_DEF));
 }
 
+/// The SUCC_ARGS analogue of processPHI: reconcile \p TailBB's block arguments
+/// when it is duplicated into \p PredBB, using the values \p PredBB forwards
+/// for them via its SUCC_ARGS. See processPHI for the LocalVRMap / Copies /
+/// Remove contract.
+void TailDuplicator::processBlockArgs(
+    MachineBasicBlock *TailBB, MachineBasicBlock *PredBB,
+    DenseMap<Register, RegSubRegPair> &LocalVRMap,
+    SmallVectorImpl<std::pair<Register, RegSubRegPair>> &Copies,
+    const DenseSet<Register> &RegsUsedByPhi, bool Remove) {
+  if (!TailBB->hasBlockArgs())
+    return;
+
+  MachineInstr *SuccArgs = PredBB->findSuccArgs(TailBB);
+  assert(SuccArgs && "predecessor of a block with arguments has no SUCC_ARGS");
+
+  // Operand i + 1 of the SUCC_ARGS is the value for the i-th block argument.
+  ArrayRef<Register> Args = TailBB->getBlockArgs();
+  for (unsigned I = 0, E = Args.size(); I != E; ++I) {
+    MachineOperand &SrcMO = SuccArgs->getOperand(I + 1);
+    Register ArgReg = Args[I];
+    Register SrcReg = SrcMO.getReg();
+    unsigned SrcSubReg = SrcMO.getSubReg();
+    LocalVRMap.try_emplace(ArgReg, SrcReg, SrcSubReg);
+    const TargetRegisterClass *RC = MRI->getRegClass(ArgReg);
+
+    if (!Remove) {
+      // The edge remains: forward a fresh copy, reconciled by SSAUpdater.
+      Register NewDef = MRI->createVirtualRegister(RC);
+      BuildMI(*PredBB, SuccArgs, DebugLoc(), TII->get(TargetOpcode::COPY),
+              NewDef)
+          .addReg(SrcReg, {}, SrcSubReg);
+      SrcMO.setReg(NewDef);
+      SrcMO.setSubReg(0);
+      continue;
+    }
+
+    // The edge is going away: record a copy for SSA update if the argument is
+    // still used after the body is cloned in.
+    if (isDefLiveOut(ArgReg, TailBB, MRI) || RegsUsedByPhi.count(ArgReg)) {
+      Register NewDef = MRI->createVirtualRegister(RC);
+      Copies.push_back(
+          std::make_pair(NewDef, RegSubRegPair(SrcReg, SrcSubReg)));
+      addSSAUpdateEntry(ArgReg, NewDef, PredBB);
+    }
+  }
+
+  if (Remove)
+    SuccArgs->eraseFromParent();
+}
+
+/// The simple block \p TailBB is bypassed: \p PredBB now branches straight to
+/// \p NewTarget (TailBB's sole successor). Rebuild PredBB's SUCC_ARGS for
+/// NewTarget from TailBB's, substituting TailBB's block arguments with the
+/// values PredBB forwards for them, then drop PredBB's SUCC_ARGS for TailBB.
+void TailDuplicator::forwardSuccArgsAcrossSimpleBB(MachineBasicBlock *TailBB,
+                                                   MachineBasicBlock *NewTarget,
+                                                   MachineBasicBlock *PredBB) {
+  // The value PredBB forwards for each of TailBB's block arguments.
+  DenseMap<Register, MachineOperand> ArgToValue;
+  MachineInstr *PredSA = nullptr;
+  for (MachineInstr &SA : PredBB->succ_args()) {
+    if (SA.getOperand(0).getMBB() != TailBB)
+      continue;
+    PredSA = &SA;
+    ArrayRef<Register> Args = TailBB->getBlockArgs();
+    for (unsigned I = 0, E = Args.size(); I != E; ++I)
+      ArgToValue.try_emplace(Args[I], SA.getOperand(I + 1));
+    break;
+  }
+
+  if (NewTarget->hasBlockArgs()) {
+    MachineInstr *TailSA = nullptr;
+    for (MachineInstr &SA : TailBB->succ_args()) {
+      if (SA.getOperand(0).getMBB() == NewTarget) {
+        TailSA = &SA;
+        break;
+      }
+    }
+    assert(TailSA && "successor with block args has no SUCC_ARGS");
+
+    auto MIB = BuildMI(*PredBB, PredBB->getFirstTerminator(), DebugLoc(),
+                       TII->get(TargetOpcode::SUCC_ARGS))
+                   .addMBB(NewTarget);
+    for (const MachineOperand &MO : drop_begin(TailSA->operands())) {
+      // Substitute a TailBB block argument with PredBB's forwarded value.
+      auto It = MO.isReg() ? ArgToValue.find(MO.getReg()) : ArgToValue.end();
+      if (It != ArgToValue.end())
+        MIB.add(It->second);
+      else
+        MIB.add(MO);
+    }
+  }
+
+  if (PredSA)
+    PredSA->eraseFromParent();
+}
+
 /// Duplicate a TailBB instruction to PredBB and update
 /// the source operands due to earlier PHI translation.
 void TailDuplicator::duplicateInstruction(
@@ -672,10 +769,13 @@ bool TailDuplicator::shouldTailDuplicate(bool IsSimple,
   // we have to address https://github.com/llvm/llvm-project/issues/78578.
   if (PreRegAlloc && TailBB.pred_size() > TailDupPredSize &&
       TailBB.succ_size() > TailDupSuccSize) {
-    // If TailBB or any of its successors contains a phi, we may have to add a
-    // large number of additional phis with additional incoming values.
-    if (NumPhis != 0 || any_of(TailBB.successors(), [](MachineBasicBlock *MBB) {
-          return any_of(*MBB, [](MachineInstr &MI) { return MI.isPHI(); });
+    // If TailBB or any of its successors contains a phi (or the block-argument
+    // equivalent), we may have to add a large number of additional phis /
+    // SUCC_ARGS operands with additional incoming values.
+    if (NumPhis != 0 || TailBB.hasBlockArgs() ||
+        any_of(TailBB.successors(), [](MachineBasicBlock *MBB) {
+          return MBB->hasBlockArgs() ||
+                 any_of(*MBB, [](MachineInstr &MI) { return MI.isPHI(); });
         }))
       return false;
   }
@@ -719,6 +819,12 @@ bool TailDuplicator::isSimpleBB(MachineBasicBlock *TailBB) {
     return false;
   if (TailBB->pred_empty())
     return false;
+  // A block with its own block arguments cannot use the simple bypass: those
+  // arguments are defined by this block, so bypassing it would leave any
+  // downstream uses of them without a reaching definition. Route it through the
+  // general path, which reconciles the arguments with SSAUpdater.
+  if (TailBB->hasBlockArgs())
+    return false;
   MachineBasicBlock::iterator I = TailBB->getFirstNonDebugInstr(true);
   if (I == TailBB->end())
     return true;
@@ -728,7 +834,8 @@ bool TailDuplicator::isSimpleBB(MachineBasicBlock *TailBB) {
 static bool bothUsedInPHI(const MachineBasicBlock &A,
                           const SmallPtrSet<MachineBasicBlock *, 8> &SuccsB) {
   for (MachineBasicBlock *BB : A.successors())
-    if (SuccsB.count(BB) && !BB->empty() && BB->begin()->isPHI())
+    if (SuccsB.count(BB) && !BB->empty() &&
+        (BB->begin()->isPHI() || BB->hasBlockArgs()))
       return true;
 
   return false;
@@ -803,6 +910,9 @@ bool TailDuplicator::duplicateSimpleBB(
       PredFBB = nullptr;
     if (PredTBB == NextBB && PredFBB == nullptr)
       PredTBB = nullptr;
+
+    // Carry block-argument forwarding across the rerouted edge.
+    forwardSuccArgsAcrossSimpleBB(TailBB, NewTarget, PredBB);
 
     auto DL = PredBB->findBranchDebugLoc();
     TII->removeBranch(*PredBB);
@@ -913,6 +1023,10 @@ bool TailDuplicator::tailDuplicate(bool IsSimple, MachineBasicBlock *TailBB,
     // Clone the contents of TailBB into PredBB.
     DenseMap<Register, RegSubRegPair> LocalVRMap;
     SmallVector<std::pair<Register, RegSubRegPair>, 4> CopyInfos;
+    // Block arguments, like PHIs, for the edge being replaced.
+    processBlockArgs(TailBB, PredBB, LocalVRMap, CopyInfos, UsedByPhi,
+                     /*Remove=*/true);
+
     for (MachineInstr &MI : llvm::make_early_inc_range(*TailBB)) {
       if (MI.isPHI()) {
         // Replace the uses of the def of the PHI with the register coming
@@ -973,6 +1087,10 @@ bool TailDuplicator::tailDuplicate(bool IsSimple, MachineBasicBlock *TailBB,
       if (PreRegAlloc) {
         DenseMap<Register, RegSubRegPair> LocalVRMap;
         SmallVector<std::pair<Register, RegSubRegPair>, 4> CopyInfos;
+        // Block arguments, like PHIs, for the edge being absorbed.
+        processBlockArgs(TailBB, PrevBB, LocalVRMap, CopyInfos, UsedByPhi,
+                         /*Remove=*/true);
+
         MachineBasicBlock::iterator I = TailBB->begin();
         // Process PHI instructions first.
         while (I != TailBB->end() && I->isPHI()) {
@@ -1050,6 +1168,9 @@ bool TailDuplicator::tailDuplicate(bool IsSimple, MachineBasicBlock *TailBB,
 
     DenseMap<Register, RegSubRegPair> LocalVRMap;
     SmallVector<std::pair<Register, RegSubRegPair>, 4> CopyInfos;
+    // Block arguments, like PHIs, for this remaining predecessor edge.
+    processBlockArgs(TailBB, PredBB, LocalVRMap, CopyInfos, UsedByPhi,
+                     /*Remove=*/false);
     // Process PHI instructions first.
     for (MachineInstr &MI : make_early_inc_range(TailBB->phis())) {
       // Replace the uses of the def of the PHI with the register coming
@@ -1067,7 +1188,10 @@ bool TailDuplicator::tailDuplicate(bool IsSimple, MachineBasicBlock *TailBB,
 void TailDuplicator::appendCopies(MachineBasicBlock *MBB,
       SmallVectorImpl<std::pair<Register, RegSubRegPair>> &CopyInfos,
       SmallVectorImpl<MachineInstr*> &Copies) {
-  MachineBasicBlock::iterator Loc = MBB->getFirstTerminator();
+  // Insert before the SUCC_ARGS cluster (which must stay adjacent to the
+  // terminators), not just before the terminators. This is the terminator
+  // point when there are no SUCC_ARGS, so it is NFC without block arguments.
+  MachineBasicBlock::iterator Loc = MBB->getBlockEndInsertPt();
   const MCInstrDesc &CopyD = TII->get(TargetOpcode::COPY);
   for (auto &CI : CopyInfos) {
     auto C = BuildMI(*MBB, Loc, DebugLoc(), CopyD, CI.first)

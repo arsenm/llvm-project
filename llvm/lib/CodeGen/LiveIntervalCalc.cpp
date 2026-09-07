@@ -80,6 +80,11 @@ void LiveIntervalCalc::calculate(LiveInterval &LI, bool TrackSubRegs) {
       createDeadDef(*Indexes, *Alloc, LI, MO);
   }
 
+  // A block argument has no defining instruction; its value is defined at the
+  // entry of its block.
+  if (MachineBasicBlock *ArgMBB = MRI->getBlockArgDef(Reg))
+    LI.createDeadDef(Indexes->getMBBStartIdx(ArgMBB), *Alloc);
+
   // We may have created empty live ranges for partially undefined uses, we
   // can't keep them because we won't find defs in them later.
   LI.removeEmptySubRanges();

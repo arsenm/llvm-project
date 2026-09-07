@@ -164,22 +164,48 @@ void MachineIDFSSAUpdater::calculate() {
   for (auto [BB, V] : Defines)
     BBInfos[BB].LiveOutValue = V;
 
+  // Create the join receiver in each frontier block: a block argument when the
+  // function uses block arguments, otherwise a PHI. Record it as the block's
+  // live-in value before filling incoming values, so computeValue() below sees
+  // it for predecessors that are themselves frontier blocks.
   for (MachineBasicBlock *FrontierBB : IDFBlocks) {
-    Register NewVR =
-        createInst(TargetOpcode::PHI, FrontierBB, FrontierBB->begin())
-            .getReg(0);
+    Register NewVR = MRI.createVirtualRegister(RegAttrs);
+    if (UsesBlockArgs)
+      FrontierBB->addBlockArg(NewVR);
+    else
+      BuildMI(*FrontierBB, FrontierBB->begin(), DebugLoc(),
+              TII.get(TargetOpcode::PHI), NewVR);
     BBInfos[FrontierBB].LiveInValue = NewVR;
   }
 
+  // Fill the incoming values. For a block argument, each predecessor forwards
+  // its live-out value through a SUCC_ARGS; for a PHI, they become PHI
+  // operands.
   for (MachineBasicBlock *BB : IDFBlocks) {
-    auto *PHI = &BB->front();
-    assert(PHI->isPHI());
-    MachineInstrBuilder MIB(*BB->getParent(), PHI);
-    for (MachineBasicBlock *Pred : BB->predecessors())
-      MIB.addReg(computeValue(Pred, /*IsLiveOut=*/true)).addMBB(Pred);
+    if (UsesBlockArgs) {
+      for (MachineBasicBlock *Pred : BB->predecessors()) {
+        MachineInstr *SuccArgs = Pred->findSuccArgs(BB);
+        if (!SuccArgs)
+          SuccArgs = BuildMI(*Pred, Pred->getBlockEndInsertPt(), DebugLoc(),
+                             TII.get(TargetOpcode::SUCC_ARGS))
+                         .addMBB(BB);
+        MachineInstrBuilder(MF, SuccArgs)
+            .addReg(computeValue(Pred, /*IsLiveOut=*/true));
+      }
+    } else {
+      auto *PHI = &BB->front();
+      assert(PHI->isPHI());
+      MachineInstrBuilder MIB(MF, PHI);
+      for (MachineBasicBlock *Pred : BB->predecessors())
+        MIB.addReg(computeValue(Pred, /*IsLiveOut=*/true)).addMBB(Pred);
+    }
   }
 }
 
 Register MachineIDFSSAUpdater::getValueInMiddleOfBlock(MachineBasicBlock *BB) {
   return computeValue(BB, /*IsLiveOut=*/false);
+}
+
+Register MachineIDFSSAUpdater::getValueAtEndOfBlock(MachineBasicBlock *BB) {
+  return computeValue(BB, /*IsLiveOut=*/true);
 }

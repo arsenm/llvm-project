@@ -4827,11 +4827,9 @@ MachineBasicBlock *MipsTargetLowering::emitPseudoSELECT(MachineInstr &MI,
   //  ...
   BB = sinkMBB;
 
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(3).getReg())
-      .addMBB(copy0MBB);
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(2).getReg(), thisMBB},
+                        {MI.getOperand(3).getReg(), copy0MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
 
@@ -4897,17 +4895,13 @@ MipsTargetLowering::emitPseudoD_SELECT(MachineInstr &MI,
   //  ...
   BB = sinkMBB;
 
-  // Use two PHI nodes to select two reults
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(3).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(5).getReg())
-      .addMBB(copy0MBB);
-  BuildMI(*BB, BB->begin(), DL, TII->get(Mips::PHI), MI.getOperand(1).getReg())
-      .addReg(MI.getOperand(4).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(6).getReg())
-      .addMBB(copy0MBB);
+  // Use two value merges to select two results
+  TII->buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                       {{MI.getOperand(3).getReg(), thisMBB},
+                        {MI.getOperand(5).getReg(), copy0MBB}});
+  TII->buildValueMerge(*BB, MI.getOperand(1).getReg(),
+                       {{MI.getOperand(4).getReg(), thisMBB},
+                        {MI.getOperand(6).getReg(), copy0MBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
 

@@ -159,6 +159,7 @@ struct MachineVerifier {
 
   const MachineInstr *FirstNonPHI = nullptr;
   const MachineInstr *FirstTerminator = nullptr;
+  const MachineInstr *FirstSuccArgs = nullptr;
   BlockSet FunctionBlocks;
 
   BitVector regsReserved;
@@ -353,6 +354,7 @@ struct MachineVerifier {
   void markReachable(const MachineBasicBlock *MBB);
   void calcRegsPassed();
   void checkPHIOps(const MachineBasicBlock &MBB);
+  void checkBlockArgOps(const MachineBasicBlock &MBB);
 
   void calcRegsRequired();
   void verifyLiveVariables();
@@ -742,6 +744,7 @@ void
 MachineVerifier::visitMachineBasicBlockBefore(const MachineBasicBlock *MBB) {
   FirstTerminator = nullptr;
   FirstNonPHI = nullptr;
+  FirstSuccArgs = nullptr;
 
   if (MRI->tracksLiveness() && hasPHIs(*MF)) {
     // If this block has allocatable physical registers live-in, check that
@@ -921,6 +924,13 @@ MachineVerifier::visitMachineBasicBlockBefore(const MachineBasicBlock *MBB) {
     }
   }
 
+  // Block arguments are defined at block entry.
+  for (Register Arg : MBB->getBlockArgs()) {
+    if (!Arg.isVirtual())
+      report("Block argument must be a virtual register", MBB);
+    regsLive.insert(Arg);
+  }
+
   const MachineFrameInfo &MFI = MF->getFrameInfo();
   BitVector PR = MFI.getPristineRegs(*MF);
   for (unsigned I : PR.set_bits())
@@ -956,6 +966,19 @@ void MachineVerifier::visitMachineBundleBefore(const MachineInstr *MI) {
       report("Non-terminator instruction after the first terminator", MI);
       OS << "First terminator was:\t" << *FirstTerminator;
     }
+  }
+
+  // SUCC_ARGS instructions must be clustered contiguously immediately before
+  // the terminators, mirroring how PHIs are clustered at the top of a block.
+  // Once a SUCC_ARGS has been seen, only more SUCC_ARGS or terminators may
+  // follow - not even debug instructions, so that the succ_args() range (which
+  // spans getFirstSuccArgs()..getFirstTerminator()) yields only SUCC_ARGS.
+  if (MI->isSuccArgs()) {
+    if (!FirstSuccArgs)
+      FirstSuccArgs = MI;
+  } else if (FirstSuccArgs && !MI->isTerminator()) {
+    report("Non-terminator instruction after SUCC_ARGS", MI);
+    OS << "First SUCC_ARGS was:\t" << *FirstSuccArgs;
   }
 }
 
@@ -2355,10 +2378,22 @@ void MachineVerifier::visitMachineInstrBefore(const MachineInstr *MI) {
     if (MF->getProperties().hasNoPHIs())
       report("Found PHI instruction with NoPHIs property set", MI);
 
+    if (MF->getProperties().hasUsesBlockArgs())
+      report("PHI instruction with UsesBlockArgs property set", MI);
+
     if (FirstNonPHI)
       report("Found PHI instruction after non-PHI", MI);
   } else if (FirstNonPHI == nullptr)
     FirstNonPHI = MI;
+
+  if (MI->isSuccArgs()) {
+    if (MI->getNumOperands() < 1 || !MI->getOperand(0).isMBB())
+      report("SUCC_ARGS must have a successor block operand", MI);
+    else if (MI->getNumOperands() < 2)
+      report("SUCC_ARGS must forward at least one value", MI);
+    else if (!MI->getParent()->isSuccessor(MI->getOperand(0).getMBB()))
+      report("SUCC_ARGS successor is not a CFG successor", MI);
+  }
 
   // Check the tied operands.
   if (MI->isInlineAsm())
@@ -3163,7 +3198,7 @@ void MachineVerifier::checkLiveness(const MachineOperand *MO, unsigned MONum) {
         }
         if (Bad)
           report("Using an undefined physical register", MO, MONum);
-      } else if (MRI->def_empty(Reg)) {
+      } else if (MRI->def_empty(Reg) && !MRI->isBlockArgDef(Reg)) {
         report("Reading virtual register without a def", MO, MONum);
       } else {
         BBInfo &MInfo = MBBInfoMap[MI->getParent()];
@@ -3501,6 +3536,42 @@ void MachineVerifier::checkPHIOps(const MachineBasicBlock &MBB) {
   }
 }
 
+// Check the SUCC_ARGS feeders of a block's arguments. Each predecessor must
+// supply exactly one SUCC_ARGS for this block, whose forwarded value count
+// matches the block's argument count.
+void MachineVerifier::checkBlockArgOps(const MachineBasicBlock &MBB) {
+  unsigned NumArgs = MBB.getNumBlockArgs();
+  if (NumArgs == 0)
+    return;
+
+  for (const MachineBasicBlock *Pred : MBB.predecessors()) {
+    const MachineInstr *Found = nullptr;
+    for (const MachineInstr &MI : Pred->succ_args()) {
+      if (MI.getOperand(0).getMBB() != &MBB)
+        continue;
+      if (Found) {
+        report("Multiple SUCC_ARGS for the same successor", &MI);
+        continue;
+      }
+      Found = &MI;
+      unsigned NumForwarded = MI.getNumOperands() - 1;
+      if (NumForwarded != NumArgs) {
+        report("SUCC_ARGS operand count does not match successor block "
+               "argument count",
+               &MI);
+        OS << "SUCC_ARGS forwards " << NumForwarded << " values but "
+           << printMBBReference(MBB) << " has " << NumArgs << " arguments.\n";
+      }
+    }
+    if (!Found) {
+      report("Missing SUCC_ARGS for a block with arguments", &MBB);
+      OS << printMBBReference(*Pred)
+         << " is a predecessor but has no SUCC_ARGS for "
+         << printMBBReference(MBB) << ".\n";
+    }
+  }
+}
+
 static void
 verifyConvergenceControl(const MachineFunction &MF, MachineDominatorTree &DT,
                          std::function<void(const Twine &Message)> FailureCB,
@@ -3528,8 +3599,10 @@ void MachineVerifier::visitMachineFunctionAfter() {
 
   calcRegsPassed();
 
-  for (const MachineBasicBlock &MBB : *MF)
+  for (const MachineBasicBlock &MBB : *MF) {
     checkPHIOps(MBB);
+    checkBlockArgOps(MBB);
+  }
 
   // Now check liveness info if available
   calcRegsRequired();

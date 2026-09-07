@@ -169,6 +169,10 @@ private:
   using LiveInVector = std::vector<RegisterMaskPair>;
   LiveInVector LiveIns;
 
+  /// The virtual registers defined as arguments of this block, fed positionally
+  /// by a SUCC_ARGS operand in each predecessor.
+  SmallVector<Register, 0> BlockArgs;
+
   /// Alignment of the basic block. One if the basic block does not need to be
   /// aligned.
   Align Alignment;
@@ -403,6 +407,27 @@ public:
     return make_range(getFirstTerminator(), end());
   }
 
+  /// Returns a range that iterates over the SUCC_ARGS instructions clustered
+  /// immediately before the terminators of this block.
+  inline iterator_range<iterator> succ_args() {
+    return make_range(getFirstSuccArgs(), getFirstTerminator());
+  }
+  inline iterator_range<const_iterator> succ_args() const {
+    return const_cast<MachineBasicBlock *>(this)->succ_args();
+  }
+
+  /// Returns the SUCC_ARGS in this block that forwards to \p Succ, or nullptr
+  /// if there is none. There is at most one per successor.
+  MachineInstr *findSuccArgs(const MachineBasicBlock *Succ) {
+    for (MachineInstr &MI : succ_args())
+      if (MI.getOperand(0).getMBB() == Succ)
+        return &MI;
+    return nullptr;
+  }
+  const MachineInstr *findSuccArgs(const MachineBasicBlock *Succ) const {
+    return const_cast<MachineBasicBlock *>(this)->findSuccArgs(Succ);
+  }
+
   /// Returns a range that iterates over the phis in the basic block.
   inline iterator_range<iterator> phis() {
     return make_range(begin(), getFirstNonPHI());
@@ -540,6 +565,28 @@ public:
   LLVM_ABI livein_iterator removeLiveIn(livein_iterator I);
 
   const std::vector<RegisterMaskPair> &getLiveIns() const { return LiveIns; }
+
+  //===--------------------------------------------------------------------===//
+  // Block argument accessors.
+  //===--------------------------------------------------------------------===//
+
+  ArrayRef<Register> getBlockArgs() const { return BlockArgs; }
+
+  unsigned getNumBlockArgs() const { return BlockArgs.size(); }
+  Register getBlockArg(unsigned I) const { return BlockArgs[I]; }
+  bool hasBlockArgs() const { return !BlockArgs.empty(); }
+
+  /// Append a register to this block's argument list and record it as defined
+  /// by this block.
+  LLVM_ABI void addBlockArg(Register Reg);
+
+  LLVM_ABI void clearBlockArgs();
+
+  /// Remove block argument \p I and the matching forwarded operand from every
+  /// predecessor's SUCC_ARGS, preserving the positional correspondence between
+  /// block arguments and SUCC_ARGS operands. A SUCC_ARGS left with no forwarded
+  /// values is erased.
+  LLVM_ABI void removeBlockArgAndUpdateSuccArgs(unsigned I);
 
   class liveout_iterator {
   public:
@@ -924,6 +971,23 @@ public:
   const_iterator getFirstTerminator() const {
     return const_cast<MachineBasicBlock *>(this)->getFirstTerminator();
   }
+
+  /// Returns an iterator to the first SUCC_ARGS instruction of this basic
+  /// block. SUCC_ARGS instructions are clustered immediately before the
+  /// terminators, mirroring how PHIs are clustered at the top of a block. If
+  /// there are none, this returns getFirstTerminator().
+  LLVM_ABI iterator getFirstSuccArgs();
+  const_iterator getFirstSuccArgs() const {
+    return const_cast<MachineBasicBlock *>(this)->getFirstSuccArgs();
+  }
+
+  /// Returns the insertion point for instructions that must go at the end of
+  /// this block, before the SUCC_ARGS cluster and terminators. This is the
+  /// end-of-block analogue of SkipPHIsAndLabels: anything spliced or built
+  /// here stays clear of the SUCC_ARGS cluster, which must remain adjacent to
+  /// the terminators. Equivalent to getFirstSuccArgs().
+  iterator getBlockEndInsertPt() { return getFirstSuccArgs(); }
+  const_iterator getBlockEndInsertPt() const { return getFirstSuccArgs(); }
 
   /// Same getFirstTerminator but it ignores bundles and return an
   /// instr_iterator instead.

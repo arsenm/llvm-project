@@ -1172,17 +1172,14 @@ SystemZTargetLowering::emitEHSjLjSetJmp(MachineInstr &MI,
   BuildMI(MainMBB, DL, TII->get(SystemZ::LHI), MainDstReg).addImm(0);
   MainMBB->addSuccessor(SinkMBB);
 
-  // sinkMBB:
-  BuildMI(*SinkMBB, SinkMBB->begin(), DL, TII->get(SystemZ::PHI), DstReg)
-      .addReg(MainDstReg)
-      .addMBB(MainMBB)
-      .addReg(RestoreDstReg)
-      .addMBB(RestoreMBB);
-
   // restoreMBB.
   BuildMI(RestoreMBB, DL, TII->get(SystemZ::LHI), RestoreDstReg).addImm(1);
   BuildMI(RestoreMBB, DL, TII->get(SystemZ::J)).addMBB(SinkMBB);
   RestoreMBB->addSuccessor(SinkMBB);
+
+  // sinkMBB:
+  TII->buildValueMerge(*SinkMBB, DstReg,
+                       {{MainDstReg, MainMBB}, {RestoreDstReg, RestoreMBB}});
 
   MI.eraseFromParent();
 
@@ -9857,9 +9854,7 @@ static void createPHIsForSelects(SmallVector<MachineInstr*, 8> &Selects,
   unsigned CCValid = FirstMI->getOperand(3).getImm();
   unsigned CCMask = FirstMI->getOperand(4).getImm();
 
-  MachineBasicBlock::iterator SinkInsertionPoint = SinkMBB->begin();
-
-  // As we are creating the PHIs, we have to be careful if there is more than
+  // As we are creating the merges, we have to be careful if there is more than
   // one.  Later Selects may reference the results of earlier Selects, but later
   // PHIs have to reference the individual true/false inputs from earlier PHIs.
   // That also means that PHI construction must work forward from earlier to
@@ -9884,12 +9879,10 @@ static void createPHIsForSelects(SmallVector<MachineInstr*, 8> &Selects,
     if (auto It = RegRewriteTable.find(FalseReg); It != RegRewriteTable.end())
       FalseReg = It->second.second;
 
-    DebugLoc DL = MI->getDebugLoc();
-    BuildMI(*SinkMBB, SinkInsertionPoint, DL, TII->get(SystemZ::PHI), DestReg)
-      .addReg(TrueReg).addMBB(TrueMBB)
-      .addReg(FalseReg).addMBB(FalseMBB);
+    TII->buildValueMerge(*SinkMBB, DestReg,
+                         {{TrueReg, TrueMBB}, {FalseReg, FalseMBB}});
 
-    // Add this PHI to the rewrite table.
+    // Add this merge to the rewrite table.
     RegRewriteTable[DestReg] = std::make_pair(TrueReg, FalseReg);
   }
 
@@ -10217,9 +10210,6 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadBinary(
   //   JNE LoopMBB
   //   # fall through to DoneMBB
   MBB = LoopMBB;
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), OldVal)
-    .addReg(OrigVal).addMBB(StartMBB)
-    .addReg(Dest).addMBB(LoopMBB);
   BuildMI(MBB, DL, TII->get(SystemZ::RLL), RotatedOldVal)
     .addReg(OldVal).addReg(BitShift).addImm(0);
   if (Invert) {
@@ -10251,6 +10241,9 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadBinary(
     .addImm(SystemZ::CCMASK_CS).addImm(SystemZ::CCMASK_CS_NE).addMBB(LoopMBB);
   MBB->addSuccessor(LoopMBB);
   MBB->addSuccessor(DoneMBB);
+
+  //   %OldVal = phi [ %OrigVal, StartMBB ], [ %Dest, LoopMBB ]
+  TII->buildValueMerge(*MBB, OldVal, {{OrigVal, StartMBB}, {Dest, LoopMBB}});
 
   MI.eraseFromParent();
   return DoneMBB;
@@ -10312,9 +10305,6 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadMinMax(
   //   CompareOpcode %RotatedOldVal, %Src2
   //   BRC KeepOldMask, UpdateMBB
   MBB = LoopMBB;
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), OldVal)
-    .addReg(OrigVal).addMBB(StartMBB)
-    .addReg(Dest).addMBB(UpdateMBB);
   BuildMI(MBB, DL, TII->get(SystemZ::RLL), RotatedOldVal)
     .addReg(OldVal).addReg(BitShift).addImm(0);
   BuildMI(MBB, DL, TII->get(CompareOpcode))
@@ -10324,6 +10314,7 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadMinMax(
   MBB->addSuccessor(UpdateMBB);
   MBB->addSuccessor(UseAltMBB);
 
+  //   %OldVal = phi [ %OrigVal, StartMBB ], [ %Dest, UpdateMBB ]
   //  UseAltMBB:
   //   %RotatedAltVal = RISBG %RotatedOldVal, %Src2, 32, 31 + BitSize, 0
   //   # fall through to UpdateMBB
@@ -10341,9 +10332,8 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadMinMax(
   //   JNE LoopMBB
   //   # fall through to DoneMBB
   MBB = UpdateMBB;
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), RotatedNewVal)
-    .addReg(RotatedOldVal).addMBB(LoopMBB)
-    .addReg(RotatedAltVal).addMBB(UseAltMBB);
+  TII->buildValueMerge(*MBB, RotatedNewVal,
+                       {{RotatedOldVal, LoopMBB}, {RotatedAltVal, UseAltMBB}});
   BuildMI(MBB, DL, TII->get(SystemZ::RLL), NewVal)
     .addReg(RotatedNewVal).addReg(NegBitShift).addImm(0);
   BuildMI(MBB, DL, TII->get(CSOpcode), Dest)
@@ -10355,6 +10345,10 @@ MachineBasicBlock *SystemZTargetLowering::emitAtomicLoadMinMax(
     .addImm(SystemZ::CCMASK_CS).addImm(SystemZ::CCMASK_CS_NE).addMBB(LoopMBB);
   MBB->addSuccessor(LoopMBB);
   MBB->addSuccessor(DoneMBB);
+
+  //   %OldVal = phi [ %OrigVal, StartMBB ], [ %Dest, UpdateMBB ]
+  TII->buildValueMerge(*LoopMBB, OldVal,
+                       {{OrigVal, StartMBB}, {Dest, UpdateMBB}});
 
   MI.eraseFromParent();
   return DoneMBB;
@@ -10428,12 +10422,6 @@ SystemZTargetLowering::emitAtomicCmpSwapW(MachineInstr &MI,
   //   JNE DoneMBB
   //   # Fall through to SetMBB
   MBB = LoopMBB;
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), OldVal)
-    .addReg(OrigOldVal).addMBB(StartMBB)
-    .addReg(RetryOldVal).addMBB(SetMBB);
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), SwapVal)
-    .addReg(OrigSwapVal).addMBB(StartMBB)
-    .addReg(RetrySwapVal).addMBB(SetMBB);
   BuildMI(MBB, DL, TII->get(SystemZ::RLL), OldValRot)
     .addReg(OldVal).addReg(BitShift).addImm(BitSize);
   BuildMI(MBB, DL, TII->get(SystemZ::RISBG32), RetrySwapVal)
@@ -10447,6 +10435,9 @@ SystemZTargetLowering::emitAtomicCmpSwapW(MachineInstr &MI,
     .addImm(SystemZ::CCMASK_CMP_NE).addMBB(DoneMBB);
   MBB->addSuccessor(DoneMBB);
   MBB->addSuccessor(SetMBB);
+
+  //   %OldVal  = phi [ %OrigOldVal, StartMBB ], [ %RetryOldVal, SetMBB ]
+  //   %SwapVal = phi [ %OrigSwapVal, StartMBB ], [ %RetrySwapVal, SetMBB ]
 
   //  SetMBB:
   //   %StoreVal     = RLL %RetrySwapVal, -BitSize(%NegBitShift)
@@ -10466,6 +10457,13 @@ SystemZTargetLowering::emitAtomicCmpSwapW(MachineInstr &MI,
     .addImm(SystemZ::CCMASK_CS).addImm(SystemZ::CCMASK_CS_NE).addMBB(LoopMBB);
   MBB->addSuccessor(LoopMBB);
   MBB->addSuccessor(DoneMBB);
+
+  //   %OldVal  = phi [ %OrigOldVal, StartMBB ], [ %RetryOldVal, SetMBB ]
+  //   %SwapVal = phi [ %OrigSwapVal, StartMBB ], [ %RetrySwapVal, SetMBB ]
+  TII->buildValueMerge(*LoopMBB, OldVal,
+                       {{OrigOldVal, StartMBB}, {RetryOldVal, SetMBB}});
+  TII->buildValueMerge(*LoopMBB, SwapVal,
+                       {{OrigSwapVal, StartMBB}, {RetrySwapVal, SetMBB}});
 
   // If the CC def wasn't dead in the ATOMIC_CMP_SWAPW, mark CC as live-in
   // to the block after the loop.  At this point, CC may have been defined
@@ -10760,16 +10758,6 @@ SystemZTargetLowering::emitMemMemWrapper(MachineInstr &MI,
     //
     // The prefetch is used only for MVC.  The JLH is used only for CLC.
     MBB = LoopMBB;
-    BuildMI(MBB, DL, TII->get(SystemZ::PHI), ThisDestReg)
-      .addReg(StartDestReg).addMBB(StartMBB)
-      .addReg(NextDestReg).addMBB(NextMBB);
-    if (!HaveSingleBase)
-      BuildMI(MBB, DL, TII->get(SystemZ::PHI), ThisSrcReg)
-        .addReg(StartSrcReg).addMBB(StartMBB)
-        .addReg(NextSrcReg).addMBB(NextMBB);
-    BuildMI(MBB, DL, TII->get(SystemZ::PHI), ThisCountReg)
-      .addReg(StartCountReg).addMBB(StartMBB)
-      .addReg(NextCountReg).addMBB(NextMBB);
     if (Opcode == SystemZ::MVC)
       BuildMI(MBB, DL, TII->get(SystemZ::PFD))
         .addImm(SystemZ::PFD_WRITE)
@@ -10810,6 +10798,18 @@ SystemZTargetLowering::emitMemMemWrapper(MachineInstr &MI,
     MBB->addSuccessor(LoopMBB);
     MBB->addSuccessor(DoneMBB);
 
+    //   %ThisDestReg  = phi [ %StartDestReg, StartMBB ], [ %NextDestReg,
+    //   NextMBB ] %ThisSrcReg   = phi [ %StartSrcReg, StartMBB ], [
+    //   %NextSrcReg, NextMBB ] %ThisCountReg = phi [ %StartCountReg, StartMBB
+    //   ], [ %NextCountReg, NextMBB ]
+    TII->buildValueMerge(*LoopMBB, ThisDestReg,
+                         {{StartDestReg, StartMBB}, {NextDestReg, NextMBB}});
+    if (!HaveSingleBase)
+      TII->buildValueMerge(*LoopMBB, ThisSrcReg,
+                           {{StartSrcReg, StartMBB}, {NextSrcReg, NextMBB}});
+    TII->buildValueMerge(*LoopMBB, ThisCountReg,
+                         {{StartCountReg, StartMBB}, {NextCountReg, NextMBB}});
+
     MBB = DoneMBB;
     if (IsRegForm) {
       // DoneMBB:
@@ -10822,13 +10822,11 @@ SystemZTargetLowering::emitMemMemWrapper(MachineInstr &MI,
       Register RemSrcReg  = MRI.createVirtualRegister(&SystemZ::ADDR64BitRegClass);
       Register RemDestReg = HaveSingleBase ? RemSrcReg
         : MRI.createVirtualRegister(&SystemZ::ADDR64BitRegClass);
-      BuildMI(MBB, DL, TII->get(SystemZ::PHI), RemDestReg)
-        .addReg(StartDestReg).addMBB(StartMBB)
-        .addReg(NextDestReg).addMBB(NextMBB);
+      TII->buildValueMerge(*MBB, RemDestReg,
+                           {{StartDestReg, StartMBB}, {NextDestReg, NextMBB}});
       if (!HaveSingleBase)
-        BuildMI(MBB, DL, TII->get(SystemZ::PHI), RemSrcReg)
-          .addReg(StartSrcReg).addMBB(StartMBB)
-          .addReg(NextSrcReg).addMBB(NextMBB);
+        TII->buildValueMerge(*MBB, RemSrcReg,
+                             {{StartSrcReg, StartMBB}, {NextSrcReg, NextMBB}});
       if (IsMemset)
         insertMemMemOp(MBB, MBB->end(),
                        MachineOperand::CreateReg(RemDestReg, false), DestDisp,
@@ -10963,12 +10961,6 @@ MachineBasicBlock *SystemZTargetLowering::emitStringWrapper(
   // The load of R0L can be hoisted by post-RA LICM.
   MBB = LoopMBB;
 
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), This1Reg)
-    .addReg(Start1Reg).addMBB(StartMBB)
-    .addReg(End1Reg).addMBB(LoopMBB);
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), This2Reg)
-    .addReg(Start2Reg).addMBB(StartMBB)
-    .addReg(End2Reg).addMBB(LoopMBB);
   BuildMI(MBB, DL, TII->get(TargetOpcode::COPY), SystemZ::R0L).addReg(CharReg);
   BuildMI(MBB, DL, TII->get(Opcode))
     .addReg(End1Reg, RegState::Define).addReg(End2Reg, RegState::Define)
@@ -10977,6 +10969,13 @@ MachineBasicBlock *SystemZTargetLowering::emitStringWrapper(
     .addImm(SystemZ::CCMASK_ANY).addImm(SystemZ::CCMASK_3).addMBB(LoopMBB);
   MBB->addSuccessor(LoopMBB);
   MBB->addSuccessor(DoneMBB);
+
+  //   %This1Reg = phi [ %Start1Reg, StartMBB ], [ %End1Reg, LoopMBB ]
+  //   %This2Reg = phi [ %Start2Reg, StartMBB ], [ %End2Reg, LoopMBB ]
+  TII->buildValueMerge(*LoopMBB, This1Reg,
+                       {{Start1Reg, StartMBB}, {End1Reg, LoopMBB}});
+  TII->buildValueMerge(*LoopMBB, This2Reg,
+                       {{Start2Reg, StartMBB}, {End2Reg, LoopMBB}});
 
   DoneMBB->addLiveIn(SystemZ::CC);
 
@@ -11082,11 +11081,6 @@ MachineBasicBlock *SystemZTargetLowering::emitProbedAlloca(
   //  # fallthrough to LoopBodyMBB
   StartMBB->addSuccessor(LoopTestMBB);
   MBB = LoopTestMBB;
-  BuildMI(MBB, DL, TII->get(SystemZ::PHI), PHIReg)
-    .addReg(SizeReg)
-    .addMBB(StartMBB)
-    .addReg(IncReg)
-    .addMBB(LoopBodyMBB);
   BuildMI(MBB, DL, TII->get(SystemZ::CLGFI))
     .addReg(PHIReg)
     .addImm(ProbeSize);
@@ -11110,6 +11104,10 @@ MachineBasicBlock *SystemZTargetLowering::emitProbedAlloca(
     .setMemRefs(VolLdMMO);
   BuildMI(MBB, DL, TII->get(SystemZ::J)).addMBB(LoopTestMBB);
   MBB->addSuccessor(LoopTestMBB);
+
+  //   %PHIReg = phi [ %SizeReg, StartMBB ], [ %IncReg, LoopBodyMBB ]
+  TII->buildValueMerge(*LoopTestMBB, PHIReg,
+                       {{SizeReg, StartMBB}, {IncReg, LoopBodyMBB}});
 
   //  TailTestMBB
   //  BRC DoneMBB

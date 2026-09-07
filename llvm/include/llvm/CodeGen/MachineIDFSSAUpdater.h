@@ -32,9 +32,15 @@ class MachineIDFSSAUpdater {
   };
 
   MachineDominatorTree &DT;
+  MachineFunction &MF;
   MachineRegisterInfo &MRI;
   const TargetInstrInfo &TII;
   MachineRegisterInfo::VRegAttrs RegAttrs;
+
+  /// When the function uses block arguments instead of PHIs, the IDF-inserted
+  /// PHIs are converted to block arguments (fed by SUCC_ARGS forwarders) so the
+  /// no-PHI invariant is preserved.
+  bool UsesBlockArgs;
 
   SmallVector<std::pair<MachineBasicBlock *, Register>, 4> Defines;
   SmallVector<MachineBasicBlock *, 4> UseBlocks;
@@ -50,8 +56,9 @@ class MachineIDFSSAUpdater {
 public:
   MachineIDFSSAUpdater(MachineDominatorTree &DT, MachineFunction &MF,
                        const MachineRegisterInfo::VRegAttrs &RegAttr)
-      : DT(DT), MRI(MF.getRegInfo()), TII(*MF.getSubtarget().getInstrInfo()),
-        RegAttrs(RegAttr) {}
+      : DT(DT), MF(MF), MRI(MF.getRegInfo()),
+        TII(*MF.getSubtarget().getInstrInfo()), RegAttrs(RegAttr),
+        UsesBlockArgs(MF.getProperties().hasUsesBlockArgs()) {}
 
   MachineIDFSSAUpdater(MachineDominatorTree &DT, MachineFunction &MF,
                        Register Reg)
@@ -74,6 +81,10 @@ public:
 
   /// See SSAUpdater::GetValueInMiddleOfBlock description.
   LLVM_ABI Register getValueInMiddleOfBlock(MachineBasicBlock *BB);
+
+  /// Return the value that is live out of the end of \p BB, i.e. the value an
+  /// on-edge use in a successor of \p BB (such as a SUCC_ARGS forwarder) sees.
+  LLVM_ABI Register getValueAtEndOfBlock(MachineBasicBlock *BB);
 };
 
 } // end namespace llvm
