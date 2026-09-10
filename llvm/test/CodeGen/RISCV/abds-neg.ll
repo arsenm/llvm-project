@@ -1121,40 +1121,40 @@ define i8 @abd_minmax_i8(i8 %a, i8 %b) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    slli a1, a1, 24
 ; RV32I-NEXT:    slli a0, a0, 24
-; RV32I-NEXT:    srai a1, a1, 24
+; RV32I-NEXT:    srai a2, a1, 24
 ; RV32I-NEXT:    srai a0, a0, 24
-; RV32I-NEXT:    mv a2, a0
-; RV32I-NEXT:    bge a0, a1, .LBB13_3
+; RV32I-NEXT:    mv a1, a0
+; RV32I-NEXT:    bge a0, a2, .LBB13_3
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    bge a1, a0, .LBB13_4
+; RV32I-NEXT:    bge a2, a0, .LBB13_4
 ; RV32I-NEXT:  .LBB13_2:
-; RV32I-NEXT:    sub a0, a2, a0
+; RV32I-NEXT:    sub a0, a1, a0
 ; RV32I-NEXT:    ret
 ; RV32I-NEXT:  .LBB13_3:
-; RV32I-NEXT:    mv a2, a1
-; RV32I-NEXT:    blt a1, a0, .LBB13_2
+; RV32I-NEXT:    mv a1, a2
+; RV32I-NEXT:    blt a2, a0, .LBB13_2
 ; RV32I-NEXT:  .LBB13_4:
-; RV32I-NEXT:    sub a0, a2, a1
+; RV32I-NEXT:    sub a0, a1, a2
 ; RV32I-NEXT:    ret
 ;
 ; RV64I-LABEL: abd_minmax_i8:
 ; RV64I:       # %bb.0:
 ; RV64I-NEXT:    slli a1, a1, 56
 ; RV64I-NEXT:    slli a0, a0, 56
-; RV64I-NEXT:    srai a1, a1, 56
+; RV64I-NEXT:    srai a2, a1, 56
 ; RV64I-NEXT:    srai a0, a0, 56
-; RV64I-NEXT:    mv a2, a0
-; RV64I-NEXT:    bge a0, a1, .LBB13_3
+; RV64I-NEXT:    mv a1, a0
+; RV64I-NEXT:    bge a0, a2, .LBB13_3
 ; RV64I-NEXT:  # %bb.1:
-; RV64I-NEXT:    bge a1, a0, .LBB13_4
+; RV64I-NEXT:    bge a2, a0, .LBB13_4
 ; RV64I-NEXT:  .LBB13_2:
-; RV64I-NEXT:    sub a0, a2, a0
+; RV64I-NEXT:    sub a0, a1, a0
 ; RV64I-NEXT:    ret
 ; RV64I-NEXT:  .LBB13_3:
-; RV64I-NEXT:    mv a2, a1
-; RV64I-NEXT:    blt a1, a0, .LBB13_2
+; RV64I-NEXT:    mv a1, a2
+; RV64I-NEXT:    blt a2, a0, .LBB13_2
 ; RV64I-NEXT:  .LBB13_4:
-; RV64I-NEXT:    sub a0, a2, a1
+; RV64I-NEXT:    sub a0, a1, a2
 ; RV64I-NEXT:    ret
 ;
 ; ZBB-LABEL: abd_minmax_i8:
@@ -1176,40 +1176,40 @@ define i16 @abd_minmax_i16(i16 %a, i16 %b) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    slli a1, a1, 16
 ; RV32I-NEXT:    slli a0, a0, 16
-; RV32I-NEXT:    srai a1, a1, 16
+; RV32I-NEXT:    srai a2, a1, 16
 ; RV32I-NEXT:    srai a0, a0, 16
-; RV32I-NEXT:    mv a2, a0
-; RV32I-NEXT:    bge a0, a1, .LBB14_3
+; RV32I-NEXT:    mv a1, a0
+; RV32I-NEXT:    bge a0, a2, .LBB14_3
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    bge a1, a0, .LBB14_4
+; RV32I-NEXT:    bge a2, a0, .LBB14_4
 ; RV32I-NEXT:  .LBB14_2:
-; RV32I-NEXT:    sub a0, a2, a0
+; RV32I-NEXT:    sub a0, a1, a0
 ; RV32I-NEXT:    ret
 ; RV32I-NEXT:  .LBB14_3:
-; RV32I-NEXT:    mv a2, a1
-; RV32I-NEXT:    blt a1, a0, .LBB14_2
+; RV32I-NEXT:    mv a1, a2
+; RV32I-NEXT:    blt a2, a0, .LBB14_2
 ; RV32I-NEXT:  .LBB14_4:
-; RV32I-NEXT:    sub a0, a2, a1
+; RV32I-NEXT:    sub a0, a1, a2
 ; RV32I-NEXT:    ret
 ;
 ; RV64I-LABEL: abd_minmax_i16:
 ; RV64I:       # %bb.0:
 ; RV64I-NEXT:    slli a1, a1, 48
 ; RV64I-NEXT:    slli a0, a0, 48
-; RV64I-NEXT:    srai a1, a1, 48
+; RV64I-NEXT:    srai a2, a1, 48
 ; RV64I-NEXT:    srai a0, a0, 48
-; RV64I-NEXT:    mv a2, a0
-; RV64I-NEXT:    bge a0, a1, .LBB14_3
+; RV64I-NEXT:    mv a1, a0
+; RV64I-NEXT:    bge a0, a2, .LBB14_3
 ; RV64I-NEXT:  # %bb.1:
-; RV64I-NEXT:    bge a1, a0, .LBB14_4
+; RV64I-NEXT:    bge a2, a0, .LBB14_4
 ; RV64I-NEXT:  .LBB14_2:
-; RV64I-NEXT:    sub a0, a2, a0
+; RV64I-NEXT:    sub a0, a1, a0
 ; RV64I-NEXT:    ret
 ; RV64I-NEXT:  .LBB14_3:
-; RV64I-NEXT:    mv a2, a1
-; RV64I-NEXT:    blt a1, a0, .LBB14_2
+; RV64I-NEXT:    mv a1, a2
+; RV64I-NEXT:    blt a2, a0, .LBB14_2
 ; RV64I-NEXT:  .LBB14_4:
-; RV64I-NEXT:    sub a0, a2, a1
+; RV64I-NEXT:    sub a0, a1, a2
 ; RV64I-NEXT:    ret
 ;
 ; ZBB-LABEL: abd_minmax_i16:
@@ -1245,20 +1245,20 @@ define i32 @abd_minmax_i32(i32 %a, i32 %b) nounwind {
 ;
 ; RV64I-LABEL: abd_minmax_i32:
 ; RV64I:       # %bb.0:
-; RV64I-NEXT:    sext.w a1, a1
+; RV64I-NEXT:    sext.w a2, a1
 ; RV64I-NEXT:    sext.w a0, a0
-; RV64I-NEXT:    mv a2, a0
-; RV64I-NEXT:    bge a0, a1, .LBB15_3
+; RV64I-NEXT:    mv a1, a0
+; RV64I-NEXT:    bge a0, a2, .LBB15_3
 ; RV64I-NEXT:  # %bb.1:
-; RV64I-NEXT:    bge a1, a0, .LBB15_4
+; RV64I-NEXT:    bge a2, a0, .LBB15_4
 ; RV64I-NEXT:  .LBB15_2:
-; RV64I-NEXT:    subw a0, a2, a0
+; RV64I-NEXT:    subw a0, a1, a0
 ; RV64I-NEXT:    ret
 ; RV64I-NEXT:  .LBB15_3:
-; RV64I-NEXT:    mv a2, a1
-; RV64I-NEXT:    blt a1, a0, .LBB15_2
+; RV64I-NEXT:    mv a1, a2
+; RV64I-NEXT:    blt a2, a0, .LBB15_2
 ; RV64I-NEXT:  .LBB15_4:
-; RV64I-NEXT:    subw a0, a2, a1
+; RV64I-NEXT:    subw a0, a1, a2
 ; RV64I-NEXT:    ret
 ;
 ; RV32ZBB-LABEL: abd_minmax_i32:

@@ -1497,26 +1497,19 @@ void TargetPassConfig::addOptimizedRegAlloc() {
 
   addPass(&ProcessImplicitDefsID);
 
-  // LiveVariables currently requires pure SSA form.
-  //
-  // FIXME: Once TwoAddressInstruction pass no longer uses kill flags,
-  // LiveVariables can be removed completely, and LiveIntervals can be directly
-  // computed. (We still either need to regenerate kill flags after regalloc, or
-  // preferably fix the scavenger to not depend on them).
-  // FIXME: UnreachableMachineBlockElim is a dependant pass of LiveVariables.
-  // When LiveVariables is removed this has to be removed/moved either.
+  // LiveIntervals requires pure SSA form and no unreachable blocks.
   // Explicit addition of UnreachableMachineBlockElim allows stopping before or
   // after it with -stop-before/-stop-after.
   addPass(&UnreachableMachineBlockElimID);
-  addPass(&LiveVariablesID);
+
+  // LiveIntervals is computed before PHIElimination so that pass can rely on it
+  // and maintain it incrementally while lowering PHIs. TwoAddressInstruction
+  // likewise uses it instead of the (now removed) LiveVariables analysis.
+  addPass(&LiveIntervalsID);
 
   // Edge splitting is smarter with machine loop info.
   addPass(&MachineLoopInfoID);
   addPass(&PHIEliminationID);
-
-  // Eventually, we want to run LiveIntervals before PHI elimination.
-  if (EarlyLiveIntervals)
-    addPass(&LiveIntervalsID);
 
   addPass(&TwoAddressInstructionPassID);
   addPass(&RegisterCoalescerID);

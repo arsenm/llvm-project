@@ -1847,12 +1847,11 @@ void GCNPassConfig::addOptimizedRegAlloc() {
   if (EnableDCEInRA)
     insertPass(&DetectDeadLanesID, &DeadMachineInstructionElimID);
 
-  // FIXME: when an instruction has a Killed operand, and the instruction is
-  // inside a bundle, seems only the BUNDLE instruction appears as the Kills of
-  // the register in LiveVariables, this would trigger a failure in verifier,
-  // we should fix it and enable the verifier.
+  // SIOptimizeVGPRLiveRange uses LiveIntervals, which is computed before
+  // PHIElimination in the optimized pipeline. Run it right after LiveIntervals
+  // so it is available; the pass still runs in SSA, before PHIElimination.
   if (OptVGPRLiveRange)
-    insertPass(&LiveVariablesID, &SIOptimizeVGPRLiveRangeLegacyID);
+    insertPass(&LiveIntervalsID, &SIOptimizeVGPRLiveRangeLegacyID);
 
   // This must be run immediately after phi elimination and before
   // TwoAddressInstructions, otherwise the processing of the tied operand of
@@ -2612,12 +2611,11 @@ Error AMDGPUCodeGenPassBuilder::addOptimizedRegAlloc(PassManagerWrapper &PMW) {
   if (EnableDCEInRA)
     insertPass<DetectDeadLanesPass>(DeadMachineInstructionElimPass());
 
-  // FIXME: when an instruction has a Killed operand, and the instruction is
-  // inside a bundle, seems only the BUNDLE instruction appears as the Kills of
-  // the register in LiveVariables, this would trigger a failure in verifier,
-  // we should fix it and enable the verifier.
+  // SIOptimizeVGPRLiveRange uses LiveIntervals, which is computed before
+  // PHIElimination in the optimized pipeline. Run it right after LiveIntervals
+  // so it is available (the pass still runs in SSA, before PHIElimination).
   if (OptVGPRLiveRange)
-    insertPass<RequireAnalysisPass<LiveVariablesAnalysis, MachineFunction>>(
+    insertPass<RequireAnalysisPass<LiveIntervalsAnalysis, MachineFunction>>(
         SIOptimizeVGPRLiveRangePass());
 
   // This must be run immediately after phi elimination and before

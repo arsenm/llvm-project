@@ -21,7 +21,6 @@
 #include "llvm/ADT/iterator_range.h"
 #include "llvm/CodeGen/LiveInterval.h"
 #include "llvm/CodeGen/LiveIntervalCalc.h"
-#include "llvm/CodeGen/LiveVariables.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineBlockFrequencyInfo.h"
 #include "llvm/CodeGen/MachineDominators.h"
@@ -111,7 +110,6 @@ cl::opt<bool> llvm::UseSegmentSetForPhysRegs(
 
 void LiveIntervalsWrapperPass::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.setPreservesCFG();
-  AU.addPreserved<LiveVariablesWrapperPass>();
   AU.addPreservedID(MachineLoopInfoID);
   AU.addRequiredTransitiveID(MachineDominatorsID);
   AU.addPreservedID(MachineDominatorsID);
@@ -1097,8 +1095,8 @@ public:
 
   // FIXME: UpdateFlags is a workaround that creates live intervals for all
   // physregs, even those that aren't needed for regalloc, in order to update
-  // kill flags. This is wasteful. Eventually, LiveVariables will strip all kill
-  // flags, and postRA passes will use a live register utility instead.
+  // kill flags. This is wasteful. Eventually, kill flags should be stripped
+  // entirely, and postRA passes will use a live register utility instead.
   LiveRange *getRegUnitLI(MCRegUnit Unit) {
     if (UpdateFlags && !MRI.isReservedRegUnit(Unit))
       return &LIS.getRegUnit(Unit);

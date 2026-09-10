@@ -15,7 +15,6 @@
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/CodeGen/LiveIntervals.h"
 #include "llvm/CodeGen/LivePhysRegs.h"
-#include "llvm/CodeGen/LiveVariables.h"
 #include "llvm/CodeGen/MachineDomTreeUpdater.h"
 #include "llvm/CodeGen/MachineDominators.h"
 #include "llvm/CodeGen/MachineFunction.h"
@@ -1186,9 +1185,8 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
   MachineFunction *MF = getParent();
   LiveIntervals *LIS = GET_RESULT(LiveIntervals, getLIS, );
   SlotIndexes *Indexes = GET_RESULT(SlotIndexes, getSI, );
-  LiveVariables *LV = GET_RESULT(LiveVariables, getLV, );
   MachineLoopInfo *MLI = GET_RESULT(MachineLoop, getLI, Info);
-  return SplitCriticalEdge(Succ, {LIS, Indexes, LV, MLI}, LiveInSets, MDTU);
+  return SplitCriticalEdge(Succ, {LIS, Indexes, MLI}, LiveInSets, MDTU);
 #undef GET_RESULT
 }
 
@@ -1222,27 +1220,6 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
     LIS->insertMBBInMaps(NMBB);
   else if (Analyses.SI)
     Analyses.SI->insertMBBInMaps(NMBB);
-
-  // On some targets like Mips, branches may kill virtual registers. Make sure
-  // that LiveVariables is properly updated after updateTerminator replaces the
-  // terminators.
-  auto *LV = Analyses.LV;
-  // Collect a list of virtual registers killed by the terminators.
-  SmallVector<Register, 4> KilledRegs;
-  if (LV)
-    for (MachineInstr &MI :
-         llvm::make_range(getFirstInstrTerminator(), instr_end())) {
-      for (MachineOperand &MO : MI.all_uses()) {
-        if (MO.getReg() == 0 || !MO.isKill() || MO.isUndef())
-          continue;
-        Register Reg = MO.getReg();
-        if (Reg.isPhysical() || LV->getVarInfo(Reg).removeKill(MI)) {
-          KilledRegs.push_back(Reg);
-          LLVM_DEBUG(dbgs() << "Removing terminator kill: " << MI);
-          MO.setIsKill(false);
-        }
-      }
-    }
 
   SmallVector<Register, 4> UsedRegs;
   if (LIS) {
@@ -1296,28 +1273,6 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
   for (const auto &LI : Succ->liveins())
     NMBB->addLiveIn(LI);
 
-  // Update LiveVariables.
-  const TargetRegisterInfo *TRI = MF->getSubtarget().getRegisterInfo();
-  if (LV) {
-    // Restore kills of virtual registers that were killed by the terminators.
-    while (!KilledRegs.empty()) {
-      Register Reg = KilledRegs.pop_back_val();
-      for (instr_iterator I = instr_end(), E = instr_begin(); I != E;) {
-        if (!(--I)->addRegisterKilled(Reg, TRI, /* AddIfNotFound= */ false))
-          continue;
-        if (Reg.isVirtual())
-          LV->getVarInfo(Reg).Kills.push_back(&*I);
-        LLVM_DEBUG(dbgs() << "Restored terminator kill: " << *I);
-        break;
-      }
-    }
-    // Update relevant live-through information.
-    if (LiveInSets != nullptr)
-      LV->addNewBlock(NMBB, this, Succ, *LiveInSets);
-    else
-      LV->addNewBlock(NMBB, this, Succ);
-  }
-
   if (LIS) {
     // After splitting the edge and updating SlotIndexes, live intervals may be
     // in one of two situations, depending on whether this block was the last in
@@ -1351,8 +1306,11 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
           assert(VNI &&
                  "PHI sources should be live out of their predecessors.");
           LI.addSegment(LiveInterval::Segment(StartIndex, EndIndex, VNI));
-          for (auto &SR : LI.subranges())
-            SR.addSegment(LiveInterval::Segment(StartIndex, EndIndex, VNI));
+          for (auto &SR : LI.subranges()) {
+            VNInfo *SRVNI = SR.getVNInfoAt(PrevIndex);
+            if (SRVNI)
+              SR.addSegment(LiveInterval::Segment(StartIndex, EndIndex, SRVNI));
+          }
         }
       }
     }
@@ -1388,6 +1346,21 @@ MachineBasicBlock *MachineBasicBlock::SplitCriticalEdge(
     // Update all intervals for registers whose uses may have been modified by
     // updateTerminator().
     LIS->repairIntervalsInRange(this, getFirstTerminator(), end(), UsedRegs);
+
+    // repairIntervalsInRange() only repairs virtual registers. Physical
+    // register unit ranges must be recomputed for any physreg defined or used
+    // by the terminators that updateTerminator() may have replaced, otherwise
+    // their live ranges retain stale value numbers at the slots of the removed
+    // terminators.
+    const TargetRegisterInfo *TRI = MF->getSubtarget().getRegisterInfo();
+    for (Register Reg : UsedRegs) {
+      if (!Reg.isPhysical())
+        continue;
+      for (MCRegUnit Unit : TRI->regunits(Reg.asMCReg())) {
+        if (LIS->getCachedRegUnit(Unit))
+          LIS->removeRegUnit(Unit);
+      }
+    }
   }
 
   if (MDTU)

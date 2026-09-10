@@ -629,6 +629,13 @@ class raw_ostream;
       llvm::sort(idx2MBBMap, less_first());
     }
 
+    /// Remove the given MachineBasicBlock from the maps. This is the inverse of
+    /// insertMBBInMaps and must be called while \p MBB is still in the function
+    /// (before MachineBasicBlock::eraseFromParent()), and after \p MBB's own
+    /// instructions have been removed from the maps. \p MBB's slot range is
+    /// merged into its layout predecessor.
+    LLVM_ABI void removeMBBFromMaps(MachineBasicBlock &MBB);
+
     /// Renumber all indexes using the default instruction distance.
     LLVM_ABI void packIndexes();
   };

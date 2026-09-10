@@ -1,7 +1,7 @@
 # RUN: llc -mtriple=s390x-linux-gnu -mcpu=z196 -O0 -start-after=finalize-isel \
 # RUN:   -stop-before=regallocfast -o - %s | FileCheck %s
 # RUN: llc -mtriple=s390x-linux-gnu -mcpu=z196 -O3 -start-after=finalize-isel \
-# RUN:   -stop-before=livevars -o - %s | FileCheck %s
+# RUN:   -stop-before=phi-node-elimination -o - %s | FileCheck %s
 #
 # Test that a COPY from CC gets implemented with an IPM to a GR32 reg.
 

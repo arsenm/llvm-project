@@ -23,10 +23,10 @@ define dso_local void @vga_load_state() #0 {
 ; CHECK-NEXT:    jle .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.end
 ; CHECK-NEXT:    movl $0, -{{[0-9]+}}(%rsp)
+; CHECK-NEXT:    # implicit-def: $edx
 ; CHECK-NEXT:    .p2align 4
 ; CHECK-NEXT:  .LBB0_4: # %for.cond1
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    # implicit-def: $edx
 ; CHECK-NEXT:    #APP
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    movq vga_load_state_p(%rip), %rax

@@ -55,7 +55,7 @@ entry:
 ; CHECK:	movl	L_LotsStuff$non_lazy_ptr, %ecx
 
 ; ATOM: _t:
-; ATOM:         movl    L_LotsStuff$non_lazy_ptr, %e{{..}}
 ; ATOM:         xorl    %e{{..}}, %e{{..}}
+; ATOM:         movl    L_LotsStuff$non_lazy_ptr, %e{{..}}
 
 }

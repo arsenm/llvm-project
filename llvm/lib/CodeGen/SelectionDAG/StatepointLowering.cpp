@@ -935,8 +935,18 @@ SDValue SelectionDAGBuilder::LowerAsSTATEPOINT(
       // additional use of the original value when lowering the gc.relocate.
       // We need to make sure the value is available at the new use, which
       // might be in another block.
-      if (Relocate->getParent() != StatepointInstr->getParent())
-        ExportFromCurrentBlock(V);
+      if (Relocate->getParent() != StatepointInstr->getParent()) {
+        // A re-materializable integer constant does not need to be exported
+        // from this block. Exporting it would define a vreg after the
+        // statepoint call, which does not dominate a use reached by the
+        // unwind (EH pad) edge that leaves this block at the call. Instead,
+        // record the constant so the gc.relocate can materialize it fresh in
+        // its own block.
+        if (auto *C = dyn_cast<ConstantSDNode>(SDV))
+          Record.ConstantValue = C->getAPIntValue();
+        else
+          ExportFromCurrentBlock(V);
+      }
     }
     RelocationMap[Relocate] = Record;
   }
@@ -1291,6 +1301,18 @@ void SelectionDAGBuilder::visitGCRelocate(const GCRelocateInst &Relocate) {
   }
 
   assert(Record.type == RecordType::NoRelocate);
+
+  // A re-materializable integer constant was not exported from the
+  // statepoint's block (see LowerAsSTATEPOINT). Emit it fresh here so no
+  // cross-block vreg is involved.
+  if (Record.ConstantValue) {
+    EVT VT = DAG.getTargetLoweringInfo().getValueType(DAG.getDataLayout(),
+                                                      Relocate.getType());
+    setValue(&Relocate,
+             DAG.getConstant(*Record.ConstantValue, getCurSDLoc(), VT));
+    return;
+  }
+
   SDValue SD = getValue(DerivedPtr);
 
   if (SD.isUndef() && SD.getValueType().getSizeInBits() <= 64) {

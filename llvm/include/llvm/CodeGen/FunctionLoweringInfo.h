@@ -14,6 +14,7 @@
 #ifndef LLVM_CODEGEN_FUNCTIONLOWERINGINFO_H
 #define LLVM_CODEGEN_FUNCTIONLOWERINGINFO_H
 
+#include "llvm/ADT/APInt.h"
 #include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/IndexedMap.h"
@@ -27,6 +28,7 @@
 #include "llvm/IR/Value.h"
 #include "llvm/Support/KnownBits.h"
 #include <cassert>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -117,6 +119,12 @@ public:
       int FI;
       Register Reg;
     } payload;
+    // For a NoRelocate value that is a re-materializable integer constant,
+    // holds the constant so the gc.relocate can emit it fresh rather than
+    // reading a vreg exported from the statepoint's block. Such an export
+    // would define the vreg after the statepoint call, which does not
+    // dominate a use reached by the unwind (EH pad) edge.
+    std::optional<APInt> ConstantValue;
   };
 
   /// Keep track of each value which was relocated and the strategy used to

@@ -9,10 +9,12 @@ target triple = "thumbv7em-arm-none-eabi"
 define hidden void @fn1() nounwind #0 {
 ; CHECK-LABEL: fn1:
 ; CHECK:       @ %bb.0: @ %entry
-; CHECK-NEXT:    movs r0, #1
-; CHECK-NEXT:    cbnz r0, .LBB0_2
+; CHECK-NEXT:    movs r0, #0
+; CHECK-NEXT:    movs r1, #1
+; CHECK-NEXT:    cbnz r1, .LBB0_2
 ; CHECK-NEXT:    b .LBB0_1
 ; CHECK-NEXT:  .LBB0_1: @ %land.rhs
+; CHECK-NEXT:    movs r0, #0
 ; CHECK-NEXT:    b .LBB0_2
 ; CHECK-NEXT:  .LBB0_2: @ %land.end
 ; CHECK-NEXT:    bx lr

@@ -806,6 +806,15 @@ void ScheduleDAGInstrs::buildSchedGraph(AAResults *AA,
       if (TrackLaneMasks) {
         SlotIndex SlotIdx = LIS->getInstructionIndex(MI);
         RegOpers.adjustLaneLiveness(*LIS, MRI, SlotIdx);
+      } else if (LIS) {
+        // Detect dead physreg defs from LiveIntervals rather than relying on
+        // dead flags. This requires the register unit ranges to be computed;
+        // materialize them on demand for the instruction's physreg defs.
+        for (const MachineOperand &MO : MI.all_defs())
+          if (MO.getReg().isPhysical())
+            for (MCRegUnit Unit : TRI->regunits(MO.getReg().asMCReg()))
+              LIS->getRegUnit(Unit);
+        RegOpers.detectDeadDefs(MI, *LIS, MRI);
       }
       if (PDiffs != nullptr)
         PDiffs->addInstruction(SU->NodeNum, RegOpers, MRI);

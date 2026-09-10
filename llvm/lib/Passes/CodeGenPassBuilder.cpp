@@ -43,7 +43,6 @@
 #include "llvm/CodeGen/InterleavedLoadCombine.h"
 #include "llvm/CodeGen/LiveDebugValuesPass.h"
 #include "llvm/CodeGen/LiveIntervals.h"
-#include "llvm/CodeGen/LiveVariables.h"
 #include "llvm/CodeGen/LocalStackSlotAllocation.h"
 #include "llvm/CodeGen/LowerEmuTLS.h"
 #include "llvm/CodeGen/MIRPrinter.h"
@@ -853,29 +852,21 @@ Error CodeGenPassBuilder::addOptimizedRegAlloc(PassManagerWrapper &PMW) {
 
   addMachineFunctionPass(ProcessImplicitDefsPass(), PMW);
 
-  // LiveVariables currently requires pure SSA form.
-  //
-  // FIXME: Once TwoAddressInstruction pass no longer uses kill flags,
-  // LiveVariables can be removed completely, and LiveIntervals can be directly
-  // computed. (We still either need to regenerate kill flags after regalloc, or
-  // preferably fix the scavenger to not depend on them).
-  // FIXME: UnreachableMachineBlockElim is a dependant pass of LiveVariables.
-  // When LiveVariables is removed this has to be removed/moved either.
+  // LiveIntervals requires pure SSA form and no unreachable blocks.
   // Explicit addition of UnreachableMachineBlockElim allows stopping before or
   // after it with -stop-before/-stop-after.
   addMachineFunctionPass(UnreachableMachineBlockElimPass(), PMW);
+
+  // LiveIntervals is computed before PHIElimination so that pass can rely on it
+  // and maintain it incrementally while lowering PHIs. TwoAddressInstruction
+  // likewise uses it instead of the (now removed) LiveVariables analysis.
   addMachineFunctionPass(
-      RequireAnalysisPass<LiveVariablesAnalysis, MachineFunction>(), PMW);
+      RequireAnalysisPass<LiveIntervalsAnalysis, MachineFunction>(), PMW);
 
   // Edge splitting is smarter with machine loop info.
   addMachineFunctionPass(
       RequireAnalysisPass<MachineLoopAnalysis, MachineFunction>(), PMW);
   addMachineFunctionPass(PHIEliminationPass(), PMW);
-
-  // Eventually, we want to run LiveIntervals before PHI elimination.
-  if (Opt.EarlyLiveIntervals)
-    addMachineFunctionPass(
-        RequireAnalysisPass<LiveIntervalsAnalysis, MachineFunction>(), PMW);
 
   addMachineFunctionPass(TwoAddressInstructionPass(), PMW);
   addMachineFunctionPass(RegisterCoalescerPass(), PMW);

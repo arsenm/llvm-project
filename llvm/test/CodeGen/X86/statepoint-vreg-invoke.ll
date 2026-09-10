@@ -70,7 +70,7 @@ define ptr addrspace(1) @test_invoke_same_val(i1 %cond, ptr addrspace(1) %val1, 
   ; CHECK-NEXT:   renamable $r15 = COPY $rdx
   ; CHECK-NEXT:   renamable $ebx = COPY $edi
   ; CHECK-NEXT:   TEST8ri renamable $bl, 1, implicit-def $eflags
-  ; CHECK-NEXT:   JCC_1 %bb.3, 4, implicit killed $eflags
+  ; CHECK-NEXT:   JCC_1 %bb.3, 4, implicit $eflags
   ; CHECK-NEXT:   JMP_1 %bb.1
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT: bb.1.left:
@@ -116,7 +116,7 @@ define ptr addrspace(1) @test_invoke_same_val(i1 %cond, ptr addrspace(1) %val1, 
   ; CHECK-NEXT:   liveins: $ebx, $r14, $r15
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   TEST8ri renamable $bl, 1, implicit-def $eflags, implicit killed $ebx
-  ; CHECK-NEXT:   renamable $r14 = CMOV64rr killed renamable $r14, killed renamable $r15, 4, implicit killed $eflags
+  ; CHECK-NEXT:   renamable $r14 = CMOV64rr killed renamable $r14, killed renamable $r15, 4, implicit $eflags
   ; CHECK-NEXT:   $rax = COPY killed renamable $r14
   ; CHECK-NEXT:   RET 0, $rax
   ; CHECK-NEXT: {{  $}}
@@ -183,12 +183,12 @@ define void @test_duplicate_ir_values() gc "statepoint-example" personality ptr 
   ; CHECK-NEXT:   MOV64mr %stack.0, 1, $noreg, 0, $noreg, killed renamable $rax :: (store (s64) into %stack.0)
   ; CHECK-NEXT:   EH_LABEL <mcsymbol >
   ; CHECK-NEXT:   ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
-  ; CHECK-NEXT:   dead $edi = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $rsi = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $edx = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $ecx = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $r8d = IMPLICIT_DEF
-  ; CHECK-NEXT:   STATEPOINT 1, 16, 5, undef renamable $rax, undef $edi, undef $rsi, undef $edx, undef $ecx, undef $r8d, 2, 0, 2, 0, 2, 0, 2, 1, 1, 8, %stack.0, 0, 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp, implicit-def dead $eax :: (volatile load store (s64) on %stack.0)
+  ; CHECK-NEXT:   $edi = IMPLICIT_DEF
+  ; CHECK-NEXT:   $rsi = IMPLICIT_DEF
+  ; CHECK-NEXT:   $edx = IMPLICIT_DEF
+  ; CHECK-NEXT:   $ecx = IMPLICIT_DEF
+  ; CHECK-NEXT:   $r8d = IMPLICIT_DEF
+  ; CHECK-NEXT:   STATEPOINT 1, 16, 5, undef renamable $rax, undef $edi, undef $rsi, undef $edx, undef $ecx, undef $r8d, 2, 0, 2, 0, 2, 0, 2, 1, 1, 8, %stack.0, 0, 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp, implicit-def $eax :: (volatile load store (s64) on %stack.0)
   ; CHECK-NEXT:   ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
   ; CHECK-NEXT:   EH_LABEL <mcsymbol >
   ; CHECK-NEXT:   JMP_1 %bb.1
@@ -199,7 +199,7 @@ define void @test_duplicate_ir_values() gc "statepoint-example" personality ptr 
   ; CHECK-NEXT:   renamable $rbx = MOV64rm %stack.0, 1, $noreg, 0, $noreg :: (load (s64) from %stack.0)
   ; CHECK-NEXT:   ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
   ; CHECK-NEXT:   $edi = MOV32ri 10
-  ; CHECK-NEXT:   dead renamable $rbx = STATEPOINT 2882400000, 0, 1, target-flags(x86-plt) @__llvm_deoptimize, killed $edi, 2, 0, 2, 2, 2, 2, killed renamable $rbx, renamable $rbx, 2, 1, renamable $rbx(tied-def 0), 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp
+  ; CHECK-NEXT:   dead renamable $rbx = STATEPOINT 2882400000, 0, 1, target-flags(x86-plt) @__llvm_deoptimize, $edi, 2, 0, 2, 2, 2, 2, killed renamable $rbx, renamable $rbx, 2, 1, renamable $rbx(tied-def 0), 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp
   ; CHECK-NEXT:   ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT: bb.2.exceptional_return (landing-pad):
@@ -209,7 +209,7 @@ define void @test_duplicate_ir_values() gc "statepoint-example" personality ptr 
   ; CHECK-NEXT:   renamable $rbx = MOV64rm %stack.0, 1, $noreg, 0, $noreg :: (load (s64) from %stack.0)
   ; CHECK-NEXT:   ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
   ; CHECK-NEXT:   $edi = MOV32ri -271
-  ; CHECK-NEXT:   dead renamable $rbx = STATEPOINT 2882400000, 0, 1, target-flags(x86-plt) @__llvm_deoptimize, killed $edi, 2, 0, 2, 0, 2, 1, killed renamable $rbx, 2, 1, renamable $rbx(tied-def 0), 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp
+  ; CHECK-NEXT:   dead renamable $rbx = STATEPOINT 2882400000, 0, 1, target-flags(x86-plt) @__llvm_deoptimize, $edi, 2, 0, 2, 0, 2, 1, killed renamable $rbx, 2, 1, renamable $rbx(tied-def 0), 2, 0, 2, 1, 0, 0, csr_64, implicit-def $rsp, implicit-def $ssp
   ; CHECK-NEXT:   ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
 entry:
   %val1 = load ptr addrspace(1), ptr addrspace(1) undef, align 8

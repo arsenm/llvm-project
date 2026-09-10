@@ -19,14 +19,14 @@ define i16 @foo(i32 noundef %t, i16 %row, i16 %col) nounwind {
   ; CHECK-NEXT:   MOV8mr %stack.0, 1, $noreg, 49, $noreg, [[COPY1]].sub_8bit :: (store (s512) into %stack.0 + 49, align 1, basealign 4)
   ; CHECK-NEXT:   MOV16mr %stack.0, 1, $noreg, 16, $noreg, [[COPY]].sub_16bit :: (store (s512) into %stack.0 + 16, align 4)
   ; CHECK-NEXT:   MOV8mr %stack.0, 1, $noreg, 48, $noreg, [[COPY1]].sub_8bit :: (store (s512) into %stack.0 + 48, align 4)
-  ; CHECK-NEXT:   PLDTILECFGV %stack.0, 1, $noreg, 0, $noreg, implicit-def dead $tmm0, implicit-def dead $tmm1, implicit-def dead $tmm2, implicit-def dead $tmm3, implicit-def dead $tmm4, implicit-def dead $tmm5, implicit-def dead $tmm6, implicit-def dead $tmm7 :: (load (s512) from %stack.0, align 4)
+  ; CHECK-NEXT:   PLDTILECFGV %stack.0, 1, $noreg, 0, $noreg, implicit-def $tmm0, implicit-def $tmm1, implicit-def $tmm2, implicit-def $tmm3, implicit-def $tmm4, implicit-def $tmm5, implicit-def $tmm6, implicit-def $tmm7 :: (load (s512) from %stack.0, align 4)
   ; CHECK-NEXT:   [[PTILEZEROV:%[0-9]+]]:tile = PTILEZEROV [[COPY1]].sub_16bit, [[COPY]].sub_16bit
   ; CHECK-NEXT:   [[PTILEZEROV1:%[0-9]+]]:tile = PTILEZEROV [[COPY1]].sub_16bit, [[COPY]].sub_16bit
   ; CHECK-NEXT:   [[PTILEZEROV2:%[0-9]+]]:tile = PTILEZEROV [[COPY1]].sub_16bit, [[COPY]].sub_16bit
   ; CHECK-NEXT:   dead [[PTILEZEROV2:%[0-9]+]]:tile = PTDPBSSDV [[COPY1]].sub_16bit, [[COPY]].sub_16bit, [[COPY]].sub_16bit, [[PTILEZEROV2]], [[PTILEZEROV]], [[PTILEZEROV1]]
   ; CHECK-NEXT:   [[LEA64_32r:%[0-9]+]]:gr32 = LEA64_32r [[COPY1]], 1, [[COPY]], 0, $noreg
   ; CHECK-NEXT:   $ax = COPY [[LEA64_32r]].sub_16bit
-  ; CHECK-NEXT:   RET 0, killed $ax
+  ; CHECK-NEXT:   RET 0, $ax
 entry:
   %0 = tail call x86_amx @llvm.x86.tilezero.internal(i16 %row, i16 %col)
   %1 = tail call x86_amx @llvm.x86.tilezero.internal(i16 %row, i16 %col)
