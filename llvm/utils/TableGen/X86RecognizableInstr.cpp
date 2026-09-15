@@ -56,7 +56,19 @@ bool X86Disassembler::isImmediateOperand(const Record *Rec) {
          Rec->getValueAsString("OperandType") == "OPERAND_IMMEDIATE";
 }
 
+// A RegClassByHwMode resolves to a different register class per subtarget, but
+// every mode maps to a class with the same encoding and width. Return one of
+// them as a representative so the operand can be treated like a plain register
+// class (for encoding, size, etc.).
+static const Record *getRegClassByHwModeRepresentative(const Record *Rec) {
+  const ListInit *Objects = Rec->getValueAsListInit("Objects");
+  assert(Objects->size() && "RegClassByHwMode with no register classes");
+  return Objects->getElementAsRecord(0);
+}
+
 unsigned X86Disassembler::getRegOperandSize(const Record *RegRec) {
+  if (RegRec->isSubClassOf("RegClassByHwMode"))
+    RegRec = getRegClassByHwModeRepresentative(RegRec);
   if (RegRec->isSubClassOf("RegisterClass"))
     return RegRec->getValueAsInt("Alignment");
   if (RegRec->isSubClassOf("RegisterOperand"))
@@ -435,7 +447,14 @@ void RecognizableInstr::handleOperand(bool optional, unsigned &operandIndex,
     ++operandIndex;
   }
 
-  StringRef typeName = (*Operands)[operandIndex].Rec->getName();
+  const Record *OpRec = (*Operands)[operandIndex].Rec;
+  // A RegClassByHwMode register operand encodes identically to its underlying
+  // register class in every mode, so resolve it to a representative and reuse
+  // the normal register-class handling instead of enumerating each by-hwmode
+  // operand name below.
+  if (OpRec->isSubClassOf("RegClassByHwMode"))
+    OpRec = getRegClassByHwModeRepresentative(OpRec);
+  StringRef typeName = OpRec->getName();
 
   OperandEncoding encoding = encodingFromString(typeName, OpSize);
   // Adjust the encoding type for an operand based on the instruction.
@@ -1033,6 +1052,20 @@ OperandType RecognizableInstr::typeFromString(StringRef Str, bool hasREX_W,
           .Case("i64i8imm", TYPE_IMM)
           .Case("GR64", TYPE_R64)
           .Case("i8mem", TYPE_M)
+          .Case("i8mem_norex2", TYPE_M)
+          .Case("i16mem_norex2", TYPE_M)
+          .Case("i32mem_norex2", TYPE_M)
+          .Case("i64mem_norex2", TYPE_M)
+          .Case("i128mem_norex2", TYPE_M)
+          .Case("i256mem_norex2", TYPE_M)
+          .Case("f32mem_norex2", TYPE_M)
+          .Case("f64mem_norex2", TYPE_M)
+          .Case("f80mem_norex2", TYPE_M)
+          .Case("ssmem_norex2", TYPE_M)
+          .Case("sdmem_norex2", TYPE_M)
+          .Case("anymem_norex2", TYPE_M)
+          .Case("opaquemem_norex2", TYPE_M)
+          .Case("sibmem_norex2", TYPE_MSIB)
           .Case("i8imm", TYPE_IMM)
           .Case("u4imm", TYPE_UIMM8)
           .Case("u8imm", TYPE_UIMM8)
@@ -1371,18 +1404,29 @@ OperandEncoding RecognizableInstr::memoryEncodingFromString(StringRef Str,
           .Case("i32mem", ENCODING_RM)
           .Case("i64mem", ENCODING_RM)
           .Case("i8mem", ENCODING_RM)
+          .Case("i8mem_norex2", ENCODING_RM)
+          .Case("i16mem_norex2", ENCODING_RM)
+          .Case("i32mem_norex2", ENCODING_RM)
+          .Case("i64mem_norex2", ENCODING_RM)
           .Case("shmem", ENCODING_RM)
           .Case("ssmem", ENCODING_RM)
           .Case("sdmem", ENCODING_RM)
+          .Case("ssmem_norex2", ENCODING_RM)
+          .Case("sdmem_norex2", ENCODING_RM)
           .Case("f128mem", ENCODING_RM)
           .Case("f256mem", ENCODING_RM)
           .Case("f512mem", ENCODING_RM)
           .Case("f64mem", ENCODING_RM)
           .Case("f32mem", ENCODING_RM)
           .Case("f16mem", ENCODING_RM)
+          .Case("f32mem_norex2", ENCODING_RM)
+          .Case("f64mem_norex2", ENCODING_RM)
+          .Case("f80mem_norex2", ENCODING_RM)
           .Case("i128mem", ENCODING_RM)
           .Case("i256mem", ENCODING_RM)
           .Case("i512mem", ENCODING_RM)
+          .Case("i128mem_norex2", ENCODING_RM)
+          .Case("i256mem_norex2", ENCODING_RM)
           .Case("i512mem_GR16", ENCODING_RM)
           .Case("i512mem_GR32", ENCODING_RM)
           .Case("i512mem_GR64", ENCODING_RM)
@@ -1392,8 +1436,11 @@ OperandEncoding RecognizableInstr::memoryEncodingFromString(StringRef Str,
           .Case("lea64_32mem", ENCODING_RM)
           .Case("lea64mem", ENCODING_RM)
           .Case("anymem", ENCODING_RM)
+          .Case("anymem_norex2", ENCODING_RM)
           .Case("opaquemem", ENCODING_RM)
+          .Case("opaquemem_norex2", ENCODING_RM)
           .Case("sibmem", ENCODING_SIB)
+          .Case("sibmem_norex2", ENCODING_SIB)
           .Case("vx32mem", ENCODING_VSIB)
           .Case("vx64mem", ENCODING_VSIB)
           .Case("vy32mem", ENCODING_VSIB)

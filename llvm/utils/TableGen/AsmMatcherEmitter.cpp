@@ -654,6 +654,22 @@ struct MatchableInfo {
     // Compare lexicographically by operand. The matcher validates that other
     // orderings wouldn't be ambiguous using \see couldMatchAmbiguouslyWith().
     for (const auto &[LHSOp, RHSOp] : zip_equal(AsmOperands, RHS.AsmOperands)) {
+      // Don't let a RegisterClassByHwMode operand facing a plain RegisterClass
+      // operand in the same slot decide the order. The two are distinct match
+      // classes but accept an overlapping register set (e.g. on X86 a VEX form
+      // constrains a GPR to a *_NOREX2 subclass by hwmode while the AVX512 form
+      // uses the full class). operator< always sorts a RegisterClassByHwMode
+      // after a RegisterClass, which would override the position-order
+      // preference below (e.g. VEX before EVEX); skip such slots so a later,
+      // discriminating operand or the position order breaks the tie.
+      bool MixedRegKinds = LHSOp.Class->isRegisterClassByHwMode() !=
+                               RHSOp.Class->isRegisterClassByHwMode() &&
+                           (LHSOp.Class->isRegisterClass() ||
+                            LHSOp.Class->isRegisterClassByHwMode()) &&
+                           (RHSOp.Class->isRegisterClass() ||
+                            RHSOp.Class->isRegisterClassByHwMode());
+      if (MixedRegKinds)
+        continue;
       if (*LHSOp.Class < *RHSOp.Class)
         return true;
       if (*RHSOp.Class < *LHSOp.Class)

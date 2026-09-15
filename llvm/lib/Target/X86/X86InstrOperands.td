@@ -6,15 +6,49 @@
 //
 //===----------------------------------------------------------------------===//
 
+// The register class picked for each RegClassByHwMode operand below is indexed
+// by the subtarget's RegInfo HwMode, so the mode list and the class list are
+// positional: X86_32 (DefaultMode), X86_64, X86_64_EGPR, X86_64_X32. Only the
+// X86_64_EGPR entry differs for the norex2 operands; every other mode keeps the
+// unconstrained class because r16-r31 only exist when the subtarget has EGPR.
+
 def x86_ptr_rc : RegClassByHwMode<
-  [X86_32, X86_64, X86_64_X32],
-  [GR32, GR64, LOW32_ADDR_ACCESS]>;
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32, GR64, GR64, LOW32_ADDR_ACCESS]>;
 
 // A version of ptr_rc which excludes SP, ESP, and RSP. This is used for
 // the index operand of an address, to conform to x86 encoding restrictions.
 def ptr_rc_nosp : RegClassByHwMode<
-  [X86_32, X86_64, X86_64_X32],
-  [GR32_NOSP, GR64_NOSP, GR32_NOSP]>;
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32_NOSP, GR64_NOSP, GR64_NOSP, GR32_NOSP]>;
+
+// Address base/index classes for instructions that cannot encode r16-r31, i.e.
+// those for which X86II::canUseApxExtendedReg is false (VEX/XOP, legacy maps
+// other than OB/TB, XSAVE/XRSTOR, and the pseudos that lower to them). The
+// X86_64_EGPR entry is the *_NOREX2 subclass; all other modes are unaffected
+// since they have no EGPRs to exclude.
+def ptr_rc_norex2 : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32, GR64, GR64_NOREX2, LOW32_ADDR_ACCESS]>;
+
+def ptr_rc_norex2_nosp : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32_NOSP, GR64_NOSP, GR64_NOREX2_NOSP, GR32_NOSP]>;
+
+// Direct GPR register operands for the same set of EGPR-incapable instructions:
+// the X86_64_EGPR entry keeps the definition/use off r16-r31 via *_NOREX2.
+def gr8_norex2 : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR8, GR8, GR8_NOREX2, GR8]>;
+def gr16_norex2 : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR16, GR16, GR16_NOREX2, GR16]>;
+def gr32_norex2 : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32, GR32, GR32_NOREX2, GR32]>;
+def gr64_norex2 : RegClassByHwMode<
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR64, GR64, GR64_NOREX2, GR64]>;
 
 // *mem - Operand definitions for the funky X86 addressing mode operands.
 //
@@ -72,6 +106,17 @@ class X86VMemOperand<RegisterClass RC, string printMethod,
   let MIOperandInfo = (ops x86_ptr_rc, i8imm, RC, i32imm, SEGMENT_REG);
 }
 
+// A memory operand whose base and index registers avoid the EGPR set (via the
+// *_NOREX2 classes in X86_64_EGPR mode), for instructions that cannot encode
+// r16-r31 in a memory address.
+class X86MemOperandNoRex2<string printMethod,
+                          AsmOperandClass parserMatchClass = X86MemAsmOperand,
+                          int size = 0>
+    : X86MemOperand<printMethod, parserMatchClass, size> {
+  let MIOperandInfo = (ops ptr_rc_norex2, i8imm, ptr_rc_norex2_nosp, i32imm,
+                       SEGMENT_REG);
+}
+
 def anymem : X86MemOperand<"printMemReference">;
 
 // FIXME: Right now we allow any size during parsing, but we might want to
@@ -117,15 +162,33 @@ def shmem : X86MemOperand<"printwordmem", X86Mem16AsmOperand>;
 def ssmem : X86MemOperand<"printdwordmem", X86Mem32AsmOperand>;
 def sdmem : X86MemOperand<"printqwordmem", X86Mem64AsmOperand>;
 
+// norex2 variants of the memory operands, for the EGPR-incapable instructions
+// (VEX/XOP, non-OB/TB legacy maps, XSAVE/XRSTOR, and certain pseudos) that take
+// a memory address.
+def anymem_norex2 : X86MemOperandNoRex2<"printMemReference">;
+def opaquemem_norex2 : X86MemOperandNoRex2<"printMemReference">;
+def sibmem_norex2 : X86MemOperandNoRex2<"printMemReference", X86SibMemOperand>;
+def i8mem_norex2   : X86MemOperandNoRex2<"printbytemem",   X86Mem8AsmOperand, 8>;
+def i16mem_norex2  : X86MemOperandNoRex2<"printwordmem",  X86Mem16AsmOperand, 16>;
+def i32mem_norex2  : X86MemOperandNoRex2<"printdwordmem",  X86Mem32AsmOperand, 32>;
+def i64mem_norex2  : X86MemOperandNoRex2<"printqwordmem",  X86Mem64AsmOperand, 64>;
+def i128mem_norex2 : X86MemOperandNoRex2<"printxmmwordmem", X86Mem128AsmOperand, 128>;
+def i256mem_norex2 : X86MemOperandNoRex2<"printymmwordmem", X86Mem256AsmOperand, 256>;
+def f32mem_norex2  : X86MemOperandNoRex2<"printdwordmem",  X86Mem32AsmOperand, 32>;
+def f64mem_norex2  : X86MemOperandNoRex2<"printqwordmem",  X86Mem64AsmOperand, 64>;
+def f80mem_norex2  : X86MemOperandNoRex2<"printtbytemem",  X86Mem80AsmOperand, 80>;
+def ssmem_norex2   : X86MemOperandNoRex2<"printdwordmem", X86Mem32AsmOperand>;
+def sdmem_norex2   : X86MemOperandNoRex2<"printqwordmem", X86Mem64AsmOperand>;
+
 // A version of i8mem for use on x86-64 and x32 that uses a NOREX GPR instead
 // of a plain GPR, so that it doesn't potentially require a REX prefix.
 def ptr_rc_norex : RegClassByHwMode<
-  [X86_32, X86_64, X86_64_X32],
-  [GR32_NOREX, GR64_NOREX, GR32_NOREX]>;
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32_NOREX, GR64_NOREX, GR64_NOREX, GR32_NOREX]>;
 
 def ptr_rc_norex_nosp : RegClassByHwMode<
-  [X86_32, X86_64, X86_64_X32],
-  [GR32_NOREX_NOSP, GR64_NOREX_NOSP, GR32_NOREX_NOSP]>;
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32_NOREX_NOSP, GR64_NOREX_NOSP, GR64_NOREX_NOSP, GR32_NOREX_NOSP]>;
 
 
 def i8mem_NOREX : X86MemOperand<"printbytemem", X86Mem8AsmOperand, 8> {
@@ -136,8 +199,8 @@ def i8mem_NOREX : X86MemOperand<"printbytemem", X86Mem8AsmOperand, 8> {
 // GPRs available for tailcall.
 // It represents GR32_TC, GR64_TC or GR64_TCW64.
 def ptr_rc_tailcall : RegClassByHwMode<
-  [X86_32, X86_64, X86_64_X32],
-  [GR32_TC, GR64_TC, GR64_TC]>;
+  [X86_32, X86_64, X86_64_EGPR, X86_64_X32],
+  [GR32_TC, GR64_TC, GR64_TC, GR64_TC]>;
 
 // Special i32mem for addresses of load folding tail calls. These are not
 // allowed to use callee-saved registers since they must be scheduled

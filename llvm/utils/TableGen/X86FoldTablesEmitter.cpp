@@ -371,6 +371,13 @@ static bool isNOREXRegClass(const Record *Op) {
   return Op->getName().contains("_NOREX");
 }
 
+// A register operand may be a plain register class/operand, or a
+// RegClassByHwMode that resolves to one per subtarget (e.g. the *_norex2
+// operands used by instructions that cannot encode r16-r31).
+static bool isRegOrRegByHwModeOperand(const Record *Op) {
+  return isRegisterOperand(Op) || Op->isSubClassOf("RegClassByHwMode");
+}
+
 // Function object - Operator() returns true if the given Reg instruction
 // matches the Mem instruction of this object.
 namespace {
@@ -454,7 +461,8 @@ public:
       if (MemOpRec == RegOpRec)
         continue;
 
-      if (isRegisterOperand(MemOpRec) && isRegisterOperand(RegOpRec) &&
+      if (isRegOrRegByHwModeOperand(MemOpRec) &&
+          isRegOrRegByHwModeOperand(RegOpRec) &&
           ((getRegOperandSize(MemOpRec) != getRegOperandSize(RegOpRec)) ||
            (isNOREXRegClass(MemOpRec) != isNOREXRegClass(RegOpRec))))
         return false;
@@ -471,7 +479,7 @@ public:
       if (FoundFoldedOp)
         return false;
 
-      assert(isRegisterOperand(RegOpRec) && isMemoryOperand(MemOpRec));
+      assert(isRegOrRegByHwModeOperand(RegOpRec) && isMemoryOperand(MemOpRec));
       FoundFoldedOp = true;
     }
 
