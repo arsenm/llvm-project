@@ -218,7 +218,7 @@ define internal void @q() {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@q
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @escapes_as_parameter(ptr nofree nonnull readnone captures(none) @escapes_as_parameter) #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @escapes_as_parameter(ptr nonnull @escapes_as_parameter) #[[ATTR2]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = call i32 @escapes_as_parameter(ptr @escapes_as_parameter)

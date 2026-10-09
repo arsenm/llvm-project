@@ -230,7 +230,7 @@ define void @test8_2(ptr %p) {
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test8_2
 ; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[P:%.*]]) #[[ATTR0]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr nofree readnone [[P]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr readnone [[P]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -238,7 +238,7 @@ define void @test8_2(ptr %p) {
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_2
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree writeonly [[P:%.*]]) #[[ATTR5:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
-; ATTRIBUTOR-CGSCC-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr nofree readnone [[P]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-CGSCC-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr [[P]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;

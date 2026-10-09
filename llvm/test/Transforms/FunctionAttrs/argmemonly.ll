@@ -210,7 +210,7 @@ define i32 @test_call_fn_where_argmemonly_can_be_inferred(ptr %ptr) {
 ; ATTRIBUTOR-LABEL: define i32 @test_call_fn_where_argmemonly_can_be_inferred
 ; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @test_only_read_arg(ptr nofree readonly captures(none) [[PTR]]) #[[ATTR19:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @test_only_read_arg(ptr readonly captures(none) [[PTR]]) #[[ATTR19:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret i32 [[C]]
 ;
 entry:
@@ -399,7 +399,7 @@ define void @test_recursive_argmem_read(ptr %p) {
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_read
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR15:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr readonly [[PVAL]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -421,7 +421,7 @@ define void @test_recursive_argmem_readwrite(ptr %p) {
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR16:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr nofree captures(none) [[PVAL]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr [[PVAL]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -444,7 +444,7 @@ define void @test_recursive_argmem_read_alloca(ptr %p) {
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR17:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = alloca ptr, align 8
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = load i32, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr nofree nonnull readonly captures(none) [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr readonly [[A]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = alloca ptr
@@ -465,7 +465,7 @@ define void @test_scc_argmem_read_1(ptr %p) {
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_1
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR15]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr readonly [[PVAL]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -483,7 +483,7 @@ define void @test_scc_argmem_read_2(ptr %p) {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_2
 ; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR15]] {
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr nofree readonly captures(none) [[P]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr readonly captures(none) [[P]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @test_scc_argmem_read_1(ptr %p)

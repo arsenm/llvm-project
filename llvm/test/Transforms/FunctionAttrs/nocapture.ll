@@ -46,7 +46,7 @@ define void @c3(ptr %q) {
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-LABEL: define void @c3
 ; ATTRIBUTOR-SAME: (ptr nofree writeonly [[Q:%.*]]) #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    call void @c2(ptr nofree writeonly [[Q]]) #[[ATTR21:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @c2(ptr [[Q]]) #[[ATTR21:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @c2(ptr %q)
@@ -232,7 +232,7 @@ define i1 @c7(ptr %q, i32 %bitno) {
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
 ; ATTRIBUTOR-LABEL: define i1 @c7
 ; ATTRIBUTOR-SAME: (ptr nofree readonly [[Q:%.*]], i32 [[BITNO:%.*]]) #[[ATTR2]] {
-; ATTRIBUTOR-NEXT:    [[PTR:%.*]] = call ptr @lookup_bit(ptr nofree readnone [[Q]], i32 [[BITNO]]) #[[ATTR22:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[PTR:%.*]] = call ptr @lookup_bit(ptr [[Q]], i32 [[BITNO]]) #[[ATTR22:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    [[VAL:%.*]] = load i1, ptr [[PTR]], align 1
 ; ATTRIBUTOR-NEXT:    ret i1 [[VAL]]
 ;
@@ -337,7 +337,7 @@ define void @nc2(ptr %p, ptr %q) {
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
 ; ATTRIBUTOR-LABEL: define void @nc2
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree [[Q:%.*]]) #[[ATTR5]] {
-; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call i32 @nc1(ptr nofree [[Q]], ptr nofree captures(none) [[P]], i1 false) #[[ATTR23:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call i32 @nc1(ptr [[Q]], ptr captures(none) [[P]], i1 false) #[[ATTR23:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %1 = call i32 @nc1(ptr %q, ptr %p, i1 0)		; <i32> [#uses=0]
@@ -478,7 +478,7 @@ define void @test1_1(ptr %x1_1, ptr %y1_1, i1 %c) {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write)
 ; ATTRIBUTOR-LABEL: define void @test1_1
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X1_1:%.*]], ptr nofree readnone captures(none) [[Y1_1:%.*]], i1 [[C:%.*]]) #[[ATTR10:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call ptr @test1_2(ptr nofree readnone captures(none) [[X1_1]], ptr nofree readnone [[Y1_1]], i1 [[C]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call ptr @test1_2(ptr readnone captures(none) [[X1_1]], ptr readnone [[Y1_1]], i1 [[C]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -504,7 +504,7 @@ define ptr @test1_2(ptr %x1_2, ptr %y1_2, i1 %c) {
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X1_2:%.*]], ptr nofree readnone [[Y1_2:%.*]], i1 [[C:%.*]]) #[[ATTR10]] {
 ; ATTRIBUTOR-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; ATTRIBUTOR:       t:
-; ATTRIBUTOR-NEXT:    call void @test1_1(ptr nofree readnone captures(none) [[X1_2]], ptr nofree readnone captures(none) [[Y1_2]], i1 [[C]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    call void @test1_1(ptr readnone captures(none) [[X1_2]], ptr readnone captures(none) [[Y1_2]], i1 [[C]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    br label [[F]]
 ; ATTRIBUTOR:       f:
@@ -530,7 +530,7 @@ define void @test2(ptr %x2) {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write)
 ; ATTRIBUTOR-LABEL: define void @test2
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X2:%.*]]) #[[ATTR10]] {
-; ATTRIBUTOR-NEXT:    call void @test2(ptr nofree readnone captures(none) [[X2]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    call void @test2(ptr readnone captures(none) [[X2]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -550,7 +550,7 @@ define void @test3(ptr %x3, ptr %y3, ptr %z3) {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write)
 ; ATTRIBUTOR-LABEL: define void @test3
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X3:%.*]], ptr nofree readnone captures(none) [[Y3:%.*]], ptr nofree readnone captures(none) [[Z3:%.*]]) #[[ATTR10]] {
-; ATTRIBUTOR-NEXT:    call void @test3(ptr nofree readnone captures(none) [[Z3]], ptr nofree readnone captures(none) [[Y3]], ptr nofree readnone captures(none) [[X3]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    call void @test3(ptr readnone captures(none) [[Z3]], ptr readnone captures(none) [[Y3]], ptr readnone captures(none) [[X3]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -570,7 +570,7 @@ define void @test4_1(ptr %x4_1, i1 %c) {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write)
 ; ATTRIBUTOR-LABEL: define void @test4_1
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X4_1:%.*]], i1 [[C:%.*]]) #[[ATTR10]] {
-; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call ptr @test4_2(ptr nofree readnone captures(none) [[X4_1]], ptr nofree readnone [[X4_1]], ptr nofree readnone captures(none) [[X4_1]], i1 [[C]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call ptr @test4_2(ptr readnone captures(none) [[X4_1]], ptr readnone [[X4_1]], ptr readnone captures(none) [[X4_1]], i1 [[C]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -596,7 +596,7 @@ define ptr @test4_2(ptr %x4_2, ptr %y4_2, ptr %z4_2, i1 %c) {
 ; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[X4_2:%.*]], ptr nofree readnone [[Y4_2:%.*]], ptr nofree readnone captures(none) [[Z4_2:%.*]], i1 [[C:%.*]]) #[[ATTR10]] {
 ; ATTRIBUTOR-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; ATTRIBUTOR:       t:
-; ATTRIBUTOR-NEXT:    call void @test4_1(ptr nofree readnone null, i1 [[C]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    call void @test4_1(ptr null, i1 [[C]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr null, ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    br label [[F]]
 ; ATTRIBUTOR:       f:
@@ -1163,7 +1163,7 @@ define ptr @scc_capture_via_ret(i1 %c, ptr %p) {
 ; ATTRIBUTOR-NEXT:    br i1 [[C]], label [[IF:%.*]], label [[ELSE:%.*]]
 ; ATTRIBUTOR:       if:
 ; ATTRIBUTOR-NEXT:    [[C_NOT:%.*]] = xor i1 [[C]], true
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @scc_capture_via_ret(i1 [[C_NOT]], ptr nofree [[P]]) #[[ATTR10]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @scc_capture_via_ret(i1 [[C_NOT]], ptr [[P]]) #[[ATTR10]]
 ; ATTRIBUTOR-NEXT:    store ptr [[RET]], ptr @g, align 8
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ; ATTRIBUTOR:       else:
@@ -1260,7 +1260,7 @@ define void @addr_only_scc(ptr %p) {
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull [[P:%.*]]) #[[ATTR16:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[V:%.*]] = load i8, ptr [[P]], align 1
 ; ATTRIBUTOR-NEXT:    store i8 [[V]], ptr @g, align 1
-; ATTRIBUTOR-NEXT:    call void @addr_only_scc2(ptr nofree nonnull [[P]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @addr_only_scc2(ptr nonnull [[P]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %v = load i8, ptr %p
@@ -1287,7 +1287,7 @@ define void @addr_only_scc2(ptr %p) {
 ; ATTRIBUTOR-NEXT:    [[CMP:%.*]] = icmp ne ptr [[P]], null
 ; ATTRIBUTOR-NEXT:    br i1 [[CMP]], label [[IF:%.*]], label [[EXIT:%.*]]
 ; ATTRIBUTOR:       if:
-; ATTRIBUTOR-NEXT:    call void @addr_only_scc(ptr nofree [[P]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @addr_only_scc(ptr [[P]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    br label [[EXIT]]
 ; ATTRIBUTOR:       exit:
 ; ATTRIBUTOR-NEXT:    ret void

@@ -1406,6 +1406,10 @@ struct AttributorConfig {
   /// is, no outside functions exist.
   bool IsClosedWorldModule = false;
 
+  /// Flag to determine if abstract attributes for call site arguments are
+  /// created up front. If not, they are only created when queried.
+  bool SeedCallSiteArguments = true;
+
   /// Callback function to be invoked on internal functions marked live.
   std::function<void(Attributor &A, const Function &F)> InitializationCallback =
       nullptr;

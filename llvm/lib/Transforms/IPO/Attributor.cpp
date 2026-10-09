@@ -3633,6 +3633,9 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
         getOrCreateAAFor<AANoFPClass>(CBInstPos);
     }
 
+    if (!Configuration.SeedCallSiteArguments)
+      return true;
+
     const AttributeList &CBAttrs = CBFnPos.getAttrList();
     for (int I = 0, E = CB.arg_size(); I < E; ++I) {
 
@@ -4024,6 +4027,9 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
        &AADenormalFPMath::ID});
   AC.Allowed = &Allowed;
   AC.UseLiveness = false;
+  // Call site argument attributes are mostly redundant with the callee's
+  // argument attributes, and seeding them for every call is expensive.
+  AC.SeedCallSiteArguments = false;
 
   Attributor A(Functions, InfoCache, AC);
 

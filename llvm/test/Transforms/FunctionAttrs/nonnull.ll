@@ -323,8 +323,8 @@ define void @test13_helper() {
 ; ATTRIBUTOR-LABEL: define void @test13_helper() {
 ; ATTRIBUTOR-NEXT:    [[NONNULLPTR:%.*]] = tail call ptr @ret_nonnull()
 ; ATTRIBUTOR-NEXT:    [[MAYBENULLPTR:%.*]] = tail call ptr @unknown()
-; ATTRIBUTOR-NEXT:    tail call void @test13(ptr nofree nonnull readnone captures(none) [[NONNULLPTR]], ptr nofree nonnull readnone captures(none) [[NONNULLPTR]], ptr nofree readnone captures(none) [[MAYBENULLPTR]])
-; ATTRIBUTOR-NEXT:    tail call void @test13(ptr nofree nonnull readnone captures(none) [[NONNULLPTR]], ptr nofree readnone captures(none) [[MAYBENULLPTR]], ptr nofree nonnull readnone captures(none) [[NONNULLPTR]])
+; ATTRIBUTOR-NEXT:    tail call void @test13(ptr nonnull [[NONNULLPTR]], ptr nonnull [[NONNULLPTR]], ptr [[MAYBENULLPTR]])
+; ATTRIBUTOR-NEXT:    tail call void @test13(ptr nonnull [[NONNULLPTR]], ptr [[MAYBENULLPTR]], ptr [[NONNULLPTR]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %nonnullptr = tail call ptr @ret_nonnull()
@@ -393,11 +393,11 @@ define internal ptr @f1(ptr %arg) {
 ; ATTRIBUTOR-NEXT:    br i1 [[TMP3]], label [[BB6:%.*]], label [[BB4:%.*]]
 ; ATTRIBUTOR:       bb4:
 ; ATTRIBUTOR-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, ptr [[ARG]], i64 1
-; ATTRIBUTOR-NEXT:    [[TMP5B:%.*]] = tail call ptr @f3(ptr nofree nonnull readonly [[TMP5]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[TMP5B:%.*]] = tail call ptr @f3(ptr readonly [[TMP5]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    [[TMP5C:%.*]] = getelementptr inbounds i32, ptr [[TMP5B]], i64 -1
 ; ATTRIBUTOR-NEXT:    br label [[BB9]]
 ; ATTRIBUTOR:       bb6:
-; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call ptr @f2(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call ptr @f2(ptr nonnull readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP7]]
 ; ATTRIBUTOR:       bb9:
 ; ATTRIBUTOR-NEXT:    [[TMP10:%.*]] = phi ptr [ [[TMP5C]], [[BB4]] ], [ inttoptr (i64 4 to ptr), [[BB:%.*]] ]
@@ -439,7 +439,7 @@ define internal ptr @f2(ptr %arg) {
 ; ATTRIBUTOR-LABEL: define internal ptr @f2(
 ; ATTRIBUTOR-SAME: ptr nofree nonnull readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr nonnull readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -460,7 +460,7 @@ define dso_local noalias ptr @f3(ptr %arg) {
 ; ATTRIBUTOR-LABEL: define dso_local noalias ptr @f3(
 ; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr nofree readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -1054,7 +1054,7 @@ define weak_odr void @weak_caller(ptr nonnull %a) {
 ;
 ; ATTRIBUTOR-LABEL: define weak_odr void @weak_caller(
 ; ATTRIBUTOR-SAME: ptr nonnull [[A:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @called_by_weak(ptr nonnull readnone captures(none) [[A]])
+; ATTRIBUTOR-NEXT:    call void @called_by_weak(ptr nonnull [[A]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @called_by_weak(ptr %a)
@@ -1104,19 +1104,12 @@ define internal void @optnone(ptr dereferenceable(4) %a) optnone noinline {
   ret void
 }
 define void @make_live(ptr nonnull dereferenceable(8) %a) {
-; FNATTRS-LABEL: define void @make_live(
-; FNATTRS-SAME: ptr nonnull dereferenceable(8) [[A:%.*]]) {
-; FNATTRS-NEXT:    call void @naked(ptr nonnull align 16 dereferenceable(8) [[A]])
-; FNATTRS-NEXT:    call void @control(ptr nonnull align 16 dereferenceable(8) [[A]])
-; FNATTRS-NEXT:    call void @optnone(ptr nonnull align 16 dereferenceable(8) [[A]])
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR-LABEL: define void @make_live(
-; ATTRIBUTOR-SAME: ptr nonnull dereferenceable(8) [[A:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @naked(ptr nonnull align 16 dereferenceable(8) [[A]])
-; ATTRIBUTOR-NEXT:    call void @control(ptr nonnull readnone align 16 captures(none) dereferenceable(8) [[A]])
-; ATTRIBUTOR-NEXT:    call void @optnone(ptr nonnull align 16 dereferenceable(8) [[A]])
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON-LABEL: define void @make_live(
+; COMMON-SAME: ptr nonnull dereferenceable(8) [[A:%.*]]) {
+; COMMON-NEXT:    call void @naked(ptr nonnull align 16 dereferenceable(8) [[A]])
+; COMMON-NEXT:    call void @control(ptr nonnull align 16 dereferenceable(8) [[A]])
+; COMMON-NEXT:    call void @optnone(ptr nonnull align 16 dereferenceable(8) [[A]])
+; COMMON-NEXT:    ret void
 ;
   call void @naked(ptr nonnull dereferenceable(8) align 16 %a)
   call void @control(ptr nonnull dereferenceable(8) align 16 %a)
