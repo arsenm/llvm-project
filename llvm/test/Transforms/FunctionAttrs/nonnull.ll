@@ -884,7 +884,7 @@ define i8 @parent7(ptr %a) {
 ;
 ; ATTRIBUTOR-LABEL: define i8 @parent7(
 ; ATTRIBUTOR-SAME: ptr nonnull [[A:%.*]]) {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call i8 @use1safecall(ptr nonnull [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call i8 @use1safecall(ptr [[A]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    call void @use1nonnull(ptr nonnull [[A]])
 ; ATTRIBUTOR-NEXT:    ret i8 [[RET]]
 ;
@@ -1038,7 +1038,7 @@ define internal void @called_by_weak(ptr %a) {
 ;
 ; ATTRIBUTOR-LABEL: define internal void @called_by_weak(
 ; ATTRIBUTOR-SAME: ptr nonnull readnone captures(none) [[A:%.*]]) #[[ATTR10:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr nonnull [[A]]) #[[ATTR17:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr [[A]]) #[[ATTR17:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @use_i32_ptr(ptr %a)
@@ -1227,7 +1227,7 @@ define i32 @nonnull_exec_ctx_2(ptr %a, i32 %b) willreturn nounwind {
 ; ATTRIBUTOR-NEXT:    ret i32 [[TMP5]]
 ; ATTRIBUTOR:       hd:
 ; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = phi i32 [ [[TMP8:%.*]], [[HD]] ], [ 0, [[EN:%.*]] ]
-; ATTRIBUTOR-NEXT:    tail call void @h(ptr nonnull [[A]])
+; ATTRIBUTOR-NEXT:    tail call void @h(ptr [[A]])
 ; ATTRIBUTOR-NEXT:    [[TMP8]] = add nuw i32 [[TMP7]], 1
 ; ATTRIBUTOR-NEXT:    [[TMP9:%.*]] = icmp eq i32 [[TMP8]], [[B]]
 ; ATTRIBUTOR-NEXT:    br i1 [[TMP9]], label [[EX]], label [[HD]]
@@ -1276,7 +1276,7 @@ define i32 @nonnull_exec_ctx_2b(ptr %a, i32 %b) willreturn nounwind {
 ; ATTRIBUTOR-NEXT:    ret i32 [[TMP5]]
 ; ATTRIBUTOR:       hd:
 ; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = phi i32 [ [[TMP8:%.*]], [[HD2:%.*]] ], [ 0, [[EN:%.*]] ]
-; ATTRIBUTOR-NEXT:    tail call void @h(ptr nonnull [[A]])
+; ATTRIBUTOR-NEXT:    tail call void @h(ptr [[A]])
 ; ATTRIBUTOR-NEXT:    br label [[HD2]]
 ; ATTRIBUTOR:       hd2:
 ; ATTRIBUTOR-NEXT:    [[TMP8]] = add nuw i32 [[TMP7]], 1

@@ -2516,10 +2516,20 @@ static int64_t getKnownNonNullAndDerefBytesForUse(
     unsigned ArgNo = CB->getArgOperandNo(U);
     IRPosition IRP = IRPosition::callsite_argument(*CB, ArgNo);
     // As long as we only use known information there is no need to track
-    // dependences here.
-    bool IsKnownNonNull;
-    AA::hasAssumedIRAttr<Attribute::NonNull>(A, &QueryingAA, IRP,
-                                             DepClassTy::NONE, IsKnownNonNull);
+    // dependences here. Only use what is already known rather than creating
+    // a new AA, which would in turn follow the uses of the same value again.
+    SmallVector<Attribute::AttrKind, 2> AttrKinds = {Attribute::NonNull};
+    if (!NullPointerIsDefined)
+      AttrKinds.push_back(Attribute::Dereferenceable);
+    bool IsKnownNonNull =
+        A.hasAttr(IRP, AttrKinds,
+                  /*IgnoreSubsumingPositions=*/false, Attribute::NonNull);
+    if (!IsKnownNonNull) {
+      if (auto *NonNullAA =
+              A.lookupAAFor<AANonNull>(IRP, &QueryingAA, DepClassTy::NONE)) {
+        IsKnownNonNull = NonNullAA->isKnownNonNull();
+      }
+    }
     IsNonNull |= IsKnownNonNull;
     auto *DerefAA =
         A.getAAFor<AADereferenceable>(QueryingAA, IRP, DepClassTy::NONE);
