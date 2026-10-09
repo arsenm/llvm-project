@@ -628,7 +628,8 @@ static void followUsesInContext(AAType &AA, Attributor &A,
                                 const Instruction *CtxI,
                                 SetVector<const Use *> &Uses,
                                 StateType &State) {
-  auto EIt = Explorer.begin(CtxI), EEnd = Explorer.end(CtxI);
+  auto &EIt = Explorer.begin(CtxI);
+  auto &EEnd = Explorer.end(CtxI);
   for (unsigned u = 0; u < Uses.size(); ++u) {
     const Use *U = Uses[u];
     if (const Instruction *UserI = dyn_cast<Instruction>(U->getUser())) {

@@ -1151,8 +1151,8 @@ bool Attributor::getAttrsFromAssumes(const IRPosition &IRP,
 
   LLVMContext &Ctx = AssociatedValue.getContext();
   unsigned AttrsSize = Attrs.size();
-  auto EIt = Explorer->begin(IRP.getCtxI()),
-       EEnd = Explorer->end(IRP.getCtxI());
+  auto &EIt = Explorer->begin(IRP.getCtxI());
+  auto &EEnd = Explorer->end(IRP.getCtxI());
   for (const auto &It : A2K)
     if (Explorer->findInContextOf(It.first, EIt, EEnd))
       Attrs.push_back(Attribute::get(Ctx, AK, It.second.Max));

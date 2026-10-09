@@ -456,9 +456,12 @@ struct MustBeExecutedContextExplorer {
   /// true if \p Pred holds in every instruction.
   bool checkForAllContext(const Instruction *PP,
                           function_ref<bool(const Instruction *)> Pred) {
-    for (auto EIt = begin(PP), EEnd = end(PP); EIt != EEnd; ++EIt)
+    // Don't use begin(PP): that iterator is shared with other queries and may
+    // already be partway through the context, so we would miss instructions.
+    for (iterator EIt(*this, PP); EIt != EndIterator; ++EIt) {
       if (!Pred(*EIt))
         return false;
+    }
     return true;
   }
 
@@ -469,8 +472,7 @@ struct MustBeExecutedContextExplorer {
   ///
   /// \returns True, iff \p I was found.
   bool findInContextOf(const Instruction *I, const Instruction *PP) {
-    auto EIt = begin(PP), EEnd = end(PP);
-    return findInContextOf(I, EIt, EEnd);
+    return findInContextOf(I, begin(PP), end(PP));
   }
 
   /// Helper to look for \p I in the context defined by \p EIt and \p EEnd.
