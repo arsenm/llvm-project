@@ -704,11 +704,11 @@ define void @f19(ptr %a, ptr %b, i8 %c) {
 ; TUNIT-NEXT:    [[CMP2:%.*]] = icmp eq i8 [[C]], 0
 ; TUNIT-NEXT:    br i1 [[CMP2]], label [[LOOP_BODY:%.*]], label [[LOOP_EXIT:%.*]]
 ; TUNIT:       loop.body:
-; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR5]]
-; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR5]]
+; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR7]]
+; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR7]]
 ; TUNIT-NEXT:    br label [[LOOP_HEADER]]
 ; TUNIT:       loop.exit:
-; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR5]]
+; TUNIT-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR7]]
 ; TUNIT-NEXT:    ret void
 ;
 ; CGSCC: Function Attrs: nounwind
@@ -719,11 +719,11 @@ define void @f19(ptr %a, ptr %b, i8 %c) {
 ; CGSCC-NEXT:    [[CMP2:%.*]] = icmp eq i8 [[C]], 0
 ; CGSCC-NEXT:    br i1 [[CMP2]], label [[LOOP_BODY:%.*]], label [[LOOP_EXIT:%.*]]
 ; CGSCC:       loop.body:
-; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR4]]
-; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR4]]
+; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR6]]
+; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR6]]
 ; CGSCC-NEXT:    br label [[LOOP_HEADER]]
 ; CGSCC:       loop.exit:
-; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR4]]
+; CGSCC-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR6]]
 ; CGSCC-NEXT:    ret void
 ;
   br label %loop.header

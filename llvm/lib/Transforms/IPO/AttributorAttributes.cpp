@@ -3379,11 +3379,27 @@ struct AAWillReturnFunction final : AAWillReturnImpl {
 
     Function *F = getAnchorScope();
     assert(F && "Did expect an anchor function");
-    if (F->isDeclaration() || mayContainUnboundedCycle(*F, A))
+    if (F->isDeclaration())
       indicatePessimisticFixpoint();
   }
 
+  ChangeStatus updateImpl(Attributor &A) override {
+    ChangeStatus Changed = AAWillReturnImpl::updateImpl(A);
+    if (!isValidState() || CheckedForUnboundedCycles)
+      return Changed;
+
+    // Looking for unbounded cycles can require expensive analyses, so only do
+    // it once, and only if nothing else prevents willreturn.
+    CheckedForUnboundedCycles = true;
+    if (mayContainUnboundedCycle(*getAnchorScope(), A))
+      return indicatePessimisticFixpoint();
+    return Changed;
+  }
+
   void trackStatistics() const override { STATS_DECLTRACK_FN_ATTR(willreturn) }
+
+private:
+  bool CheckedForUnboundedCycles = false;
 };
 
 /// WillReturn attribute deduction for a call sites.
