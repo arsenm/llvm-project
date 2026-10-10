@@ -1530,6 +1530,9 @@ struct Attributor {
                                  const AbstractAttribute *QueryingAA,
                                  DepClassTy DepClass, bool ForceUpdate = false,
                                  bool UpdateAfterInit = true) {
+    if (!isAllowed<AAType>())
+      return nullptr;
+
     if (!shouldPropagateCallBaseContext(IRP))
       IRP = IRP.stripCallBaseContext();
 
@@ -1611,6 +1614,10 @@ struct Attributor {
     static_assert(std::is_base_of<AbstractAttribute, AAType>::value,
                   "Cannot query an attribute with a type not derived from "
                   "'AbstractAttribute'!");
+    // Attributes of a kind that is not allowed are never created.
+    if (!isAllowed<AAType>())
+      return nullptr;
+
     // Lookup the abstract attribute of type AAType. If found, return it after
     // registering a dependence of QueryingAA on the one returned attribute.
     AbstractAttribute *AAPtr = AAMap.lookup({&AAType::ID, IRP});
@@ -1629,6 +1636,11 @@ struct Attributor {
     if (!AllowInvalidState && !AA->getState().isValidState())
       return nullptr;
     return AA;
+  }
+
+  /// Return true if abstract attributes of type \p AAType may be created.
+  template <typename AAType> bool isAllowed() const {
+    return !Configuration.Allowed || Configuration.Allowed->count(&AAType::ID);
   }
 
   /// Allows a query AA to request an update if a new query was received.
@@ -1746,7 +1758,7 @@ struct Attributor {
     if (!AAType::isValidIRPositionForInit(*this, IRP))
       return false;
 
-    if (Configuration.Allowed && !Configuration.Allowed->count(&AAType::ID))
+    if (!isAllowed<AAType>())
       return false;
 
     // For now we skip anything in naked and optnone functions.
