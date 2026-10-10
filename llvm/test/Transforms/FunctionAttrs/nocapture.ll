@@ -1089,7 +1089,7 @@ define i64 @captures_ptrtoaddr_ignored(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-LABEL: define i64 @captures_ptrtoaddr_ignored
-; ATTRIBUTOR-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR0]] {
+; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[P:%.*]]) #[[ATTR0]] {
 ; ATTRIBUTOR-NEXT:    [[INT:%.*]] = ptrtoaddr ptr [[P]] to i64
 ; ATTRIBUTOR-NEXT:    ret i64 0
 ;

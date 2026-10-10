@@ -1559,11 +1559,40 @@ bool Attributor::getAssumedSimplifiedValues(
       // AAPotentialValues.
       const auto *PotentialValuesAA =
           getOrCreateAAFor<AAPotentialValues>(IRP, AA, DepClassTy::OPTIONAL);
+      bool PotentialValuesAllowed =
+          !Configuration.Allowed ||
+          Configuration.Allowed->count(&AAPotentialValues::ID);
       if (PotentialValuesAA &&
           PotentialValuesAA->getAssumedSimplifiedValues(*this, Values, S)) {
         UsedAssumedInformation |= !PotentialValuesAA->isAtFixpoint();
       } else if (IRP.getPositionKind() != IRPosition::IRP_RETURNED) {
-        Values.push_back({IRP.getAssociatedValue(), IRP.getCtxI()});
+        Value &V = IRP.getAssociatedValue();
+        // If AAPotentialValues is not allowed, look through phis and selects
+        // directly.
+        bool LookThrough = RecurseForSelectAndPHI && !PotentialValuesAllowed;
+        auto *PHI = LookThrough ? dyn_cast<PHINode>(&V) : nullptr;
+        auto *SI = LookThrough ? dyn_cast<SelectInst>(&V) : nullptr;
+        if (PHI) {
+          for (Value *Op : PHI->incoming_values())
+            Values.push_back({*Op, IRP.getCtxI()});
+        } else if (SI) {
+          Values.push_back({*SI->getTrueValue(), IRP.getCtxI()});
+          Values.push_back({*SI->getFalseValue(), IRP.getCtxI()});
+        } else {
+          Values.push_back({V, IRP.getCtxI()});
+        }
+      } else if (!PotentialValuesAllowed) {
+        // If AAPotentialValues is not allowed, the returned values are the
+        // operands of all returns.
+        auto AddReturnedValue = [&](Instruction &I) {
+          Values.push_back({*cast<ReturnInst>(I).getReturnValue(), &I});
+          return true;
+        };
+        if (!checkForAllInstructions(
+                AddReturnedValue, IRP.getAssociatedFunction(), AA,
+                {Instruction::Ret}, UsedAssumedInformation)) {
+          return false;
+        }
       } else {
         // TODO: We could visit all returns and add the operands.
         return false;

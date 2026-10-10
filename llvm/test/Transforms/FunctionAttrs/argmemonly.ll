@@ -491,23 +491,14 @@ define void @test_scc_argmem_read_2(ptr %p) {
 }
 
 define i64 @select_same_obj(i1 %c, ptr %p, i64 %x) {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
-; FNATTRS-LABEL: define i64 @select_same_obj
-; FNATTRS-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], i64 [[X:%.*]]) #[[ATTR1]] {
-; FNATTRS-NEXT:  entry:
-; FNATTRS-NEXT:    [[P2:%.*]] = getelementptr i8, ptr [[P]], i64 [[X]]
-; FNATTRS-NEXT:    [[P3:%.*]] = select i1 [[C]], ptr [[P]], ptr [[P2]]
-; FNATTRS-NEXT:    [[R:%.*]] = load i64, ptr [[P3]], align 4
-; FNATTRS-NEXT:    ret i64 [[R]]
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; ATTRIBUTOR-LABEL: define i64 @select_same_obj
-; ATTRIBUTOR-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], i64 [[X:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[P2:%.*]] = getelementptr i8, ptr [[P]], i64 [[X]]
-; ATTRIBUTOR-NEXT:    [[P3:%.*]] = select i1 [[C]], ptr [[P]], ptr [[P2]]
-; ATTRIBUTOR-NEXT:    [[R:%.*]] = load i64, ptr [[P3]], align 4
-; ATTRIBUTOR-NEXT:    ret i64 [[R]]
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
+; COMMON-LABEL: define i64 @select_same_obj
+; COMMON-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], i64 [[X:%.*]]) #[[ATTR1:[0-9]+]] {
+; COMMON-NEXT:  entry:
+; COMMON-NEXT:    [[P2:%.*]] = getelementptr i8, ptr [[P]], i64 [[X]]
+; COMMON-NEXT:    [[P3:%.*]] = select i1 [[C]], ptr [[P]], ptr [[P2]]
+; COMMON-NEXT:    [[R:%.*]] = load i64, ptr [[P3]], align 4
+; COMMON-NEXT:    ret i64 [[R]]
 ;
 entry:
   %p2 = getelementptr i8, ptr %p, i64 %x
@@ -526,9 +517,9 @@ define i64 @select_different_obj(i1 %c, ptr %p, ptr %p2) {
 ; FNATTRS-NEXT:    [[R:%.*]] = load i64, ptr [[P3]], align 4
 ; FNATTRS-NEXT:    ret i64 [[R]]
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; ATTRIBUTOR-LABEL: define i64 @select_different_obj
-; ATTRIBUTOR-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], ptr nofree readonly captures(none) [[P2:%.*]]) #[[ATTR0]] {
+; ATTRIBUTOR-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], ptr nofree readonly captures(none) [[P2:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    [[P3:%.*]] = select i1 [[C]], ptr [[P]], ptr [[P2]]
 ; ATTRIBUTOR-NEXT:    [[R:%.*]] = load i64, ptr [[P3]], align 4
@@ -543,7 +534,7 @@ entry:
 define i64 @phi_same_obj(i1 %c, ptr %p, i64 %x) {
 ; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; COMMON-LABEL: define i64 @phi_same_obj
-; COMMON-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], i64 [[X:%.*]]) #[[ATTR1:[0-9]+]] {
+; COMMON-SAME: (i1 [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]], i64 [[X:%.*]]) #[[ATTR1]] {
 ; COMMON-NEXT:  entry:
 ; COMMON-NEXT:    [[P2:%.*]] = getelementptr i8, ptr [[P]], i64 [[X]]
 ; COMMON-NEXT:    br i1 [[C]], label [[IF:%.*]], label [[JOIN:%.*]]

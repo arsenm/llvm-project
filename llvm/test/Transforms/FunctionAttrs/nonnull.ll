@@ -79,9 +79,9 @@ define ptr @test4_helper() {
 ; FNATTRS-NEXT:    [[RET:%.*]] = call ptr @test4()
 ; FNATTRS-NEXT:    ret ptr [[RET]]
 ;
-; ATTRIBUTOR-LABEL: define ptr @test4_helper(
+; ATTRIBUTOR-LABEL: define nonnull ptr @test4_helper(
 ; ATTRIBUTOR-SAME: ) #[[ATTR1:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call nonnull ptr @test4() #[[ATTR1]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ;
   %ret = call ptr @test4()
@@ -94,9 +94,9 @@ define ptr @test4() {
 ; FNATTRS-NEXT:    [[RET:%.*]] = call ptr @test4_helper()
 ; FNATTRS-NEXT:    ret ptr [[RET]]
 ;
-; ATTRIBUTOR-LABEL: define ptr @test4(
+; ATTRIBUTOR-LABEL: define nonnull ptr @test4(
 ; ATTRIBUTOR-SAME: ) #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4_helper() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call nonnull ptr @test4_helper() #[[ATTR1]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ;
   %ret = call ptr @test4_helper()
@@ -382,7 +382,7 @@ define internal ptr @f1(ptr %arg) {
 ; FNATTRS-NEXT:    [[TMP10:%.*]] = phi ptr [ [[TMP5C]], [[BB4]] ], [ inttoptr (i64 4 to ptr), [[BB:%.*]] ]
 ; FNATTRS-NEXT:    ret ptr [[TMP10]]
 ;
-; ATTRIBUTOR-LABEL: define internal ptr @f1(
+; ATTRIBUTOR-LABEL: define internal nonnull ptr @f1(
 ; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  bb:
 ; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = icmp eq ptr [[ARG]], null
@@ -397,7 +397,7 @@ define internal ptr @f1(ptr %arg) {
 ; ATTRIBUTOR-NEXT:    [[TMP5C:%.*]] = getelementptr inbounds i32, ptr [[TMP5B]], i64 -1
 ; ATTRIBUTOR-NEXT:    br label [[BB9]]
 ; ATTRIBUTOR:       bb6:
-; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call ptr @f2(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call nonnull ptr @f2(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP7]]
 ; ATTRIBUTOR:       bb9:
 ; ATTRIBUTOR-NEXT:    [[TMP10:%.*]] = phi ptr [ [[TMP5C]], [[BB4]] ], [ inttoptr (i64 4 to ptr), [[BB:%.*]] ]
@@ -436,10 +436,10 @@ define internal ptr @f2(ptr %arg) {
 ; FNATTRS-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr [[ARG]])
 ; FNATTRS-NEXT:    ret ptr [[TMP]]
 ;
-; ATTRIBUTOR-LABEL: define internal ptr @f2(
+; ATTRIBUTOR-LABEL: define internal nonnull ptr @f2(
 ; ATTRIBUTOR-SAME: ptr nofree nonnull readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call nonnull ptr @f1(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -457,10 +457,10 @@ define dso_local noalias ptr @f3(ptr %arg) {
 ; FNATTRS-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr [[ARG]])
 ; FNATTRS-NEXT:    ret ptr [[TMP]]
 ;
-; ATTRIBUTOR-LABEL: define dso_local noalias ptr @f3(
+; ATTRIBUTOR-LABEL: define dso_local noalias nonnull ptr @f3(
 ; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr nofree readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call nonnull ptr @f1(ptr nofree readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -1020,9 +1020,9 @@ define  ptr @g1() {
 ; FNATTRS-NEXT:    [[C:%.*]] = call ptr @g2()
 ; FNATTRS-NEXT:    ret ptr [[C]]
 ;
-; ATTRIBUTOR-LABEL: define ptr @g1(
+; ATTRIBUTOR-LABEL: define nonnull ptr @g1(
 ; ATTRIBUTOR-SAME: ) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call ptr @g2() #[[ATTR16:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[C:%.*]] = call nonnull ptr @g2() #[[ATTR16:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[C]]
 ;
   %c = call ptr @g2()
