@@ -33,6 +33,10 @@ class Module;
 LLVM_ABI MemoryEffects computeFunctionBodyMemoryAccess(Function &F,
                                                        AAResults &AAR);
 
+/// Add the returned attribute to the argument of \p F that is always returned,
+/// if there is one. Returns true if it changed.
+LLVM_ABI bool inferReturnedArg(Function &F);
+
 /// Infer the initializes attribute for the pointer argument \p A from the
 /// accesses in its function, and add it. Returns true if it changed.
 LLVM_ABI bool inferInitializes(Argument &A);

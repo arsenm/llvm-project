@@ -4056,22 +4056,25 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
 
   ChangeStatus Changed = A.run();
 
-  // Like FunctionAttrs, infer initializes once the attributes it depends on,
+  // Like FunctionAttrs, infer attributes that are cheap to deduce from the
+  // function body alone, and initializes, once the attributes it depends on,
   // e.g., writeonly and captures, have been deduced.
-  SmallSetVector<Function *, 8> InitializesChanged;
+  SmallSetVector<Function *, 8> LocalChanged;
   if (!IsModulePass) {
     for (Function *F : Functions) {
       if (F->isDeclaration() || !F->hasExactDefinition() ||
           F->hasOptNone() || F->hasFnAttribute(Attribute::Naked) ||
           F->isPresplitCoroutine())
         continue;
+      if (inferReturnedArg(*F))
+        LocalChanged.insert(F);
       for (Argument &Arg : F->args()) {
         if (Arg.getType()->isPointerTy() && !Arg.onlyReadsMemory() &&
             inferInitializes(Arg))
-          InitializesChanged.insert(F);
+          LocalChanged.insert(F);
       }
     }
-    if (!InitializesChanged.empty())
+    if (!LocalChanged.empty())
       Changed = ChangeStatus::CHANGED;
   }
 
@@ -4106,7 +4109,7 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
     }
 
     SmallSetVector<Function *, 8> AttrModified(A.getAttrModifiedFunctions());
-    AttrModified.insert_range(InitializesChanged);
+    AttrModified.insert_range(LocalChanged);
     for (Function *Changed : AttrModified) {
       if (IRModified.contains(Changed))
         continue;

@@ -975,6 +975,42 @@ determinePointerAccessAttrs(Argument *A,
 }
 
 /// Deduce returned attributes for the SCC.
+bool llvm::inferReturnedArg(Function &F) {
+  if (F.getReturnType()->isVoidTy())
+    return false;
+
+  // There is nothing to do if an argument is already marked as 'returned'.
+  if (F.getAttributes().hasAttrSomewhere(Attribute::Returned))
+    return false;
+
+  auto FindRetArg = [&]() -> Argument * {
+    Argument *RetArg = nullptr;
+    for (BasicBlock &BB : F)
+      if (auto *Ret = dyn_cast<ReturnInst>(BB.getTerminator())) {
+        // Note that stripPointerCasts should look through functions with
+        // returned arguments.
+        auto *RetVal =
+            dyn_cast<Argument>(Ret->getReturnValue()->stripPointerCasts());
+        if (!RetVal || RetVal->getType() != F.getReturnType())
+          return nullptr;
+
+        if (!RetArg)
+          RetArg = RetVal;
+        else if (RetArg != RetVal)
+          return nullptr;
+      }
+
+    return RetArg;
+  };
+
+  if (Argument *RetArg = FindRetArg()) {
+    RetArg->addAttr(Attribute::Returned);
+    ++NumReturned;
+    return true;
+  }
+  return false;
+}
+
 static void addArgumentReturnedAttrs(const SCCNodeSet &SCCNodes,
                                      SmallPtrSet<Function *, 8> &Changed) {
   // Check each function in turn, determining if an argument is always returned.
@@ -985,38 +1021,8 @@ static void addArgumentReturnedAttrs(const SCCNodeSet &SCCNodes,
     if (!F->hasExactDefinition())
       continue;
 
-    if (F->getReturnType()->isVoidTy())
-      continue;
-
-    // There is nothing to do if an argument is already marked as 'returned'.
-    if (F->getAttributes().hasAttrSomewhere(Attribute::Returned))
-      continue;
-
-    auto FindRetArg = [&]() -> Argument * {
-      Argument *RetArg = nullptr;
-      for (BasicBlock &BB : *F)
-        if (auto *Ret = dyn_cast<ReturnInst>(BB.getTerminator())) {
-          // Note that stripPointerCasts should look through functions with
-          // returned arguments.
-          auto *RetVal =
-              dyn_cast<Argument>(Ret->getReturnValue()->stripPointerCasts());
-          if (!RetVal || RetVal->getType() != F->getReturnType())
-            return nullptr;
-
-          if (!RetArg)
-            RetArg = RetVal;
-          else if (RetArg != RetVal)
-            return nullptr;
-        }
-
-      return RetArg;
-    };
-
-    if (Argument *RetArg = FindRetArg()) {
-      RetArg->addAttr(Attribute::Returned);
-      ++NumReturned;
+    if (inferReturnedArg(*F))
       Changed.insert(F);
-    }
   }
 }
 

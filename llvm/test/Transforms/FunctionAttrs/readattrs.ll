@@ -47,7 +47,7 @@ define ptr @test2(ptr %p) {
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test2
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone returned [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 0, ptr @x, align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret ptr [[P]]
 ;
@@ -209,7 +209,7 @@ define ptr @test8_1(ptr %p) {
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_1
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR1]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone returned [[P:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
 ; ATTRIBUTOR-CGSCC-NEXT:    ret ptr [[P]]
 ;
@@ -234,7 +234,7 @@ define void @test8_2(ptr %p) {
 ; ATTRIBUTOR-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; ATTRIBUTOR-NEXT:    ret void
 ;
-; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_2
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree writeonly [[P:%.*]]) #[[ATTR5:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
