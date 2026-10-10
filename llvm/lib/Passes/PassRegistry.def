@@ -324,7 +324,6 @@ CGSCC_ANALYSIS("pass-instrumentation", PassInstrumentationAnalysis(PIC))
 #endif
 CGSCC_PASS("argpromotion", ArgumentPromotionPass())
 CGSCC_PASS("attributor-cgscc", AttributorCGSCCPass())
-CGSCC_PASS("attributor-light-cgscc", AttributorLightCGSCCPass())
 CGSCC_PASS("invalidate<all>", InvalidateAllAnalysesPass())
 CGSCC_PASS("no-op-cgscc", NoOpCGSCCPass())
 CGSCC_PASS("openmp-opt-cgscc", OpenMPOptCGSCCPass())
@@ -335,6 +334,12 @@ CGSCC_PASS("trigger-crash-cgscc", TriggerCrashCGSCCPass())
 #ifndef CGSCC_PASS_WITH_PARAMS
 #define CGSCC_PASS_WITH_PARAMS(NAME, CLASS, CREATE_PASS, PARSER, PARAMS)
 #endif
+CGSCC_PASS_WITH_PARAMS(
+    "attributor-light-cgscc", "AttributorLightCGSCCPass",
+    [](bool SkipNonRecursive) {
+      return AttributorLightCGSCCPass(SkipNonRecursive);
+    },
+    parseAttributorLightCGSCCPassOptions, "skip-non-recursive")
 CGSCC_PASS_WITH_PARAMS(
     "coro-split", "CoroSplitPass",
     [](bool OptimizeFrame) { return CoroSplitPass(OptimizeFrame); },

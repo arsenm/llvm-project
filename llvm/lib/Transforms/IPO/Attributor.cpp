@@ -4221,10 +4221,26 @@ void AttributorLightPass::printPipeline(
     OS << "<top-down>";
 }
 
+void AttributorLightCGSCCPass::printPipeline(
+    raw_ostream &OS, function_ref<StringRef(StringRef)> MapClassName2PassName) {
+  static_cast<PassInfoMixin<AttributorLightCGSCCPass> *>(this)->printPipeline(
+      OS, MapClassName2PassName);
+  if (SkipNonRecursive)
+    OS << "<skip-non-recursive>";
+}
+
 PreservedAnalyses AttributorLightCGSCCPass::run(LazyCallGraph::SCC &C,
                                                 CGSCCAnalysisManager &AM,
                                                 LazyCallGraph &CG,
                                                 CGSCCUpdateResult &UR) {
+  // A single non-recursive function does not benefit from deducing its
+  // attributes before it is simplified, if another run follows.
+  if (SkipNonRecursive && C.size() == 1) {
+    LazyCallGraph::Node &N = *C.begin();
+    if (!N->lookup(N))
+      return PreservedAnalyses::all();
+  }
+
   FunctionAnalysisManager &FAM =
       AM.getResult<FunctionAnalysisManagerCGSCCProxy>(C, CG).getManager();
   AnalysisGetter AG(FAM);

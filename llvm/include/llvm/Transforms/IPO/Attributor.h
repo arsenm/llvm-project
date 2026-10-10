@@ -3448,9 +3448,22 @@ private:
 /// inference but no simplifications.
 struct AttributorLightCGSCCPass
     : public OptionalPassInfoMixin<AttributorLightCGSCCPass> {
+  /// If \p SkipNonRecursive is set, SCCs with a single non-recursive function
+  /// are skipped. This is useful before the function is simplified, if another
+  /// run will follow afterwards.
+  explicit AttributorLightCGSCCPass(bool SkipNonRecursive = false)
+      : SkipNonRecursive(SkipNonRecursive) {}
+
   LLVM_ABI PreservedAnalyses run(LazyCallGraph::SCC &C,
                                  CGSCCAnalysisManager &AM, LazyCallGraph &CG,
                                  CGSCCUpdateResult &UR);
+
+  LLVM_ABI void
+  printPipeline(raw_ostream &OS,
+                function_ref<StringRef(StringRef)> MapClassName2PassName);
+
+private:
+  bool SkipNonRecursive;
 };
 
 /// Helper function to clamp a state \p S of type \p StateType with the

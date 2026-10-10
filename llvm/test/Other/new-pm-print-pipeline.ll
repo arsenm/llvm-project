@@ -127,5 +127,5 @@
 ; RUN: opt -disable-output -disable-verify -print-pipeline-passes -passes='function(infer-address-spaces,infer-address-spaces<assume-default-is-flat-addrspace>)' < %s | FileCheck %s --match-full-lines --check-prefixes=CHECK-39
 ; CHECK-39: function(infer-address-spaces,infer-address-spaces<assume-default-is-flat-addrspace>)
 
-; RUN: opt -disable-output -disable-verify -print-pipeline-passes -passes='attributor-light,attributor-light<top-down>' < %s | FileCheck %s --match-full-lines --check-prefixes=CHECK-40
-; CHECK-40: attributor-light,attributor-light<top-down>
+; RUN: opt -disable-output -disable-verify -print-pipeline-passes -passes='attributor-light,attributor-light<top-down>,cgscc(attributor-light-cgscc,attributor-light-cgscc<skip-non-recursive>)' < %s | FileCheck %s --match-full-lines --check-prefixes=CHECK-40
+; CHECK-40: attributor-light,attributor-light<top-down>,cgscc(attributor-light-cgscc,attributor-light-cgscc<skip-non-recursive>)

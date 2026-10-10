@@ -943,6 +943,11 @@ Expected<bool> parseAttributorLightPassOptions(StringRef Params) {
                                             "AttributorLight");
 }
 
+Expected<bool> parseAttributorLightCGSCCPassOptions(StringRef Params) {
+  return PassBuilder::parseSinglePassOption(Params, "skip-non-recursive",
+                                            "AttributorLightCGSCC");
+}
+
 Expected<bool> parseCGProfilePassOptions(StringRef Params) {
   return PassBuilder::parseSinglePassOption(Params, "in-lto-post-link",
                                             "CGProfile");
