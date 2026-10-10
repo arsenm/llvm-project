@@ -26,15 +26,10 @@ define void @foo2() nounwind {
 
 ; TEST 2
 define i32 @scc1_foo() {
-; TUNIT: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@scc1_foo
-; TUNIT-SAME: () #[[ATTR2:[0-9]+]] {
-; TUNIT-NEXT:    ret i32 1
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@scc1_foo
-; CGSCC-SAME: () #[[ATTR0]] {
-; CGSCC-NEXT:    ret i32 1
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@scc1_foo
+; CHECK-SAME: () #[[ATTR0]] {
+; CHECK-NEXT:    ret i32 1
 ;
   %1 = call i32 @scc1_bar()
   ret i32 1
@@ -43,15 +38,10 @@ define i32 @scc1_foo() {
 
 ; TEST 3
 define i32 @scc1_bar() {
-; TUNIT: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@scc1_bar
-; TUNIT-SAME: () #[[ATTR2]] {
-; TUNIT-NEXT:    ret i32 1
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@scc1_bar
-; CGSCC-SAME: () #[[ATTR0]] {
-; CGSCC-NEXT:    ret i32 1
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@scc1_bar
+; CHECK-SAME: () #[[ATTR0]] {
+; CHECK-NEXT:    ret i32 1
 ;
   %1 = call i32 @scc1_foo()
   ret i32 1
@@ -235,7 +225,6 @@ declare void @__cxa_end_catch()
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR1]] = { nounwind }
-; TUNIT: attributes #[[ATTR2]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR1]] = { nounwind }

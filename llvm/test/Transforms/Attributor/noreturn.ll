@@ -15,7 +15,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 ; }
 ;
 define void @srec0() #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@srec0
 ; CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -34,7 +34,7 @@ entry:
 ; }
 ;
 define i32 @srec16(i32 %a) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline noreturn nosync nounwind willreturn memory(none) uwtable
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse noreturn nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@srec16
 ; CHECK-SAME: (i32 [[A:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -126,31 +126,18 @@ return:                                           ; No predecessors!
 ; }
 ;
 define i32 @multiple_noreturn_calls(i32 %a) #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline norecurse noreturn nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@multiple_noreturn_calls
-; TUNIT-SAME: (i32 [[A:%.*]]) #[[ATTR3:[0-9]+]] {
-; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq i32 [[A]], 0
-; TUNIT-NEXT:    br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_FALSE:%.*]]
-; TUNIT:       cond.true:
-; TUNIT-NEXT:    unreachable
-; TUNIT:       cond.false:
-; TUNIT-NEXT:    unreachable
-; TUNIT:       cond.end:
-; TUNIT-NEXT:    unreachable
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline noreturn nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@multiple_noreturn_calls
-; CGSCC-SAME: (i32 [[A:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq i32 [[A]], 0
-; CGSCC-NEXT:    br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_FALSE:%.*]]
-; CGSCC:       cond.true:
-; CGSCC-NEXT:    unreachable
-; CGSCC:       cond.false:
-; CGSCC-NEXT:    unreachable
-; CGSCC:       cond.end:
-; CGSCC-NEXT:    unreachable
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse noreturn nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@multiple_noreturn_calls
+; CHECK-SAME: (i32 [[A:%.*]]) #[[ATTR1]] {
+; CHECK-NEXT:  entry:
+; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i32 [[A]], 0
+; CHECK-NEXT:    br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_FALSE:%.*]]
+; CHECK:       cond.true:
+; CHECK-NEXT:    unreachable
+; CHECK:       cond.false:
+; CHECK-NEXT:    unreachable
+; CHECK:       cond.end:
+; CHECK-NEXT:    unreachable
 ;
 entry:
   %cmp = icmp eq i32 %a, 0
@@ -174,21 +161,13 @@ cond.end:                                         ; preds = %cond.false, %cond.t
 ; FIXME: we should derive "UB" as an argument and report it to the user on request.
 
 define i32 @endless_loop_but_willreturn() willreturn {
-; TUNIT: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@endless_loop_but_willreturn
-; TUNIT-SAME: () #[[ATTR4:[0-9]+]] {
-; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    br label [[WHILE_BODY:%.*]]
-; TUNIT:       while.body:
-; TUNIT-NEXT:    br label [[WHILE_BODY]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@endless_loop_but_willreturn
-; CGSCC-SAME: () #[[ATTR3:[0-9]+]] {
-; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    br label [[WHILE_BODY:%.*]]
-; CGSCC:       while.body:
-; CGSCC-NEXT:    br label [[WHILE_BODY]]
+; CHECK: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@endless_loop_but_willreturn
+; CHECK-SAME: () #[[ATTR3:[0-9]+]] {
+; CHECK-NEXT:  entry:
+; CHECK-NEXT:    br label [[WHILE_BODY:%.*]]
+; CHECK:       while.body:
+; CHECK-NEXT:    br label [[WHILE_BODY]]
 ;
 entry:
   br label %while.body
@@ -199,17 +178,11 @@ while.body:                                       ; preds = %entry, %while.body
 
 ; TEST 6b: willreturn means *not* no-return or UB
 define i32 @UB_and_willreturn() willreturn {
-; TUNIT: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@UB_and_willreturn
-; TUNIT-SAME: () #[[ATTR4]] {
-; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    unreachable
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@UB_and_willreturn
-; CGSCC-SAME: () #[[ATTR3]] {
-; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    unreachable
+; CHECK: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@UB_and_willreturn
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:  entry:
+; CHECK-NEXT:    unreachable
 ;
 entry:
   unreachable
@@ -217,14 +190,11 @@ entry:
 
 attributes #0 = { noinline nounwind uwtable }
 ;.
-; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable }
-; TUNIT: attributes #[[ATTR1]] = { mustprogress nofree noinline noreturn nosync nounwind willreturn memory(none) uwtable }
-; TUNIT: attributes #[[ATTR2]] = { nofree noinline norecurse noreturn nosync nounwind memory(none) uwtable }
-; TUNIT: attributes #[[ATTR3]] = { mustprogress nofree noinline norecurse noreturn nosync nounwind willreturn memory(none) uwtable }
-; TUNIT: attributes #[[ATTR4]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
+; CHECK: attributes #[[ATTR0]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable }
+; CHECK: attributes #[[ATTR1]] = { mustprogress nofree noinline norecurse noreturn nosync nounwind willreturn memory(none) uwtable }
+; CHECK: attributes #[[ATTR2]] = { nofree noinline norecurse noreturn nosync nounwind memory(none) uwtable }
+; CHECK: attributes #[[ATTR3]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
 ;.
-; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree noinline noreturn nosync nounwind willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR2]] = { nofree noinline norecurse noreturn nosync nounwind memory(none) uwtable }
-; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
-;.
+;; NOTE: These prefixes are unused and the list is autogenerated. Do not add tests below this line:
+; CGSCC: {{.*}}
+; TUNIT: {{.*}}

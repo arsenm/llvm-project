@@ -26,9 +26,9 @@ define void @baz(<8 x i32> %arg) local_unnamed_addr {
 ; TUNIT-NEXT:    [[TMP1:%.*]] = extractvalue [[STRUCT_ZOT:%.*]] undef, 0, 0
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@baz
-; CGSCC-SAME: (<8 x i32> [[ARG:%.*]]) local_unnamed_addr #[[ATTR1:[0-9]+]] {
+; CGSCC-SAME: (<8 x i32> [[ARG:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CGSCC-NEXT:  bb:
 ; CGSCC-NEXT:    ret void
 ;
@@ -41,5 +41,4 @@ bb:
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
 ;.

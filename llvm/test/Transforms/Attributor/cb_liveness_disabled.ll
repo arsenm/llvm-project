@@ -74,7 +74,7 @@ define i32 @test(i32 %0, i32 %1) #0 {
 ; TUNIT-NEXT:    ret i32 [[DOT0]]
 ;
 ; CGSCC-LABEL: define {{[^@]+}}@test
-; CGSCC-SAME: (i32 [[TMP0:%.*]], i32 [[TMP1:%.*]]) #[[ATTR1:[0-9]+]] {
+; CGSCC-SAME: (i32 [[TMP0:%.*]], i32 [[TMP1:%.*]]) #[[ATTR0]] {
 ; CGSCC-NEXT:    [[TMP3:%.*]] = icmp ne i32 [[TMP1]], 0
 ; CGSCC-NEXT:    br i1 [[TMP3]], label [[TMP4:%.*]], label [[TMP6:%.*]]
 ; CGSCC:       4:
@@ -104,19 +104,12 @@ define i32 @test(i32 %0, i32 %1) #0 {
 }
 
 define i32 @test_pcheck1(i32 %0) #0 {
-; TUNIT-LABEL: define {{[^@]+}}@test_pcheck1
-; TUNIT-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
-; TUNIT-NEXT:    [[TMP3:%.*]] = icmp slt i32 [[TMP2]], 101
-; TUNIT-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; TUNIT-NEXT:    ret i32 [[TMP4]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@test_pcheck1
-; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
-; CGSCC-NEXT:    [[TMP3:%.*]] = icmp slt i32 [[TMP2]], 101
-; CGSCC-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; CGSCC-NEXT:    ret i32 [[TMP4]]
+; CHECK-LABEL: define {{[^@]+}}@test_pcheck1
+; CHECK-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
+; CHECK-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
+; CHECK-NEXT:    [[TMP3:%.*]] = icmp slt i32 [[TMP2]], 101
+; CHECK-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
+; CHECK-NEXT:    ret i32 [[TMP4]]
 ;
   %2 = call i32 @test(i32 %0, i32 1)
   %3 = icmp slt i32 %2, 101
@@ -125,19 +118,12 @@ define i32 @test_pcheck1(i32 %0) #0 {
 }
 
 define i32 @test_pcheck2(i32 %0) #0 {
-; TUNIT-LABEL: define {{[^@]+}}@test_pcheck2
-; TUNIT-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
-; TUNIT-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 99
-; TUNIT-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; TUNIT-NEXT:    ret i32 [[TMP4]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@test_pcheck2
-; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
-; CGSCC-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 99
-; CGSCC-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; CGSCC-NEXT:    ret i32 [[TMP4]]
+; CHECK-LABEL: define {{[^@]+}}@test_pcheck2
+; CHECK-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
+; CHECK-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
+; CHECK-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 99
+; CHECK-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
+; CHECK-NEXT:    ret i32 [[TMP4]]
 ;
   %2 = call i32 @test(i32 %0, i32 0)
   %3 = icmp sgt i32 %2, 99
@@ -146,19 +132,12 @@ define i32 @test_pcheck2(i32 %0) #0 {
 }
 
 define i32 @test_ncheck1(i32 %0) #0 {
-; TUNIT-LABEL: define {{[^@]+}}@test_ncheck1
-; TUNIT-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
-; TUNIT-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 50
-; TUNIT-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; TUNIT-NEXT:    ret i32 [[TMP4]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@test_ncheck1
-; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
-; CGSCC-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 50
-; CGSCC-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; CGSCC-NEXT:    ret i32 [[TMP4]]
+; CHECK-LABEL: define {{[^@]+}}@test_ncheck1
+; CHECK-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
+; CHECK-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 1)
+; CHECK-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 50
+; CHECK-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
+; CHECK-NEXT:    ret i32 [[TMP4]]
 ;
   %2 = call i32 @test(i32 %0, i32 1)
   %3 = icmp sgt i32 %2, 50
@@ -167,19 +146,12 @@ define i32 @test_ncheck1(i32 %0) #0 {
 }
 
 define i32 @test_ncheck2(i32 %0) #0 {
-; TUNIT-LABEL: define {{[^@]+}}@test_ncheck2
-; TUNIT-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
-; TUNIT-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 150
-; TUNIT-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; TUNIT-NEXT:    ret i32 [[TMP4]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@test_ncheck2
-; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
-; CGSCC-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 150
-; CGSCC-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
-; CGSCC-NEXT:    ret i32 [[TMP4]]
+; CHECK-LABEL: define {{[^@]+}}@test_ncheck2
+; CHECK-SAME: (i32 [[TMP0:%.*]]) #[[ATTR0]] {
+; CHECK-NEXT:    [[TMP2:%.*]] = call i32 @test(i32 [[TMP0]], i32 noundef 0)
+; CHECK-NEXT:    [[TMP3:%.*]] = icmp sgt i32 [[TMP2]], 150
+; CHECK-NEXT:    [[TMP4:%.*]] = zext i1 [[TMP3]] to i32
+; CHECK-NEXT:    ret i32 [[TMP4]]
 ;
   %2 = call i32 @test(i32 %0, i32 0)
   %3 = icmp sgt i32 %2, 150
@@ -194,6 +166,5 @@ attributes #0 = { noinline nounwind sspstrong uwtable}
 ; TUNIT: attributes #[[ATTR1:[0-9]+]] = { nofree nosync nounwind willreturn memory(none) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree noinline norecurse nosync nounwind sspstrong willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree noinline nosync nounwind sspstrong willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR2:[0-9]+]] = { nofree nosync willreturn }
+; CGSCC: attributes #[[ATTR1:[0-9]+]] = { nofree nosync willreturn }
 ;.

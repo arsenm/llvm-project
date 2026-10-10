@@ -40,7 +40,7 @@ define void @f() {
 ; TUNIT-NEXT:    call void @add(ptr noalias nofree nonnull readnone align 8 captures(none) undef, ptr noalias nofree noundef nonnull writeonly sret(i32) align 4 captures(none) dereferenceable(4) [[R]]) #[[ATTR2:[0-9]+]]
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@f
 ; CGSCC-SAME: () #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:    [[R:%.*]] = alloca i32, align 4
@@ -56,7 +56,7 @@ define void @f() {
 }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
+; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR2]] = { nofree nounwind willreturn }
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }

@@ -34,11 +34,11 @@ define i32 @foo(i1 %C, ptr %P) {
 ; TUNIT-NEXT:    [[X:%.*]] = call i32 @callee(i1 noundef [[C]], ptr nofree readonly captures(none) [[P]]) #[[ATTR1:[0-9]+]]
 ; TUNIT-NEXT:    ret i32 [[X]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: read)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CGSCC-LABEL: define {{[^@]+}}@foo
-; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR1:[0-9]+]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR0]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[X:%.*]] = call i32 @callee(i1 noundef [[C]], ptr nofree readonly captures(none) [[P]]) #[[ATTR2:[0-9]+]]
+; CGSCC-NEXT:    [[X:%.*]] = call i32 @callee(i1 noundef [[C]], ptr nofree readonly captures(none) [[P]]) #[[ATTR1:[0-9]+]]
 ; CGSCC-NEXT:    ret i32 [[X]]
 ;
 entry:
@@ -51,6 +51,5 @@ entry:
 ; TUNIT: attributes #[[ATTR1]] = { nofree nosync nounwind willreturn memory(read) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(argmem: read) }
-; CGSCC: attributes #[[ATTR2]] = { nofree willreturn memory(read) }
+; CGSCC: attributes #[[ATTR1]] = { nofree willreturn memory(read) }
 ;.

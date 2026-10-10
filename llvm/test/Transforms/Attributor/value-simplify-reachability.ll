@@ -44,49 +44,27 @@ define internal void @write1ToGInt2() {
 }
 
 define void @entry1(i1 %c, i32 %v) {
-; TUNIT: Function Attrs: norecurse nosync
-; TUNIT-LABEL: define {{[^@]+}}@entry1
-; TUNIT-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5:[0-9]+]] {
-; TUNIT-NEXT:    [[L0:%.*]] = load i32, ptr @GInt1, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L0]])
-; TUNIT-NEXT:    call void @write1ToGInt1() #[[ATTR12:[0-9]+]]
-; TUNIT-NEXT:    [[L1:%.*]] = load i32, ptr @GInt1, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L1]])
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       T:
-; TUNIT-NEXT:    store i32 [[V]], ptr @GInt1, align 4
-; TUNIT-NEXT:    [[L2:%.*]] = load i32, ptr @GInt1, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L2]])
-; TUNIT-NEXT:    br label [[F]]
-; TUNIT:       F:
-; TUNIT-NEXT:    [[L3:%.*]] = load i32, ptr @GInt1, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L3]])
-; TUNIT-NEXT:    call void @write1ToGInt1() #[[ATTR12]]
-; TUNIT-NEXT:    [[L4:%.*]] = load i32, ptr @GInt1, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L4]])
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: nosync
-; CGSCC-LABEL: define {{[^@]+}}@entry1
-; CGSCC-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5:[0-9]+]] {
-; CGSCC-NEXT:    [[L0:%.*]] = load i32, ptr @GInt1, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L0]])
-; CGSCC-NEXT:    call void @write1ToGInt1() #[[ATTR13:[0-9]+]]
-; CGSCC-NEXT:    [[L1:%.*]] = load i32, ptr @GInt1, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L1]])
-; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       T:
-; CGSCC-NEXT:    store i32 [[V]], ptr @GInt1, align 4
-; CGSCC-NEXT:    [[L2:%.*]] = load i32, ptr @GInt1, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L2]])
-; CGSCC-NEXT:    br label [[F]]
-; CGSCC:       F:
-; CGSCC-NEXT:    [[L3:%.*]] = load i32, ptr @GInt1, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L3]])
-; CGSCC-NEXT:    call void @write1ToGInt1() #[[ATTR13]]
-; CGSCC-NEXT:    [[L4:%.*]] = load i32, ptr @GInt1, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L4]])
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse nosync
+; CHECK-LABEL: define {{[^@]+}}@entry1
+; CHECK-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5:[0-9]+]] {
+; CHECK-NEXT:    [[L0:%.*]] = load i32, ptr @GInt1, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L0]])
+; CHECK-NEXT:    call void @write1ToGInt1() #[[ATTR12:[0-9]+]]
+; CHECK-NEXT:    [[L1:%.*]] = load i32, ptr @GInt1, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L1]])
+; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       T:
+; CHECK-NEXT:    store i32 [[V]], ptr @GInt1, align 4
+; CHECK-NEXT:    [[L2:%.*]] = load i32, ptr @GInt1, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L2]])
+; CHECK-NEXT:    br label [[F]]
+; CHECK:       F:
+; CHECK-NEXT:    [[L3:%.*]] = load i32, ptr @GInt1, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L3]])
+; CHECK-NEXT:    call void @write1ToGInt1() #[[ATTR12]]
+; CHECK-NEXT:    [[L4:%.*]] = load i32, ptr @GInt1, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L4]])
+; CHECK-NEXT:    ret void
 ;
   %l0 = load i32, ptr @GInt1
   call void @useI32(i32 %l0)
@@ -109,49 +87,27 @@ F:
 }
 
 define void @entry2(i1 %c, i32 %v) {
-; TUNIT: Function Attrs: norecurse nosync
-; TUNIT-LABEL: define {{[^@]+}}@entry2
-; TUNIT-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    [[L0:%.*]] = load i32, ptr @GInt2, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L0]])
-; TUNIT-NEXT:    call void @write1ToGInt2() #[[ATTR12]]
-; TUNIT-NEXT:    [[L1:%.*]] = load i32, ptr @GInt2, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L1]])
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       T:
-; TUNIT-NEXT:    store i32 [[V]], ptr @GInt2, align 4
-; TUNIT-NEXT:    [[L2:%.*]] = load i32, ptr @GInt2, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L2]])
-; TUNIT-NEXT:    br label [[F]]
-; TUNIT:       F:
-; TUNIT-NEXT:    [[L3:%.*]] = load i32, ptr @GInt2, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L3]])
-; TUNIT-NEXT:    call void @write1ToGInt2() #[[ATTR12]]
-; TUNIT-NEXT:    [[L4:%.*]] = load i32, ptr @GInt2, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L4]])
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: nosync
-; CGSCC-LABEL: define {{[^@]+}}@entry2
-; CGSCC-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
-; CGSCC-NEXT:    [[L0:%.*]] = load i32, ptr @GInt2, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L0]])
-; CGSCC-NEXT:    call void @write1ToGInt2() #[[ATTR13]]
-; CGSCC-NEXT:    [[L1:%.*]] = load i32, ptr @GInt2, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L1]])
-; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       T:
-; CGSCC-NEXT:    store i32 [[V]], ptr @GInt2, align 4
-; CGSCC-NEXT:    [[L2:%.*]] = load i32, ptr @GInt2, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L2]])
-; CGSCC-NEXT:    br label [[F]]
-; CGSCC:       F:
-; CGSCC-NEXT:    [[L3:%.*]] = load i32, ptr @GInt2, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L3]])
-; CGSCC-NEXT:    call void @write1ToGInt2() #[[ATTR13]]
-; CGSCC-NEXT:    [[L4:%.*]] = load i32, ptr @GInt2, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L4]])
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse nosync
+; CHECK-LABEL: define {{[^@]+}}@entry2
+; CHECK-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
+; CHECK-NEXT:    [[L0:%.*]] = load i32, ptr @GInt2, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L0]])
+; CHECK-NEXT:    call void @write1ToGInt2() #[[ATTR12]]
+; CHECK-NEXT:    [[L1:%.*]] = load i32, ptr @GInt2, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L1]])
+; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       T:
+; CHECK-NEXT:    store i32 [[V]], ptr @GInt2, align 4
+; CHECK-NEXT:    [[L2:%.*]] = load i32, ptr @GInt2, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L2]])
+; CHECK-NEXT:    br label [[F]]
+; CHECK:       F:
+; CHECK-NEXT:    [[L3:%.*]] = load i32, ptr @GInt2, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L3]])
+; CHECK-NEXT:    call void @write1ToGInt2() #[[ATTR12]]
+; CHECK-NEXT:    [[L4:%.*]] = load i32, ptr @GInt2, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L4]])
+; CHECK-NEXT:    ret void
 ;
   %l0 = load i32, ptr @GInt2
   call void @useI32(i32 %l0)
@@ -173,43 +129,24 @@ F:
   ret void
 }
 define void @entry3(i1 %c, i32 %v) {
-; TUNIT: Function Attrs: norecurse nosync
-; TUNIT-LABEL: define {{[^@]+}}@entry3
-; TUNIT-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    call void @useI32(i32 1)
-; TUNIT-NEXT:    store i32 1, ptr @GInt3, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1)
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       T:
-; TUNIT-NEXT:    store i32 [[V]], ptr @GInt3, align 4
-; TUNIT-NEXT:    [[L2:%.*]] = load i32, ptr @GInt3, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L2]])
-; TUNIT-NEXT:    br label [[F]]
-; TUNIT:       F:
-; TUNIT-NEXT:    [[L3:%.*]] = load i32, ptr @GInt3, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L3]])
-; TUNIT-NEXT:    store i32 1, ptr @GInt3, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1)
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: norecurse nosync
-; CGSCC-LABEL: define {{[^@]+}}@entry3
-; CGSCC-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR6:[0-9]+]] {
-; CGSCC-NEXT:    call void @useI32(i32 1)
-; CGSCC-NEXT:    store i32 1, ptr @GInt3, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1)
-; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       T:
-; CGSCC-NEXT:    store i32 [[V]], ptr @GInt3, align 4
-; CGSCC-NEXT:    [[L2:%.*]] = load i32, ptr @GInt3, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L2]])
-; CGSCC-NEXT:    br label [[F]]
-; CGSCC:       F:
-; CGSCC-NEXT:    [[L3:%.*]] = load i32, ptr @GInt3, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L3]])
-; CGSCC-NEXT:    store i32 1, ptr @GInt3, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1)
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse nosync
+; CHECK-LABEL: define {{[^@]+}}@entry3
+; CHECK-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
+; CHECK-NEXT:    call void @useI32(i32 1)
+; CHECK-NEXT:    store i32 1, ptr @GInt3, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1)
+; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       T:
+; CHECK-NEXT:    store i32 [[V]], ptr @GInt3, align 4
+; CHECK-NEXT:    [[L2:%.*]] = load i32, ptr @GInt3, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L2]])
+; CHECK-NEXT:    br label [[F]]
+; CHECK:       F:
+; CHECK-NEXT:    [[L3:%.*]] = load i32, ptr @GInt3, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L3]])
+; CHECK-NEXT:    store i32 1, ptr @GInt3, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1)
+; CHECK-NEXT:    ret void
 ;
   %l0 = load i32, ptr @GInt3
   call void @useI32(i32 %l0)
@@ -232,45 +169,25 @@ F:
 }
 
 define void @entry4(i1 %c, i32 %v) {
-; TUNIT: Function Attrs: norecurse nosync
-; TUNIT-LABEL: define {{[^@]+}}@entry4
-; TUNIT-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    [[L0:%.*]] = load i32, ptr @GInt4, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef [[L0]])
-; TUNIT-NEXT:    store i32 1, ptr @GInt4, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1)
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       T:
-; TUNIT-NEXT:    store i32 [[V]], ptr @GInt4, align 4
-; TUNIT-NEXT:    [[L2:%.*]] = load i32, ptr @GInt4, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L2]])
-; TUNIT-NEXT:    br label [[F]]
-; TUNIT:       F:
-; TUNIT-NEXT:    [[L3:%.*]] = load i32, ptr @GInt4, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L3]])
-; TUNIT-NEXT:    store i32 1, ptr @GInt4, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1)
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: norecurse nosync
-; CGSCC-LABEL: define {{[^@]+}}@entry4
-; CGSCC-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR6]] {
-; CGSCC-NEXT:    [[L0:%.*]] = load i32, ptr @GInt4, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef [[L0]])
-; CGSCC-NEXT:    store i32 1, ptr @GInt4, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1)
-; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       T:
-; CGSCC-NEXT:    store i32 [[V]], ptr @GInt4, align 4
-; CGSCC-NEXT:    [[L2:%.*]] = load i32, ptr @GInt4, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L2]])
-; CGSCC-NEXT:    br label [[F]]
-; CGSCC:       F:
-; CGSCC-NEXT:    [[L3:%.*]] = load i32, ptr @GInt4, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L3]])
-; CGSCC-NEXT:    store i32 1, ptr @GInt4, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1)
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse nosync
+; CHECK-LABEL: define {{[^@]+}}@entry4
+; CHECK-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
+; CHECK-NEXT:    [[L0:%.*]] = load i32, ptr @GInt4, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef [[L0]])
+; CHECK-NEXT:    store i32 1, ptr @GInt4, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1)
+; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       T:
+; CHECK-NEXT:    store i32 [[V]], ptr @GInt4, align 4
+; CHECK-NEXT:    [[L2:%.*]] = load i32, ptr @GInt4, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L2]])
+; CHECK-NEXT:    br label [[F]]
+; CHECK:       F:
+; CHECK-NEXT:    [[L3:%.*]] = load i32, ptr @GInt4, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L3]])
+; CHECK-NEXT:    store i32 1, ptr @GInt4, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1)
+; CHECK-NEXT:    ret void
 ;
   %l0 = load i32, ptr @GInt4
   call void @useI32(i32 %l0)
@@ -294,43 +211,24 @@ F:
 
 ; TODO: In this test we can replace %l0, in the others above we cannot.
 define void @entry5(i1 %c, i32 %v) {
-; TUNIT: Function Attrs: norecurse nosync
-; TUNIT-LABEL: define {{[^@]+}}@entry5
-; TUNIT-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    call void @useI32(i32 1)
-; TUNIT-NEXT:    store i32 1, ptr @GInt5, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR6:[0-9]+]]
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       T:
-; TUNIT-NEXT:    store i32 [[V]], ptr @GInt5, align 4
-; TUNIT-NEXT:    [[L2:%.*]] = load i32, ptr @GInt5, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L2]]) #[[ATTR6]]
-; TUNIT-NEXT:    br label [[F]]
-; TUNIT:       F:
-; TUNIT-NEXT:    [[L3:%.*]] = load i32, ptr @GInt5, align 4
-; TUNIT-NEXT:    call void @useI32(i32 [[L3]]) #[[ATTR6]]
-; TUNIT-NEXT:    store i32 1, ptr @GInt5, align 4
-; TUNIT-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR6]]
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: norecurse nosync
-; CGSCC-LABEL: define {{[^@]+}}@entry5
-; CGSCC-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR6]] {
-; CGSCC-NEXT:    call void @useI32(i32 1)
-; CGSCC-NEXT:    store i32 1, ptr @GInt5, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR7:[0-9]+]]
-; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       T:
-; CGSCC-NEXT:    store i32 [[V]], ptr @GInt5, align 4
-; CGSCC-NEXT:    [[L2:%.*]] = load i32, ptr @GInt5, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L2]]) #[[ATTR7]]
-; CGSCC-NEXT:    br label [[F]]
-; CGSCC:       F:
-; CGSCC-NEXT:    [[L3:%.*]] = load i32, ptr @GInt5, align 4
-; CGSCC-NEXT:    call void @useI32(i32 [[L3]]) #[[ATTR7]]
-; CGSCC-NEXT:    store i32 1, ptr @GInt5, align 4
-; CGSCC-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR7]]
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse nosync
+; CHECK-LABEL: define {{[^@]+}}@entry5
+; CHECK-SAME: (i1 [[C:%.*]], i32 [[V:%.*]]) #[[ATTR5]] {
+; CHECK-NEXT:    call void @useI32(i32 1)
+; CHECK-NEXT:    store i32 1, ptr @GInt5, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR6:[0-9]+]]
+; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       T:
+; CHECK-NEXT:    store i32 [[V]], ptr @GInt5, align 4
+; CHECK-NEXT:    [[L2:%.*]] = load i32, ptr @GInt5, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L2]]) #[[ATTR6]]
+; CHECK-NEXT:    br label [[F]]
+; CHECK:       F:
+; CHECK-NEXT:    [[L3:%.*]] = load i32, ptr @GInt5, align 4
+; CHECK-NEXT:    call void @useI32(i32 [[L3]]) #[[ATTR6]]
+; CHECK-NEXT:    store i32 1, ptr @GInt5, align 4
+; CHECK-NEXT:    call void @useI32(i32 noundef 1) #[[ATTR6]]
+; CHECK-NEXT:    ret void
 ;
   %l0 = load i32, ptr @GInt5
   call void @useI32(i32 %l0)
@@ -525,63 +423,34 @@ if.end:
 }
 
 define void @exclusion_set2(i1 %c1, i1 %c2, i1 %c3) {
-; TUNIT: Function Attrs: norecurse
-; TUNIT-LABEL: define {{[^@]+}}@exclusion_set2
-; TUNIT-SAME: (i1 [[C1:%.*]], i1 [[C2:%.*]], i1 [[C3:%.*]]) #[[ATTR7:[0-9]+]] {
-; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    call void @use_4_i8(i8 undef, i8 undef, i8 undef, i8 undef)
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
-; TUNIT-NEXT:    br i1 [[C1]], label [[IF_MERGE1:%.*]], label [[IF_THEN:%.*]]
-; TUNIT:       if.then:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
-; TUNIT-NEXT:    br i1 [[C1]], label [[IF_MERGE1]], label [[IF_THEN2:%.*]]
-; TUNIT:       if.then2:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
-; TUNIT-NEXT:    br i1 [[C2]], label [[IF_MERGE2:%.*]], label [[IF_THEN3:%.*]]
-; TUNIT:       if.merge1:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 undef, i8 undef)
-; TUNIT-NEXT:    br label [[IF_MERGE2]]
-; TUNIT:       if.merge2:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 undef)
-; TUNIT-NEXT:    br label [[IF_END:%.*]]
-; TUNIT:       if.then3:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 noundef 4)
-; TUNIT-NEXT:    br label [[IF_END]]
-; TUNIT:       if.end:
-; TUNIT-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 4)
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: norecurse
-; CGSCC-LABEL: define {{[^@]+}}@exclusion_set2
-; CGSCC-SAME: (i1 [[C1:%.*]], i1 [[C2:%.*]], i1 [[C3:%.*]]) #[[ATTR8:[0-9]+]] {
-; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    call void @use_4_i8(i8 undef, i8 undef, i8 undef, i8 undef)
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
-; CGSCC-NEXT:    br i1 [[C1]], label [[IF_MERGE1:%.*]], label [[IF_THEN:%.*]]
-; CGSCC:       if.then:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
-; CGSCC-NEXT:    br i1 [[C1]], label [[IF_MERGE1]], label [[IF_THEN2:%.*]]
-; CGSCC:       if.then2:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
-; CGSCC-NEXT:    br i1 [[C2]], label [[IF_MERGE2:%.*]], label [[IF_THEN3:%.*]]
-; CGSCC:       if.merge1:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 undef, i8 undef)
-; CGSCC-NEXT:    br label [[IF_MERGE2]]
-; CGSCC:       if.merge2:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 undef)
-; CGSCC-NEXT:    br label [[IF_END:%.*]]
-; CGSCC:       if.then3:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 noundef 4)
-; CGSCC-NEXT:    br label [[IF_END]]
-; CGSCC:       if.end:
-; CGSCC-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 4)
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: norecurse
+; CHECK-LABEL: define {{[^@]+}}@exclusion_set2
+; CHECK-SAME: (i1 [[C1:%.*]], i1 [[C2:%.*]], i1 [[C3:%.*]]) #[[ATTR7:[0-9]+]] {
+; CHECK-NEXT:  entry:
+; CHECK-NEXT:    call void @use_4_i8(i8 undef, i8 undef, i8 undef, i8 undef)
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
+; CHECK-NEXT:    br i1 [[C1]], label [[IF_MERGE1:%.*]], label [[IF_THEN:%.*]]
+; CHECK:       if.then:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 undef, i8 undef, i8 undef)
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
+; CHECK-NEXT:    br i1 [[C1]], label [[IF_MERGE1]], label [[IF_THEN2:%.*]]
+; CHECK:       if.then2:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 undef, i8 undef)
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
+; CHECK-NEXT:    br i1 [[C2]], label [[IF_MERGE2:%.*]], label [[IF_THEN3:%.*]]
+; CHECK:       if.merge1:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 undef, i8 undef)
+; CHECK-NEXT:    br label [[IF_MERGE2]]
+; CHECK:       if.merge2:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 undef)
+; CHECK-NEXT:    br label [[IF_END:%.*]]
+; CHECK:       if.then3:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 undef)
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 noundef 2, i8 noundef 3, i8 noundef 4)
+; CHECK-NEXT:    br label [[IF_END]]
+; CHECK:       if.end:
+; CHECK-NEXT:    call void @use_4_i8(i8 noundef 1, i8 2, i8 3, i8 4)
+; CHECK-NEXT:    ret void
 ;
 entry:
   %alloc = alloca i8, i32 4
@@ -717,7 +586,7 @@ define internal void @exclusion_set3_helper(i1 %c, ptr %p) {
 ;
 ; CGSCC: Function Attrs: nosync
 ; CGSCC-LABEL: define {{[^@]+}}@exclusion_set3_helper
-; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR8:[0-9]+]] {
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i32 42, ptr [[P]], align 4
@@ -732,7 +601,7 @@ define internal void @exclusion_set3_helper(i1 %c, ptr %p) {
 ; CGSCC-NEXT:    [[USE1:%.*]] = load i32, ptr [[P]], align 4
 ; CGSCC-NEXT:    call void @usei32(i32 [[USE1]])
 ; CGSCC-NEXT:    store i32 77, ptr [[P]], align 4
-; CGSCC-NEXT:    call void @exclusion_set3_helper(i1 noundef true, ptr noalias nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[P]]) #[[ATTR5]]
+; CGSCC-NEXT:    call void @exclusion_set3_helper(i1 noundef true, ptr noalias nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[P]]) #[[ATTR8]]
 ; CGSCC-NEXT:    [[USE2:%.*]] = load i32, ptr [[P]], align 4
 ; CGSCC-NEXT:    call void @usei32(i32 [[USE2]])
 ; CGSCC-NEXT:    br label [[T]]
@@ -777,7 +646,7 @@ define i32 @exclusion_set3(i1 %c) {
 ;
 ; CGSCC: Function Attrs: nosync
 ; CGSCC-LABEL: define {{[^@]+}}@exclusion_set3
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR8]] {
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i32, align 4
 ; CGSCC-NEXT:    store i32 3, ptr [[A]], align 4
 ; CGSCC-NEXT:    call void @exclusion_set3_helper(i1 noundef [[C]], ptr noalias nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[A]])
@@ -799,14 +668,14 @@ define internal i32 @readI32(ptr %a) {
 ; TUNIT-SAME: (i32 [[TMP0:%.*]]) #[[ATTR9:[0-9]+]] {
 ; TUNIT-NEXT:    [[A_PRIV:%.*]] = alloca i32, align 4
 ; TUNIT-NEXT:    store i32 [[TMP0]], ptr [[A_PRIV]], align 4
-; TUNIT-NEXT:    [[R:%.*]] = load i32, ptr [[A_PRIV]], align 4
+; TUNIT-NEXT:    [[R:%.*]] = load i32, ptr [[A_PRIV]], align 4, !invariant.load [[META0:![0-9]+]]
 ; TUNIT-NEXT:    store i32 1, ptr @B, align 4
 ; TUNIT-NEXT:    ret i32 [[R]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@readI32
 ; CGSCC-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[A:%.*]]) #[[ATTR9:[0-9]+]] {
-; CGSCC-NEXT:    [[R:%.*]] = load i32, ptr [[A]], align 4
+; CGSCC-NEXT:    [[R:%.*]] = load i32, ptr [[A]], align 4, !invariant.load [[META0:![0-9]+]]
 ; CGSCC-NEXT:    store i32 1, ptr @B, align 4
 ; CGSCC-NEXT:    ret i32 [[R]]
 ;
@@ -825,12 +694,12 @@ define internal i32 @broker(ptr %a) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i32 @readI32(i32 [[TMP2]]) #[[ATTR13:[0-9]+]]
 ; TUNIT-NEXT:    ret i32 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(readwrite, argmem: none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@broker
 ; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR10:[0-9]+]] {
 ; CGSCC-NEXT:    [[A_PRIV:%.*]] = alloca i32, align 4
 ; CGSCC-NEXT:    store i32 [[TMP0]], ptr [[A_PRIV]], align 4
-; CGSCC-NEXT:    [[R:%.*]] = call i32 @readI32(ptr noalias nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[A_PRIV]]) #[[ATTR14:[0-9]+]]
+; CGSCC-NEXT:    [[R:%.*]] = call i32 @readI32(ptr noalias nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[A_PRIV]]) #[[ATTR13:[0-9]+]]
 ; CGSCC-NEXT:    ret i32 [[R]]
 ;
   %r = call i32 @readI32(ptr %a)
@@ -851,15 +720,11 @@ define i32 @two_calls() {
 ; TUNIT-NEXT:    [[R:%.*]] = call i32 @broker(i32 [[TMP2]]) #[[ATTR13]]
 ; TUNIT-NEXT:    ret i32 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@two_calls
-; CGSCC-SAME: () #[[ATTR11:[0-9]+]] {
-; CGSCC-NEXT:    [[A:%.*]] = alloca i32, align 4
-; CGSCC-NEXT:    store i32 0, ptr [[A]], align 4
-; CGSCC-NEXT:    [[TMP1:%.*]] = load i32, ptr [[A]], align 4
-; CGSCC-NEXT:    [[D:%.*]] = call i32 @broker(i32 noundef [[TMP1]]) #[[ATTR14]]
-; CGSCC-NEXT:    store i32 1, ptr [[A]], align 4
-; CGSCC-NEXT:    [[R:%.*]] = call i32 @broker(i32 noundef 1) #[[ATTR14]]
+; CGSCC-SAME: () #[[ATTR9]] {
+; CGSCC-NEXT:    [[D:%.*]] = call i32 @broker(i32 noundef 0) #[[ATTR13]]
+; CGSCC-NEXT:    [[R:%.*]] = call i32 @broker(i32 noundef 1) #[[ATTR13]]
 ; CGSCC-NEXT:    ret i32 [[R]]
 ;
   %a = alloca i32
@@ -891,14 +756,17 @@ define i32 @two_calls() {
 ; CGSCC: attributes #[[ATTR2:[0-9]+]] = { allockind("free") "alloc-family"="malloc" }
 ; CGSCC: attributes #[[ATTR3:[0-9]+]] = { allockind("alloc,zeroed") allocsize(0,1) "alloc-family"="malloc" }
 ; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
-; CGSCC: attributes #[[ATTR5]] = { nosync }
-; CGSCC: attributes #[[ATTR6]] = { norecurse nosync }
-; CGSCC: attributes #[[ATTR7]] = { nocallback }
-; CGSCC: attributes #[[ATTR8]] = { norecurse }
+; CGSCC: attributes #[[ATTR5]] = { norecurse nosync }
+; CGSCC: attributes #[[ATTR6]] = { nocallback }
+; CGSCC: attributes #[[ATTR7]] = { norecurse }
+; CGSCC: attributes #[[ATTR8]] = { nosync }
 ; CGSCC: attributes #[[ATTR9]] = { mustprogress nofree norecurse nosync nounwind willreturn }
-; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree nosync nounwind willreturn memory(readwrite, argmem: none) }
-; CGSCC: attributes #[[ATTR11]] = { mustprogress nofree nosync nounwind willreturn }
-; CGSCC: attributes #[[ATTR12:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
-; CGSCC: attributes #[[ATTR13]] = { nounwind memory(write) }
-; CGSCC: attributes #[[ATTR14]] = { nofree nounwind willreturn }
+; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none) }
+; CGSCC: attributes #[[ATTR11:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: write) }
+; CGSCC: attributes #[[ATTR12]] = { nounwind memory(write) }
+; CGSCC: attributes #[[ATTR13]] = { nofree nounwind willreturn }
+;.
+; TUNIT: [[META0]] = !{}
+;.
+; CGSCC: [[META0]] = !{}
 ;.

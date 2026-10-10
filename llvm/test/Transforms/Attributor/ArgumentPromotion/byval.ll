@@ -69,14 +69,14 @@ define i32 @main() nounwind  {
 ; TUNIT-NEXT:    [[A:%.*]] = add i32 [[C0]], [[C1]]
 ; TUNIT-NEXT:    ret i32 [[A]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@main
-; CGSCC-SAME: () #[[ATTR1:[0-9]+]] {
+; CGSCC-SAME: () #[[ATTR0]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[S:%.*]] = alloca [[STRUCT_SS:%.*]], align 4
 ; CGSCC-NEXT:    [[VAL4:%.*]] = getelementptr [[STRUCT_SS]], ptr [[S]], i32 0, i32 1
-; CGSCC-NEXT:    [[C0:%.*]] = call i32 @f(i32 noundef 1, i64 noundef 2) #[[ATTR2:[0-9]+]]
-; CGSCC-NEXT:    [[C1:%.*]] = call i32 @g(i32 noundef 1, i64 noundef 2) #[[ATTR2]]
+; CGSCC-NEXT:    [[C0:%.*]] = call i32 @f(i32 noundef 1, i64 noundef 2) #[[ATTR1:[0-9]+]]
+; CGSCC-NEXT:    [[C1:%.*]] = call i32 @g(i32 noundef 1, i64 noundef 2) #[[ATTR1]]
 ; CGSCC-NEXT:    [[A:%.*]] = add i32 [[C0]], [[C1]]
 ; CGSCC-NEXT:    ret i32 [[A]]
 ;
@@ -97,6 +97,5 @@ entry:
 ; TUNIT: attributes #[[ATTR1]] = { nofree nosync nounwind willreturn }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR2]] = { nofree nosync nounwind willreturn }
+; CGSCC: attributes #[[ATTR1]] = { nofree nosync nounwind willreturn }
 ;.

@@ -12,9 +12,9 @@ define i32 @leaf() {
 }
 
 define i32 @self_rec() {
-; CHECK: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@self_rec
-; CHECK-SAME: () #[[ATTR1:[0-9]+]] {
+; CHECK-SAME: () #[[ATTR0]] {
 ; CHECK-NEXT:    ret i32 4
 ;
   %a = call i32 @self_rec()
@@ -22,29 +22,19 @@ define i32 @self_rec() {
 }
 
 define i32 @indirect_rec() {
-; TUNIT: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@indirect_rec
-; TUNIT-SAME: () #[[ATTR1]] {
-; TUNIT-NEXT:    ret i32 undef
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@indirect_rec
-; CGSCC-SAME: () #[[ATTR0]] {
-; CGSCC-NEXT:    ret i32 undef
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@indirect_rec
+; CHECK-SAME: () #[[ATTR0]] {
+; CHECK-NEXT:    ret i32 undef
 ;
   %a = call i32 @indirect_rec2()
   ret i32 %a
 }
 define i32 @indirect_rec2() {
-; TUNIT: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
-; TUNIT-LABEL: define {{[^@]+}}@indirect_rec2
-; TUNIT-SAME: () #[[ATTR1]] {
-; TUNIT-NEXT:    ret i32 undef
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; CGSCC-LABEL: define {{[^@]+}}@indirect_rec2
-; CGSCC-SAME: () #[[ATTR0]] {
-; CGSCC-NEXT:    ret i32 undef
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; CHECK-LABEL: define {{[^@]+}}@indirect_rec2
+; CHECK-SAME: () #[[ATTR0]] {
+; CHECK-NEXT:    ret i32 undef
 ;
   %a = call i32 @indirect_rec()
   ret i32 %a
@@ -53,8 +43,8 @@ define i32 @indirect_rec2() {
 define i32 @extern() {
 ; CHECK: Function Attrs: nosync memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@extern
-; CHECK-SAME: () #[[ATTR2:[0-9]+]] {
-; CHECK-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR9:[0-9]+]]
+; CHECK-SAME: () #[[ATTR1:[0-9]+]] {
+; CHECK-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR8:[0-9]+]]
 ; CHECK-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @k()
@@ -67,8 +57,8 @@ declare i32 @k() readnone
 define void @intrinsic(ptr %dest, ptr %src, i32 %len) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite)
 ; CHECK-LABEL: define {{[^@]+}}@intrinsic
-; CHECK-SAME: (ptr nofree writeonly captures(none) [[DEST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]], i32 [[LEN:%.*]]) #[[ATTR4:[0-9]+]] {
-; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i32(ptr nofree writeonly captures(none) [[DEST]], ptr nofree readonly captures(none) [[SRC]], i32 [[LEN]], i1 noundef false) #[[ATTR10:[0-9]+]]
+; CHECK-SAME: (ptr nofree writeonly captures(none) [[DEST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]], i32 [[LEN:%.*]]) #[[ATTR3:[0-9]+]] {
+; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i32(ptr nofree writeonly captures(none) [[DEST]], ptr nofree readonly captures(none) [[SRC]], i32 [[LEN]], i1 noundef false) #[[ATTR9:[0-9]+]]
 ; CHECK-NEXT:    ret void
 ;
   call void @llvm.memcpy.p0.p0.i32(ptr %dest, ptr %src, i32 %len, i1 false)
@@ -81,8 +71,8 @@ declare void @llvm.memcpy.p0.p0.i32(ptr, ptr, i32, i1)
 define internal i32 @called_by_norecurse() {
 ; CHECK: Function Attrs: norecurse nosync memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@called_by_norecurse
-; CHECK-SAME: () #[[ATTR6:[0-9]+]] {
-; CHECK-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR9]]
+; CHECK-SAME: () #[[ATTR5:[0-9]+]] {
+; CHECK-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR8]]
 ; CHECK-NEXT:    ret i32 undef
 ;
   %a = call i32 @k()
@@ -91,14 +81,14 @@ define internal i32 @called_by_norecurse() {
 define void @m() norecurse {
 ; TUNIT: Function Attrs: norecurse nosync memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@m
-; TUNIT-SAME: () #[[ATTR6]] {
-; TUNIT-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse() #[[ATTR2]]
+; TUNIT-SAME: () #[[ATTR5]] {
+; TUNIT-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse() #[[ATTR1]]
 ; TUNIT-NEXT:    ret void
 ;
 ; CGSCC: Function Attrs: norecurse nosync memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@m
-; CGSCC-SAME: () #[[ATTR6]] {
-; CGSCC-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse() #[[ATTR9]]
+; CGSCC-SAME: () #[[ATTR5]] {
+; CGSCC-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse() #[[ATTR8]]
 ; CGSCC-NEXT:    ret void
 ;
   %a = call i32 @called_by_norecurse()
@@ -108,14 +98,14 @@ define void @m() norecurse {
 define internal i32 @called_by_norecurse_indirectly() {
 ; TUNIT: Function Attrs: norecurse nosync memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@called_by_norecurse_indirectly
-; TUNIT-SAME: () #[[ATTR6]] {
-; TUNIT-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR9]]
+; TUNIT-SAME: () #[[ATTR5]] {
+; TUNIT-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR8]]
 ; TUNIT-NEXT:    ret i32 [[A]]
 ;
 ; CGSCC: Function Attrs: nosync memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@called_by_norecurse_indirectly
-; CGSCC-SAME: () #[[ATTR2]] {
-; CGSCC-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR9]]
+; CGSCC-SAME: () #[[ATTR1]] {
+; CGSCC-NEXT:    [[A:%.*]] = call i32 @k() #[[ATTR8]]
 ; CGSCC-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @k()
@@ -124,14 +114,14 @@ define internal i32 @called_by_norecurse_indirectly() {
 define internal i32 @o() {
 ; TUNIT: Function Attrs: norecurse nosync memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@o
-; TUNIT-SAME: () #[[ATTR6]] {
-; TUNIT-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly() #[[ATTR2]]
+; TUNIT-SAME: () #[[ATTR5]] {
+; TUNIT-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly() #[[ATTR1]]
 ; TUNIT-NEXT:    ret i32 [[A]]
 ;
 ; CGSCC: Function Attrs: norecurse nosync memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@o
-; CGSCC-SAME: () #[[ATTR6]] {
-; CGSCC-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly() #[[ATTR9]]
+; CGSCC-SAME: () #[[ATTR5]] {
+; CGSCC-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly() #[[ATTR8]]
 ; CGSCC-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @called_by_norecurse_indirectly()
@@ -140,14 +130,14 @@ define internal i32 @o() {
 define i32 @p() norecurse {
 ; TUNIT: Function Attrs: norecurse nosync memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@p
-; TUNIT-SAME: () #[[ATTR6]] {
-; TUNIT-NEXT:    [[A:%.*]] = call i32 @o() #[[ATTR2]]
+; TUNIT-SAME: () #[[ATTR5]] {
+; TUNIT-NEXT:    [[A:%.*]] = call i32 @o() #[[ATTR1]]
 ; TUNIT-NEXT:    ret i32 [[A]]
 ;
 ; CGSCC: Function Attrs: norecurse nosync memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@p
-; CGSCC-SAME: () #[[ATTR6]] {
-; CGSCC-NEXT:    [[A:%.*]] = call i32 @o() #[[ATTR9]]
+; CGSCC-SAME: () #[[ATTR5]] {
+; CGSCC-NEXT:    [[A:%.*]] = call i32 @o() #[[ATTR8]]
 ; CGSCC-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @o()
@@ -155,9 +145,9 @@ define i32 @p() norecurse {
 }
 
 define void @f(i32 %x)  {
-; TUNIT: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@f
-; TUNIT-SAME: (i32 [[X:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (i32 [[X:%.*]]) #[[ATTR0]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[X_ADDR:%.*]] = alloca i32, align 4
 ; TUNIT-NEXT:    store i32 [[X]], ptr [[X_ADDR]], align 4
@@ -228,7 +218,7 @@ define i32 @eval_func1(ptr , i32) local_unnamed_addr {
 define i32 @eval_func2(ptr , i32) local_unnamed_addr null_pointer_is_valid{
 ; CHECK: Function Attrs: null_pointer_is_valid
 ; CHECK-LABEL: define {{[^@]+}}@eval_func2
-; CHECK-SAME: (ptr nofree noundef captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr #[[ATTR7:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr #[[ATTR6:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP3:%.*]] = tail call i32 [[TMP0]](i32 [[TMP1]])
 ; CHECK-NEXT:    ret i32 [[TMP3]]
 ;
@@ -255,7 +245,7 @@ Dead:
 define i1 @test_rec_neg(i1 %c) norecurse {
 ; TUNIT: Function Attrs: norecurse
 ; TUNIT-LABEL: define {{[^@]+}}@test_rec_neg
-; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR8:[0-9]+]] {
+; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR7:[0-9]+]] {
 ; TUNIT-NEXT:    [[RC1:%.*]] = call i1 @rec(i1 noundef true)
 ; TUNIT-NEXT:    br i1 [[RC1]], label [[T:%.*]], label [[F:%.*]]
 ; TUNIT:       t:
@@ -266,7 +256,7 @@ define i1 @test_rec_neg(i1 %c) norecurse {
 ;
 ; CGSCC: Function Attrs: norecurse
 ; CGSCC-LABEL: define {{[^@]+}}@test_rec_neg
-; CGSCC-SAME: (i1 [[C:%.*]]) #[[ATTR8:[0-9]+]] {
+; CGSCC-SAME: (i1 [[C:%.*]]) #[[ATTR7:[0-9]+]] {
 ; CGSCC-NEXT:    [[RC1:%.*]] = call noundef i1 @rec(i1 noundef true)
 ; CGSCC-NEXT:    br i1 [[RC1]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
@@ -306,26 +296,24 @@ f:
 
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; TUNIT: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
-; TUNIT: attributes #[[ATTR2]] = { nosync memory(none) }
-; TUNIT: attributes #[[ATTR3:[0-9]+]] = { memory(none) }
-; TUNIT: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
-; TUNIT: attributes #[[ATTR5:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-; TUNIT: attributes #[[ATTR6]] = { norecurse nosync memory(none) }
-; TUNIT: attributes #[[ATTR7]] = { null_pointer_is_valid }
-; TUNIT: attributes #[[ATTR8]] = { norecurse }
-; TUNIT: attributes #[[ATTR9]] = { nosync }
-; TUNIT: attributes #[[ATTR10]] = { nofree willreturn }
+; TUNIT: attributes #[[ATTR1]] = { nosync memory(none) }
+; TUNIT: attributes #[[ATTR2:[0-9]+]] = { memory(none) }
+; TUNIT: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
+; TUNIT: attributes #[[ATTR4:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; TUNIT: attributes #[[ATTR5]] = { norecurse nosync memory(none) }
+; TUNIT: attributes #[[ATTR6]] = { null_pointer_is_valid }
+; TUNIT: attributes #[[ATTR7]] = { norecurse }
+; TUNIT: attributes #[[ATTR8]] = { nosync }
+; TUNIT: attributes #[[ATTR9]] = { nofree willreturn }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR2]] = { nosync memory(none) }
-; CGSCC: attributes #[[ATTR3:[0-9]+]] = { memory(none) }
-; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
-; CGSCC: attributes #[[ATTR5:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-; CGSCC: attributes #[[ATTR6]] = { norecurse nosync memory(none) }
-; CGSCC: attributes #[[ATTR7]] = { null_pointer_is_valid }
-; CGSCC: attributes #[[ATTR8]] = { norecurse }
-; CGSCC: attributes #[[ATTR9]] = { nosync }
-; CGSCC: attributes #[[ATTR10]] = { nofree willreturn }
+; CGSCC: attributes #[[ATTR1]] = { nosync memory(none) }
+; CGSCC: attributes #[[ATTR2:[0-9]+]] = { memory(none) }
+; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) }
+; CGSCC: attributes #[[ATTR4:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CGSCC: attributes #[[ATTR5]] = { norecurse nosync memory(none) }
+; CGSCC: attributes #[[ATTR6]] = { null_pointer_is_valid }
+; CGSCC: attributes #[[ATTR7]] = { norecurse }
+; CGSCC: attributes #[[ATTR8]] = { nosync }
+; CGSCC: attributes #[[ATTR9]] = { nofree willreturn }
 ;.

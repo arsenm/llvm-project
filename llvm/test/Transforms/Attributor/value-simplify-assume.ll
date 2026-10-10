@@ -44,17 +44,11 @@ define i1 @keep_assume_1c_nr() norecurse {
 }
 
 define i1 @drop_assume_1c_nr() norecurse {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
-; TUNIT-LABEL: define {{[^@]+}}@drop_assume_1c_nr
-; TUNIT-SAME: () #[[ATTR3:[0-9]+]] {
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7:[0-9]+]]
-; TUNIT-NEXT:    ret i1 true
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
-; CGSCC-LABEL: define {{[^@]+}}@drop_assume_1c_nr
-; CGSCC-SAME: () #[[ATTR3:[0-9]+]] {
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR8:[0-9]+]]
-; CGSCC-NEXT:    ret i1 true
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
+; CHECK-LABEL: define {{[^@]+}}@drop_assume_1c_nr
+; CHECK-SAME: () #[[ATTR3:[0-9]+]] {
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7:[0-9]+]]
+; CHECK-NEXT:    ret i1 true
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -88,25 +82,15 @@ define i1 @keep_assume_2c_nr() norecurse {
 
 define i1 @keep_assume_3c_nr() norecurse {
 ;
-; TUNIT: Function Attrs: norecurse
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_3c_nr
-; TUNIT-SAME: () #[[ATTR2]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC: Function Attrs: norecurse
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_3c_nr
-; CGSCC-SAME: () #[[ATTR2]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK: Function Attrs: norecurse
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_3c_nr
+; CHECK-SAME: () #[[ATTR2]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -117,23 +101,14 @@ define i1 @keep_assume_3c_nr() norecurse {
 }
 define i1 @keep_assume_4c_nr() norecurse {
 ;
-; TUNIT: Function Attrs: norecurse
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_4c_nr
-; TUNIT-SAME: () #[[ATTR2]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 true
-;
-; CGSCC: Function Attrs: norecurse
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_4c_nr
-; CGSCC-SAME: () #[[ATTR2]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 true
+; CHECK: Function Attrs: norecurse
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_4c_nr
+; CHECK-SAME: () #[[ATTR2]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 true
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -163,21 +138,13 @@ define i1 @keep_assume_1_nr(i1 %arg) norecurse {
 }
 
 define i1 @drop_assume_1_nr(i1 %arg) norecurse {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@drop_assume_1_nr
-; TUNIT-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
-; TUNIT-NEXT:    ret i1 [[ARG]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@drop_assume_1_nr
-; CGSCC-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR8]]
-; CGSCC-NEXT:    ret i1 [[ARG]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@drop_assume_1_nr
+; CHECK-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
+; CHECK-NEXT:    ret i1 [[ARG]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -211,25 +178,15 @@ define i1 @keep_assume_2_nr(i1 %arg) norecurse {
 
 define i1 @keep_assume_3_nr(i1 %arg) norecurse {
 ;
-; TUNIT: Function Attrs: norecurse
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_3_nr
-; TUNIT-SAME: (i1 [[ARG:%.*]]) #[[ATTR2]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC: Function Attrs: norecurse
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_3_nr
-; CGSCC-SAME: (i1 [[ARG:%.*]]) #[[ATTR2]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK: Function Attrs: norecurse
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_3_nr
+; CHECK-SAME: (i1 [[ARG:%.*]]) #[[ATTR2]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -241,23 +198,14 @@ define i1 @keep_assume_3_nr(i1 %arg) norecurse {
 
 define i1 @keep_assume_4_nr(i1 %arg) norecurse {
 ;
-; TUNIT: Function Attrs: norecurse
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_4_nr
-; TUNIT-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR2]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[ARG]]
-;
-; CGSCC: Function Attrs: norecurse
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_4_nr
-; CGSCC-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR2]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[ARG]]
+; CHECK: Function Attrs: norecurse
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_4_nr
+; CHECK-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR2]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[ARG]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -268,33 +216,19 @@ define i1 @keep_assume_4_nr(i1 %arg) norecurse {
 }
 
 define i1 @assume_1_nr(i1 %arg, i1 %cond) norecurse {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@assume_1_nr
-; TUNIT-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
-; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       t:
-; TUNIT-NEXT:    br label [[M:%.*]]
-; TUNIT:       f:
-; TUNIT-NEXT:    br label [[M]]
-; TUNIT:       m:
-; TUNIT-NEXT:    ret i1 [[ARG]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@assume_1_nr
-; CGSCC-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR8]]
-; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       t:
-; CGSCC-NEXT:    br label [[M:%.*]]
-; CGSCC:       f:
-; CGSCC-NEXT:    br label [[M]]
-; CGSCC:       m:
-; CGSCC-NEXT:    ret i1 [[ARG]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@assume_1_nr
+; CHECK-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
+; CHECK-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       t:
+; CHECK-NEXT:    br label [[M:%.*]]
+; CHECK:       f:
+; CHECK-NEXT:    br label [[M]]
+; CHECK:       m:
+; CHECK-NEXT:    ret i1 [[ARG]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -314,7 +248,7 @@ m:
 define void @assume_1b_nr(i1 %arg, i1 %cond) norecurse {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
 ; CHECK-LABEL: define {{[^@]+}}@assume_1b_nr
-; CHECK-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4:[0-9]+]] {
+; CHECK-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CHECK:       t:
 ; CHECK-NEXT:    br label [[M:%.*]]
@@ -339,37 +273,21 @@ m:
 }
 
 define i1 @assume_2_nr(i1 %arg, i1 %cond) norecurse {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@assume_2_nr
-; TUNIT-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       t:
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    br label [[M:%.*]]
-; TUNIT:       f:
-; TUNIT-NEXT:    store i1 false, ptr [[STACK]], align 1
-; TUNIT-NEXT:    br label [[M]]
-; TUNIT:       m:
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@assume_2_nr
-; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       t:
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    br label [[M:%.*]]
-; CGSCC:       f:
-; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
-; CGSCC-NEXT:    br label [[M]]
-; CGSCC:       m:
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@assume_2_nr
+; CHECK-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       t:
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    br label [[M:%.*]]
+; CHECK:       f:
+; CHECK-NEXT:    store i1 false, ptr [[STACK]], align 1
+; CHECK-NEXT:    br label [[M]]
+; CHECK:       m:
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -437,7 +355,7 @@ define i1 @assume_3_nr(i1 %arg, i1 %cond) norecurse {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
@@ -446,7 +364,7 @@ define i1 @assume_3_nr(i1 %arg, i1 %cond) norecurse {
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9:[0-9]+]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8:[0-9]+]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -497,8 +415,8 @@ define i1 @assume_4_nr(i1 %arg, i1 %cond) norecurse {
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -545,22 +463,22 @@ define i1 @assume_5_nr(i1 %arg, i1 %cond) norecurse {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L1:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L2:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR10:[0-9]+]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR9:[0-9]+]]
 ; CGSCC-NEXT:    br label [[M:%.*]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L3:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR10]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR9]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -614,22 +532,22 @@ define i1 @assume_5c_nr(i1 %cond) norecurse {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L1:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L2:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M:%.*]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L3:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR10]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR9]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -673,17 +591,11 @@ define i1 @keep_assume_1c() {
 }
 
 define i1 @drop_assume_1c() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
-; TUNIT-LABEL: define {{[^@]+}}@drop_assume_1c
-; TUNIT-SAME: () #[[ATTR3]] {
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7]]
-; TUNIT-NEXT:    ret i1 true
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
-; CGSCC-LABEL: define {{[^@]+}}@drop_assume_1c
-; CGSCC-SAME: () #[[ATTR3]] {
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR8]]
-; CGSCC-NEXT:    ret i1 true
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write)
+; CHECK-LABEL: define {{[^@]+}}@drop_assume_1c
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef true) #[[ATTR7]]
+; CHECK-NEXT:    ret i1 true
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -715,21 +627,13 @@ define i1 @keep_assume_2c() {
 
 define i1 @keep_assume_3c() {
 ;
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_3c() {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_3c() {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_3c() {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -740,21 +644,13 @@ define i1 @keep_assume_3c() {
 }
 define i1 @keep_assume_4c() {
 ;
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_4c() {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L4]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_4c() {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L4]]
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_4c() {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L4]]
 ;
   %stack = alloca i1
   store i1 true, ptr %stack
@@ -783,21 +679,13 @@ define i1 @keep_assume_1(i1 %arg) {
 }
 
 define i1 @drop_assume_1(i1 %arg) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@drop_assume_1
-; TUNIT-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
-; TUNIT-NEXT:    ret i1 [[ARG]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@drop_assume_1
-; CGSCC-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR8]]
-; CGSCC-NEXT:    ret i1 [[ARG]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@drop_assume_1
+; CHECK-SAME: (i1 returned [[ARG:%.*]]) #[[ATTR4]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
+; CHECK-NEXT:    ret i1 [[ARG]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -830,23 +718,14 @@ define i1 @keep_assume_2(i1 %arg) {
 
 define i1 @keep_assume_3(i1 %arg) {
 ;
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_3
-; TUNIT-SAME: (i1 [[ARG:%.*]]) {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_3
-; CGSCC-SAME: (i1 [[ARG:%.*]]) {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_3
+; CHECK-SAME: (i1 [[ARG:%.*]]) {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noundef nonnull dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -858,23 +737,14 @@ define i1 @keep_assume_3(i1 %arg) {
 
 define i1 @keep_assume_4(i1 %arg) {
 ;
-; TUNIT-LABEL: define {{[^@]+}}@keep_assume_4
-; TUNIT-SAME: (i1 [[ARG:%.*]]) {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC-LABEL: define {{[^@]+}}@keep_assume_4
-; CGSCC-SAME: (i1 [[ARG:%.*]]) {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK-LABEL: define {{[^@]+}}@keep_assume_4
+; CHECK-SAME: (i1 [[ARG:%.*]]) {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    call void @useI1p(ptr noalias noundef nonnull captures(none) dereferenceable(1) [[STACK]])
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -885,33 +755,19 @@ define i1 @keep_assume_4(i1 %arg) {
 }
 
 define i1 @assume_1(i1 %arg, i1 %cond) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@assume_1
-; TUNIT-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
-; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       t:
-; TUNIT-NEXT:    br label [[M:%.*]]
-; TUNIT:       f:
-; TUNIT-NEXT:    br label [[M]]
-; TUNIT:       m:
-; TUNIT-NEXT:    ret i1 [[ARG]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@assume_1
-; CGSCC-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR8]]
-; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       t:
-; CGSCC-NEXT:    br label [[M:%.*]]
-; CGSCC:       f:
-; CGSCC-NEXT:    br label [[M]]
-; CGSCC:       m:
-; CGSCC-NEXT:    ret i1 [[ARG]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@assume_1
+; CHECK-SAME: (i1 returned [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[ARG]]) #[[ATTR7]]
+; CHECK-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       t:
+; CHECK-NEXT:    br label [[M:%.*]]
+; CHECK:       f:
+; CHECK-NEXT:    br label [[M]]
+; CHECK:       m:
+; CHECK-NEXT:    ret i1 [[ARG]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -956,37 +812,21 @@ m:
 }
 
 define i1 @assume_2(i1 %arg, i1 %cond) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@assume_2
-; TUNIT-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; TUNIT-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       t:
-; TUNIT-NEXT:    store i1 true, ptr [[STACK]], align 1
-; TUNIT-NEXT:    br label [[M:%.*]]
-; TUNIT:       f:
-; TUNIT-NEXT:    store i1 false, ptr [[STACK]], align 1
-; TUNIT-NEXT:    br label [[M]]
-; TUNIT:       m:
-; TUNIT-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
-; TUNIT-NEXT:    ret i1 [[L]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
-; CGSCC-LABEL: define {{[^@]+}}@assume_2
-; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
-; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
-; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
-; CGSCC:       t:
-; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
-; CGSCC-NEXT:    br label [[M:%.*]]
-; CGSCC:       f:
-; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
-; CGSCC-NEXT:    br label [[M]]
-; CGSCC:       m:
-; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    ret i1 [[L]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CHECK-LABEL: define {{[^@]+}}@assume_2
+; CHECK-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
+; CHECK-NEXT:    [[STACK:%.*]] = alloca i1, align 1
+; CHECK-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
+; CHECK:       t:
+; CHECK-NEXT:    store i1 true, ptr [[STACK]], align 1
+; CHECK-NEXT:    br label [[M:%.*]]
+; CHECK:       f:
+; CHECK-NEXT:    store i1 false, ptr [[STACK]], align 1
+; CHECK-NEXT:    br label [[M]]
+; CHECK:       m:
+; CHECK-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CHECK-NEXT:    ret i1 [[L]]
 ;
   %stack = alloca i1
   store i1 %arg, ptr %stack
@@ -1048,13 +888,13 @@ define i1 @assume_3(i1 %arg, i1 %cond) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret i1 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
 ; CGSCC-LABEL: define {{[^@]+}}@assume_3
-; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR5:[0-9]+]] {
+; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
@@ -1063,7 +903,7 @@ define i1 @assume_3(i1 %arg, i1 %cond) {
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -1100,9 +940,9 @@ define i1 @assume_4(i1 %arg, i1 %cond) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret i1 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
 ; CGSCC-LABEL: define {{[^@]+}}@assume_4
-; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
@@ -1114,8 +954,8 @@ define i1 @assume_4(i1 %arg, i1 %cond) {
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR8]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -1156,28 +996,28 @@ define i1 @assume_5(i1 %arg, i1 %cond) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret i1 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
 ; CGSCC-LABEL: define {{[^@]+}}@assume_5
-; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (i1 [[ARG:%.*]], i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 [[ARG]], ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L1:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L2:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M:%.*]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L3:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR10]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR9]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -1225,28 +1065,28 @@ define i1 @assume_5c(i1 %cond) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret i1 [[R]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite)
 ; CGSCC-LABEL: define {{[^@]+}}@assume_5c
-; CGSCC-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:    [[STACK:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L1:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR8]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L1]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i1 true, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L2:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L2]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M:%.*]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    store i1 false, ptr [[STACK]], align 1
 ; CGSCC-NEXT:    [[L3:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L3]]) #[[ATTR9]]
 ; CGSCC-NEXT:    br label [[M]]
 ; CGSCC:       m:
 ; CGSCC-NEXT:    [[L4:%.*]] = load i1, ptr [[STACK]], align 1
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR10]]
-; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR10]]
+; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[L4]]) #[[ATTR9]]
+; CGSCC-NEXT:    [[R:%.*]] = call i1 @readI1p(ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[STACK]]) #[[ATTR9]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ;
   %stack = alloca i1
@@ -1274,29 +1114,17 @@ m:
 define i32 @assume_read_global_good() {
 ;
 ;
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
-; TUNIT-LABEL: define {{[^@]+}}@assume_read_global_good
-; TUNIT-SAME: () #[[ATTR5:[0-9]+]] {
-; TUNIT-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; TUNIT-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR7]]
-; TUNIT-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; TUNIT-NEXT:    store i32 17, ptr @Gstatic_int1, align 4
-; TUNIT-NEXT:    [[LGS3:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; TUNIT-NEXT:    [[ADD:%.*]] = add i32 [[LGS2]], [[LGS3]]
-; TUNIT-NEXT:    ret i32 [[ADD]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
-; CGSCC-LABEL: define {{[^@]+}}@assume_read_global_good
-; CGSCC-SAME: () #[[ATTR6:[0-9]+]] {
-; CGSCC-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; CGSCC-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR8]]
-; CGSCC-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; CGSCC-NEXT:    store i32 17, ptr @Gstatic_int1, align 4
-; CGSCC-NEXT:    [[LGS3:%.*]] = load i32, ptr @Gstatic_int1, align 4
-; CGSCC-NEXT:    [[ADD:%.*]] = add i32 [[LGS2]], [[LGS3]]
-; CGSCC-NEXT:    ret i32 [[ADD]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; CHECK-LABEL: define {{[^@]+}}@assume_read_global_good
+; CHECK-SAME: () #[[ATTR5:[0-9]+]] {
+; CHECK-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int1, align 4
+; CHECK-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR7]]
+; CHECK-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int1, align 4
+; CHECK-NEXT:    store i32 17, ptr @Gstatic_int1, align 4
+; CHECK-NEXT:    [[LGS3:%.*]] = load i32, ptr @Gstatic_int1, align 4
+; CHECK-NEXT:    [[ADD:%.*]] = add i32 [[LGS2]], [[LGS3]]
+; CHECK-NEXT:    ret i32 [[ADD]]
 ;
   %lgs1 = load i32, ptr @Gstatic_int1
   %c = icmp eq i32 %lgs1, 42
@@ -1312,27 +1140,16 @@ define i32 @assume_read_global_good() {
 ; TODO: Technically we could still utilize the assumption if we employ AA.
 define i32 @assume_read_global_bad(ptr %p) {
 ;
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
-; TUNIT-LABEL: define {{[^@]+}}@assume_read_global_bad
-; TUNIT-SAME: (ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int2, align 4
-; TUNIT-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
-; TUNIT-NEXT:    store i32 13, ptr [[P]], align 4
-; TUNIT-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR7]]
-; TUNIT-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int2, align 4
-; TUNIT-NEXT:    store i32 17, ptr @Gstatic_int2, align 4
-; TUNIT-NEXT:    ret i32 [[LGS2]]
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
-; CGSCC-LABEL: define {{[^@]+}}@assume_read_global_bad
-; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR6]] {
-; CGSCC-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int2, align 4
-; CGSCC-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
-; CGSCC-NEXT:    store i32 13, ptr [[P]], align 4
-; CGSCC-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR8]]
-; CGSCC-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int2, align 4
-; CGSCC-NEXT:    store i32 17, ptr @Gstatic_int2, align 4
-; CGSCC-NEXT:    ret i32 [[LGS2]]
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; CHECK-LABEL: define {{[^@]+}}@assume_read_global_bad
+; CHECK-SAME: (ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR5]] {
+; CHECK-NEXT:    [[LGS1:%.*]] = load i32, ptr @Gstatic_int2, align 4
+; CHECK-NEXT:    [[C:%.*]] = icmp eq i32 [[LGS1]], 42
+; CHECK-NEXT:    store i32 13, ptr [[P]], align 4
+; CHECK-NEXT:    call void @llvm.assume(i1 noundef [[C]]) #[[ATTR7]]
+; CHECK-NEXT:    [[LGS2:%.*]] = load i32, ptr @Gstatic_int2, align 4
+; CHECK-NEXT:    store i32 17, ptr @Gstatic_int2, align 4
+; CHECK-NEXT:    ret i32 [[LGS2]]
 ;
   %lgs1 = load i32, ptr @Gstatic_int2
   %c = icmp eq i32 %lgs1, 42
@@ -1345,19 +1162,12 @@ define i32 @assume_read_global_bad(ptr %p) {
 
 define void @assume_write_globals() {
 ;
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
-; TUNIT-LABEL: define {{[^@]+}}@assume_write_globals
-; TUNIT-SAME: () #[[ATTR6:[0-9]+]] {
-; TUNIT-NEXT:    store i32 42, ptr @Gstatic_int1, align 4
-; TUNIT-NEXT:    store i32 42, ptr @Gstatic_int2, align 4
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
-; CGSCC-LABEL: define {{[^@]+}}@assume_write_globals
-; CGSCC-SAME: () #[[ATTR7:[0-9]+]] {
-; CGSCC-NEXT:    store i32 42, ptr @Gstatic_int1, align 4
-; CGSCC-NEXT:    store i32 42, ptr @Gstatic_int2, align 4
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CHECK-LABEL: define {{[^@]+}}@assume_write_globals
+; CHECK-SAME: () #[[ATTR6:[0-9]+]] {
+; CHECK-NEXT:    store i32 42, ptr @Gstatic_int1, align 4
+; CHECK-NEXT:    store i32 42, ptr @Gstatic_int2, align 4
+; CHECK-NEXT:    ret void
 ;
   store i32 42, ptr @Gstatic_int1, align 4
   store i32 42, ptr @Gstatic_int2, align 4
@@ -1381,10 +1191,9 @@ define void @assume_write_globals() {
 ; CGSCC: attributes #[[ATTR2]] = { norecurse }
 ; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: write) }
 ; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
-; CGSCC: attributes #[[ATTR5]] = { mustprogress nofree nosync nounwind willreturn memory(inaccessiblemem: readwrite) }
-; CGSCC: attributes #[[ATTR6]] = { mustprogress nofree norecurse nosync nounwind willreturn }
-; CGSCC: attributes #[[ATTR7]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
-; CGSCC: attributes #[[ATTR8]] = { nofree willreturn memory(write) }
-; CGSCC: attributes #[[ATTR9]] = { nofree willreturn memory(read) }
-; CGSCC: attributes #[[ATTR10]] = { nofree willreturn }
+; CGSCC: attributes #[[ATTR5]] = { mustprogress nofree norecurse nosync nounwind willreturn }
+; CGSCC: attributes #[[ATTR6]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; CGSCC: attributes #[[ATTR7]] = { nofree willreturn memory(write) }
+; CGSCC: attributes #[[ATTR8]] = { nofree willreturn memory(read) }
+; CGSCC: attributes #[[ATTR9]] = { nofree willreturn }
 ;.

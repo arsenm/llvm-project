@@ -2809,6 +2809,25 @@ struct AANoRecurseFunction final : AANoRecurseImpl {
       return ChangeStatus::UNCHANGED;
     }
 
+    // Like FunctionAttrs, avoid the reachability query if every call is to
+    // another function that is known to not recurse, and hence cannot call
+    // this function, or that cannot call back into the module.
+    auto CallPred = [&](Instruction &I) {
+      const Function *Callee = cast<CallBase>(I).getCalledFunction();
+      if (!Callee || Callee == getAnchorScope())
+        return false;
+      return Callee->doesNotRecurse() ||
+             (Callee->isDeclaration() &&
+              Callee->hasFnAttribute(Attribute::NoCallback));
+    };
+    UsedAssumedInformation = false;
+    if (A.checkForAllCallLikeInstructions(CallPred, *this,
+                                          UsedAssumedInformation)) {
+      if (!UsedAssumedInformation)
+        indicateOptimisticFixpoint();
+      return ChangeStatus::UNCHANGED;
+    }
+
     const AAInterFnReachability *EdgeReachability =
         A.getAAFor<AAInterFnReachability>(*this, getIRPosition(),
                                           DepClassTy::REQUIRED);

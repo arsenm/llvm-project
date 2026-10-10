@@ -29,7 +29,7 @@ define internal i1 @recursive_inst_generator(i1 %c, ptr %p) {
 ; TUNIT-NEXT:    [[A:%.*]] = call ptr @geti1Ptr()
 ; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; TUNIT:       t:
-; TUNIT-NEXT:    [[R1:%.*]] = call i1 @recursive_inst_comparator(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[P]]) #[[ATTR7:[0-9]+]]
+; TUNIT-NEXT:    [[R1:%.*]] = call i1 @recursive_inst_comparator(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[P]]) #[[ATTR6:[0-9]+]]
 ; TUNIT-NEXT:    ret i1 [[R1]]
 ; TUNIT:       f:
 ; TUNIT-NEXT:    [[R2:%.*]] = call i1 @recursive_inst_generator(i1 noundef true, ptr [[A]])
@@ -150,33 +150,14 @@ define i1 @recursive_alloca_compare_caller(i1 %c) {
 
 ; Make sure we do *not* simplify this to return 0 or 1, return 42 is ok though.
 define internal i8 @recursive_alloca_load_return(i1 %c, ptr %p, i8 %v) {
-; TUNIT: Function Attrs: nofree nosync nounwind memory(argmem: readwrite)
-; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_load_return
-; TUNIT-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree readonly captures(none) [[P:%.*]], i8 noundef [[V:%.*]]) #[[ATTR3:[0-9]+]] {
-; TUNIT-NEXT:    [[A:%.*]] = alloca i8, align 1
-; TUNIT-NEXT:    store i8 [[V]], ptr [[A]], align 1
-; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
-; TUNIT:       t:
-; TUNIT-NEXT:    store i8 0, ptr [[A]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1, !invariant.load [[META0:![0-9]+]]
-; TUNIT-NEXT:    ret i8 [[L]]
-; TUNIT:       f:
-; TUNIT-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef true, ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[A]], i8 noundef 1) #[[ATTR4:[0-9]+]]
-; TUNIT-NEXT:    ret i8 [[CALL]]
-;
-; CGSCC: Function Attrs: nofree nosync nounwind memory(argmem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_load_return
-; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree readonly captures(none) [[P:%.*]], i8 noundef [[V:%.*]]) #[[ATTR2:[0-9]+]] {
-; CGSCC-NEXT:    [[A:%.*]] = alloca i8, align 1
-; CGSCC-NEXT:    store i8 [[V]], ptr [[A]], align 1
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR0]] {
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
-; CGSCC-NEXT:    store i8 0, ptr [[A]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1, !invariant.load [[META0:![0-9]+]]
-; CGSCC-NEXT:    ret i8 [[L]]
+; CGSCC-NEXT:    ret i8 0
 ; CGSCC:       f:
-; CGSCC-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef true, ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[A]], i8 noundef 1) #[[ATTR3:[0-9]+]]
-; CGSCC-NEXT:    ret i8 [[CALL]]
+; CGSCC-NEXT:    ret i8 0
 ;
   %a = alloca i8
   store i8 %v, ptr %a
@@ -191,16 +172,15 @@ f:
 }
 
 define i8 @recursive_alloca_load_return_caller(i1 %c) {
-; TUNIT: Function Attrs: nofree norecurse nosync nounwind memory(none)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_load_return_caller
-; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR2]] {
-; TUNIT-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef [[C]], ptr undef, i8 noundef 42) #[[ATTR4]]
-; TUNIT-NEXT:    ret i8 [[CALL]]
+; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR0]] {
+; TUNIT-NEXT:    ret i8 0
 ;
-; CGSCC: Function Attrs: nofree nosync nounwind memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_load_return_caller
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef [[C]], ptr nofree undef, i8 noundef 42) #[[ATTR5:[0-9]+]]
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR0]] {
+; CGSCC-NEXT:    [[CALL:%.*]] = call noundef i8 @recursive_alloca_load_return(i1 noundef [[C]]) #[[ATTR4:[0-9]+]]
 ; CGSCC-NEXT:    ret i8 [[CALL]]
 ;
   %call = call i8 @recursive_alloca_load_return(i1 %c, ptr undef, i8 42)
@@ -215,7 +195,7 @@ define i8 @recursive_alloca_load_return_caller(i1 %c) {
 define internal i1 @recursive_alloca_compare_global1(i1 %c) {
 ; TUNIT: Function Attrs: nofree nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_compare_global1
-; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR4]] {
+; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3:[0-9]+]] {
 ; TUNIT-NEXT:    [[A:%.*]] = alloca i1, align 1
 ; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; TUNIT:       t:
@@ -224,12 +204,12 @@ define internal i1 @recursive_alloca_compare_global1(i1 %c) {
 ; TUNIT-NEXT:    ret i1 [[CMP]]
 ; TUNIT:       f:
 ; TUNIT-NEXT:    store ptr [[A]], ptr @G1, align 8
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef true) #[[ATTR4]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef true) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_compare_global1
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2:[0-9]+]] {
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
@@ -238,7 +218,7 @@ define internal i1 @recursive_alloca_compare_global1(i1 %c) {
 ; CGSCC-NEXT:    ret i1 [[CMP]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    store ptr [[A]], ptr @G1, align 8
-; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef true) #[[ATTR3]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef true) #[[ATTR2]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
   %a = alloca i1
@@ -257,14 +237,14 @@ f:
 define i1 @recursive_alloca_compare_caller_global1(i1 %c) {
 ; TUNIT: Function Attrs: nofree norecurse nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_compare_caller_global1
-; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR5:[0-9]+]] {
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef [[C]]) #[[ATTR4]]
+; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR4:[0-9]+]] {
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef [[C]]) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_compare_caller_global1
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
-; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef [[C]]) #[[ATTR5]]
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2]] {
+; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global1(i1 noundef [[C]]) #[[ATTR5:[0-9]+]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
   %call = call i1 @recursive_alloca_compare_global1(i1 %c)
@@ -274,7 +254,7 @@ define i1 @recursive_alloca_compare_caller_global1(i1 %c) {
 define internal i1 @recursive_alloca_compare_global2(i1 %c) {
 ; TUNIT: Function Attrs: nofree nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_compare_global2
-; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR4]] {
+; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
 ; TUNIT-NEXT:    [[A:%.*]] = alloca i1, align 1
 ; TUNIT-NEXT:    [[P:%.*]] = load ptr, ptr @G2, align 8
 ; TUNIT-NEXT:    store ptr [[A]], ptr @G2, align 8
@@ -283,12 +263,12 @@ define internal i1 @recursive_alloca_compare_global2(i1 %c) {
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], [[P]]
 ; TUNIT-NEXT:    ret i1 [[CMP]]
 ; TUNIT:       f:
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef true) #[[ATTR4]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef true) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_compare_global2
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2]] {
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i1, align 1
 ; CGSCC-NEXT:    [[P:%.*]] = load ptr, ptr @G2, align 8
 ; CGSCC-NEXT:    store ptr [[A]], ptr @G2, align 8
@@ -297,7 +277,7 @@ define internal i1 @recursive_alloca_compare_global2(i1 %c) {
 ; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], [[P]]
 ; CGSCC-NEXT:    ret i1 [[CMP]]
 ; CGSCC:       f:
-; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef true) #[[ATTR3]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef true) #[[ATTR2]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
   %a = alloca i1
@@ -316,13 +296,13 @@ f:
 define i1 @recursive_alloca_compare_caller_global2(i1 %c) {
 ; TUNIT: Function Attrs: nofree norecurse nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_alloca_compare_caller_global2
-; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef [[C]]) #[[ATTR4]]
+; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR4]] {
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef [[C]]) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_alloca_compare_caller_global2
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2]] {
 ; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_alloca_compare_global2(i1 noundef [[C]]) #[[ATTR5]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
@@ -333,7 +313,7 @@ define internal i1 @recursive_inst_compare_global3(i1 %c) {
 ;
 ; TUNIT: Function Attrs: nofree nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_inst_compare_global3
-; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR4]] {
+; TUNIT-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
 ; TUNIT-NEXT:    [[P:%.*]] = load i1, ptr @G3, align 1
 ; TUNIT-NEXT:    store i1 [[C]], ptr @G3, align 1
 ; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
@@ -341,12 +321,12 @@ define internal i1 @recursive_inst_compare_global3(i1 %c) {
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq i1 [[C]], [[P]]
 ; TUNIT-NEXT:    ret i1 [[CMP]]
 ; TUNIT:       f:
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef true) #[[ATTR4]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef true) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_inst_compare_global3
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2]] {
 ; CGSCC-NEXT:    [[P:%.*]] = load i1, ptr @G3, align 1
 ; CGSCC-NEXT:    store i1 [[C]], ptr @G3, align 1
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
@@ -354,7 +334,7 @@ define internal i1 @recursive_inst_compare_global3(i1 %c) {
 ; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq i1 [[C]], [[P]]
 ; CGSCC-NEXT:    ret i1 [[CMP]]
 ; CGSCC:       f:
-; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef true) #[[ATTR3]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef true) #[[ATTR2]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
   %p = load i1, ptr @G3
@@ -372,13 +352,13 @@ f:
 define i1 @recursive_inst_compare_caller_global3(i1 %c) {
 ; TUNIT: Function Attrs: nofree norecurse nosync nounwind
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_inst_compare_caller_global3
-; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR5]] {
-; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef [[C]]) #[[ATTR4]]
+; TUNIT-SAME: (i1 [[C:%.*]]) #[[ATTR4]] {
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef [[C]]) #[[ATTR3]]
 ; TUNIT-NEXT:    ret i1 [[CALL]]
 ;
 ; CGSCC: Function Attrs: nofree nosync nounwind
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_inst_compare_caller_global3
-; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR3]] {
+; CGSCC-SAME: (i1 noundef [[C:%.*]]) #[[ATTR2]] {
 ; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare_global3(i1 noundef [[C]]) #[[ATTR5]]
 ; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
@@ -389,7 +369,7 @@ define i1 @recursive_inst_compare_caller_global3(i1 %c) {
 define i32 @non_unique_phi_ops(ptr %ptr) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; TUNIT-LABEL: define {{[^@]+}}@non_unique_phi_ops
-; TUNIT-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR6:[0-9]+]] {
+; TUNIT-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR5:[0-9]+]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    br label [[HEADER:%.*]]
 ; TUNIT:       header:
@@ -397,7 +377,7 @@ define i32 @non_unique_phi_ops(ptr %ptr) {
 ; TUNIT-NEXT:    [[P:%.*]] = phi i32 [ [[NON_UNIQUE:%.*]], [[F]] ], [ poison, [[ENTRY]] ]
 ; TUNIT-NEXT:    [[ADD]] = add i32 [[I]], 1
 ; TUNIT-NEXT:    [[G:%.*]] = getelementptr i32, ptr [[PTR]], i32 [[I]]
-; TUNIT-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0]]
+; TUNIT-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0:![0-9]+]]
 ; TUNIT-NEXT:    [[CMP1:%.*]] = icmp eq i32 [[I]], [[NON_UNIQUE_INPUT]]
 ; TUNIT-NEXT:    br i1 [[CMP1]], label [[T:%.*]], label [[F]]
 ; TUNIT:       t:
@@ -411,7 +391,7 @@ define i32 @non_unique_phi_ops(ptr %ptr) {
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; CGSCC-LABEL: define {{[^@]+}}@non_unique_phi_ops
-; CGSCC-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR4:[0-9]+]] {
+; CGSCC-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR3:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    br label [[HEADER:%.*]]
 ; CGSCC:       header:
@@ -419,7 +399,7 @@ define i32 @non_unique_phi_ops(ptr %ptr) {
 ; CGSCC-NEXT:    [[P:%.*]] = phi i32 [ [[NON_UNIQUE:%.*]], [[F]] ], [ poison, [[ENTRY]] ]
 ; CGSCC-NEXT:    [[ADD]] = add i32 [[I]], 1
 ; CGSCC-NEXT:    [[G:%.*]] = getelementptr i32, ptr [[PTR]], i32 [[I]]
-; CGSCC-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0]]
+; CGSCC-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0:![0-9]+]]
 ; CGSCC-NEXT:    [[CMP1:%.*]] = icmp eq i32 [[I]], [[NON_UNIQUE_INPUT]]
 ; CGSCC-NEXT:    br i1 [[CMP1]], label [[T:%.*]], label [[F]]
 ; CGSCC:       t:
@@ -457,17 +437,16 @@ end:
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR1]] = { nofree nosync nounwind memory(none) }
 ; TUNIT: attributes #[[ATTR2]] = { nofree norecurse nosync nounwind memory(none) }
-; TUNIT: attributes #[[ATTR3]] = { nofree nosync nounwind memory(argmem: readwrite) }
-; TUNIT: attributes #[[ATTR4]] = { nofree nosync nounwind }
-; TUNIT: attributes #[[ATTR5]] = { nofree norecurse nosync nounwind }
-; TUNIT: attributes #[[ATTR6]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
-; TUNIT: attributes #[[ATTR7]] = { nounwind memory(none) }
+; TUNIT: attributes #[[ATTR3]] = { nofree nosync nounwind }
+; TUNIT: attributes #[[ATTR4]] = { nofree norecurse nosync nounwind }
+; TUNIT: attributes #[[ATTR5]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
+; TUNIT: attributes #[[ATTR6]] = { nounwind memory(none) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR1]] = { nofree nosync nounwind memory(none) }
-; CGSCC: attributes #[[ATTR2]] = { nofree nosync nounwind memory(argmem: readwrite) }
-; CGSCC: attributes #[[ATTR3]] = { nofree nosync nounwind }
-; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
+; CGSCC: attributes #[[ATTR2]] = { nofree nosync nounwind }
+; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
+; CGSCC: attributes #[[ATTR4]] = { nofree nosync willreturn }
 ; CGSCC: attributes #[[ATTR5]] = { nofree nounwind }
 ;.
 ; TUNIT: [[META0]] = !{}

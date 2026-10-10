@@ -15,7 +15,7 @@ define i32 @main() noreturn nounwind {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    ret i32 123
 ;
-; CGSCC: Function Attrs: mustprogress nofree noreturn nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@main
 ; CGSCC-SAME: () #[[ATTR0:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
@@ -56,7 +56,7 @@ return:
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
 ;.
-; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree noreturn nosync nounwind willreturn memory(none) }
+; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR2]] = { nofree nosync nounwind willreturn }
 ;.

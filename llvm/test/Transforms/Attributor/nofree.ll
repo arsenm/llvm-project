@@ -104,30 +104,20 @@ end:
 
 
 define void @mutual_recursion1() #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@mutual_recursion1
-; TUNIT-SAME: () #[[ATTR4:[0-9]+]] {
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@mutual_recursion1
-; CGSCC-SAME: () #[[ATTR3]] {
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@mutual_recursion1
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    ret void
 ;
   call void @mutual_recursion2()
   ret void
 }
 
 define void @mutual_recursion2() #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@mutual_recursion2
-; TUNIT-SAME: () #[[ATTR4]] {
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@mutual_recursion2
-; CGSCC-SAME: () #[[ATTR3]] {
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@mutual_recursion2
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    ret void
 ;
   call void @mutual_recursion1()
   ret void
@@ -186,15 +176,10 @@ define noalias ptr @call_realloc(ptr nocapture %0, i64 %1) local_unnamed_addr #0
 declare void @nofree_function() nofree readnone #0
 
 define void @call_nofree_function() #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@call_nofree_function
-; TUNIT-SAME: () #[[ATTR4]] {
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@call_nofree_function
-; CGSCC-SAME: () #[[ATTR5:[0-9]+]] {
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@call_nofree_function
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    ret void
 ;
   tail call void @nofree_function()
   ret void
@@ -255,7 +240,7 @@ define float @call_floor2(float %a) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@call_floor2
 ; CHECK-SAME: (float [[A:%.*]]) #[[ATTR3]] {
-; CHECK-NEXT:    [[C:%.*]] = tail call nofpclass(sub) float @llvm.floor.f32(float [[A]]) #[[ATTR14:[0-9]+]]
+; CHECK-NEXT:    [[C:%.*]] = tail call nofpclass(sub) float @llvm.floor.f32(float [[A]]) #[[ATTR13:[0-9]+]]
 ; CHECK-NEXT:    ret float [[C]]
 ;
   %c = tail call float @llvm.floor.f32(float %a)
@@ -266,30 +251,20 @@ define float @call_floor2(float %a) #0 {
 ; Check propagation.
 
 define void @f1() #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@f1
-; TUNIT-SAME: () #[[ATTR4]] {
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@f1
-; CGSCC-SAME: () #[[ATTR5]] {
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@f1
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    ret void
 ;
   tail call void @nofree_function()
   ret void
 }
 
 define void @f2() #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; TUNIT-LABEL: define {{[^@]+}}@f2
-; TUNIT-SAME: () #[[ATTR4]] {
-; TUNIT-NEXT:    ret void
-;
-; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable
-; CGSCC-LABEL: define {{[^@]+}}@f2
-; CGSCC-SAME: () #[[ATTR5]] {
-; CGSCC-NEXT:    ret void
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
+; CHECK-LABEL: define {{[^@]+}}@f2
+; CHECK-SAME: () #[[ATTR3]] {
+; CHECK-NEXT:    ret void
 ;
   tail call void @f1()
   ret void
@@ -299,10 +274,10 @@ define void @f2() #0 {
 define double @test12(ptr nocapture readonly %a) {
 ; CHECK: Function Attrs: nofree nounwind
 ; CHECK-LABEL: define {{[^@]+}}@test12
-; CHECK-SAME: (ptr nofree noundef nonnull readonly align 8 captures(none) dereferenceable(8) [[A:%.*]]) #[[ATTR7:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly align 8 captures(none) dereferenceable(8) [[A:%.*]]) #[[ATTR6:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = load double, ptr [[A]], align 8
-; CHECK-NEXT:    [[CALL:%.*]] = tail call double @cos(double [[TMP0]]) #[[ATTR8:[0-9]+]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call double @cos(double [[TMP0]]) #[[ATTR7:[0-9]+]]
 ; CHECK-NEXT:    ret double [[CALL]]
 ;
 entry:
@@ -347,7 +322,7 @@ define void @test14(ptr nocapture %0, ptr nocapture %1) {
 define weak void @implied_nofree1() readnone {
 ; CHECK: Function Attrs: nosync memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@implied_nofree1
-; CHECK-SAME: () #[[ATTR9:[0-9]+]] {
+; CHECK-SAME: () #[[ATTR8:[0-9]+]] {
 ; CHECK-NEXT:    ret void
 ;
   ret void
@@ -356,7 +331,7 @@ define weak void @implied_nofree1() readnone {
 define weak void @implied_nofree2() readonly {
 ; CHECK: Function Attrs: nosync memory(read)
 ; CHECK-LABEL: define {{[^@]+}}@implied_nofree2
-; CHECK-SAME: () #[[ATTR10:[0-9]+]] {
+; CHECK-SAME: () #[[ATTR9:[0-9]+]] {
 ; CHECK-NEXT:    ret void
 ;
   ret void
@@ -379,7 +354,7 @@ define weak void @implied_nofree4(ptr readonly %a) {
 define weak void @implied_nofree5(ptr %a) readonly {
 ; CHECK: Function Attrs: nosync memory(read)
 ; CHECK-LABEL: define {{[^@]+}}@implied_nofree5
-; CHECK-SAME: (ptr [[A:%.*]]) #[[ATTR10]] {
+; CHECK-SAME: (ptr [[A:%.*]]) #[[ATTR9]] {
 ; CHECK-NEXT:    ret void
 ;
   ret void
@@ -387,7 +362,7 @@ define weak void @implied_nofree5(ptr %a) readonly {
 define weak void @implied_nofree6(ptr %a) nofree {
 ; CHECK: Function Attrs: nofree
 ; CHECK-LABEL: define {{[^@]+}}@implied_nofree6
-; CHECK-SAME: (ptr nofree [[A:%.*]]) #[[ATTR11:[0-9]+]] {
+; CHECK-SAME: (ptr nofree [[A:%.*]]) #[[ATTR10:[0-9]+]] {
 ; CHECK-NEXT:    ret void
 ;
   ret void
@@ -404,35 +379,21 @@ attributes #0 = { nounwind uwtable noinline }
 attributes #1 = { nounwind }
 attributes #2 = { nobuiltin nounwind }
 ;.
-; TUNIT: attributes #[[ATTR0]] = { nounwind }
-; TUNIT: attributes #[[ATTR1]] = { noinline nounwind uwtable }
-; TUNIT: attributes #[[ATTR2]] = { nobuiltin nounwind }
-; TUNIT: attributes #[[ATTR3]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable }
-; TUNIT: attributes #[[ATTR4]] = { mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable }
-; TUNIT: attributes #[[ATTR5:[0-9]+]] = { nofree noinline nounwind memory(none) uwtable }
-; TUNIT: attributes #[[ATTR6:[0-9]+]] = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
-; TUNIT: attributes #[[ATTR7]] = { nofree nounwind }
-; TUNIT: attributes #[[ATTR8]] = { nobuiltin nofree nounwind }
-; TUNIT: attributes #[[ATTR9]] = { nosync memory(none) }
-; TUNIT: attributes #[[ATTR10]] = { nosync memory(read) }
-; TUNIT: attributes #[[ATTR11]] = { nofree }
-; TUNIT: attributes #[[ATTR12:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write) }
-; TUNIT: attributes #[[ATTR13:[0-9]+]] = { nounwind willreturn }
-; TUNIT: attributes #[[ATTR14]] = { nofree nosync willreturn }
+; CHECK: attributes #[[ATTR0]] = { nounwind }
+; CHECK: attributes #[[ATTR1]] = { noinline nounwind uwtable }
+; CHECK: attributes #[[ATTR2]] = { nobuiltin nounwind }
+; CHECK: attributes #[[ATTR3]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable }
+; CHECK: attributes #[[ATTR4:[0-9]+]] = { nofree noinline nounwind memory(none) uwtable }
+; CHECK: attributes #[[ATTR5:[0-9]+]] = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
+; CHECK: attributes #[[ATTR6]] = { nofree nounwind }
+; CHECK: attributes #[[ATTR7]] = { nobuiltin nofree nounwind }
+; CHECK: attributes #[[ATTR8]] = { nosync memory(none) }
+; CHECK: attributes #[[ATTR9]] = { nosync memory(read) }
+; CHECK: attributes #[[ATTR10]] = { nofree }
+; CHECK: attributes #[[ATTR11:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write) }
+; CHECK: attributes #[[ATTR12:[0-9]+]] = { nounwind willreturn }
+; CHECK: attributes #[[ATTR13]] = { nofree nosync willreturn }
 ;.
-; CGSCC: attributes #[[ATTR0]] = { nounwind }
-; CGSCC: attributes #[[ATTR1]] = { noinline nounwind uwtable }
-; CGSCC: attributes #[[ATTR2]] = { nobuiltin nounwind }
-; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR4:[0-9]+]] = { nofree noinline nounwind memory(none) uwtable }
-; CGSCC: attributes #[[ATTR5]] = { mustprogress nofree noinline nosync nounwind willreturn memory(none) uwtable }
-; CGSCC: attributes #[[ATTR6:[0-9]+]] = { nocallback nocreateundeforpoison nofree nosync nounwind speculatable willreturn memory(none) }
-; CGSCC: attributes #[[ATTR7]] = { nofree nounwind }
-; CGSCC: attributes #[[ATTR8]] = { nobuiltin nofree nounwind }
-; CGSCC: attributes #[[ATTR9]] = { nosync memory(none) }
-; CGSCC: attributes #[[ATTR10]] = { nosync memory(read) }
-; CGSCC: attributes #[[ATTR11]] = { nofree }
-; CGSCC: attributes #[[ATTR12:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(inaccessiblemem: write) }
-; CGSCC: attributes #[[ATTR13:[0-9]+]] = { nounwind willreturn }
-; CGSCC: attributes #[[ATTR14]] = { nofree nosync willreturn }
-;.
+;; NOTE: These prefixes are unused and the list is autogenerated. Do not add tests below this line:
+; CGSCC: {{.*}}
+; TUNIT: {{.*}}

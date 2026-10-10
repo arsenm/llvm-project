@@ -21,7 +21,7 @@ define internal i32 @test(ptr %X, ptr %Y) {
 }
 
 define internal i32 @caller(ptr %B) {
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@caller
 ; CGSCC-SAME: (i32 [[TMP0:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:    [[B_PRIV:%.*]] = alloca i32, align 4
@@ -42,7 +42,7 @@ define i32 @callercaller() {
 ; TUNIT-NEXT:    [[B:%.*]] = alloca i32, align 4
 ; TUNIT-NEXT:    ret i32 3
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@callercaller
 ; CGSCC-SAME: () #[[ATTR1]] {
 ; CGSCC-NEXT:    [[X:%.*]] = call i32 @caller(i32 noundef 2) #[[ATTR3:[0-9]+]]
@@ -58,7 +58,7 @@ define i32 @callercaller() {
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
+; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR2]] = { nofree willreturn memory(read) }
 ; CGSCC: attributes #[[ATTR3]] = { nofree nosync willreturn }
 ;.
