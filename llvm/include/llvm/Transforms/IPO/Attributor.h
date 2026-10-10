@@ -1152,12 +1152,11 @@ constexpr bool AnalysisGetter::HasLegacyWrapper<
 struct InformationCache {
   InformationCache(const Module &M, AnalysisGetter &AG,
                    BumpPtrAllocator &Allocator, SetVector<Function *> *CGSCC,
-                   bool UseExplorer = true)
+                   bool UseExplorer = true, bool ExploreInterBlock = true)
       : CGSCC(CGSCC), M(M), Allocator(Allocator), AG(AG) {
     if (UseExplorer)
       Explorer = new (Allocator) MustBeExecutedContextExplorer(
-          /* ExploreInterBlock */
-          true, /* ExploreCFGForward */ true,
+          ExploreInterBlock, /* ExploreCFGForward */ true,
           /* ExploreCFGBackward */ true,
           /* LIGetter */
           [&](const Function &F) { return AG.getAnalysis<LoopAnalysis>(F); },

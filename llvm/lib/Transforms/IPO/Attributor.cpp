@@ -4192,7 +4192,10 @@ PreservedAnalyses AttributorLightPass::run(Module &M,
 
   CallGraphUpdater CGUpdater;
   BumpPtrAllocator Allocator;
-  InformationCache InfoCache(M, AG, Allocator, /* CGSCC */ nullptr);
+  // Only explore the must-be-executed context within a block, exploring
+  // across blocks for every program point is too expensive.
+  InformationCache InfoCache(M, AG, Allocator, /* CGSCC */ nullptr,
+                             /*UseExplorer=*/true, /*ExploreInterBlock=*/false);
   if (runAttributorLightOnFunctions(InfoCache, Functions, CGUpdater, FAM,
                                     /* IsModulePass */ true)) {
     PreservedAnalyses PA;
@@ -4224,7 +4227,10 @@ PreservedAnalyses AttributorLightCGSCCPass::run(LazyCallGraph::SCC &C,
   CallGraphUpdater CGUpdater;
   CGUpdater.initialize(CG, C, AM, UR);
   BumpPtrAllocator Allocator;
-  InformationCache InfoCache(M, AG, Allocator, /* CGSCC */ &Functions);
+  // Only explore the must-be-executed context within a block, exploring
+  // across blocks for every program point is too expensive.
+  InformationCache InfoCache(M, AG, Allocator, /* CGSCC */ &Functions,
+                             /*UseExplorer=*/true, /*ExploreInterBlock=*/false);
   if (runAttributorLightOnFunctions(InfoCache, Functions, CGUpdater, FAM,
                                     /* IsModulePass */ false)) {
     PreservedAnalyses PA;
