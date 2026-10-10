@@ -35,7 +35,7 @@ define void @load_undef_pointer() {
 }
 
 define void @load_wholly_unreachable_volatile() {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind memory(none)
+; CHECK: Function Attrs: nofree norecurse nosync nounwind memory(inaccessiblemem: readwrite)
 ; CHECK-LABEL: define {{[^@]+}}@load_wholly_unreachable_volatile
 ; CHECK-SAME: () #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[A:%.*]] = load volatile i32, ptr null, align 4
@@ -130,7 +130,7 @@ define void @store_wholly_unreachable() {
 }
 
 define void @store_wholly_unreachable_volatile() {
-; CHECK: Function Attrs: nofree norecurse nosync nounwind memory(none)
+; CHECK: Function Attrs: nofree norecurse nosync nounwind memory(inaccessiblemem: readwrite)
 ; CHECK-LABEL: define {{[^@]+}}@store_wholly_unreachable_volatile
 ; CHECK-SAME: () #[[ATTR1]] {
 ; CHECK-NEXT:    store volatile i32 5, ptr null, align 4
@@ -200,12 +200,12 @@ define void @store_null_propagated() {
 ; -- AtomicRMW tests --
 
 define void @atomicrmw_wholly_unreachable() {
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomicrmw_wholly_unreachable
 ; TUNIT-SAME: () #[[ATTR4:[0-9]+]] {
 ; TUNIT-NEXT:    unreachable
 ;
-; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomicrmw_wholly_unreachable
 ; CGSCC-SAME: () #[[ATTR6:[0-9]+]] {
 ; CGSCC-NEXT:    unreachable
@@ -216,7 +216,7 @@ define void @atomicrmw_wholly_unreachable() {
 }
 
 define void @atomicrmw_single_bb_unreachable(i1 %cond) {
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomicrmw_single_bb_unreachable
 ; TUNIT-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[E:%.*]]
@@ -225,7 +225,7 @@ define void @atomicrmw_single_bb_unreachable(i1 %cond) {
 ; TUNIT:       e:
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomicrmw_single_bb_unreachable
 ; CGSCC-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR6]] {
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[E:%.*]]
@@ -264,7 +264,7 @@ define void @atomicrmw_null_propagated() {
 ; ATTRIBUTOR-LABEL: @atomicrmw_null_propagated(
 ; ATTRIBUTOR-NEXT:    unreachable
 ;
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomicrmw_null_propagated
 ; TUNIT-SAME: () #[[ATTR4]] {
 ; TUNIT-NEXT:    unreachable
@@ -272,7 +272,7 @@ define void @atomicrmw_null_propagated() {
 ; CGSCC: Function Attrs: mustprogress nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomicrmw_null_propagated
 ; CGSCC-SAME: () #[[ATTR8:[0-9]+]] {
-; CGSCC-NEXT:    [[PTR:%.*]] = call noalias ptr @ret_null() #[[ATTR12:[0-9]+]]
+; CGSCC-NEXT:    [[PTR:%.*]] = call ptr @ret_null() #[[ATTR12:[0-9]+]]
 ; CGSCC-NEXT:    [[A:%.*]] = atomicrmw add ptr [[PTR]], i32 1 acquire, align 4
 ; CGSCC-NEXT:    ret void
 ;
@@ -285,12 +285,12 @@ define void @atomicrmw_null_propagated() {
 ; -- AtomicCmpXchg tests --
 
 define void @atomiccmpxchg_wholly_unreachable() {
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomiccmpxchg_wholly_unreachable
 ; TUNIT-SAME: () #[[ATTR4]] {
 ; TUNIT-NEXT:    unreachable
 ;
-; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomiccmpxchg_wholly_unreachable
 ; CGSCC-SAME: () #[[ATTR6]] {
 ; CGSCC-NEXT:    unreachable
@@ -301,7 +301,7 @@ define void @atomiccmpxchg_wholly_unreachable() {
 }
 
 define void @atomiccmpxchg_single_bb_unreachable(i1 %cond) {
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomiccmpxchg_single_bb_unreachable
 ; TUNIT-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR4]] {
 ; TUNIT-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[E:%.*]]
@@ -310,7 +310,7 @@ define void @atomiccmpxchg_single_bb_unreachable(i1 %cond) {
 ; TUNIT:       e:
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; CGSCC: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomiccmpxchg_single_bb_unreachable
 ; CGSCC-SAME: (i1 noundef [[COND:%.*]]) #[[ATTR6]] {
 ; CGSCC-NEXT:    br i1 [[COND]], label [[T:%.*]], label [[E:%.*]]
@@ -349,7 +349,7 @@ define void @atomiccmpxchg_null_propagated() {
 ; ATTRIBUTOR-LABEL: @atomiccmpxchg_null_propagated(
 ; ATTRIBUTOR-NEXT:    unreachable
 ;
-; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn memory(none)
+; TUNIT: Function Attrs: mustprogress norecurse nounwind willreturn
 ; TUNIT-LABEL: define {{[^@]+}}@atomiccmpxchg_null_propagated
 ; TUNIT-SAME: () #[[ATTR4]] {
 ; TUNIT-NEXT:    unreachable
@@ -357,7 +357,7 @@ define void @atomiccmpxchg_null_propagated() {
 ; CGSCC: Function Attrs: mustprogress nounwind willreturn
 ; CGSCC-LABEL: define {{[^@]+}}@atomiccmpxchg_null_propagated
 ; CGSCC-SAME: () #[[ATTR8]] {
-; CGSCC-NEXT:    [[PTR:%.*]] = call noalias ptr @ret_null() #[[ATTR12]]
+; CGSCC-NEXT:    [[PTR:%.*]] = call ptr @ret_null() #[[ATTR12]]
 ; CGSCC-NEXT:    [[A:%.*]] = cmpxchg ptr [[PTR]], i32 2, i32 3 acq_rel monotonic, align 4
 ; CGSCC-NEXT:    ret void
 ;
@@ -1117,22 +1117,22 @@ define noundef i32 @assumed_undef_is_ok_caller(i1 %c) {
 
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; TUNIT: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind memory(none) }
+; TUNIT: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind memory(inaccessiblemem: readwrite) }
 ; TUNIT: attributes #[[ATTR2]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(write) }
-; TUNIT: attributes #[[ATTR4]] = { mustprogress norecurse nounwind willreturn memory(none) }
+; TUNIT: attributes #[[ATTR4]] = { mustprogress norecurse nounwind willreturn }
 ; TUNIT: attributes #[[ATTR5]] = { mustprogress norecurse nounwind null_pointer_is_valid willreturn }
 ; TUNIT: attributes #[[ATTR6]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR7]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }
 ; TUNIT: attributes #[[ATTR8]] = { nofree nosync nounwind willreturn memory(write) }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind memory(none) }
+; CGSCC: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind memory(inaccessiblemem: readwrite) }
 ; CGSCC: attributes #[[ATTR2]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR3]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(write) }
 ; CGSCC: attributes #[[ATTR5]] = { mustprogress nofree nosync nounwind willreturn memory(write) }
-; CGSCC: attributes #[[ATTR6]] = { mustprogress norecurse nounwind willreturn memory(none) }
+; CGSCC: attributes #[[ATTR6]] = { mustprogress norecurse nounwind willreturn }
 ; CGSCC: attributes #[[ATTR7]] = { mustprogress norecurse nounwind null_pointer_is_valid willreturn }
 ; CGSCC: attributes #[[ATTR8]] = { mustprogress nounwind willreturn }
 ; CGSCC: attributes #[[ATTR9]] = { mustprogress nofree norecurse noreturn nosync nounwind willreturn memory(none) }
@@ -1141,3 +1141,4 @@ define noundef i32 @assumed_undef_is_ok_caller(i1 %c) {
 ; CGSCC: attributes #[[ATTR12]] = { willreturn }
 ; CGSCC: attributes #[[ATTR13]] = { nofree nounwind willreturn memory(write) }
 ;.
+;; NOTE: These prefixes are unused and the list is autogenerated. Do not add tests below this line:

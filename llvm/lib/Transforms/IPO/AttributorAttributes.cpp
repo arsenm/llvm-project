@@ -8751,7 +8751,25 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
     return AccessedLocs.getAssumed();
   }
 
-  if (const Value *Ptr = getPointerOperand(&I, /* AllowVolatile */ true)) {
+  // The argument memory of the instruction is the memory accessed through its
+  // pointer operand. Ordered atomics may also synchronize with other threads,
+  // and volatile accesses may access inaccessible memory.
+  MemoryEffects ME = I.getMemoryEffects();
+  MemoryEffects NonPtrME = ME.getWithoutLoc(IRMemLocation::ArgMem);
+  if (NonPtrME == MemoryEffects::inaccessibleMemOnly()) {
+    updateStateAndAccessesMap(AccessedLocs, NO_INACCESSIBLE_MEM, &I, nullptr,
+                              Changed, getAccessKindFromInst(&I));
+  } else if (!NonPtrME.doesNotAccessMemory()) {
+    updateStateAndAccessesMap(AccessedLocs, NO_UNKOWN_MEM, &I, nullptr, Changed,
+                              getAccessKindFromInst(&I));
+    return AccessedLocs.getAssumed();
+  }
+
+  if (isNoModRef(ME.getModRef(IRMemLocation::ArgMem)))
+    return AccessedLocs.getAssumed();
+
+  if (std::optional<MemoryLocation> Loc = MemoryLocation::getOrNone(&I)) {
+    const Value *Ptr = Loc->Ptr;
     LLVM_DEBUG(
         dbgs() << "[AAMemoryLocation] Categorize memory access with pointer: "
                << I << " [" << *Ptr << "]\n");

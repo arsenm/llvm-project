@@ -1850,7 +1850,7 @@ define double @fpext(float noundef nofpclass(inf nan) %arg) {
 }
 
 define float @atomicrmw_fadd(ptr %ptr, float nofpclass(inf nan) %val) {
-; CHECK: Function Attrs: mustprogress norecurse nounwind willreturn memory(argmem: readwrite)
+; CHECK: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CHECK-LABEL: define float @atomicrmw_fadd
 ; CHECK-SAME: (ptr nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[PTR:%.*]], float nofpclass(nan inf) [[VAL:%.*]]) #[[ATTR6:[0-9]+]] {
 ; CHECK-NEXT:    [[RESULT:%.*]] = atomicrmw fadd ptr [[PTR]], float [[VAL]] seq_cst, align 4
@@ -1876,7 +1876,7 @@ define float @load(ptr %ptr, float noundef nofpclass(nan inf) %val) {
 }
 
 define float @load_atomic(ptr %ptr, float noundef nofpclass(nan inf) %val) {
-; CHECK: Function Attrs: mustprogress norecurse nounwind willreturn memory(argmem: readwrite)
+; CHECK: Function Attrs: mustprogress norecurse nounwind willreturn
 ; CHECK-LABEL: define noundef nofpclass(ninf nzero nsub nnorm) float @load_atomic
 ; CHECK-SAME: (ptr nofree noundef nonnull align 4 captures(none) dereferenceable(4) [[PTR:%.*]], float noundef nofpclass(nan inf) [[VAL:%.*]]) #[[ATTR6]] {
 ; CHECK-NEXT:    store atomic float [[VAL]], ptr [[PTR]] seq_cst, align 4

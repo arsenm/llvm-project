@@ -652,7 +652,7 @@ define void @test_cmpxchg(ptr %p) {
 ; FNATTRS-NEXT:    [[TMP1:%.*]] = cmpxchg ptr [[P]], i32 0, i32 1 acquire monotonic, align 4
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn memory(argmem: readwrite)
+; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn
 ; ATTRIBUTOR-LABEL: define void @test_cmpxchg
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR11:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = cmpxchg ptr [[P]], i32 0, i32 1 acquire monotonic, align 4
@@ -669,7 +669,7 @@ define void @test_cmpxchg_ptr(ptr %p, ptr %q) {
 ; FNATTRS-NEXT:    [[TMP1:%.*]] = cmpxchg ptr [[P]], ptr null, ptr [[Q]] acquire monotonic, align 8
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn memory(argmem: readwrite)
+; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn
 ; ATTRIBUTOR-LABEL: define void @test_cmpxchg_ptr
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]], ptr [[Q:%.*]]) #[[ATTR11]] {
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = cmpxchg ptr [[P]], ptr null, ptr [[Q]] acquire monotonic, align 8
@@ -686,7 +686,7 @@ define void @test_atomicrmw(ptr %p) {
 ; FNATTRS-NEXT:    [[TMP1:%.*]] = atomicrmw add ptr [[P]], i32 1 seq_cst, align 4
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn memory(argmem: readwrite)
+; ATTRIBUTOR: Function Attrs: mustprogress norecurse nounwind willreturn
 ; ATTRIBUTOR-LABEL: define void @test_atomicrmw
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR11]] {
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = atomicrmw add ptr [[P]], i32 1 seq_cst, align 4
@@ -705,7 +705,7 @@ define void @test_volatile(ptr %x) {
 ; FNATTRS-NEXT:    store volatile i32 0, ptr [[GEP]], align 4
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite)
+; ATTRIBUTOR: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite, inaccessiblemem: readwrite)
 ; ATTRIBUTOR-LABEL: define void @test_volatile
 ; ATTRIBUTOR-SAME: (ptr nofree [[X:%.*]]) #[[ATTR12:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
