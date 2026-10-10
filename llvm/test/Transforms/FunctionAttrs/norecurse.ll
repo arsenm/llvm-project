@@ -4,31 +4,20 @@
 
 
 define i32 @leaf() {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; FNATTRS-LABEL: define {{[^@]+}}@leaf
-; FNATTRS-SAME: () #[[ATTR0:[0-9]+]] {
-; FNATTRS-NEXT:    ret i32 1
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@leaf
-; ATTRIBUTOR-SAME: () #[[ATTR0:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    ret i32 1
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; COMMON-LABEL: define {{[^@]+}}@leaf
+; COMMON-SAME: () #[[ATTR0:[0-9]+]] {
+; COMMON-NEXT:    ret i32 1
 ;
   ret i32 1
 }
 
 define i32 @self_rec() {
-; FNATTRS: Function Attrs: nofree nosync nounwind memory(none)
-; FNATTRS-LABEL: define {{[^@]+}}@self_rec
-; FNATTRS-SAME: () #[[ATTR1:[0-9]+]] {
-; FNATTRS-NEXT:    [[A:%.*]] = call i32 @self_rec()
-; FNATTRS-NEXT:    ret i32 4
-;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@self_rec
-; ATTRIBUTOR-SAME: () #[[ATTR1:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @self_rec() #[[ATTR1]]
-; ATTRIBUTOR-NEXT:    ret i32 4
+; COMMON: Function Attrs: nofree nosync nounwind memory(none)
+; COMMON-LABEL: define {{[^@]+}}@self_rec
+; COMMON-SAME: () #[[ATTR1:[0-9]+]] {
+; COMMON-NEXT:    [[A:%.*]] = call i32 @self_rec()
+; COMMON-NEXT:    ret i32 4
 ;
   %a = call i32 @self_rec()
   ret i32 4
@@ -44,7 +33,7 @@ define i32 @indirect_rec() {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@indirect_rec
 ; ATTRIBUTOR-SAME: () #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @indirect_rec2() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @indirect_rec2()
 ; ATTRIBUTOR-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @indirect_rec2()
@@ -61,7 +50,7 @@ define i32 @indirect_rec2() {
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@indirect_rec2
 ; ATTRIBUTOR-SAME: () #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @indirect_rec() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @indirect_rec()
 ; ATTRIBUTOR-NEXT:    ret i32 [[A]]
 ;
   %a = call i32 @indirect_rec()
@@ -97,7 +86,7 @@ define void @intrinsic(ptr %dest, ptr %src, i32 %len) {
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@intrinsic
 ; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[DEST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]], i32 [[LEN:%.*]]) #[[ATTR4:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i32(ptr writeonly captures(none) [[DEST]], ptr readonly captures(none) [[SRC]], i32 [[LEN]], i1 false) #[[ATTR8:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i32(ptr captures(none) [[DEST]], ptr captures(none) [[SRC]], i32 [[LEN]], i1 false) #[[ATTR8:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @llvm.memcpy.p0.p0.i32(ptr %dest, ptr %src, i32 %len, i1 false)
@@ -133,7 +122,7 @@ define void @m() norecurse {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@m
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse() #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = call i32 @called_by_norecurse()
@@ -167,7 +156,7 @@ define internal void @o() {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@o
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly() #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @called_by_norecurse_indirectly()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = call i32 @called_by_norecurse_indirectly()
@@ -184,7 +173,7 @@ define void @p() norecurse {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@p
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    call void @o() #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    call void @o()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @o()
@@ -218,7 +207,7 @@ define internal void @q() {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@q
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @escapes_as_parameter(ptr nonnull @escapes_as_parameter) #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = call i32 @escapes_as_parameter(ptr nonnull @escapes_as_parameter)
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = call i32 @escapes_as_parameter(ptr @escapes_as_parameter)
@@ -235,7 +224,7 @@ define void @r() norecurse {
 ; ATTRIBUTOR: Function Attrs: norecurse nosync memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@r
 ; ATTRIBUTOR-SAME: () #[[ATTR6]] {
-; ATTRIBUTOR-NEXT:    call void @q() #[[ATTR2]]
+; ATTRIBUTOR-NEXT:    call void @q()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @q()
@@ -293,5 +282,3 @@ define void @unknown_norecurse_call(ptr %fn) {
 ; ATTRIBUTOR: attributes #[[ATTR8]] = { nofree willreturn }
 ; ATTRIBUTOR: attributes #[[ATTR9]] = { norecurse }
 ;.
-;; NOTE: These prefixes are unused and the list is autogenerated. Do not add tests below this line:
-; COMMON: {{.*}}

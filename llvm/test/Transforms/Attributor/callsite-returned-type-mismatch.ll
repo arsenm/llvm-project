@@ -31,7 +31,7 @@ define i32 @ret_i32_from_ptr_callee() {
 ; LIGHT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; LIGHT-LABEL: define i32 @ret_i32_from_ptr_callee(
 ; LIGHT-SAME: ) #[[ATTR0:[0-9]+]] {
-; LIGHT-NEXT:    [[RET:%.*]] = call i32 @ptr_callee() #[[ATTR1:[0-9]+]]
+; LIGHT-NEXT:    [[RET:%.*]] = call i32 @ptr_callee()
 ; LIGHT-NEXT:    ret i32 [[RET]]
 ;
   %ret = call i32 @ptr_callee()
@@ -76,7 +76,7 @@ define double @ret_double_from_nofpclass_float_callee(float %x) {
 ; LIGHT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; LIGHT-LABEL: define double @ret_double_from_nofpclass_float_callee(
 ; LIGHT-SAME: float [[X:%.*]]) #[[ATTR0]] {
-; LIGHT-NEXT:    [[RET:%.*]] = call double @nofpclass_float_callee(float [[X]]) #[[ATTR1]]
+; LIGHT-NEXT:    [[RET:%.*]] = call double @nofpclass_float_callee(float [[X]])
 ; LIGHT-NEXT:    ret double [[RET]]
 ;
   %ret = call double @nofpclass_float_callee(float %x)
@@ -93,7 +93,7 @@ define half @ret_half_from_nofpclass_float_callee(float %x) {
 ; LIGHT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; LIGHT-LABEL: define half @ret_half_from_nofpclass_float_callee(
 ; LIGHT-SAME: float [[X:%.*]]) #[[ATTR0]] {
-; LIGHT-NEXT:    [[RET:%.*]] = call half @nofpclass_float_callee(float [[X]]) #[[ATTR1]]
+; LIGHT-NEXT:    [[RET:%.*]] = call half @nofpclass_float_callee(float [[X]])
 ; LIGHT-NEXT:    ret half [[RET]]
 ;
   %ret = call half @nofpclass_float_callee(float %x)
@@ -110,7 +110,7 @@ define <2 x float> @ret_v2f32_from_nofpclass_float_callee(float %x) {
 ; LIGHT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; LIGHT-LABEL: define <2 x float> @ret_v2f32_from_nofpclass_float_callee(
 ; LIGHT-SAME: float [[X:%.*]]) #[[ATTR0]] {
-; LIGHT-NEXT:    [[RET:%.*]] = call <2 x float> @nofpclass_float_callee(float [[X]]) #[[ATTR1]]
+; LIGHT-NEXT:    [[RET:%.*]] = call <2 x float> @nofpclass_float_callee(float [[X]])
 ; LIGHT-NEXT:    ret <2 x float> [[RET]]
 ;
   %ret = call <2 x float> @nofpclass_float_callee(float %x)

@@ -23,7 +23,7 @@ define void @parent_poison(float %a) {
 ;
 ; ATTRIBUTOR-LABEL: define void @parent_poison(
 ; ATTRIBUTOR-SAME: float nofpclass(nan) [[A:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @use1_nofpclass_without_noundef(float nofpclass(nan) [[A]])
+; ATTRIBUTOR-NEXT:    call void @use1_nofpclass_without_noundef(float [[A]])
 ; ATTRIBUTOR-NEXT:    call void @use1_nofpclass_without_noundef(float [[A]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -47,17 +47,11 @@ define void @parent1(float %a, float %b, float %c) {
 }
 
 define void @parent2(float %a, float %b, float %c) {
-; FNATTRS-LABEL: define void @parent2(
-; FNATTRS-SAME: float nofpclass(nan nzero) [[A:%.*]], float nofpclass(nan) [[B:%.*]], float nofpclass(nan inf) [[C:%.*]]) {
-; FNATTRS-NEXT:    call void @use3_nofpclass(float [[B]], float nofpclass(inf) [[C]], float nofpclass(nzero) [[A]])
-; FNATTRS-NEXT:    call void @use3(float [[C]], float [[A]], float [[B]])
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR-LABEL: define void @parent2(
-; ATTRIBUTOR-SAME: float nofpclass(nan nzero) [[A:%.*]], float nofpclass(nan) [[B:%.*]], float nofpclass(nan inf) [[C:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @use3_nofpclass(float nofpclass(nan) [[B]], float nofpclass(nan inf) [[C]], float nofpclass(nan nzero) [[A]])
-; ATTRIBUTOR-NEXT:    call void @use3(float [[C]], float [[A]], float [[B]])
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON-LABEL: define void @parent2(
+; COMMON-SAME: float nofpclass(nan nzero) [[A:%.*]], float nofpclass(nan) [[B:%.*]], float nofpclass(nan inf) [[C:%.*]]) {
+; COMMON-NEXT:    call void @use3_nofpclass(float [[B]], float nofpclass(inf) [[C]], float nofpclass(nzero) [[A]])
+; COMMON-NEXT:    call void @use3(float [[C]], float [[A]], float [[B]])
+; COMMON-NEXT:    ret void
 ;
 
 

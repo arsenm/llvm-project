@@ -25,8 +25,8 @@ define void @captured_by_readonly_decl_return(ptr %p, ptr %q, ptr %ret) {
 define void @not_captured_by_readonly_willreturn_decl(ptr %p, ptr %q, ptr %ret) {
 ; CHECK-LABEL: define void @not_captured_by_readonly_willreturn_decl(
 ; CHECK-SAME: ptr readonly captures(none) [[P:%.*]], ptr readonly captures(none) [[Q:%.*]], ptr readonly captures(none) [[RET:%.*]]) #[[ATTR3:[0-9]+]] {
-; CHECK-NEXT:    call void @readonly_nounwind_willreturn_decl(ptr readonly captures(none) [[P]]) #[[ATTR5:[0-9]+]]
-; CHECK-NEXT:    [[R:%.*]] = call ptr @readonly_nounwind_willreturn_returned_decl(ptr readonly [[RET]], ptr readonly captures(none) [[Q]]) #[[ATTR5]]
+; CHECK-NEXT:    call void @readonly_nounwind_willreturn_decl(ptr captures(none) [[P]]) #[[ATTR5:[0-9]+]]
+; CHECK-NEXT:    [[R:%.*]] = call ptr @readonly_nounwind_willreturn_returned_decl(ptr [[RET]], ptr captures(none) [[Q]]) #[[ATTR5]]
 ; CHECK-NEXT:    ret void
 ;
   call void @readonly_nounwind_willreturn_decl(ptr %p)

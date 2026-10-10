@@ -2360,6 +2360,17 @@ ChangeStatus Attributor::manifestAttributes() {
     if (AA->getCtxI() && !isRunOn(*AA->getAnchorScope()))
       continue;
 
+    if (!Configuration.ManifestCallSiteAttributes) {
+      switch (AA->getIRPosition().getPositionKind()) {
+      case IRPosition::IRP_CALL_SITE:
+      case IRPosition::IRP_CALL_SITE_RETURNED:
+      case IRPosition::IRP_CALL_SITE_ARGUMENT:
+        continue;
+      default:
+        break;
+      }
+    }
+
     // Skip dead code.
     bool UsedAssumedInformation = false;
     if (isAssumedDead(*AA, nullptr, UsedAssumedInformation,
@@ -4034,6 +4045,8 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
   AC.SeedCallSiteArguments = false;
   // Like FunctionAttrs, only deduce noalias and noundef for return values.
   AC.SeedArgumentNoAliasAndNoUndef = false;
+  // Like FunctionAttrs, only add attributes to functions and their arguments.
+  AC.ManifestCallSiteAttributes = false;
 
   Attributor A(Functions, InfoCache, AC);
 

@@ -219,7 +219,7 @@ define void @direct2(ptr %p) {
 ; ATTRIBUTOR: Function Attrs: memory(write)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@direct2
 ; ATTRIBUTOR-SAME: (ptr writeonly [[P:%.*]]) #[[ATTR9:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @direct2_callee(ptr [[P]]) #[[ATTR9]]
+; ATTRIBUTOR-NEXT:    call void @direct2_callee(ptr [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @direct2_callee(ptr %p)
@@ -228,17 +228,11 @@ define void @direct2(ptr %p) {
 }
 
 define void @direct2b(ptr %p) {
-; FNATTRS: Function Attrs: memory(write)
-; FNATTRS-LABEL: define {{[^@]+}}@direct2b
-; FNATTRS-SAME: (ptr writeonly captures(none) [[P:%.*]]) #[[ATTR9]] {
-; FNATTRS-NEXT:    call void @direct2_callee(ptr captures(none) [[P]])
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR: Function Attrs: memory(write)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@direct2b
-; ATTRIBUTOR-SAME: (ptr writeonly captures(none) [[P:%.*]]) #[[ATTR9]] {
-; ATTRIBUTOR-NEXT:    call void @direct2_callee(ptr writeonly captures(none) [[P]]) #[[ATTR9]]
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON: Function Attrs: memory(write)
+; COMMON-LABEL: define {{[^@]+}}@direct2b
+; COMMON-SAME: (ptr writeonly captures(none) [[P:%.*]]) #[[ATTR9:[0-9]+]] {
+; COMMON-NEXT:    call void @direct2_callee(ptr captures(none) [[P]])
+; COMMON-NEXT:    ret void
 ;
   call void @direct2_callee(ptr nocapture %p)
   ret void
@@ -254,7 +248,7 @@ define void @direct3(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@direct3
 ; ATTRIBUTOR-SAME: (ptr writeonly captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @direct3_callee(ptr writeonly captures(none) [[P]])
+; ATTRIBUTOR-NEXT:    call void @direct3_callee(ptr captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @direct3_callee(ptr %p)

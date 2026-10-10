@@ -16,13 +16,13 @@ define void @test1_2(ptr %x1_2, ptr %y1_2, ptr %z1_2) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test1_2
 ; ATTRIBUTOR-SAME: (ptr [[X1_2:%.*]], ptr nofree readonly captures(none) [[Y1_2:%.*]], ptr [[Z1_2:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void (ptr, ptr, ...) @test1_1(ptr [[X1_2]], ptr nofree readonly captures(none) [[Y1_2]], ptr [[Z1_2]])
+; ATTRIBUTOR-NEXT:    call void (ptr, ptr, ...) @test1_1(ptr [[X1_2]], ptr nofree captures(none) [[Y1_2]], ptr [[Z1_2]])
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr @x, align 4
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test1_2
 ; ATTRIBUTOR-CGSCC-SAME: (ptr [[X1_2:%.*]], ptr nofree readonly captures(none) [[Y1_2:%.*]], ptr [[Z1_2:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void (ptr, ptr, ...) @test1_1(ptr [[X1_2]], ptr nofree readonly captures(none) [[Y1_2]], ptr [[Z1_2]])
+; ATTRIBUTOR-CGSCC-NEXT:    call void (ptr, ptr, ...) @test1_1(ptr [[X1_2]], ptr nofree captures(none) [[Y1_2]], ptr [[Z1_2]])
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 0, ptr @x, align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -90,13 +90,13 @@ define void @test4_2(ptr %p) {
 ; ATTRIBUTOR: Function Attrs: nosync memory(read)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test4_2
 ; ATTRIBUTOR-SAME: (ptr readonly captures(none) [[P:%.*]]) #[[ATTR3:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @test4_1(ptr readonly captures(none) [[P]]) #[[ATTR3]]
+; ATTRIBUTOR-NEXT:    call void @test4_1(ptr captures(none) [[P]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: nosync memory(read)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test4_2
 ; ATTRIBUTOR-CGSCC-SAME: (ptr readonly captures(none) [[P:%.*]]) #[[ATTR3:[0-9]+]] {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @test4_1(ptr readonly captures(none) [[P]]) #[[ATTR3]]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @test4_1(ptr captures(none) [[P]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @test4_1(ptr %p)
@@ -230,7 +230,7 @@ define void @test8_2(ptr %p) {
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test8_2
 ; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[P:%.*]]) #[[ATTR0]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr readnone [[P]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr [[P]])
 ; ATTRIBUTOR-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -238,7 +238,7 @@ define void @test8_2(ptr %p) {
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_2
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree writeonly [[P:%.*]]) #[[ATTR5:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
-; ATTRIBUTOR-CGSCC-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr [[P]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-CGSCC-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr [[P]]) #[[ATTR15:[0-9]+]]
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -266,7 +266,7 @@ define void @test9(<4 x ptr> %ptrs, <4 x i32>%val) {
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test9
 ; ATTRIBUTOR-CGSCC-SAME: (<4 x ptr> [[PTRS:%.*]], <4 x i32> [[VAL:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @llvm.masked.scatter.v4i32.v4p0(<4 x i32> [[VAL]], <4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>) #[[ATTR15:[0-9]+]]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @llvm.masked.scatter.v4i32.v4p0(<4 x i32> [[VAL]], <4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>) #[[ATTR16:[0-9]+]]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @llvm.masked.scatter.v4i32.v4p0(<4 x i32>%val, <4 x ptr> %ptrs, i32 4, <4 x i1><i1 true, i1 false, i1 true, i1 false>)
@@ -284,13 +284,13 @@ define <4 x i32> @test10(<4 x ptr> %ptrs) {
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test10
 ; ATTRIBUTOR-SAME: (<4 x ptr> [[PTRS:%.*]]) #[[ATTR5:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call <4 x i32> @llvm.masked.gather.v4i32.v4p0(<4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>, <4 x i32> undef) #[[ATTR16:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call <4 x i32> @llvm.masked.gather.v4i32.v4p0(<4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>, <4 x i32> undef) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret <4 x i32> [[RES]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test10
 ; ATTRIBUTOR-CGSCC-SAME: (<4 x ptr> [[PTRS:%.*]]) #[[ATTR6:[0-9]+]] {
-; ATTRIBUTOR-CGSCC-NEXT:    [[RES:%.*]] = call <4 x i32> @llvm.masked.gather.v4i32.v4p0(<4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>, <4 x i32> undef) #[[ATTR16:[0-9]+]]
+; ATTRIBUTOR-CGSCC-NEXT:    [[RES:%.*]] = call <4 x i32> @llvm.masked.gather.v4i32.v4p0(<4 x ptr> align 4 [[PTRS]], <4 x i1> <i1 true, i1 false, i1 true, i1 false>, <4 x i32> undef) #[[ATTR16]]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret <4 x i32> [[RES]]
 ;
   %res = call <4 x i32> @llvm.masked.gather.v4i32.v4p0(<4 x ptr> %ptrs, i32 4, <4 x i1><i1 true, i1 false, i1 true, i1 false>, <4 x i32>undef)
@@ -308,13 +308,13 @@ define <4 x i32> @test11_2(<4 x ptr> %ptrs) {
 ; ATTRIBUTOR: Function Attrs: nosync nounwind memory(argmem: read)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test11_2
 ; ATTRIBUTOR-SAME: (<4 x ptr> [[PTRS:%.*]]) #[[ATTR7:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call <4 x i32> @test11_1(<4 x ptr> [[PTRS]]) #[[ATTR3]]
+; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call <4 x i32> @test11_1(<4 x ptr> [[PTRS]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret <4 x i32> [[RES]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: nosync nounwind memory(argmem: read)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test11_2
 ; ATTRIBUTOR-CGSCC-SAME: (<4 x ptr> [[PTRS:%.*]]) #[[ATTR8:[0-9]+]] {
-; ATTRIBUTOR-CGSCC-NEXT:    [[RES:%.*]] = call <4 x i32> @test11_1(<4 x ptr> [[PTRS]]) #[[ATTR3]]
+; ATTRIBUTOR-CGSCC-NEXT:    [[RES:%.*]] = call <4 x i32> @test11_1(<4 x ptr> [[PTRS]]) #[[ATTR14]]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret <4 x i32> [[RES]]
 ;
   %res = call <4 x i32> @test11_1(<4 x ptr> %ptrs)
@@ -648,12 +648,12 @@ define void @op_bundle_readnone_deopt(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@op_bundle_readnone_deopt
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @readnone_param(ptr nofree captures(none) [[P]]) [ "deopt"() ]
+; ATTRIBUTOR-NEXT:    call void @readnone_param(ptr captures(none) [[P]]) [ "deopt"() ]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@op_bundle_readnone_deopt
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @readnone_param(ptr nofree captures(none) [[P]]) [ "deopt"() ]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @readnone_param(ptr captures(none) [[P]]) [ "deopt"() ]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @readnone_param(ptr %p) ["deopt"()]
@@ -668,12 +668,12 @@ define void @op_bundle_readnone_unknown(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@op_bundle_readnone_unknown
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @readnone_param(ptr nofree captures(none) [[P]]) [ "unknown"() ]
+; ATTRIBUTOR-NEXT:    call void @readnone_param(ptr captures(none) [[P]]) [ "unknown"() ]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@op_bundle_readnone_unknown
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @readnone_param(ptr nofree captures(none) [[P]]) [ "unknown"() ]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @readnone_param(ptr captures(none) [[P]]) [ "unknown"() ]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @readnone_param(ptr %p) ["unknown"()]
@@ -688,12 +688,12 @@ define void @op_bundle_readonly_deopt(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@op_bundle_readonly_deopt
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @readonly_param(ptr nofree captures(none) [[P]]) [ "deopt"() ]
+; ATTRIBUTOR-NEXT:    call void @readonly_param(ptr captures(none) [[P]]) [ "deopt"() ]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@op_bundle_readonly_deopt
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @readonly_param(ptr nofree captures(none) [[P]]) [ "deopt"() ]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @readonly_param(ptr captures(none) [[P]]) [ "deopt"() ]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @readonly_param(ptr %p) ["deopt"()]
@@ -708,12 +708,12 @@ define void @op_bundle_readonly_unknown(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@op_bundle_readonly_unknown
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @readonly_param(ptr nofree captures(none) [[P]]) [ "unknown"() ]
+; ATTRIBUTOR-NEXT:    call void @readonly_param(ptr captures(none) [[P]]) [ "unknown"() ]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@op_bundle_readonly_unknown
 ; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @readonly_param(ptr nofree captures(none) [[P]]) [ "unknown"() ]
+; ATTRIBUTOR-CGSCC-NEXT:    call void @readonly_param(ptr captures(none) [[P]]) [ "unknown"() ]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @readonly_param(ptr %p) ["unknown"()]
@@ -772,12 +772,12 @@ define void @call_byval_param(ptr %p) {
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@call_byval_param
 ; ATTRIBUTOR-SAME: (ptr readonly captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-NEXT:    call void @byval_param(ptr readonly byval(i32) captures(none) [[P]])
+; ATTRIBUTOR-NEXT:    call void @byval_param(ptr byval(i32) captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@call_byval_param
 ; ATTRIBUTOR-CGSCC-SAME: (ptr readonly captures(none) [[P:%.*]]) {
-; ATTRIBUTOR-CGSCC-NEXT:    call void @byval_param(ptr readonly byval(i32) captures(none) [[P]])
+; ATTRIBUTOR-CGSCC-NEXT:    call void @byval_param(ptr byval(i32) captures(none) [[P]])
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
   call void @byval_param(ptr byval(i32) %p)

@@ -1414,6 +1414,10 @@ struct AttributorConfig {
   /// addition to return values.
   bool SeedArgumentNoAliasAndNoUndef = true;
 
+  /// Flag to determine if attributes are manifested for call sites, their
+  /// arguments and their return values.
+  bool ManifestCallSiteAttributes = true;
+
   /// Callback function to be invoked on internal functions marked live.
   std::function<void(Attributor &A, const Function &F)> InitializationCallback =
       nullptr;

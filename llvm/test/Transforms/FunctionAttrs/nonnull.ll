@@ -81,7 +81,7 @@ define ptr @test4_helper() {
 ;
 ; ATTRIBUTOR-LABEL: define ptr @test4_helper(
 ; ATTRIBUTOR-SAME: ) #[[ATTR1:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4()
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ;
   %ret = call ptr @test4()
@@ -96,7 +96,7 @@ define ptr @test4() {
 ;
 ; ATTRIBUTOR-LABEL: define ptr @test4(
 ; ATTRIBUTOR-SAME: ) #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4_helper() #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test4_helper()
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ;
   %ret = call ptr @test4_helper()
@@ -119,7 +119,7 @@ define ptr @test5_helper(i1 %c) {
 ; ATTRIBUTOR-SAME: i1 [[C:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:    br i1 [[C]], label [[REC:%.*]], label [[END:%.*]]
 ; ATTRIBUTOR:       rec:
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test5(i1 [[C]]) #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test5(i1 [[C]])
 ; ATTRIBUTOR-NEXT:    br label [[END]]
 ; ATTRIBUTOR:       end:
 ; ATTRIBUTOR-NEXT:    ret ptr null
@@ -140,7 +140,7 @@ define ptr @test5(i1 %c) {
 ;
 ; ATTRIBUTOR-LABEL: define ptr @test5(
 ; ATTRIBUTOR-SAME: i1 [[C:%.*]]) #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test5_helper(i1 [[C]]) #[[ATTR1]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call ptr @test5_helper(i1 [[C]])
 ; ATTRIBUTOR-NEXT:    ret ptr [[RET]]
 ;
   %ret = call ptr @test5_helper(i1 %c)
@@ -393,11 +393,11 @@ define internal ptr @f1(ptr %arg) {
 ; ATTRIBUTOR-NEXT:    br i1 [[TMP3]], label [[BB6:%.*]], label [[BB4:%.*]]
 ; ATTRIBUTOR:       bb4:
 ; ATTRIBUTOR-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, ptr [[ARG]], i64 1
-; ATTRIBUTOR-NEXT:    [[TMP5B:%.*]] = tail call ptr @f3(ptr readonly [[TMP5]]) #[[ATTR14:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[TMP5B:%.*]] = tail call ptr @f3(ptr [[TMP5]])
 ; ATTRIBUTOR-NEXT:    [[TMP5C:%.*]] = getelementptr inbounds i32, ptr [[TMP5B]], i64 -1
 ; ATTRIBUTOR-NEXT:    br label [[BB9]]
 ; ATTRIBUTOR:       bb6:
-; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call ptr @f2(ptr nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = tail call ptr @f2(ptr [[ARG]])
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP7]]
 ; ATTRIBUTOR:       bb9:
 ; ATTRIBUTOR-NEXT:    [[TMP10:%.*]] = phi ptr [ [[TMP5C]], [[BB4]] ], [ inttoptr (i64 4 to ptr), [[BB:%.*]] ]
@@ -439,7 +439,7 @@ define internal ptr @f2(ptr %arg) {
 ; ATTRIBUTOR-LABEL: define internal ptr @f2(
 ; ATTRIBUTOR-SAME: ptr nofree nonnull readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr nonnull readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr [[ARG]])
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -460,7 +460,7 @@ define dso_local noalias ptr @f3(ptr %arg) {
 ; ATTRIBUTOR-LABEL: define dso_local noalias ptr @f3(
 ; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
-; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr readonly [[ARG]]) #[[ATTR14]]
+; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr [[ARG]])
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
 ;
 bb:
@@ -513,10 +513,10 @@ define void @f16(ptr %a, ptr %b, i8 %c) {
 ; ATTRIBUTOR-NEXT:    [[CMP:%.*]] = icmp eq i8 [[C]], 0
 ; ATTRIBUTOR-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_ELSE:%.*]]
 ; ATTRIBUTOR:       if.then:
-; ATTRIBUTOR-NEXT:    tail call void @fun2(ptr nonnull [[A]], ptr nonnull [[B]]) #[[ATTR15:[0-9]+]]
+; ATTRIBUTOR-NEXT:    tail call void @fun2(ptr nonnull [[A]], ptr nonnull [[B]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ; ATTRIBUTOR:       if.else:
-; ATTRIBUTOR-NEXT:    tail call void @fun2(ptr nonnull [[A]], ptr [[B]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun2(ptr nonnull [[A]], ptr [[B]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %cmp = icmp eq i8 %c, 0
@@ -555,13 +555,13 @@ define void @f17(ptr %a, i8 %c) {
 ; ATTRIBUTOR-NEXT:    [[CMP:%.*]] = icmp eq i8 [[C]], 0
 ; ATTRIBUTOR-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_ELSE:%.*]]
 ; ATTRIBUTOR:       if.then:
-; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT:%.*]]
 ; ATTRIBUTOR:       if.else:
-; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT]]
 ; ATTRIBUTOR:       cont:
-; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %cmp = icmp eq i8 %c, 0
@@ -616,22 +616,22 @@ define void @f18(ptr %a, ptr %b, i8 %c) {
 ; ATTRIBUTOR-NEXT:    [[CMP1:%.*]] = icmp eq i8 [[C]], 0
 ; ATTRIBUTOR-NEXT:    br i1 [[CMP1]], label [[IF_THEN:%.*]], label [[IF_ELSE:%.*]]
 ; ATTRIBUTOR:       if.then:
-; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT:%.*]]
 ; ATTRIBUTOR:       if.else:
-; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT]]
 ; ATTRIBUTOR:       cont:
 ; ATTRIBUTOR-NEXT:    [[CMP2:%.*]] = icmp eq i8 [[C]], 1
 ; ATTRIBUTOR-NEXT:    br i1 [[CMP2]], label [[CONT_THEN:%.*]], label [[CONT_ELSE:%.*]]
 ; ATTRIBUTOR:       cont.then:
-; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[B]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT2:%.*]]
 ; ATTRIBUTOR:       cont.else:
-; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun0() #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    br label [[CONT2]]
 ; ATTRIBUTOR:       cont2:
-; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    tail call void @fun1(ptr nonnull [[A]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %cmp1 = icmp eq i8 %c, 0
@@ -884,7 +884,7 @@ define i8 @parent7(ptr %a) {
 ;
 ; ATTRIBUTOR-LABEL: define i8 @parent7(
 ; ATTRIBUTOR-SAME: ptr nonnull [[A:%.*]]) {
-; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call i8 @use1safecall(ptr nonnull [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    [[RET:%.*]] = call i8 @use1safecall(ptr [[A]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    call void @use1nonnull(ptr nonnull [[A]])
 ; ATTRIBUTOR-NEXT:    ret i8 [[RET]]
 ;
@@ -1022,7 +1022,7 @@ define  ptr @g1() {
 ;
 ; ATTRIBUTOR-LABEL: define ptr @g1(
 ; ATTRIBUTOR-SAME: ) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call ptr @g2() #[[ATTR16:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[C:%.*]] = call ptr @g2()
 ; ATTRIBUTOR-NEXT:    ret ptr [[C]]
 ;
   %c = call ptr @g2()
@@ -1038,7 +1038,7 @@ define internal void @called_by_weak(ptr %a) {
 ;
 ; ATTRIBUTOR-LABEL: define internal void @called_by_weak(
 ; ATTRIBUTOR-SAME: ptr nonnull readnone captures(none) [[A:%.*]]) #[[ATTR10:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr nonnull [[A]]) #[[ATTR17:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr [[A]]) #[[ATTR15:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @use_i32_ptr(ptr %a)
@@ -1070,7 +1070,7 @@ define internal void @control(ptr dereferenceable(4) %a) {
 ;
 ; ATTRIBUTOR-LABEL: define internal void @control(
 ; ATTRIBUTOR-SAME: ptr nonnull readnone captures(none) dereferenceable(4) [[A:%.*]]) #[[ATTR10]] {
-; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr [[A]]) #[[ATTR17]]
+; ATTRIBUTOR-NEXT:    call void @use_i32_ptr(ptr [[A]]) #[[ATTR15]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @use_i32_ptr(ptr %a)
@@ -1220,7 +1220,7 @@ define i32 @nonnull_exec_ctx_2(ptr %a, i32 %b) willreturn nounwind {
 ; ATTRIBUTOR-NEXT:    ret i32 [[TMP5]]
 ; ATTRIBUTOR:       hd:
 ; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = phi i32 [ [[TMP8:%.*]], [[HD]] ], [ 0, [[EN:%.*]] ]
-; ATTRIBUTOR-NEXT:    tail call void @h(ptr nonnull [[A]])
+; ATTRIBUTOR-NEXT:    tail call void @h(ptr [[A]])
 ; ATTRIBUTOR-NEXT:    [[TMP8]] = add nuw i32 [[TMP7]], 1
 ; ATTRIBUTOR-NEXT:    [[TMP9:%.*]] = icmp eq i32 [[TMP8]], [[B]]
 ; ATTRIBUTOR-NEXT:    br i1 [[TMP9]], label [[EX]], label [[HD]]
@@ -1269,7 +1269,7 @@ define i32 @nonnull_exec_ctx_2b(ptr %a, i32 %b) willreturn nounwind {
 ; ATTRIBUTOR-NEXT:    ret i32 [[TMP5]]
 ; ATTRIBUTOR:       hd:
 ; ATTRIBUTOR-NEXT:    [[TMP7:%.*]] = phi i32 [ [[TMP8:%.*]], [[HD2:%.*]] ], [ 0, [[EN:%.*]] ]
-; ATTRIBUTOR-NEXT:    tail call void @h(ptr nonnull [[A]])
+; ATTRIBUTOR-NEXT:    tail call void @h(ptr [[A]])
 ; ATTRIBUTOR-NEXT:    br label [[HD2]]
 ; ATTRIBUTOR:       hd2:
 ; ATTRIBUTOR-NEXT:    [[TMP8]] = add nuw i32 [[TMP7]], 1

@@ -87,8 +87,8 @@ define i32 @mustprogress_call_known_functions(ptr %ptr) mustprogress {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; ATTRIBUTOR-LABEL: @mustprogress_call_known_functions(
-; ATTRIBUTOR-NEXT:    call void @mustprogress_readnone() #[[ATTR9:[0-9]+]]
-; ATTRIBUTOR-NEXT:    [[R:%.*]] = call i32 @mustprogress_load(ptr readonly captures(none) [[PTR:%.*]]) #[[ATTR12:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @mustprogress_readnone()
+; ATTRIBUTOR-NEXT:    [[R:%.*]] = call i32 @mustprogress_load(ptr [[PTR:%.*]])
 ; ATTRIBUTOR-NEXT:    ret i32 [[R]]
 ;
   call void @mustprogress_readnone()
@@ -112,7 +112,7 @@ define i64 @mustprogress_mayunwind() mustprogress personality ptr @__gxx_persona
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-LABEL: @mustprogress_mayunwind(
-; ATTRIBUTOR-NEXT:    [[A:%.*]] = invoke i64 @fn_noread() #[[ATTR13:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[A:%.*]] = invoke i64 @fn_noread() #[[ATTR12:[0-9]+]]
 ; ATTRIBUTOR-NEXT:            to label [[A:%.*]] unwind label [[B:%.*]]
 ; ATTRIBUTOR:       A:
 ; ATTRIBUTOR-NEXT:    ret i64 10
@@ -229,15 +229,10 @@ end:
 
 ; Infinite recursion without mustprogress, will not return.
 define void @willreturn_recursion() {
-; FNATTRS: Function Attrs: nofree nosync nounwind memory(none)
-; FNATTRS-LABEL: @willreturn_recursion(
-; FNATTRS-NEXT:    tail call void @willreturn_recursion()
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
-; ATTRIBUTOR-LABEL: @willreturn_recursion(
-; ATTRIBUTOR-NEXT:    tail call void @willreturn_recursion() #[[ATTR9]]
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON: Function Attrs: nofree nosync nounwind memory(none)
+; COMMON-LABEL: @willreturn_recursion(
+; COMMON-NEXT:    tail call void @willreturn_recursion()
+; COMMON-NEXT:    ret void
 ;
   tail call void @willreturn_recursion()
   ret void

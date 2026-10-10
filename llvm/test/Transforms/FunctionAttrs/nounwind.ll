@@ -4,32 +4,21 @@
 
 ; TEST 1
 define i32 @foo1() {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; FNATTRS-LABEL: define {{[^@]+}}@foo1
-; FNATTRS-SAME: () #[[ATTR0:[0-9]+]] {
-; FNATTRS-NEXT:    ret i32 1
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@foo1
-; ATTRIBUTOR-SAME: () #[[ATTR0:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    ret i32 1
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
+; COMMON-LABEL: define {{[^@]+}}@foo1
+; COMMON-SAME: () #[[ATTR0:[0-9]+]] {
+; COMMON-NEXT:    ret i32 1
 ;
   ret i32 1
 }
 
 ; TEST 2
 define i32 @scc1_foo() {
-; FNATTRS: Function Attrs: nofree nosync nounwind memory(none)
-; FNATTRS-LABEL: define {{[^@]+}}@scc1_foo
-; FNATTRS-SAME: () #[[ATTR1:[0-9]+]] {
-; FNATTRS-NEXT:    [[TMP1:%.*]] = call i32 @scc1_bar()
-; FNATTRS-NEXT:    ret i32 1
-;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@scc1_foo
-; ATTRIBUTOR-SAME: () #[[ATTR1:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call i32 @scc1_bar() #[[ATTR1]]
-; ATTRIBUTOR-NEXT:    ret i32 1
+; COMMON: Function Attrs: nofree nosync nounwind memory(none)
+; COMMON-LABEL: define {{[^@]+}}@scc1_foo
+; COMMON-SAME: () #[[ATTR1:[0-9]+]] {
+; COMMON-NEXT:    [[TMP1:%.*]] = call i32 @scc1_bar()
+; COMMON-NEXT:    ret i32 1
 ;
   %1 = call i32 @scc1_bar()
   ret i32 1
@@ -38,17 +27,11 @@ define i32 @scc1_foo() {
 
 ; TEST 3
 define i32 @scc1_bar() {
-; FNATTRS: Function Attrs: nofree nosync nounwind memory(none)
-; FNATTRS-LABEL: define {{[^@]+}}@scc1_bar
-; FNATTRS-SAME: () #[[ATTR1]] {
-; FNATTRS-NEXT:    [[TMP1:%.*]] = call i32 @scc1_foo()
-; FNATTRS-NEXT:    ret i32 1
-;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(none)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@scc1_bar
-; ATTRIBUTOR-SAME: () #[[ATTR1]] {
-; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call i32 @scc1_foo() #[[ATTR1]]
-; ATTRIBUTOR-NEXT:    ret i32 1
+; COMMON: Function Attrs: nofree nosync nounwind memory(none)
+; COMMON-LABEL: define {{[^@]+}}@scc1_bar
+; COMMON-SAME: () #[[ATTR1]] {
+; COMMON-NEXT:    [[TMP1:%.*]] = call i32 @scc1_foo()
+; COMMON-NEXT:    ret i32 1
 ;
   %1 = call i32 @scc1_foo()
   ret i32 1
@@ -75,23 +58,14 @@ define void @call_non_nounwind(){
 ; }
 
 define i32 @maybe_throw(i1 zeroext %0) {
-; FNATTRS-LABEL: define {{[^@]+}}@maybe_throw
-; FNATTRS-SAME: (i1 zeroext [[TMP0:%.*]]) {
-; FNATTRS-NEXT:    br i1 [[TMP0]], label [[TMP2:%.*]], label [[TMP3:%.*]]
-; FNATTRS:       2:
-; FNATTRS-NEXT:    tail call void @__cxa_rethrow()
-; FNATTRS-NEXT:    unreachable
-; FNATTRS:       3:
-; FNATTRS-NEXT:    ret i32 -1
-;
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@maybe_throw
-; ATTRIBUTOR-SAME: (i1 zeroext [[TMP0:%.*]]) {
-; ATTRIBUTOR-NEXT:    br i1 [[TMP0]], label [[TMP2:%.*]], label [[TMP3:%.*]]
-; ATTRIBUTOR:       2:
-; ATTRIBUTOR-NEXT:    tail call void @__cxa_rethrow()
-; ATTRIBUTOR-NEXT:    unreachable
-; ATTRIBUTOR:       3:
-; ATTRIBUTOR-NEXT:    ret i32 -1
+; COMMON-LABEL: define {{[^@]+}}@maybe_throw
+; COMMON-SAME: (i1 zeroext [[TMP0:%.*]]) {
+; COMMON-NEXT:    br i1 [[TMP0]], label [[TMP2:%.*]], label [[TMP3:%.*]]
+; COMMON:       2:
+; COMMON-NEXT:    tail call void @__cxa_rethrow()
+; COMMON-NEXT:    unreachable
+; COMMON:       3:
+; COMMON-NEXT:    ret i32 -1
 ;
   br i1 %0, label %2, label %3
 
@@ -115,31 +89,18 @@ declare void @__cxa_rethrow()
 ; }
 
 define i32 @catch_thing() personality ptr @__gxx_personality_v0 {
-; FNATTRS-LABEL: define {{[^@]+}}@catch_thing() personality ptr @__gxx_personality_v0 {
-; FNATTRS-NEXT:    invoke void @__cxa_rethrow()
-; FNATTRS-NEXT:            to label [[TMP1:%.*]] unwind label [[TMP2:%.*]]
-; FNATTRS:       1:
-; FNATTRS-NEXT:    unreachable
-; FNATTRS:       2:
-; FNATTRS-NEXT:    [[TMP3:%.*]] = landingpad { ptr, i32 }
-; FNATTRS-NEXT:            catch ptr null
-; FNATTRS-NEXT:    [[TMP4:%.*]] = extractvalue { ptr, i32 } [[TMP3]], 0
-; FNATTRS-NEXT:    [[TMP5:%.*]] = tail call ptr @__cxa_begin_catch(ptr [[TMP4]])
-; FNATTRS-NEXT:    tail call void @__cxa_end_catch()
-; FNATTRS-NEXT:    ret i32 -1
-;
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@catch_thing() personality ptr @__gxx_personality_v0 {
-; ATTRIBUTOR-NEXT:    invoke void @__cxa_rethrow()
-; ATTRIBUTOR-NEXT:            to label [[TMP1:%.*]] unwind label [[TMP2:%.*]]
-; ATTRIBUTOR:       1:
-; ATTRIBUTOR-NEXT:    unreachable
-; ATTRIBUTOR:       2:
-; ATTRIBUTOR-NEXT:    [[TMP3:%.*]] = landingpad { ptr, i32 }
-; ATTRIBUTOR-NEXT:            catch ptr null
-; ATTRIBUTOR-NEXT:    [[TMP4:%.*]] = extractvalue { ptr, i32 } [[TMP3]], 0
-; ATTRIBUTOR-NEXT:    [[TMP5:%.*]] = tail call ptr @__cxa_begin_catch(ptr [[TMP4]])
-; ATTRIBUTOR-NEXT:    tail call void @__cxa_end_catch()
-; ATTRIBUTOR-NEXT:    ret i32 -1
+; COMMON-LABEL: define {{[^@]+}}@catch_thing() personality ptr @__gxx_personality_v0 {
+; COMMON-NEXT:    invoke void @__cxa_rethrow()
+; COMMON-NEXT:            to label [[TMP1:%.*]] unwind label [[TMP2:%.*]]
+; COMMON:       1:
+; COMMON-NEXT:    unreachable
+; COMMON:       2:
+; COMMON-NEXT:    [[TMP3:%.*]] = landingpad { ptr, i32 }
+; COMMON-NEXT:            catch ptr null
+; COMMON-NEXT:    [[TMP4:%.*]] = extractvalue { ptr, i32 } [[TMP3]], 0
+; COMMON-NEXT:    [[TMP5:%.*]] = tail call ptr @__cxa_begin_catch(ptr [[TMP4]])
+; COMMON-NEXT:    tail call void @__cxa_end_catch()
+; COMMON-NEXT:    ret i32 -1
 ;
   invoke void @__cxa_rethrow() #1
   to label %1 unwind label %2
@@ -157,13 +118,9 @@ define i32 @catch_thing() personality ptr @__gxx_personality_v0 {
 }
 
 define i32 @catch_thing_user() {
-; FNATTRS-LABEL: define {{[^@]+}}@catch_thing_user() {
-; FNATTRS-NEXT:    [[CATCH_THING_CALL:%.*]] = call i32 @catch_thing()
-; FNATTRS-NEXT:    ret i32 [[CATCH_THING_CALL]]
-;
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@catch_thing_user() {
-; ATTRIBUTOR-NEXT:    [[CATCH_THING_CALL:%.*]] = call i32 @catch_thing()
-; ATTRIBUTOR-NEXT:    ret i32 [[CATCH_THING_CALL]]
+; COMMON-LABEL: define {{[^@]+}}@catch_thing_user() {
+; COMMON-NEXT:    [[CATCH_THING_CALL:%.*]] = call i32 @catch_thing()
+; COMMON-NEXT:    ret i32 [[CATCH_THING_CALL]]
 ;
   %catch_thing_call = call i32 @catch_thing()
   ret i32 %catch_thing_call
