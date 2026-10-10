@@ -182,7 +182,7 @@ declare void @unknown_no_openmp() "llvm.assume"="omp_no_openmp"
 ; CHECK-NEXT:    ret void
 ;
 ;
-; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@use.internalized
 ; CHECK-SAME: (ptr nofree [[X:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -210,8 +210,8 @@ declare void @unknown_no_openmp() "llvm.assume"="omp_no_openmp"
 ;
 ;.
 ; CHECK: attributes #[[ATTR0]] = { "kernel" }
-; CHECK: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind willreturn memory(write) }
-; CHECK: attributes #[[ATTR2]] = { nosync nounwind allockind("alloc,uninitialized") allocsize(0) memory(read) "alloc-family"="__kmpc_alloc_shared" }
+; CHECK: attributes #[[ATTR1]] = { nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
+; CHECK: attributes #[[ATTR2]] = { nosync nounwind allockind("alloc,uninitialized") allocsize(0) memory(read, argmem: none, inaccessiblemem: none, target_mem: none) "alloc-family"="__kmpc_alloc_shared" }
 ; CHECK: attributes #[[ATTR3:[0-9]+]] = { nosync nounwind allockind("free") "alloc-family"="__kmpc_alloc_shared" }
 ; CHECK: attributes #[[ATTR4:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
 ; CHECK: attributes #[[ATTR5]] = { "llvm.assume"="omp_no_openmp" }

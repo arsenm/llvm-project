@@ -56,19 +56,12 @@ entry:
 }
 
 define i32 @test_read_global() {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, argmem: none, inaccessiblemem: none, target_mem: none)
-; FNATTRS-LABEL: define i32 @test_read_global
-; FNATTRS-SAME: () #[[ATTR2:[0-9]+]] {
-; FNATTRS-NEXT:  entry:
-; FNATTRS-NEXT:    [[L:%.*]] = load i32, ptr @g, align 4
-; FNATTRS-NEXT:    ret i32 [[L]]
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
-; ATTRIBUTOR-LABEL: define i32 @test_read_global
-; ATTRIBUTOR-SAME: () #[[ATTR2:[0-9]+]] {
-; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[L:%.*]] = load i32, ptr @g, align 4
-; ATTRIBUTOR-NEXT:    ret i32 [[L]]
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, argmem: none, inaccessiblemem: none, target_mem: none)
+; COMMON-LABEL: define i32 @test_read_global
+; COMMON-SAME: () #[[ATTR2:[0-9]+]] {
+; COMMON-NEXT:  entry:
+; COMMON-NEXT:    [[L:%.*]] = load i32, ptr @g, align 4
+; COMMON-NEXT:    ret i32 [[L]]
 ;
 entry:
   %l = load i32, ptr @g
@@ -86,7 +79,7 @@ define i32 @test_read_loaded_ptr(ptr %ptr) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
 ; ATTRIBUTOR-LABEL: define i32 @test_read_loaded_ptr
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR2]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR3:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    [[L:%.*]] = load ptr, ptr [[PTR]], align 8
 ; ATTRIBUTOR-NEXT:    [[L_2:%.*]] = load i32, ptr [[L]], align 4
@@ -108,7 +101,7 @@ define void @test_only_write_arg(ptr %ptr) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
 ; ATTRIBUTOR-LABEL: define void @test_only_write_arg
-; ATTRIBUTOR-SAME: (ptr nofree nonnull writeonly captures(none) [[PTR:%.*]]) #[[ATTR3:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull writeonly captures(none) [[PTR:%.*]]) #[[ATTR4:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[PTR]], align 4
 ; ATTRIBUTOR-NEXT:    ret void
@@ -119,19 +112,12 @@ entry:
 }
 
 define void @test_write_global() {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
-; FNATTRS-LABEL: define void @test_write_global
-; FNATTRS-SAME: () #[[ATTR5:[0-9]+]] {
-; FNATTRS-NEXT:  entry:
-; FNATTRS-NEXT:    store i32 0, ptr @g, align 4
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
-; ATTRIBUTOR-LABEL: define void @test_write_global
-; ATTRIBUTOR-SAME: () #[[ATTR4:[0-9]+]] {
-; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    store i32 0, ptr @g, align 4
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
+; COMMON-LABEL: define void @test_write_global
+; COMMON-SAME: () #[[ATTR5:[0-9]+]] {
+; COMMON-NEXT:  entry:
+; COMMON-NEXT:    store i32 0, ptr @g, align 4
+; COMMON-NEXT:    ret void
 ;
 entry:
   store i32 0, ptr @g
@@ -164,9 +150,9 @@ define void @test_call_readnone(ptr %ptr) {
 ;
 ; ATTRIBUTOR: Function Attrs: nosync memory(argmem: write)
 ; ATTRIBUTOR-LABEL: define void @test_call_readnone
-; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[PTR:%.*]]) #[[ATTR6:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[PTR:%.*]]) #[[ATTR7:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @fn_readnone() #[[ATTR18:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @fn_readnone() #[[ATTR19:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    store i32 [[C]], ptr [[PTR]], align 4
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -179,19 +165,12 @@ entry:
 declare i32 @fn_argmemonly(ptr) argmemonly
 
 define i32 @test_call_argmemonly(ptr %ptr) {
-; FNATTRS: Function Attrs: memory(argmem: readwrite)
-; FNATTRS-LABEL: define i32 @test_call_argmemonly
-; FNATTRS-SAME: (ptr [[PTR:%.*]]) #[[ATTR8:[0-9]+]] {
-; FNATTRS-NEXT:  entry:
-; FNATTRS-NEXT:    [[C:%.*]] = call i32 @fn_argmemonly(ptr [[PTR]])
-; FNATTRS-NEXT:    ret i32 [[C]]
-;
-; ATTRIBUTOR: Function Attrs: memory(argmem: readwrite)
-; ATTRIBUTOR-LABEL: define i32 @test_call_argmemonly
-; ATTRIBUTOR-SAME: (ptr [[PTR:%.*]]) #[[ATTR7:[0-9]+]] {
-; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @fn_argmemonly(ptr [[PTR]])
-; ATTRIBUTOR-NEXT:    ret i32 [[C]]
+; COMMON: Function Attrs: memory(argmem: readwrite)
+; COMMON-LABEL: define i32 @test_call_argmemonly
+; COMMON-SAME: (ptr [[PTR:%.*]]) #[[ATTR8:[0-9]+]] {
+; COMMON-NEXT:  entry:
+; COMMON-NEXT:    [[C:%.*]] = call i32 @fn_argmemonly(ptr [[PTR]])
+; COMMON-NEXT:    ret i32 [[C]]
 ;
 entry:
   %c = call i32 @fn_argmemonly(ptr %ptr)
@@ -210,7 +189,7 @@ define i32 @test_call_fn_where_argmemonly_can_be_inferred(ptr %ptr) {
 ; ATTRIBUTOR-LABEL: define i32 @test_call_fn_where_argmemonly_can_be_inferred
 ; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[PTR:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @test_only_read_arg(ptr nofree readonly captures(none) [[PTR]]) #[[ATTR19:[0-9]+]]
+; ATTRIBUTOR-NEXT:    [[C:%.*]] = call i32 @test_only_read_arg(ptr nofree readonly captures(none) [[PTR]]) #[[ATTR20:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret i32 [[C]]
 ;
 entry:
@@ -228,9 +207,9 @@ define void @test_memcpy_argonly(ptr %dst, ptr %src) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite)
 ; ATTRIBUTOR-LABEL: define void @test_memcpy_argonly
-; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[DST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]]) #[[ATTR8:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[DST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]]) #[[ATTR9:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly captures(none) [[DST]], ptr readonly captures(none) [[SRC]], i64 32, i1 false) #[[ATTR20:[0-9]+]]
+; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly captures(none) [[DST]], ptr readonly captures(none) [[SRC]], i64 32, i1 false) #[[ATTR21:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 entry:
@@ -250,11 +229,11 @@ define void @test_memcpy_src_global(ptr %dst) {
 ; FNATTRS-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr [[DST]], ptr @arr, i64 32, i1 false)
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_memcpy_src_global
-; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[DST:%.*]]) #[[ATTR10:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree writeonly captures(none) [[DST:%.*]]) #[[ATTR11:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly captures(none) [[DST]], ptr readonly @arr, i64 32, i1 false) #[[ATTR20]]
+; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly captures(none) [[DST]], ptr readonly @arr, i64 32, i1 false) #[[ATTR21]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 entry:
@@ -270,11 +249,11 @@ define void @test_memcpy_dst_global(ptr %src) {
 ; FNATTRS-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr @arr, ptr [[SRC]], i64 32, i1 false)
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_memcpy_dst_global
-; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[SRC:%.*]]) #[[ATTR10]] {
+; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[SRC:%.*]]) #[[ATTR11]] {
 ; ATTRIBUTOR-NEXT:  entry:
-; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly @arr, ptr readonly captures(none) [[SRC]], i64 32, i1 false) #[[ATTR20]]
+; ATTRIBUTOR-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr writeonly @arr, ptr readonly captures(none) [[SRC]], i64 32, i1 false) #[[ATTR21]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 entry:
@@ -295,7 +274,7 @@ define i32 @test_read_arg_access_alloca(ptr %ptr) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite)
 ; ATTRIBUTOR-LABEL: define i32 @test_read_arg_access_alloca
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR8]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR9]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = alloca i32, align 4
 ; ATTRIBUTOR-NEXT:    [[L:%.*]] = load i32, ptr [[PTR]], align 4
@@ -314,17 +293,11 @@ entry:
 declare void @fn_inaccessiblememonly() inaccessiblememonly
 
 define void @test_inaccessiblememonly() {
-; FNATTRS: Function Attrs: memory(inaccessiblemem: readwrite)
-; FNATTRS-LABEL: define void @test_inaccessiblememonly
-; FNATTRS-SAME: () #[[ATTR12:[0-9]+]] {
-; FNATTRS-NEXT:    call void @fn_inaccessiblememonly()
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR: Function Attrs: memory(inaccessiblemem: readwrite)
-; ATTRIBUTOR-LABEL: define void @test_inaccessiblememonly
-; ATTRIBUTOR-SAME: () #[[ATTR11:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly()
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON: Function Attrs: memory(inaccessiblemem: readwrite)
+; COMMON-LABEL: define void @test_inaccessiblememonly
+; COMMON-SAME: () #[[ATTR12:[0-9]+]] {
+; COMMON-NEXT:    call void @fn_inaccessiblememonly()
+; COMMON-NEXT:    ret void
 ;
   call void @fn_inaccessiblememonly()
   ret void
@@ -339,8 +312,8 @@ define void @test_inaccessiblememonly_readonly() {
 ;
 ; ATTRIBUTOR: Function Attrs: nosync memory(inaccessiblemem: read)
 ; ATTRIBUTOR-LABEL: define void @test_inaccessiblememonly_readonly
-; ATTRIBUTOR-SAME: () #[[ATTR12:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR21:[0-9]+]]
+; ATTRIBUTOR-SAME: () #[[ATTR13:[0-9]+]] {
+; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR22:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @fn_inaccessiblememonly() readonly
@@ -357,9 +330,9 @@ define void @test_inaccessibleorargmemonly_readonly(ptr %arg) {
 ;
 ; ATTRIBUTOR: Function Attrs: nosync memory(argmem: read, inaccessiblemem: read)
 ; ATTRIBUTOR-LABEL: define void @test_inaccessibleorargmemonly_readonly
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[ARG:%.*]]) #[[ATTR13:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[ARG:%.*]]) #[[ATTR14:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = load i32, ptr [[ARG]], align 4
-; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR21]]
+; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR22]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   load i32, ptr %arg
@@ -377,9 +350,9 @@ define void @test_inaccessibleorargmemonly_readwrite(ptr %arg) {
 ;
 ; ATTRIBUTOR: Function Attrs: nosync memory(argmem: readwrite, inaccessiblemem: readwrite)
 ; ATTRIBUTOR-LABEL: define void @test_inaccessibleorargmemonly_readwrite
-; ATTRIBUTOR-SAME: (ptr nofree nonnull writeonly captures(none) [[ARG:%.*]]) #[[ATTR14:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull writeonly captures(none) [[ARG:%.*]]) #[[ATTR15:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[ARG]], align 4
-; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR21]]
+; ATTRIBUTOR-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR22]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   store i32 0, ptr %arg
@@ -397,9 +370,9 @@ define void @test_recursive_argmem_read(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_read
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR15:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR16:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -418,10 +391,10 @@ define void @test_recursive_argmem_readwrite(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_readwrite
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR16:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR17:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr nofree captures(none) [[PVAL]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr nofree captures(none) [[PVAL]]) #[[ATTR17]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -441,10 +414,10 @@ define void @test_recursive_argmem_read_alloca(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(argmem: read)
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_read_alloca
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR17:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR18:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = alloca ptr, align 8
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = load i32, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr nofree nonnull readonly captures(none) [[A]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr nofree nonnull readonly captures(none) [[A]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = alloca ptr
@@ -463,9 +436,9 @@ define void @test_scc_argmem_read_1(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_1
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR15]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR16]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR15]]
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -482,8 +455,8 @@ define void @test_scc_argmem_read_2(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_2
-; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR15]] {
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr nofree readonly captures(none) [[P]]) #[[ATTR15]]
+; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR16]] {
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr nofree readonly captures(none) [[P]]) #[[ATTR16]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @test_scc_argmem_read_1(ptr %p)

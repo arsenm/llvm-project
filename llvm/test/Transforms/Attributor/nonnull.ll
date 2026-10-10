@@ -1613,7 +1613,7 @@ define void @multi_ret_caller(ptr %p) {
 ; From https://github.com/llvm/llvm-project/pull/85810
 @G = internal global i64 1, align 8
 define dso_local ptr @update_global_in_alive_bb() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@update_global_in_alive_bb
 ; CHECK-SAME: () #[[ATTR15:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -1655,7 +1655,7 @@ attributes #1 = { nounwind willreturn}
 ; TUNIT: attributes #[[ATTR12]] = { noinline optnone }
 ; TUNIT: attributes #[[ATTR13:[0-9]+]] = { nofree nounwind willreturn memory(read) }
 ; TUNIT: attributes #[[ATTR14]] = { mustprogress nofree nosync nounwind willreturn memory(read) }
-; TUNIT: attributes #[[ATTR15]] = { mustprogress nofree norecurse nosync nounwind willreturn }
+; TUNIT: attributes #[[ATTR15]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR16]] = { nofree willreturn memory(write) }
 ; TUNIT: attributes #[[ATTR17]] = { nofree nosync nounwind memory(read) }
 ; TUNIT: attributes #[[ATTR18]] = { nosync willreturn memory(read) }
@@ -1677,7 +1677,7 @@ attributes #1 = { nounwind willreturn}
 ; CGSCC: attributes #[[ATTR12]] = { noinline optnone }
 ; CGSCC: attributes #[[ATTR13:[0-9]+]] = { nofree nounwind willreturn memory(read) }
 ; CGSCC: attributes #[[ATTR14]] = { mustprogress nofree nosync nounwind willreturn memory(read) }
-; CGSCC: attributes #[[ATTR15]] = { mustprogress nofree norecurse nosync nounwind willreturn }
+; CGSCC: attributes #[[ATTR15]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR16]] = { nofree willreturn memory(write) }
 ; CGSCC: attributes #[[ATTR17]] = { nofree nosync nounwind memory(read) }
 ; CGSCC: attributes #[[ATTR18]] = { nosync willreturn memory(read) }

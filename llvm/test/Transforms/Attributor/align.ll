@@ -940,7 +940,7 @@ define i32 @musttail_callee_1(ptr %p) {
   ret i32 %v
 }
 define i32 @musttail_caller_1(ptr %p) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@musttail_caller_1
 ; TUNIT-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR11:[0-9]+]] {
 ; TUNIT-NEXT:    [[C:%.*]] = load i1, ptr @cnd, align 1
@@ -951,7 +951,7 @@ define i32 @musttail_caller_1(ptr %p) {
 ; TUNIT:       exit:
 ; TUNIT-NEXT:    ret i32 0
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(read)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@musttail_caller_1
 ; CGSCC-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR12:[0-9]+]] {
 ; CGSCC-NEXT:    [[C:%.*]] = load i1, ptr @cnd, align 1
@@ -1229,7 +1229,7 @@ attributes #2 = { null_pointer_is_valid }
 ; TUNIT: attributes #[[ATTR8]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
 ; TUNIT: attributes #[[ATTR9]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
 ; TUNIT: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; TUNIT: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read) }
+; TUNIT: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR12]] = { mustprogress norecurse nounwind willreturn memory(argmem: readwrite) }
 ; TUNIT: attributes #[[ATTR13]] = { nofree nosync nounwind }
 ; TUNIT: attributes #[[ATTR14]] = { nofree nosync nounwind willreturn memory(read) }
@@ -1247,7 +1247,7 @@ attributes #2 = { null_pointer_is_valid }
 ; CGSCC: attributes #[[ATTR9]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
 ; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
 ; CGSCC: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR12]] = { mustprogress nofree nosync nounwind willreturn memory(read) }
+; CGSCC: attributes #[[ATTR12]] = { mustprogress nofree nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR13]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR14]] = { mustprogress norecurse nounwind willreturn memory(argmem: readwrite) }
 ; CGSCC: attributes #[[ATTR15]] = { nofree nosync willreturn }

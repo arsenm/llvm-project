@@ -22,7 +22,7 @@ define internal void @store_fp(ptr %fp, i1 %c, ...) {
 ; CHECK-NEXT:    store ptr @f, ptr @g, align 8
 ; CHECK-NEXT:    br i1 [[C]], label %[[T:.*]], label %[[E:.*]]
 ; CHECK:       [[T]]:
-; CHECK-NEXT:    call void @caller(i1 noundef false) #[[ATTR1]]
+; CHECK-NEXT:    call void @caller(i1 noundef false) #[[ATTR2:[0-9]+]]
 ; CHECK-NEXT:    br label %[[E]]
 ; CHECK:       [[E]]:
 ; CHECK-NEXT:    ret void
@@ -40,7 +40,7 @@ e:
 define void @caller(i1 %c) {
 ; CHECK-LABEL: define void @caller(
 ; CHECK-SAME: i1 [[C:%.*]]) #[[ATTR1]] {
-; CHECK-NEXT:    call void (ptr, i1, ...) @store_fp(ptr nofree nonnull writeonly undef, i1 [[C]]) #[[ATTR1]]
+; CHECK-NEXT:    call void (ptr, i1, ...) @store_fp(ptr nofree nonnull writeonly undef, i1 [[C]]) #[[ATTR2]]
 ; CHECK-NEXT:    ret void
 ;
   call void (ptr, i1, ...) @store_fp(ptr @f, i1 %c)

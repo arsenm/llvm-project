@@ -14,34 +14,22 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:
 @g.nested = global [24 x i8] zeroinitializer
 
 define internal void @tail(ptr %p) {
-; TUNIT-LABEL: define internal void @tail(
-; TUNIT-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
-; TUNIT-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P]], i64 noundef 16, i1 noundef false) #[[ATTR2:[0-9]+]]
-; TUNIT-NEXT:    ret void
-;
-; CGSCC-LABEL: define internal void @tail(
-; CGSCC-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
-; CGSCC-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P]], i64 noundef 16, i1 noundef false) #[[ATTR3:[0-9]+]]
-; CGSCC-NEXT:    ret void
+; CHECK-LABEL: define internal void @tail(
+; CHECK-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[P]], i64 noundef 16, i1 noundef false) #[[ATTR3:[0-9]+]]
+; CHECK-NEXT:    ret void
 ;
   call void @llvm.memcpy.p0.p0.i64(ptr @g, ptr %p, i64 16, i1 false)
   ret void
 }
 
 define void @call_tail(i64 %v) {
-; TUNIT-LABEL: define void @call_tail(
-; TUNIT-SAME: i64 [[V:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[A:%.*]] = alloca [[STRUCT_TAIL:%.*]], align 8
-; TUNIT-NEXT:    store i64 [[V]], ptr [[A]], align 8
-; TUNIT-NEXT:    call void @tail(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[A]]) #[[ATTR3:[0-9]+]]
-; TUNIT-NEXT:    ret void
-;
-; CGSCC-LABEL: define void @call_tail(
-; CGSCC-SAME: i64 [[V:%.*]]) #[[ATTR1:[0-9]+]] {
-; CGSCC-NEXT:    [[A:%.*]] = alloca [[STRUCT_TAIL:%.*]], align 8
-; CGSCC-NEXT:    store i64 [[V]], ptr [[A]], align 8
-; CGSCC-NEXT:    call void @tail(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[A]]) #[[ATTR4:[0-9]+]]
-; CGSCC-NEXT:    ret void
+; CHECK-LABEL: define void @call_tail(
+; CHECK-SAME: i64 [[V:%.*]]) #[[ATTR1:[0-9]+]] {
+; CHECK-NEXT:    [[A:%.*]] = alloca [[STRUCT_TAIL:%.*]], align 8
+; CHECK-NEXT:    store i64 [[V]], ptr [[A]], align 8
+; CHECK-NEXT:    call void @tail(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(16) [[A]]) #[[ATTR4:[0-9]+]]
+; CHECK-NEXT:    ret void
 ;
   %a = alloca %struct.tail, align 8
   store i64 %v, ptr %a, align 8
@@ -50,36 +38,23 @@ define void @call_tail(i64 %v) {
 }
 
 define internal void @nested(ptr %p) {
-; TUNIT-LABEL: define internal void @nested(
-; TUNIT-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g.nested, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P]], i64 noundef 24, i1 noundef false) #[[ATTR2]]
-; TUNIT-NEXT:    ret void
-;
-; CGSCC-LABEL: define internal void @nested(
-; CGSCC-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P:%.*]]) #[[ATTR0]] {
-; CGSCC-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g.nested, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P]], i64 noundef 24, i1 noundef false) #[[ATTR3]]
-; CGSCC-NEXT:    ret void
+; CHECK-LABEL: define internal void @nested(
+; CHECK-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P:%.*]]) #[[ATTR0]] {
+; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef writeonly @g.nested, ptr noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[P]], i64 noundef 24, i1 noundef false) #[[ATTR3]]
+; CHECK-NEXT:    ret void
 ;
   call void @llvm.memcpy.p0.p0.i64(ptr @g.nested, ptr %p, i64 24, i1 false)
   ret void
 }
 
 define void @call_nested(i64 %v) {
-; TUNIT-LABEL: define void @call_nested(
-; TUNIT-SAME: i64 [[V:%.*]]) #[[ATTR0]] {
-; TUNIT-NEXT:    [[A:%.*]] = alloca [[STRUCT_NESTED:%.*]], align 8
-; TUNIT-NEXT:    [[GEP:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 8
-; TUNIT-NEXT:    store i64 [[V]], ptr [[GEP]], align 8
-; TUNIT-NEXT:    call void @nested(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[A]]) #[[ATTR3]]
-; TUNIT-NEXT:    ret void
-;
-; CGSCC-LABEL: define void @call_nested(
-; CGSCC-SAME: i64 [[V:%.*]]) #[[ATTR1]] {
-; CGSCC-NEXT:    [[A:%.*]] = alloca [[STRUCT_NESTED:%.*]], align 8
-; CGSCC-NEXT:    [[GEP:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 8
-; CGSCC-NEXT:    store i64 [[V]], ptr [[GEP]], align 8
-; CGSCC-NEXT:    call void @nested(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[A]]) #[[ATTR4]]
-; CGSCC-NEXT:    ret void
+; CHECK-LABEL: define void @call_nested(
+; CHECK-SAME: i64 [[V:%.*]]) #[[ATTR1]] {
+; CHECK-NEXT:    [[A:%.*]] = alloca [[STRUCT_NESTED:%.*]], align 8
+; CHECK-NEXT:    [[GEP:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 8
+; CHECK-NEXT:    store i64 [[V]], ptr [[GEP]], align 8
+; CHECK-NEXT:    call void @nested(ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) [[A]]) #[[ATTR4]]
+; CHECK-NEXT:    ret void
 ;
   %a = alloca %struct.nested, align 8
   %gep = getelementptr inbounds i8, ptr %a, i64 8
@@ -88,4 +63,5 @@ define void @call_nested(i64 %v) {
   ret void
 }
 ;; NOTE: These prefixes are unused and the list is autogenerated. Do not add tests below this line:
-; CHECK: {{.*}}
+; CGSCC: {{.*}}
+; TUNIT: {{.*}}

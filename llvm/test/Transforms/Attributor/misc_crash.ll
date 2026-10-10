@@ -36,7 +36,7 @@ define internal ptr @func1a(ptr %arg) {
 }
 
 define internal void @func2a(ptr %0) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@func2a
 ; CHECK-SAME: (ptr nofree nonnull writeonly align 4 captures(none) [[TMP0:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    ret void
@@ -46,7 +46,7 @@ define internal void @func2a(ptr %0) {
 }
 
 define i32 @func2() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@func2
 ; CHECK-SAME: () #[[ATTR1]] {
 ; CHECK-NEXT:    [[TMP1:%.*]] = tail call i32 (ptr, ...) @func2a(ptr nofree nonnull writeonly align 4 captures(none) undef) #[[ATTR3:[0-9]+]]
@@ -58,7 +58,7 @@ define i32 @func2() {
 }
 
 define i32 @func3(i1 %false) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@func3
 ; CHECK-SAME: (i1 [[FALSE:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:    [[TMP1:%.*]] = tail call i32 (ptr, ...) @func2a(ptr nofree nonnull writeonly align 4 captures(none) undef) #[[ATTR3]]
@@ -127,7 +127,7 @@ define internal i16 @bar3(ptr %p1, i16 %p2) {
 declare void @func6(ptr)
 ;.
 ; CHECK: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CHECK: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; CHECK: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR2]] = { memory(readwrite, argmem: none) }
 ; CHECK: attributes #[[ATTR3]] = { nofree nosync nounwind willreturn memory(write) }
 ; CHECK: attributes #[[ATTR4]] = { nofree nosync nounwind willreturn memory(none) }

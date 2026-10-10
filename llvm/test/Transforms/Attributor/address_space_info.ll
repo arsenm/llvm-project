@@ -17,7 +17,7 @@
 ; CHECK: @s2 = dso_local addrspace(3) global i32 undef, align 4
 ;.
 define internal void @_Z12global_writePi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z12global_writePi
 ; CHECK-SAME: (ptr nofree noundef nonnull writeonly align 4 dereferenceable(8) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -32,7 +32,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define internal void @_Z13unknown_writePi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z13unknown_writePi
 ; CHECK-SAME: (ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
@@ -46,7 +46,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define internal void @_Z12shared_writePi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write)
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z12shared_writePi
 ; CHECK-SAME: (ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
@@ -61,7 +61,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define internal void @_Z11global_readPi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z11global_readPi
 ; CHECK-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -78,7 +78,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define internal void @_Z12unknown_readPi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z12unknown_readPi
 ; CHECK-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
@@ -94,7 +94,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define internal void @_Z11shared_readPi(ptr noundef %p) #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z11shared_readPi
 ; CHECK-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[P:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
@@ -111,7 +111,7 @@ entry:
 
 ; Function Attrs: convergent mustprogress noinline nounwind
 define dso_local void @_Z3bazv() #0 {
-; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@_Z3bazv
 ; CHECK-SAME: () #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
@@ -148,8 +148,8 @@ entry:
 attributes #0 = { convergent mustprogress noinline nounwind }
 attributes #1 = { convergent nounwind }
 ;.
-; CHECK: attributes #[[ATTR0]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write) }
-; CHECK: attributes #[[ATTR1]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn }
+; CHECK: attributes #[[ATTR0]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
+; CHECK: attributes #[[ATTR1]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR2]] = { convergent nofree nosync nounwind willreturn memory(write) }
 ; CHECK: attributes #[[ATTR3]] = { convergent nofree nosync nounwind willreturn }
 ;.

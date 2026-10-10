@@ -38,19 +38,12 @@ nouses-argworn-funro_entry:
 @d-ccc = internal global %_type_of_d-ccc <{ ptr null, i8 1, i8 13, i8 0, i8 -127 }>, align 8
 
 define void @nouses-argworn-funwo(ptr writeonly %.aaa) {
-; FNATTRS: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
-; FNATTRS-LABEL: define {{[^@]+}}@nouses-argworn-funwo
-; FNATTRS-SAME: (ptr nofree readnone captures(none) [[DOTAAA:%.*]]) #[[ATTR2:[0-9]+]] {
-; FNATTRS-NEXT:  nouses-argworn-funwo_entry:
-; FNATTRS-NEXT:    store i8 0, ptr getelementptr inbounds ([[_TYPE_OF_D_CCC:%.*]], ptr @d-ccc, i32 0, i32 3), align 1
-; FNATTRS-NEXT:    ret void
-;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
-; ATTRIBUTOR-LABEL: define {{[^@]+}}@nouses-argworn-funwo
-; ATTRIBUTOR-SAME: (ptr nofree readnone captures(none) [[DOTAAA:%.*]]) #[[ATTR2:[0-9]+]] {
-; ATTRIBUTOR-NEXT:  nouses-argworn-funwo_entry:
-; ATTRIBUTOR-NEXT:    store i8 0, ptr getelementptr inbounds ([[_TYPE_OF_D_CCC:%.*]], ptr @d-ccc, i32 0, i32 3), align 1
-; ATTRIBUTOR-NEXT:    ret void
+; COMMON: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
+; COMMON-LABEL: define {{[^@]+}}@nouses-argworn-funwo
+; COMMON-SAME: (ptr nofree readnone captures(none) [[DOTAAA:%.*]]) #[[ATTR2:[0-9]+]] {
+; COMMON-NEXT:  nouses-argworn-funwo_entry:
+; COMMON-NEXT:    store i8 0, ptr getelementptr inbounds ([[_TYPE_OF_D_CCC:%.*]], ptr @d-ccc, i32 0, i32 3), align 1
+; COMMON-NEXT:    ret void
 ;
 nouses-argworn-funwo_entry:
   store i8 0, ptr getelementptr inbounds (%_type_of_d-ccc, ptr @d-ccc, i32 0, i32 3)

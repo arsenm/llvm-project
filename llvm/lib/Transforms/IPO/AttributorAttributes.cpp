@@ -8406,23 +8406,28 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
 
   void getDeducedAttributes(Attributor &A, LLVMContext &Ctx,
                             SmallVectorImpl<Attribute> &Attrs) const override {
-    // TODO: We can map Attributor locations to MemoryEffects more precisely.
     assert(Attrs.size() == 0);
-    if (getIRPosition().getPositionKind() == IRPosition::IRP_FUNCTION) {
-      if (isAssumedReadNone())
-        Attrs.push_back(
-            Attribute::getWithMemoryEffects(Ctx, MemoryEffects::none()));
-      else if (isAssumedInaccessibleMemOnly())
-        Attrs.push_back(Attribute::getWithMemoryEffects(
-            Ctx, MemoryEffects::inaccessibleMemOnly()));
-      else if (isAssumedArgMemOnly())
-        Attrs.push_back(
-            Attribute::getWithMemoryEffects(Ctx, MemoryEffects::argMemOnly()));
-      else if (isAssumedInaccessibleOrArgMemOnly())
-        Attrs.push_back(Attribute::getWithMemoryEffects(
-            Ctx, MemoryEffects::inaccessibleOrArgMemOnly()));
+    if (getIRPosition().getPositionKind() != IRPosition::IRP_FUNCTION)
+      return;
+    if (isAssumedReadNone()) {
+      Attrs.push_back(
+          Attribute::getWithMemoryEffects(Ctx, MemoryEffects::none()));
+      return;
     }
-    assert(Attrs.size() <= 1);
+    // Accesses to unknown memory can be to any location.
+    if (!isAssumed(NO_UNKOWN_MEM))
+      return;
+
+    // Local and constant memory accesses are not visible to the caller. Other
+    // memory, e.g. globals or allocated memory, could also be errno.
+    MemoryEffects ME = MemoryEffects::none();
+    if (!isAssumed(NO_ARGUMENT_MEM))
+      ME |= MemoryEffects::argMemOnly();
+    if (!isAssumed(NO_INACCESSIBLE_MEM))
+      ME |= MemoryEffects::inaccessibleMemOnly();
+    if (!isAssumed(NO_GLOBAL_MEM | NO_MALLOCED_MEM))
+      ME |= MemoryEffects::otherMemOnly() | MemoryEffects::errnoMemOnly();
+    Attrs.push_back(Attribute::getWithMemoryEffects(Ctx, ME));
   }
 
   ChangeStatus manifest(Attributor &A) override {

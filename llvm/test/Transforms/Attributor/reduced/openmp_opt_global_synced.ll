@@ -36,7 +36,7 @@ attributes #1 = { "kernel" }
 ;.
 ; CHECK: @_ZN4ompx5state9TeamStateE = internal addrspace(3) global ptr undef
 ;.
-; CHECK: Function Attrs: norecurse nosync nounwind memory(read)
+; CHECK: Function Attrs: norecurse nosync nounwind memory(read, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@__kmpc_kernel_parallel
 ; CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  bb:
@@ -59,7 +59,7 @@ attributes #1 = { "kernel" }
 ; CHECK-NEXT:    ret void
 ;
 ;.
-; CHECK: attributes #[[ATTR0]] = { norecurse nosync nounwind memory(read) }
+; CHECK: attributes #[[ATTR0]] = { norecurse nosync nounwind memory(read, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR1]] = { "kernel" }
 ; CHECK: attributes #[[ATTR2:[0-9]+]] = { nocallback }
 ; CHECK: attributes #[[ATTR3:[0-9]+]] = { nosync nounwind memory(read) }

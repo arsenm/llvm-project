@@ -24,7 +24,7 @@ entry:
 declare void @use(i32 noundef)
 
 define void @src() norecurse !dbg !22 {
-; CHECK: Function Attrs: norecurse nosync memory(write)
+; CHECK: Function Attrs: norecurse nosync memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@src
 ; CHECK-SAME: () #[[ATTR0:[0-9]+]] !dbg [[DBG22:![0-9]+]] {
 ; CHECK-NEXT:  entry:
@@ -73,16 +73,16 @@ declare i32 @speculatable() speculatable readnone
 !24 = !DILocation(line: 10, column: 7, scope: !22)
 !25 = !DILocation(line: 11, column: 1, scope: !22)
 ;.
-; CHECK: attributes #[[ATTR0]] = { norecurse nosync memory(write) }
+; CHECK: attributes #[[ATTR0]] = { norecurse nosync memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR1:[0-9]+]] = { speculatable memory(none) }
 ; CHECK: attributes #[[ATTR2]] = { nosync }
 ;.
 ; CHECK: [[META0]] = !DIGlobalVariableExpression(var: [[META1:![0-9]+]], expr: !DIExpression())
 ; CHECK: [[META1]] = distinct !DIGlobalVariable(name: "G", scope: [[META2:![0-9]+]], file: [[META5:![0-9]+]], line: 1, type: [[META6:![0-9]+]], isLocal: true, isDefinition: true)
 ; CHECK: [[META2]] = distinct !DICompileUnit(language: DW_LANG_C99, file: [[META3:![0-9]+]], producer: "{{.*}}clang version {{.*}}", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, globals: [[META4:![0-9]+]], splitDebugInlining: false, nameTableKind: None)
-; CHECK: [[META3]] = !DIFile(filename: "/app/example.c", directory: {{.*}})
+; CHECK: [[META3]] = !DIFile(filename: "{{.*}}example.c", directory: {{.*}}, checksumkind: CSK_MD5, checksum: "b456b90cec5c3705a028b274d88ee970")
 ; CHECK: [[META4]] = !{[[META0]]}
-; CHECK: [[META5]] = !DIFile(filename: "example.c", directory: {{.*}})
+; CHECK: [[META5]] = !DIFile(filename: "{{.*}}example.c", directory: {{.*}}, checksumkind: CSK_MD5, checksum: "b456b90cec5c3705a028b274d88ee970")
 ; CHECK: [[META6]] = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
 ; CHECK: [[META7:![0-9]+]] = !{i32 7, !"Dwarf Version", i32 5}
 ; CHECK: [[META8:![0-9]+]] = !{i32 2, !"Debug Info Version", i32 3}

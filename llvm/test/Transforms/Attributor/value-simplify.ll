@@ -600,7 +600,7 @@ define internal void @test_byval(ptr byval(%struct.X) %a) {
   ret void
 }
 define void @complicated_args_byval() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@complicated_args_byval
 ; TUNIT-SAME: () #[[ATTR5:[0-9]+]] {
 ; TUNIT-NEXT:    [[TMP1:%.*]] = load ptr, ptr @S, align 8
@@ -819,7 +819,7 @@ define internal i8 @callee(i8 %a) {
 }
 
 define void @user_as3() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@user_as3
 ; TUNIT-SAME: () #[[ATTR5]] {
 ; TUNIT-NEXT:    store i32 0, ptr addrspace(3) @ConstAS3Ptr, align 4
@@ -837,7 +837,7 @@ define void @user_as3() {
   ret void
 }
 define void @user() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@user
 ; TUNIT-SAME: () #[[ATTR5]] {
 ; TUNIT-NEXT:    store i32 0, ptr addrspacecast (ptr addrspace(3) @ConstAS3Ptr to ptr), align 4
@@ -1428,13 +1428,13 @@ define i1 @user_of_not_called() {
 
 @x = external global i32
 define internal void @indirect() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@indirect
 ; TUNIT-SAME: () #[[ATTR5]] {
 ; TUNIT-NEXT:    store i32 0, ptr @x, align 4
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@indirect
 ; CGSCC-SAME: () #[[ATTR10:[0-9]+]] {
 ; CGSCC-NEXT:    store i32 0, ptr @x, align 4
@@ -1676,7 +1676,7 @@ define i32 @readExtInitZeroInit() {
 ; TUNIT: attributes #[[ATTR2]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn }
 ; TUNIT: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }
-; TUNIT: attributes #[[ATTR5]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; TUNIT: attributes #[[ATTR5]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR6:[0-9]+]] = { speculatable memory(none) }
 ; TUNIT: attributes #[[ATTR7]] = { norecurse nosync memory(none) }
 ; TUNIT: attributes #[[ATTR8:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
@@ -1699,7 +1699,7 @@ define i32 @readExtInitZeroInit() {
 ; CGSCC: attributes #[[ATTR7]] = { mustprogress nofree nosync nounwind willreturn memory(write) }
 ; CGSCC: attributes #[[ATTR8:[0-9]+]] = { speculatable memory(none) }
 ; CGSCC: attributes #[[ATTR9]] = { norecurse nosync memory(none) }
-; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR11:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
 ; CGSCC: attributes #[[ATTR12]] = { nofree nosync willreturn }
 ; CGSCC: attributes #[[ATTR13]] = { willreturn }

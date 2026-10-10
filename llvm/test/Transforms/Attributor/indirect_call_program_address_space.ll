@@ -31,7 +31,7 @@ define internal void @cb2() {
 
 define void @caller(i1 %c) {
 ; CHECK-LABEL: define void @caller(
-; CHECK-SAME: i1 [[C:%.*]]) addrspace(9) #[[ATTR0]] {
+; CHECK-SAME: i1 [[C:%.*]]) addrspace(9) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[FP:%.*]] = select i1 [[C]], ptr addrspace(9) @cb1, ptr addrspace(9) @cb2
 ; CHECK-NEXT:    [[TMP1:%.*]] = icmp eq ptr addrspace(9) [[FP]], @cb2
 ; CHECK-NEXT:    br i1 [[TMP1]], label %[[BB2:.*]], label %[[BB3:.*]]
