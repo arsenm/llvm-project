@@ -938,6 +938,11 @@ Expected<bool> parseGlobalDCEPassOptions(StringRef Params) {
       Params, "vfe-linkage-unit-visibility", "GlobalDCE");
 }
 
+Expected<bool> parseAttributorLightPassOptions(StringRef Params) {
+  return PassBuilder::parseSinglePassOption(Params, "top-down",
+                                            "AttributorLight");
+}
+
 Expected<bool> parseCGProfilePassOptions(StringRef Params) {
   return PassBuilder::parseSinglePassOption(Params, "in-lto-post-link",
                                             "CGProfile");

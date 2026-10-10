@@ -3999,7 +3999,8 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
                                           SetVector<Function *> &Functions,
                                           CallGraphUpdater &CGUpdater,
                                           FunctionAnalysisManager &FAM,
-                                          bool IsModulePass) {
+                                          bool IsModulePass,
+                                          bool TopDownOnly = false) {
   if (Functions.empty())
     return false;
 
@@ -4022,6 +4023,13 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
        &AAInterFnReachability::ID, &AAIntraFnReachability::ID, &AACallEdges::ID,
        &AANoFPClass::ID, &AAMustProgress::ID, &AANonNull::ID,
        &AADenormalFPMath::ID});
+  // Only deduce attributes that use information from the callers. Other
+  // attributes are expected to be deduced already, bottom-up.
+  if (TopDownOnly) {
+    Allowed = DenseSet<const char *>(
+        {&AANoRecurse::ID, &AANonNull::ID, &AANoFPClass::ID, &AACallEdges::ID,
+         &AAInterFnReachability::ID, &AAIntraFnReachability::ID});
+  }
   AC.Allowed = &Allowed;
   AC.UseLiveness = false;
 
@@ -4194,7 +4202,7 @@ PreservedAnalyses AttributorLightPass::run(Module &M,
   BumpPtrAllocator Allocator;
   InformationCache InfoCache(M, AG, Allocator, /* CGSCC */ nullptr);
   if (runAttributorLightOnFunctions(InfoCache, Functions, CGUpdater, FAM,
-                                    /* IsModulePass */ true)) {
+                                    /* IsModulePass */ true, TopDownOnly)) {
     PreservedAnalyses PA;
     // We have not added or removed functions.
     PA.preserve<FunctionAnalysisManagerCGSCCProxy>();
@@ -4203,6 +4211,14 @@ PreservedAnalyses AttributorLightPass::run(Module &M,
     return PA;
   }
   return PreservedAnalyses::all();
+}
+
+void AttributorLightPass::printPipeline(
+    raw_ostream &OS, function_ref<StringRef(StringRef)> MapClassName2PassName) {
+  static_cast<PassInfoMixin<AttributorLightPass> *>(this)->printPipeline(
+      OS, MapClassName2PassName);
+  if (TopDownOnly)
+    OS << "<top-down>";
 }
 
 PreservedAnalyses AttributorLightCGSCCPass::run(LazyCallGraph::SCC &C,

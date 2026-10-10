@@ -57,7 +57,6 @@ MODULE_PASS("always-inline", AlwaysInlinerPass())
 MODULE_PASS("annotation2metadata", Annotation2MetadataPass())
 MODULE_PASS("assign-guid", AssignGUIDPass())
 MODULE_PASS("attributor", AttributorPass())
-MODULE_PASS("attributor-light", AttributorLightPass())
 MODULE_PASS("called-value-propagation", CalledValuePropagationPass())
 MODULE_PASS("canonicalize-aliases", CanonicalizeAliasesPass())
 MODULE_PASS("check-debugify", NewPMCheckDebugifyPass())
@@ -201,6 +200,10 @@ MODULE_PASS_WITH_PARAMS(
     "asan", "AddressSanitizerPass",
     [](AddressSanitizerOptions Opts) { return AddressSanitizerPass(Opts); },
     parseASanPassOptions, "kernel;use-after-scope")
+MODULE_PASS_WITH_PARAMS(
+    "attributor-light", "AttributorLightPass",
+    [](bool TopDownOnly) { return AttributorLightPass(TopDownOnly); },
+    parseAttributorLightPassOptions, "top-down")
 MODULE_PASS_WITH_PARAMS(
     "cg-profile", "CGProfilePass",
     [](bool InLTOPostLink) { return CGProfilePass(InLTOPostLink); },

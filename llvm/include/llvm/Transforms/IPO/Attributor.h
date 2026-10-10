@@ -3428,7 +3428,20 @@ struct AttributorCGSCCPass : public OptionalPassInfoMixin<AttributorCGSCCPass> {
 /// A more lightweight version of the Attributor which only runs attribute
 /// inference but no simplifications.
 struct AttributorLightPass : public OptionalPassInfoMixin<AttributorLightPass> {
+  /// If \p TopDownOnly is set, only deduce attributes which benefit from
+  /// looking at the callers, e.g. after the other attributes were already
+  /// deduced bottom-up.
+  explicit AttributorLightPass(bool TopDownOnly = false)
+      : TopDownOnly(TopDownOnly) {}
+
   LLVM_ABI PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+
+  LLVM_ABI void
+  printPipeline(raw_ostream &OS,
+                function_ref<StringRef(StringRef)> MapClassName2PassName);
+
+private:
+  bool TopDownOnly;
 };
 
 /// A more lightweight version of the Attributor which only runs attribute
