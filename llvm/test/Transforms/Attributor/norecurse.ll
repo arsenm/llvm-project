@@ -217,7 +217,7 @@ define linkonce_odr i32 @leaf_redefinable() {
 ; Call through a function pointer
 define i32 @eval_func1(ptr , i32) local_unnamed_addr {
 ; CHECK-LABEL: define {{[^@]+}}@eval_func1
-; CHECK-SAME: (ptr nofree noundef nonnull captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr {
 ; CHECK-NEXT:    [[TMP3:%.*]] = tail call i32 [[TMP0]](i32 [[TMP1]])
 ; CHECK-NEXT:    ret i32 [[TMP3]]
 ;
@@ -228,7 +228,7 @@ define i32 @eval_func1(ptr , i32) local_unnamed_addr {
 define i32 @eval_func2(ptr , i32) local_unnamed_addr null_pointer_is_valid{
 ; CHECK: Function Attrs: null_pointer_is_valid
 ; CHECK-LABEL: define {{[^@]+}}@eval_func2
-; CHECK-SAME: (ptr nofree noundef captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr #[[ATTR7:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef readonly captures(none) [[TMP0:%.*]], i32 [[TMP1:%.*]]) local_unnamed_addr #[[ATTR7:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP3:%.*]] = tail call i32 [[TMP0]](i32 [[TMP1]])
 ; CHECK-NEXT:    ret i32 [[TMP3]]
 ;

@@ -352,7 +352,7 @@ define void @nc3(ptr %p) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define void @nc3
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[P]]()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -404,7 +404,7 @@ define void @callsite_readonly_nounwind_not_willreturn(ptr %f, ptr %p) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define void @callsite_readonly_nounwind_not_willreturn
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr [[P]]) #[[ATTR6:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
@@ -422,7 +422,7 @@ define void @callsite_readonly_nounwind_willreturn(ptr %f, ptr %p) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define void @callsite_readonly_nounwind_willreturn
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr [[P]]) #[[ATTR8:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
@@ -957,7 +957,7 @@ define void @nocapture_fptr(ptr %f, ptr %p) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define void @nocapture_fptr
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call ptr [[F]](ptr [[P]])
 ; ATTRIBUTOR-NEXT:    call void @capture(ptr [[RES]])
 ; ATTRIBUTOR-NEXT:    ret void
@@ -975,7 +975,7 @@ define void @recurse_fptr(ptr %f, ptr %p) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define void @recurse_fptr
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call ptr [[F]](ptr [[P]])
 ; ATTRIBUTOR-NEXT:    store i8 0, ptr [[RES]], align 1
 ; ATTRIBUTOR-NEXT:    ret void

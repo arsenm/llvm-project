@@ -8200,7 +8200,14 @@ bool AAMemoryBehaviorFloating::followUsersOfUseIn(Attributor &A, const Use &U,
   // By default we follow all uses assuming UserI might leak information on U,
   // we have special handling for call sites operands though.
   const auto *CB = dyn_cast<CallBase>(UserI);
-  if (!CB || !CB->isArgOperand(&U))
+  if (!CB)
+    return true;
+
+  // The result of calling a function pointer is unrelated to the pointer.
+  if (CB->isCallee(&U))
+    return false;
+
+  if (!CB->isArgOperand(&U))
     return true;
 
   // If the use is a call argument known not to be captured, the users of
@@ -8256,11 +8263,10 @@ void AAMemoryBehaviorFloating::analyzeUseIn(Attributor &A, const Use &U,
       return;
     }
 
-    // Calling a function does read the function pointer, maybe write it if the
-    // function is self-modifying.
+    // Calling a function reads the function pointer, but does not write it.
     if (CB->isCallee(&U)) {
       removeAssumedBits(NO_READS);
-      break;
+      return;
     }
 
     // Adjust the possible access behavior based on the information on the

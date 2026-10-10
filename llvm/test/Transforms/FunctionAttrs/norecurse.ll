@@ -249,7 +249,7 @@ define void @unknown_call(ptr %fn) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@unknown_call
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[FN:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[FN:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[FN]]()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -264,7 +264,7 @@ define void @unknown_norecurse_call(ptr %fn) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@unknown_norecurse_call
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[FN:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[FN:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[FN]]() #[[ATTR9:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;

@@ -308,7 +308,7 @@ define void @nc2(ptr %p, ptr %q) {
 
 define void @nc3(ptr %p) {
 ; CHECK-LABEL: define {{[^@]+}}@nc3
-; CHECK-SAME: (ptr nofree noundef nonnull captures(none) [[P:%.*]]) {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly captures(none) [[P:%.*]]) {
 ; CHECK-NEXT:    call void [[P]]()
 ; CHECK-NEXT:    ret void
 ;
@@ -338,7 +338,7 @@ define void @nc4(ptr %p) {
 
 define void @callsite_readonly_nounwind_not_willreturn(ptr %f, ptr %p) {
 ; CHECK-LABEL: define {{[^@]+}}@callsite_readonly_nounwind_not_willreturn
-; CHECK-SAME: (ptr nofree noundef nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; CHECK-NEXT:    call void [[F]](ptr captures(none) [[P]])
 ; CHECK-NEXT:    ret void
 ;
@@ -349,7 +349,7 @@ define void @callsite_readonly_nounwind_not_willreturn(ptr %f, ptr %p) {
 
 define void @callsite_readonly_nounwind_willreturn(ptr %f, ptr %p) {
 ; CHECK-LABEL: define {{[^@]+}}@callsite_readonly_nounwind_willreturn
-; CHECK-SAME: (ptr nofree noundef nonnull captures(none) [[F:%.*]], ptr [[P:%.*]]) {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly captures(none) [[F:%.*]], ptr [[P:%.*]]) {
 ; CHECK-NEXT:    call void [[F]](ptr captures(none) [[P]])
 ; CHECK-NEXT:    ret void
 ;

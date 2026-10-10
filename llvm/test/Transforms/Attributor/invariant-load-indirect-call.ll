@@ -5,7 +5,7 @@
 
 define i32 @load_from_indirect_call_result(ptr %fp) {
 ; CHECK-LABEL: define i32 @load_from_indirect_call_result(
-; CHECK-SAME: ptr nofree noundef nonnull captures(none) [[FP:%.*]]) {
+; CHECK-SAME: ptr nofree noundef nonnull readonly captures(none) [[FP:%.*]]) {
 ; CHECK-NEXT:    [[P:%.*]] = call ptr [[FP]]()
 ; CHECK-NEXT:    [[V:%.*]] = load i32, ptr [[P]], align 4
 ; CHECK-NEXT:    ret i32 [[V]]

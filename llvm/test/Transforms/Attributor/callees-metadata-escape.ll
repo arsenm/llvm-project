@@ -24,7 +24,7 @@ define internal void @f() {
 ; CHECK-LABEL: define internal void @f(
 ; CHECK-SAME: ) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    store i32 1, ptr @sink, align 4
-; CHECK-NEXT:    call void @call_through(ptr nofree noundef null, i1 noundef false) #[[ATTR0]]
+; CHECK-NEXT:    call void @call_through(ptr nofree noundef readonly null, i1 noundef false) #[[ATTR0]]
 ; CHECK-NEXT:    ret void
 ;
   store i32 1, ptr @sink
@@ -34,7 +34,7 @@ define internal void @f() {
 
 define void @call_through(ptr %p, i1 %go) {
 ; CHECK-LABEL: define void @call_through(
-; CHECK-SAME: ptr nofree captures(none) [[P:%.*]], i1 noundef [[GO:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: ptr nofree readonly captures(none) [[P:%.*]], i1 noundef [[GO:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
 ; CHECK-NEXT:    br i1 [[GO]], label %[[DO:.*]], label %[[DONE:.*]]
 ; CHECK:       [[DO]]:
@@ -70,7 +70,7 @@ define void @call_g(ptr %p) {
 ; TUNIT-NEXT:    unreachable
 ;
 ; CGSCC-LABEL: define void @call_g(
-; CGSCC-SAME: ptr nofree noundef nonnull captures(none) [[P:%.*]]) {
+; CGSCC-SAME: ptr nofree noundef nonnull readonly captures(none) [[P:%.*]]) {
 ; CGSCC-NEXT:    call void @g()
 ; CGSCC-NEXT:    ret void
 ;

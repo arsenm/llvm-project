@@ -2350,7 +2350,7 @@ define i32 @switch_default_dead_caller() {
 
 define void @call_via_pointer_with_dead_args(ptr %a, ptr %b, ptr %fp) {
 ; CHECK-LABEL: define {{[^@]+}}@call_via_pointer_with_dead_args
-; CHECK-SAME: (ptr [[A:%.*]], ptr [[B:%.*]], ptr nofree noundef nonnull captures(none) [[FP:%.*]]) {
+; CHECK-SAME: (ptr [[A:%.*]], ptr [[B:%.*]], ptr nofree noundef nonnull readonly captures(none) [[FP:%.*]]) {
 ; CHECK-NEXT:    call void [[FP]](ptr [[A]], ptr [[B]], ptr [[A]], i64 -1, ptr null)
 ; CHECK-NEXT:    ret void
 ;
@@ -2393,8 +2393,8 @@ define void @call_via_pointer_with_dead_args_caller(ptr %a, ptr %b) {
 ; CHECK-NEXT:    [[PTR2:%.*]] = alloca i32, align 128
 ; CHECK-NEXT:    [[PTR3:%.*]] = alloca i32, align 128
 ; CHECK-NEXT:    [[PTR4:%.*]] = alloca i32, align 128
-; CHECK-NEXT:    call void @call_via_pointer_with_dead_args(ptr [[A]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR1]], ptr nofree noundef nonnull captures(none) @called_via_pointer)
-; CHECK-NEXT:    call void @call_via_pointer_with_dead_args(ptr [[A]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR2]], ptr nofree noundef nonnull captures(none) @called_via_pointer_internal_1)
+; CHECK-NEXT:    call void @call_via_pointer_with_dead_args(ptr [[A]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR1]], ptr nofree noundef nonnull readonly captures(none) @called_via_pointer)
+; CHECK-NEXT:    call void @call_via_pointer_with_dead_args(ptr [[A]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR2]], ptr nofree noundef nonnull readonly captures(none) @called_via_pointer_internal_1)
 ; CHECK-NEXT:    call void @call_via_pointer_with_dead_args_internal_a(ptr [[B]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR3]])
 ; CHECK-NEXT:    call void @call_via_pointer_with_dead_args_internal_b(ptr [[B]], ptr noundef nonnull align 128 dereferenceable(4) [[PTR4]])
 ; CHECK-NEXT:    ret void

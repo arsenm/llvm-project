@@ -409,7 +409,7 @@ define void @unknown_call(ptr %fn) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@unknown_call
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[FN:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[FN:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[FN]]()
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -426,7 +426,7 @@ define void @unknown_nounwind_call(ptr %fn) {
 ;
 ; ATTRIBUTOR: Function Attrs: nounwind
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@unknown_nounwind_call
-; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[FN:%.*]]) #[[ATTR2:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[FN:%.*]]) #[[ATTR2:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    call void [[FN]]() #[[ATTR2]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;

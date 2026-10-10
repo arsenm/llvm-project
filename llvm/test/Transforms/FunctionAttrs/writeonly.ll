@@ -293,7 +293,7 @@ define void @fptr_test1(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test1
-; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -308,7 +308,7 @@ define void @fptr_test2(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test2
-; ATTRIBUTOR-SAME: (ptr captures(none) [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr captures(none) [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr writeonly captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
@@ -325,7 +325,7 @@ define void @fptr_test3(ptr %p, ptr %f) {
 ;
 ; ATTRIBUTOR: Function Attrs: memory(write)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test3
-; ATTRIBUTOR-SAME: (ptr writeonly captures(none) [[P:%.*]], ptr nofree nonnull writeonly captures(none) [[F:%.*]]) #[[ATTR9]] {
+; ATTRIBUTOR-SAME: (ptr writeonly captures(none) [[P:%.*]], ptr nofree nonnull readnone captures(none) [[F:%.*]]) #[[ATTR9]] {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr captures(none) [[P]]) #[[ATTR9]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;

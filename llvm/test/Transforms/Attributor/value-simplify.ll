@@ -974,13 +974,13 @@ define i1 @icmp() {
 
 define void @test_callee_is_undef(ptr %fn) {
 ; TUNIT-LABEL: define {{[^@]+}}@test_callee_is_undef
-; TUNIT-SAME: (ptr nofree captures(none) [[FN:%.*]]) {
-; TUNIT-NEXT:    call void @unknown_calle_arg_is_undef(ptr nofree noundef captures(none) [[FN]])
+; TUNIT-SAME: (ptr nofree readonly captures(none) [[FN:%.*]]) {
+; TUNIT-NEXT:    call void @unknown_calle_arg_is_undef(ptr nofree noundef readonly captures(none) [[FN]])
 ; TUNIT-NEXT:    ret void
 ;
 ; CGSCC-LABEL: define {{[^@]+}}@test_callee_is_undef
-; CGSCC-SAME: (ptr nofree noundef nonnull captures(none) [[FN:%.*]]) {
-; CGSCC-NEXT:    call void @unknown_calle_arg_is_undef(ptr nofree noundef nonnull captures(none) [[FN]])
+; CGSCC-SAME: (ptr nofree noundef nonnull readonly captures(none) [[FN:%.*]]) {
+; CGSCC-NEXT:    call void @unknown_calle_arg_is_undef(ptr nofree noundef nonnull readonly captures(none) [[FN]])
 ; CGSCC-NEXT:    ret void
 ;
   call void @callee_is_undef(ptr undef)
@@ -1000,7 +1000,7 @@ define internal void @callee_is_undef(ptr %fn) {
 define internal void @unknown_calle_arg_is_undef(ptr %fn, i32 %arg) {
 ;
 ; CHECK-LABEL: define {{[^@]+}}@unknown_calle_arg_is_undef
-; CHECK-SAME: (ptr nofree noundef nonnull captures(none) [[FN:%.*]]) {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly captures(none) [[FN:%.*]]) {
 ; CHECK-NEXT:    call void [[FN]](i32 undef)
 ; CHECK-NEXT:    ret void
 ;
@@ -1037,7 +1037,7 @@ define internal void @f2(ptr %a) {
 ; CHECK-LABEL: define {{[^@]+}}@f2
 ; CHECK-SAME: (ptr [[A:%.*]]) {
 ; CHECK-NEXT:  cont461:
-; CHECK-NEXT:    call void @f3(ptr [[A]], ptr nofree captures(none) [[A]])
+; CHECK-NEXT:    call void @f3(ptr [[A]], ptr nofree readonly captures(none) [[A]])
 ; CHECK-NEXT:    ret void
 ;
 cont461:
@@ -1047,7 +1047,7 @@ cont461:
 
 define internal void @f3(ptr %a1, ptr %a) {
 ; CHECK-LABEL: define {{[^@]+}}@f3
-; CHECK-SAME: (ptr [[A1:%.*]], ptr nofree captures(none) [[A:%.*]]) {
+; CHECK-SAME: (ptr [[A1:%.*]], ptr nofree readonly captures(none) [[A:%.*]]) {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CALL20:%.*]] = call i1 @f9()
 ; CHECK-NEXT:    br i1 [[CALL20]], label [[LAND_LHS_TRUE:%.*]], label [[IF_END40:%.*]]

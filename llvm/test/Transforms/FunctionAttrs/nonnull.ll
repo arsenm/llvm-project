@@ -1403,7 +1403,7 @@ define ptr @unknown_func(ptr %fn) {
 ; FNATTRS-NEXT:    ret ptr [[RES]]
 ;
 ; ATTRIBUTOR-LABEL: define ptr @unknown_func(
-; ATTRIBUTOR-SAME: ptr nofree nonnull captures(none) [[FN:%.*]]) {
+; ATTRIBUTOR-SAME: ptr nofree nonnull readonly captures(none) [[FN:%.*]]) {
 ; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call ptr [[FN]]()
 ; ATTRIBUTOR-NEXT:    ret ptr [[RES]]
 ;
@@ -1418,7 +1418,7 @@ define ptr @unknown_nonnull_func(ptr %fn) {
 ; FNATTRS-NEXT:    ret ptr [[RES]]
 ;
 ; ATTRIBUTOR-LABEL: define nonnull ptr @unknown_nonnull_func(
-; ATTRIBUTOR-SAME: ptr nofree nonnull captures(none) [[FN:%.*]]) {
+; ATTRIBUTOR-SAME: ptr nofree nonnull readonly captures(none) [[FN:%.*]]) {
 ; ATTRIBUTOR-NEXT:    [[RES:%.*]] = call nonnull ptr [[FN]]()
 ; ATTRIBUTOR-NEXT:    ret ptr [[RES]]
 ;

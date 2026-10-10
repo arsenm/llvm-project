@@ -446,12 +446,12 @@ define void @fptr_test1a(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test1a
-; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr nofree readnone captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@fptr_test1a
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-CGSCC-NEXT:    call void [[F]](ptr nofree readnone captures(none) [[P]])
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -467,12 +467,12 @@ define void @fptr_test1b(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test1b
-; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr nofree readnone [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@fptr_test1b
-; ATTRIBUTOR-CGSCC-SAME: (ptr [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-CGSCC-SAME: (ptr [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-CGSCC-NEXT:    call void [[F]](ptr nofree readnone [[P]])
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -510,12 +510,12 @@ define void @fptr_test2a(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test2a
-; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr nofree readonly captures(none) [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@fptr_test2a
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-CGSCC-NEXT:    call void [[F]](ptr nofree readonly captures(none) [[P]])
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -531,12 +531,12 @@ define void @fptr_test2b(ptr %p, ptr %f) {
 ; FNATTRS-NEXT:    ret void
 ;
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@fptr_test2b
-; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-SAME: (ptr [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-NEXT:    call void [[F]](ptr nofree readonly [[P]])
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@fptr_test2b
-; ATTRIBUTOR-CGSCC-SAME: (ptr [[P:%.*]], ptr nofree nonnull captures(none) [[F:%.*]]) {
+; ATTRIBUTOR-CGSCC-SAME: (ptr [[P:%.*]], ptr nofree nonnull readonly captures(none) [[F:%.*]]) {
 ; ATTRIBUTOR-CGSCC-NEXT:    call void [[F]](ptr nofree readonly [[P]])
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
