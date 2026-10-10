@@ -25,6 +25,7 @@
 
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/DenseSet.h"
+#include "llvm/ADT/SetVector.h"
 #include "llvm/Analysis/InstructionPrecedenceTracking.h"
 #include "llvm/IR/EHPersonalities.h"
 #include "llvm/IR/PassManager.h"
@@ -335,9 +336,23 @@ struct MustBeExecutedIterator {
            Visited.count({I, ExplorationDirection::BACKWARD});
   }
 
+  /// Call \p Pred for the instructions encountered so far, in the order they
+  /// were encountered, until it returns false. Returns false if \p Pred did.
+  bool checkForAllVisited(function_ref<bool(const Instruction *)> Pred) const {
+    for (auto [Idx, Entry] : enumerate(Visited)) {
+      // The initial instruction is visited in both directions but encountered
+      // once.
+      if (Idx == 1)
+        continue;
+      if (!Pred(Entry.getPointer()))
+        return false;
+    }
+    return true;
+  }
+
 private:
   using VisitedSetTy =
-      DenseSet<PointerIntPair<const Instruction *, 1, ExplorationDirection>>;
+      SetVector<PointerIntPair<const Instruction *, 1, ExplorationDirection>>;
 
   /// Private constructors.
   LLVM_ABI MustBeExecutedIterator(ExplorerTy &Explorer, const Instruction *I);
@@ -456,13 +471,12 @@ struct MustBeExecutedContextExplorer {
   /// true if \p Pred holds in every instruction.
   bool checkForAllContext(const Instruction *PP,
                           function_ref<bool(const Instruction *)> Pred) {
-    // Don't use begin(PP): that iterator is shared with other queries and may
-    // already be partway through the context, so we would miss instructions.
-    for (iterator EIt(*this, PP); EIt != EndIterator; ++EIt) {
-      if (!Pred(*EIt))
-        return false;
-    }
-    return true;
+    // The iterator is shared with other queries, so explore the whole context
+    // once and then visit the instructions in the order they were explored.
+    iterator &EIt = begin(PP), &EEnd = end(PP);
+    while (EIt != EEnd)
+      ++EIt;
+    return EIt.checkForAllVisited(Pred);
   }
 
   /// Helper to look for \p I in the context of \p PP.

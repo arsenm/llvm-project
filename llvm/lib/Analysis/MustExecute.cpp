@@ -750,12 +750,12 @@ void MustBeExecutedIterator::resetInstruction(const Instruction *I) {
 const Instruction *MustBeExecutedIterator::advance() {
   assert(CurInst && "Cannot advance an end iterator!");
   Head = Explorer.getMustBeExecutedNextInstruction(*this, Head);
-  if (Head && Visited.insert({Head, ExplorationDirection ::FORWARD}).second)
+  if (Head && Visited.insert({Head, ExplorationDirection ::FORWARD}))
     return Head;
   Head = nullptr;
 
   Tail = Explorer.getMustBeExecutedPrevInstruction(*this, Tail);
-  if (Tail && Visited.insert({Tail, ExplorationDirection ::BACKWARD}).second)
+  if (Tail && Visited.insert({Tail, ExplorationDirection ::BACKWARD}))
     return Tail;
   Tail = nullptr;
   return nullptr;
