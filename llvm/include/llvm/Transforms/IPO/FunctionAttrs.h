@@ -33,6 +33,10 @@ class Module;
 LLVM_ABI MemoryEffects computeFunctionBodyMemoryAccess(Function &F,
                                                        AAResults &AAR);
 
+/// Add the cold attribute to \p F if all paths through it call a cold
+/// function. Returns true if it changed.
+LLVM_ABI bool inferCold(Function &F);
+
 /// Add the returned attribute to the argument of \p F that is always returned,
 /// if there is one. Returns true if it changed.
 LLVM_ABI bool inferReturnedArg(Function &F);

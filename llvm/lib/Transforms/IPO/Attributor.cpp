@@ -4068,6 +4068,8 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
         continue;
       if (inferReturnedArg(*F))
         LocalChanged.insert(F);
+      if (inferCold(*F))
+        LocalChanged.insert(F);
       for (Argument &Arg : F->args()) {
         if (Arg.getType()->isPointerTy() && !Arg.onlyReadsMemory() &&
             inferInitializes(Arg))

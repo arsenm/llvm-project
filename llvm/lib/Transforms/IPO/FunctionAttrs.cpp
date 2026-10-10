@@ -2149,21 +2149,26 @@ static bool allPathsGoThroughCold(Function &F) {
   return true;
 }
 
+bool llvm::inferCold(Function &F) {
+  if (F.hasFnAttribute(Attribute::Naked) || F.hasFnAttribute(Attribute::Cold) ||
+      F.hasFnAttribute(Attribute::Hot))
+    return false;
+
+  // Potential TODO: We could add attribute `cold` on functions with `coldcc`.
+  if (!allPathsGoThroughCold(F))
+    return false;
+
+  F.addFnAttr(Attribute::Cold);
+  ++NumCold;
+  return true;
+}
+
 // Set the cold function attribute if possible.
 static void addColdAttrs(const SCCNodeSet &SCCNodes,
                          SmallPtrSet<Function *, 8> &Changed) {
   for (Function *F : SCCNodes) {
-    if (!F || !F->hasExactDefinition() || F->hasFnAttribute(Attribute::Naked) ||
-        F->hasFnAttribute(Attribute::Cold) || F->hasFnAttribute(Attribute::Hot))
-      continue;
-
-    // Potential TODO: We could add attribute `cold` on functions with `coldcc`.
-    if (allPathsGoThroughCold(*F)) {
-      F->addFnAttr(Attribute::Cold);
-      ++NumCold;
+    if (F && F->hasExactDefinition() && inferCold(*F))
       Changed.insert(F);
-      continue;
-    }
   }
 }
 
