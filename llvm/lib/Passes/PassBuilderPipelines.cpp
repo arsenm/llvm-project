@@ -1087,10 +1087,14 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   // (quick!) no-op if there are no OpenMP runtime calls present in the module.
   MPM.addPass(OpenMPOptPass(Phase));
 
-  if (Opts.attributor_enable & AttributorRunOption::MODULE)
+  if (Opts.attributor_enable & AttributorRunOption::MODULE) {
     MPM.addPass(AttributorPass());
-  else if (Opts.attributor_enable & AttributorRunOption::MODULE_LIGHT)
-    MPM.addPass(AttributorLightPass());
+  } else if (Opts.attributor_enable & AttributorRunOption::MODULE_LIGHT) {
+    // Attributes that only depend on the function and its callees are deduced
+    // later, after simplification. Only deduce those depending on the callers
+    // here.
+    MPM.addPass(AttributorLightPass(/*TopDownOnly=*/true));
+  }
 
   // Lower type metadata and the type.test intrinsic in the ThinLTO
   // post link pipeline after ICP. This is to enable usage of the type

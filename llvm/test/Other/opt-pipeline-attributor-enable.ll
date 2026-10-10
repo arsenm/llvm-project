@@ -14,12 +14,12 @@
 ; CGSCCLIGHT-SAME: ),attributor-light-cgscc,function(
 ; CGSCCLIGHT-SAME: ,elim-avail-extern,rpo-function-attrs,
 
-; MODULELIGHT: openmp-opt,attributor-light,ipsccp
+; MODULELIGHT: openmp-opt,attributor-light<top-down>,ipsccp
 ; MODULELIGHT-SAME: inline,function-attrs<skip-non-recursive-function-attrs>,
 ; MODULELIGHT-SAME: ),function-attrs,function(
 ; MODULELIGHT-SAME: ,elim-avail-extern,attributor-light,
 
-; LIGHT: openmp-opt,attributor-light,
+; LIGHT: openmp-opt,attributor-light<top-down>,
 ; LIGHT-SAME: inline,attributor-light-cgscc,
 ; LIGHT-SAME: ),attributor-light-cgscc,function(
 ; LIGHT-RPO-SAME: ,elim-avail-extern,attributor-light,
