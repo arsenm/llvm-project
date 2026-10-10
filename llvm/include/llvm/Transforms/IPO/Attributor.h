@@ -4597,7 +4597,7 @@ struct AAMemoryBehavior
 struct AAMemoryLocation
     : public IRAttribute<
           Attribute::None,
-          StateWrapper<BitIntegerState<uint32_t, 511>, AbstractAttribute>,
+          StateWrapper<BitIntegerState<uint32_t, 1023>, AbstractAttribute>,
           AAMemoryLocation> {
   using MemoryLocationsKind = StateType::base_t;
 
@@ -4627,9 +4627,12 @@ struct AAMemoryLocation
     NO_INACCESSIBLE_MEM = 1 << 5,
     NO_MALLOCED_MEM = 1 << 6,
     NO_UNKOWN_MEM = 1 << 7,
+    /// Memory accessed through a pointer to an unknown object. This can be
+    /// argument, global or allocated memory, but not inaccessible memory.
+    NO_UNKNOWN_OBJECT_MEM = 1 << 8,
     NO_LOCATIONS = NO_LOCAL_MEM | NO_CONST_MEM | NO_GLOBAL_INTERNAL_MEM |
-                   NO_GLOBAL_EXTERNAL_MEM | NO_ARGUMENT_MEM |
-                   NO_INACCESSIBLE_MEM | NO_MALLOCED_MEM | NO_UNKOWN_MEM,
+        NO_GLOBAL_EXTERNAL_MEM | NO_ARGUMENT_MEM | NO_INACCESSIBLE_MEM |
+        NO_MALLOCED_MEM | NO_UNKOWN_MEM | NO_UNKNOWN_OBJECT_MEM,
 
     // Helper bit to track if we gave up or not.
     VALID_STATE = NO_LOCATIONS + 1,

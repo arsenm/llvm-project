@@ -724,7 +724,7 @@ end:
 }
 
 define void @test13-1(i1 %c, ptr align 32 %dst) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@test13-1
 ; TUNIT-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR9:[0-9]+]] {
 ; TUNIT-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -737,7 +737,7 @@ define void @test13-1(i1 %c, ptr align 32 %dst) {
 ; TUNIT-NEXT:    store i32 0, ptr [[PTR]], align 16
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test13-1
 ; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR10:[0-9]+]] {
 ; CGSCC-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -762,7 +762,7 @@ end:
 }
 
 define void @test13-2(i1 %c, ptr align 32 %dst) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@test13-2
 ; TUNIT-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR9]] {
 ; TUNIT-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -775,7 +775,7 @@ define void @test13-2(i1 %c, ptr align 32 %dst) {
 ; TUNIT-NEXT:    store i32 0, ptr [[PTR]], align 32
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test13-2
 ; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR10]] {
 ; CGSCC-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -800,7 +800,7 @@ end:
 }
 
 define void @test13-3(i1 %c, ptr align 32 %dst) {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define {{[^@]+}}@test13-3
 ; TUNIT-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR9]] {
 ; TUNIT-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -813,7 +813,7 @@ define void @test13-3(i1 %c, ptr align 32 %dst) {
 ; TUNIT-NEXT:    store i32 0, ptr [[PTR]], align 32
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test13-3
 ; CGSCC-SAME: (i1 noundef [[C:%.*]], ptr nofree writeonly align 32 captures(none) [[DST:%.*]]) #[[ATTR10]] {
 ; CGSCC-NEXT:    br i1 [[C]], label [[TRUEBB:%.*]], label [[FALSEBB:%.*]]
@@ -1227,7 +1227,7 @@ attributes #2 = { null_pointer_is_valid }
 ; TUNIT: attributes #[[ATTR6]] = { nounwind willreturn }
 ; TUNIT: attributes #[[ATTR7]] = { mustprogress nounwind willreturn }
 ; TUNIT: attributes #[[ATTR8]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
-; TUNIT: attributes #[[ATTR9]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; TUNIT: attributes #[[ATTR9]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR12]] = { mustprogress norecurse nounwind willreturn memory(argmem: readwrite) }
@@ -1245,7 +1245,7 @@ attributes #2 = { null_pointer_is_valid }
 ; CGSCC: attributes #[[ATTR7]] = { nounwind willreturn }
 ; CGSCC: attributes #[[ATTR8]] = { mustprogress nounwind willreturn }
 ; CGSCC: attributes #[[ATTR9]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
-; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR12]] = { mustprogress nofree nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR13]] = { mustprogress nofree nosync nounwind willreturn memory(none) }

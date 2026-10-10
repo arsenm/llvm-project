@@ -77,7 +77,7 @@ define i32 @test_read_loaded_ptr(ptr %ptr) {
 ; FNATTRS-NEXT:    [[L_2:%.*]] = load i32, ptr [[L]], align 4
 ; FNATTRS-NEXT:    ret i32 [[L_2]]
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define i32 @test_read_loaded_ptr
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR3:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
@@ -368,11 +368,11 @@ define void @test_recursive_argmem_read(ptr %p) {
 ; FNATTRS-NEXT:    call void @test_recursive_argmem_read(ptr [[PVAL]])
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_read
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR16:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR23:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -389,12 +389,12 @@ define void @test_recursive_argmem_readwrite(ptr %p) {
 ; FNATTRS-NEXT:    call void @test_recursive_argmem_readwrite(ptr [[PVAL]])
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(readwrite, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_recursive_argmem_readwrite
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull captures(none) [[P:%.*]]) #[[ATTR17:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr nofree captures(none) [[PVAL]]) #[[ATTR17]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_readwrite(ptr nofree captures(none) [[PVAL]]) #[[ATTR24:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -417,7 +417,7 @@ define void @test_recursive_argmem_read_alloca(ptr %p) {
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR18:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = alloca ptr, align 8
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = load i32, ptr [[P]], align 4
-; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr nofree nonnull readonly captures(none) [[A]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_recursive_argmem_read_alloca(ptr nofree nonnull readonly captures(none) [[A]]) #[[ATTR23]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %a = alloca ptr
@@ -434,11 +434,11 @@ define void @test_scc_argmem_read_1(ptr %p) {
 ; FNATTRS-NEXT:    call void @test_scc_argmem_read_2(ptr [[PVAL]])
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_1
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[P:%.*]]) #[[ATTR16]] {
 ; ATTRIBUTOR-NEXT:    [[PVAL:%.*]] = load ptr, ptr [[P]], align 8
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_2(ptr nofree readonly captures(none) [[PVAL]]) #[[ATTR23]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   %pval = load ptr, ptr %p
@@ -453,10 +453,10 @@ define void @test_scc_argmem_read_2(ptr %p) {
 ; FNATTRS-NEXT:    call void @test_scc_argmem_read_1(ptr [[P]])
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read)
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @test_scc_argmem_read_2
 ; ATTRIBUTOR-SAME: (ptr nofree readonly captures(none) [[P:%.*]]) #[[ATTR16]] {
-; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr nofree readonly captures(none) [[P]]) #[[ATTR16]]
+; ATTRIBUTOR-NEXT:    call void @test_scc_argmem_read_1(ptr nofree readonly captures(none) [[P]]) #[[ATTR23]]
 ; ATTRIBUTOR-NEXT:    ret void
 ;
   call void @test_scc_argmem_read_1(ptr %p)

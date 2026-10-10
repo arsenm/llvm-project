@@ -36,7 +36,7 @@ define i32 @test_const_as_global2() {
 }
 ; Should be memory(none)
 define i32 @test_const_as_call1() {
-; CHECK: Function Attrs: nosync memory(read)
+; CHECK: Function Attrs: nosync memory(read, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@test_const_as_call1
 ; CHECK-SAME: () #[[ATTR2:[0-9]+]] {
 ; CHECK-NEXT:    [[P1:%.*]] = call ptr addrspace(4) @ptr_to_const() #[[ATTR4:[0-9]+]]
@@ -66,7 +66,7 @@ define i32 @test_const_as_call2() {
 
 ; Should be memory(read)
 define i32 @test_shared_as_call1() {
-; CHECK: Function Attrs: nosync memory(read)
+; CHECK: Function Attrs: nosync memory(read, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@test_shared_as_call1
 ; CHECK-SAME: () #[[ATTR2]] {
 ; CHECK-NEXT:    [[P1:%.*]] = call ptr addrspace(3) @ptr_to_shared() #[[ATTR4]]
@@ -80,7 +80,7 @@ define i32 @test_shared_as_call1() {
 }
 ; Should be memory(read)
 define i32 @test_shared_as_call2() {
-; CHECK: Function Attrs: nosync memory(read)
+; CHECK: Function Attrs: nosync memory(read, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@test_shared_as_call2
 ; CHECK-SAME: () #[[ATTR2]] {
 ; CHECK-NEXT:    [[P2:%.*]] = call ptr @ptr() #[[ATTR4]]
@@ -96,7 +96,7 @@ define i32 @test_shared_as_call2() {
 ;.
 ; CHECK: attributes #[[ATTR0:[0-9]+]] = { memory(none) }
 ; CHECK: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CHECK: attributes #[[ATTR2]] = { nosync memory(read) }
+; CHECK: attributes #[[ATTR2]] = { nosync memory(read, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR3]] = { nosync memory(none) }
 ; CHECK: attributes #[[ATTR4]] = { nosync }
 ;.

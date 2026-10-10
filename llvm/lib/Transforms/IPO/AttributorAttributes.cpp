@@ -8318,6 +8318,8 @@ std::string AAMemoryLocation::getMemoryLocationsAsStr(
     S += "malloced,";
   if (0 == (MLK & AAMemoryLocation::NO_UNKOWN_MEM))
     S += "unknown,";
+  if (0 == (MLK & AAMemoryLocation::NO_UNKNOWN_OBJECT_MEM))
+    S += "unknown object,";
   S.pop_back();
   return S;
 }
@@ -8426,6 +8428,10 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
     if (!isAssumed(NO_INACCESSIBLE_MEM))
       ME |= MemoryEffects::inaccessibleMemOnly();
     if (!isAssumed(NO_GLOBAL_MEM | NO_MALLOCED_MEM))
+      ME |= MemoryEffects::otherMemOnly() | MemoryEffects::errnoMemOnly();
+    // Accesses through pointers to unknown objects are also recorded as
+    // argument memory accesses.
+    if (!isAssumed(NO_UNKNOWN_OBJECT_MEM))
       ME |= MemoryEffects::otherMemOnly() | MemoryEffects::errnoMemOnly();
     Attrs.push_back(Attribute::getWithMemoryEffects(Ctx, ME));
   }
@@ -8627,9 +8633,9 @@ void AAMemoryLocationImpl::categorizePtrValue(
               IsKnownNoAlias))
         MLK = NO_MALLOCED_MEM;
       else
-        MLK = NO_UNKOWN_MEM;
+        MLK = NO_UNKNOWN_OBJECT_MEM;
     } else {
-      MLK = NO_UNKOWN_MEM;
+      MLK = NO_UNKNOWN_OBJECT_MEM;
     }
 
     assert(MLK != NO_LOCATIONS && "No location specified!");
@@ -8637,6 +8643,10 @@ void AAMemoryLocationImpl::categorizePtrValue(
                       << Obj << " -> " << getMemoryLocationsAsStr(MLK) << "\n");
     updateStateAndAccessesMap(State, MLK, &I, &Obj, Changed,
                               getAccessKindFromInst(&I));
+    // A pointer to an unknown object may also point to argument memory.
+    if (MLK == NO_UNKNOWN_OBJECT_MEM)
+      updateStateAndAccessesMap(State, NO_ARGUMENT_MEM, &I, &Obj, Changed,
+                                getAccessKindFromInst(&I));
 
     return true;
   };
@@ -8646,7 +8656,9 @@ void AAMemoryLocationImpl::categorizePtrValue(
   if (!AA || !AA->forallUnderlyingObjects(Pred, AA::Intraprocedural)) {
     LLVM_DEBUG(
         dbgs() << "[AAMemoryLocation] Pointer locations not categorized\n");
-    updateStateAndAccessesMap(State, NO_UNKOWN_MEM, &I, nullptr, Changed,
+    updateStateAndAccessesMap(State, NO_UNKNOWN_OBJECT_MEM, &I, nullptr,
+                              Changed, getAccessKindFromInst(&I));
+    updateStateAndAccessesMap(State, NO_ARGUMENT_MEM, &I, nullptr, Changed,
                               getAccessKindFromInst(&I));
     return;
   }

@@ -486,7 +486,7 @@ entry:
 ;
 ; There should *not* be a no-capture attribute on %a
 define void @negative_test_not_captured_but_returned_call_1b(ptr %a) #0 {
-; TUNIT: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write) uwtable
+; TUNIT: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) uwtable
 ; TUNIT-LABEL: define void @negative_test_not_captured_but_returned_call_1b
 ; TUNIT-SAME: (ptr nofree writeonly align 8 [[A:%.*]]) #[[ATTR5:[0-9]+]] {
 ; TUNIT-NEXT:  entry:
@@ -495,7 +495,7 @@ define void @negative_test_not_captured_but_returned_call_1b(ptr %a) #0 {
 ; TUNIT-NEXT:    store i64 [[TMP0]], ptr [[CALL]], align 8
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(write) uwtable
+; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) uwtable
 ; CGSCC-LABEL: define void @negative_test_not_captured_but_returned_call_1b
 ; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A:%.*]]) #[[ATTR6:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
@@ -831,7 +831,7 @@ exit:
 ; TUNIT: attributes #[[ATTR2]] = { nofree nosync nounwind memory(none) }
 ; TUNIT: attributes #[[ATTR3]] = { noinline nounwind uwtable }
 ; TUNIT: attributes #[[ATTR4]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
-; TUNIT: attributes #[[ATTR5]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write) uwtable }
+; TUNIT: attributes #[[ATTR5]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) uwtable }
 ; TUNIT: attributes #[[ATTR6:[0-9]+]] = { memory(read) }
 ; TUNIT: attributes #[[ATTR7]] = { noinline nosync nounwind memory(read) uwtable }
 ; TUNIT: attributes #[[ATTR8]] = { nosync nounwind memory(read) }
@@ -847,7 +847,7 @@ exit:
 ; CGSCC: attributes #[[ATTR3]] = { noinline nounwind uwtable }
 ; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable }
 ; CGSCC: attributes #[[ATTR5]] = { mustprogress nofree noinline nosync nounwind willreturn memory(argmem: write) uwtable }
-; CGSCC: attributes #[[ATTR6]] = { mustprogress nofree noinline nosync nounwind willreturn memory(write) uwtable }
+; CGSCC: attributes #[[ATTR6]] = { mustprogress nofree noinline nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) uwtable }
 ; CGSCC: attributes #[[ATTR7:[0-9]+]] = { memory(read) }
 ; CGSCC: attributes #[[ATTR8]] = { noinline nosync nounwind memory(read) uwtable }
 ; CGSCC: attributes #[[ATTR9]] = { nosync nounwind memory(read) }

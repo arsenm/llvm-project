@@ -53,9 +53,9 @@ define void @store_as1(ptr addrspace(1) %arg) {
 
 attributes #0 = { null_pointer_is_valid }
 ;.
-; CHECK: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(write) }
+; CHECK: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(write, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind null_pointer_is_valid willreturn memory(none) }
 ; CHECK: attributes #[[ATTR2]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }
-; CHECK: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write) }
+; CHECK: attributes #[[ATTR3]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) }
 ; CHECK: attributes #[[ATTR4]] = { nofree nosync nounwind willreturn memory(write) }
 ;.

@@ -18,14 +18,15 @@ define internal i64 @load_cast_null() {
 
 define i64 @caller() {
 ; CHECK-LABEL: define i64 @caller(
-; CHECK-SAME: ) #[[ATTR0]] {
-; CHECK-NEXT:    [[V:%.*]] = call i64 @load_cast_null() #[[ATTR1:[0-9]+]]
+; CHECK-SAME: ) #[[ATTR1:[0-9]+]] {
+; CHECK-NEXT:    [[V:%.*]] = call i64 @load_cast_null() #[[ATTR2:[0-9]+]]
 ; CHECK-NEXT:    ret i64 [[V]]
 ;
   %v = call i64 @load_cast_null()
   ret i64 %v
 }
 ;.
-; CHECK: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read) }
-; CHECK: attributes #[[ATTR1]] = { nofree nosync nounwind willreturn memory(read) }
+; CHECK: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read, inaccessiblemem: none, target_mem: none) }
+; CHECK: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(read, argmem: none, inaccessiblemem: none, target_mem: none) }
+; CHECK: attributes #[[ATTR2]] = { nofree nosync nounwind willreturn memory(read) }
 ;.

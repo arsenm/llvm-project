@@ -2,7 +2,7 @@
 ; RUN: opt -passes=attributor -S < %s | FileCheck %s
 
 define amdgpu_kernel void @__omp_offloading_fd00_2c00523__ZN11qmcplusplus7ompBLAS9gemv_implIfEEiRiciiT_PKS3_iS5_iS3_PS3_i_l383() {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@__omp_offloading_fd00_2c00523__ZN11qmcplusplus7ompBLAS9gemv_implIfEEiRiciiT_PKS3_iS5_iS3_PS3_i_l383
 ; CHECK-SAME: () #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP1:%.*]] = alloca [0 x [0 x float]], i32 0, align 8, addrspace(5)
@@ -19,9 +19,9 @@ define amdgpu_kernel void @__omp_offloading_fd00_2c00523__ZN11qmcplusplus7ompBLA
 }
 
 define fastcc i32 @__kmpc_nvptx_parallel_reduce_nowait_v2(ptr %0, i1 %1) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
 ; CHECK-LABEL: define {{[^@]+}}@__kmpc_nvptx_parallel_reduce_nowait_v2
-; CHECK-SAME: (ptr nofree nonnull readonly align 8 captures(none) dereferenceable(8) [[TMP0:%.*]], i1 noundef [[TMP1:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree nonnull readonly align 8 captures(none) dereferenceable(8) [[TMP0:%.*]], i1 noundef [[TMP1:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    br i1 [[TMP1]], label [[TMP3:%.*]], label [[TMP79:%.*]]
 ; CHECK:       3:
 ; CHECK-NEXT:    br i1 [[TMP1]], label [[TMP4:%.*]], label [[TMP6:%.*]]
