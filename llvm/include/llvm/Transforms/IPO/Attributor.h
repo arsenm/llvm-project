@@ -1933,6 +1933,9 @@ private:
                                                AttributeMask &, AttrBuilder &)>
                                  CB);
 
+  /// Return the attributes of \p IRP, including changes not yet manifested.
+  AttributeSet getAttrSet(const IRPosition &IRP) const;
+
   /// Mapping from functions/call sites to their attributes.
   DenseMap<Value *, AttributeList> AttrsMap;
 

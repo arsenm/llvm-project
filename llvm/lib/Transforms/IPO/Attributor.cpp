@@ -1203,22 +1203,34 @@ Attributor::updateAttrMap(const IRPosition &IRP, ArrayRef<DescTy> AttrDescs,
   return HasChanged;
 }
 
+AttributeSet Attributor::getAttrSet(const IRPosition &IRP) const {
+  switch (IRP.getPositionKind()) {
+  case IRPosition::IRP_FLOAT:
+  case IRPosition::IRP_INVALID:
+    return AttributeSet();
+  default:
+    break;
+  }
+
+  auto Iter = AttrsMap.find(IRP.getAttrListAnchor());
+  AttributeList AL = Iter != AttrsMap.end() ? Iter->second : IRP.getAttrList();
+  return AL.getAttributes(IRP.getAttrIdx());
+}
+
 bool Attributor::hasAttr(const IRPosition &IRP,
                          ArrayRef<Attribute::AttrKind> AttrKinds,
                          bool IgnoreSubsumingPositions,
                          Attribute::AttrKind ImpliedAttributeKind) {
   bool Implied = false;
   bool HasAttr = false;
-  auto HasAttrCB = [&](const Attribute::AttrKind &Kind, AttributeSet AttrSet,
-                       AttributeMask &, AttrBuilder &) {
-    if (AttrSet.hasAttribute(Kind)) {
-      Implied |= Kind != ImpliedAttributeKind;
-      HasAttr = true;
-    }
-    return false;
-  };
   for (const IRPosition &EquivIRP : SubsumingPositionIterator(IRP)) {
-    updateAttrMap<Attribute::AttrKind>(EquivIRP, AttrKinds, HasAttrCB);
+    AttributeSet AttrSet = getAttrSet(EquivIRP);
+    for (Attribute::AttrKind Kind : AttrKinds) {
+      if (AttrSet.hasAttribute(Kind)) {
+        Implied |= Kind != ImpliedAttributeKind;
+        HasAttr = true;
+      }
+    }
     if (HasAttr)
       break;
     // The first position returned by the SubsumingPositionIterator is
@@ -1249,15 +1261,12 @@ void Attributor::getAttrs(const IRPosition &IRP,
                           ArrayRef<Attribute::AttrKind> AttrKinds,
                           SmallVectorImpl<Attribute> &Attrs,
                           bool IgnoreSubsumingPositions) {
-  auto CollectAttrCB = [&](const Attribute::AttrKind &Kind,
-                           AttributeSet AttrSet, AttributeMask &,
-                           AttrBuilder &) {
-    if (AttrSet.hasAttribute(Kind))
-      Attrs.push_back(AttrSet.getAttribute(Kind));
-    return false;
-  };
   for (const IRPosition &EquivIRP : SubsumingPositionIterator(IRP)) {
-    updateAttrMap<Attribute::AttrKind>(EquivIRP, AttrKinds, CollectAttrCB);
+    AttributeSet AttrSet = getAttrSet(EquivIRP);
+    for (Attribute::AttrKind Kind : AttrKinds) {
+      if (AttrSet.hasAttribute(Kind))
+        Attrs.push_back(AttrSet.getAttribute(Kind));
+    }
     // The first position returned by the SubsumingPositionIterator is
     // always the position itself. If we ignore subsuming positions we
     // are done after the first iteration.
