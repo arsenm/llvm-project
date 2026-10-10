@@ -3422,6 +3422,18 @@ void Attributor::checkAndQueryIRAttr(const IRPosition &IRP, AttributeSet Attrs,
 }
 
 void Attributor::identifyDefaultAbstractAttributes(Function &F) {
+  // Seed the simplification of a position. This only creates the AAs that
+  // simplify it, so there is nothing to do if none of them are allowed.
+  bool SeedSimplification = isAllowed<AAValueSimplify>() ||
+                            isAllowed<AAPotentialValues>();
+  auto SeedSimplified = [&](const IRPosition &IRP) {
+    if (!SeedSimplification && !hasSimplificationCallback(IRP))
+      return;
+    bool UsedAssumedInformation = false;
+    getAssumedSimplified(IRP, /*AA=*/nullptr, UsedAssumedInformation,
+                         AA::Intraprocedural);
+  };
+
   assert(!F.isDeclaration());
 
   if (!VisitedFunctions.insert(&F).second)
@@ -3513,9 +3525,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
       getOrCreateAAFor<AAIsDead>(RetPos);
 
       // Every function might be simplified.
-      bool UsedAssumedInformation = false;
-      getAssumedSimplified(RetPos, nullptr, UsedAssumedInformation,
-                           AA::Intraprocedural);
+      SeedSimplified(RetPos);
 
       // Every returned value might be marked noundef.
       checkAndQueryIRAttr<Attribute::NoUndef, AANoUndef>(RetPos, RetAttrs);
@@ -3555,9 +3565,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
     // Every argument might be simplified. We have to go through the
     // Attributor interface though as outside AAs can register custom
     // simplification callbacks.
-    bool UsedAssumedInformation = false;
-    getAssumedSimplified(ArgPos, /* AA */ nullptr, UsedAssumedInformation,
-                         AA::Intraprocedural);
+    SeedSimplified(ArgPos);
 
     // Every argument might be dead.
     getOrCreateAAFor<AAIsDead>(ArgPos);
@@ -3624,10 +3632,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
       return true;
 
     if (!Callee->getReturnType()->isVoidTy() && !CB.use_empty()) {
-      IRPosition CBRetPos = IRPosition::callsite_returned(CB);
-      bool UsedAssumedInformation = false;
-      getAssumedSimplified(CBRetPos, nullptr, UsedAssumedInformation,
-                           AA::Intraprocedural);
+      SeedSimplified(IRPosition::callsite_returned(CB));
 
       if (AttributeFuncs::isNoFPClassCompatibleType(Callee->getReturnType()))
         getOrCreateAAFor<AANoFPClass>(CBInstPos);
@@ -3645,9 +3650,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
       // Call site argument might be simplified. We have to go through the
       // Attributor interface though as outside AAs can register custom
       // simplification callbacks.
-      bool UsedAssumedInformation = false;
-      getAssumedSimplified(CBArgPos, /* AA */ nullptr, UsedAssumedInformation,
-                           AA::Intraprocedural);
+      SeedSimplified(CBArgPos);
 
       // Every call site argument might be marked "noundef".
       checkAndQueryIRAttr<Attribute::NoUndef, AANoUndef>(CBArgPos, CBArgAttrs);
@@ -3702,8 +3705,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
     if (auto *LI = dyn_cast<LoadInst>(&I)) {
       getOrCreateAAFor<AAAlign>(IRPosition::value(*LI->getPointerOperand()));
       if (SimplifyAllLoads)
-        getAssumedSimplified(IRPosition::value(I), nullptr,
-                             UsedAssumedInformation, AA::Intraprocedural);
+        SeedSimplified(IRPosition::value(I));
       getOrCreateAAFor<AAInvariantLoadPointer>(
           IRPosition::value(*LI->getPointerOperand()));
       getOrCreateAAFor<AAAddressSpace>(
@@ -3711,8 +3713,7 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
     } else {
       auto &SI = cast<StoreInst>(I);
       getOrCreateAAFor<AAIsDead>(IRPosition::inst(I));
-      getAssumedSimplified(IRPosition::value(*SI.getValueOperand()), nullptr,
-                           UsedAssumedInformation, AA::Intraprocedural);
+      SeedSimplified(IRPosition::value(*SI.getValueOperand()));
       getOrCreateAAFor<AAAlign>(IRPosition::value(*SI.getPointerOperand()));
       getOrCreateAAFor<AAAddressSpace>(
           IRPosition::value(*SI.getPointerOperand()));
