@@ -1440,11 +1440,9 @@ define void @scc_capture_a(ptr %p, i1 %c) {
 ; COMMON-NEXT:    ret void
 ;
   br i1 %c, label %t, label %e
-
 t:
   call void @scc_capture_c(ptr %p, i1 %c)
   ret void
-
 e:
   call void @scc_capture_b(ptr %p)
   ret void

@@ -1410,6 +1410,10 @@ struct AttributorConfig {
   /// created up front. If not, they are only created when queried.
   bool SeedCallSiteArguments = true;
 
+  /// Flag to determine if noalias and noundef are deduced for arguments, in
+  /// addition to return values.
+  bool SeedArgumentNoAliasAndNoUndef = true;
+
   /// Callback function to be invoked on internal functions marked live.
   std::function<void(Attributor &A, const Function &F)> InitializationCallback =
       nullptr;

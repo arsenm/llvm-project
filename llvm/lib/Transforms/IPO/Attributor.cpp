@@ -3563,14 +3563,16 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
     getOrCreateAAFor<AAIsDead>(ArgPos);
 
     // Every argument might be marked noundef.
-    checkAndQueryIRAttr<Attribute::NoUndef, AANoUndef>(ArgPos, ArgAttrs);
+    if (Configuration.SeedArgumentNoAliasAndNoUndef)
+      checkAndQueryIRAttr<Attribute::NoUndef, AANoUndef>(ArgPos, ArgAttrs);
 
     if (Arg.getType()->isPointerTy()) {
       // Every argument with pointer type might be marked nonnull.
       checkAndQueryIRAttr<Attribute::NonNull, AANonNull>(ArgPos, ArgAttrs);
 
       // Every argument with pointer type might be marked noalias.
-      checkAndQueryIRAttr<Attribute::NoAlias, AANoAlias>(ArgPos, ArgAttrs);
+      if (Configuration.SeedArgumentNoAliasAndNoUndef)
+        checkAndQueryIRAttr<Attribute::NoAlias, AANoAlias>(ArgPos, ArgAttrs);
 
       // Every argument with pointer type might be marked dereferenceable.
       getOrCreateAAFor<AADereferenceable>(ArgPos);
@@ -4024,12 +4026,14 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
        &AAMemoryBehavior::ID, &AAUnderlyingObjects::ID, &AANoCapture::ID,
        &AAInterFnReachability::ID, &AAIntraFnReachability::ID, &AACallEdges::ID,
        &AANoFPClass::ID, &AAMustProgress::ID, &AANonNull::ID,
-       &AADenormalFPMath::ID});
+       &AADenormalFPMath::ID, &AANoAlias::ID, &AANoUndef::ID});
   AC.Allowed = &Allowed;
   AC.UseLiveness = false;
   // Call site argument attributes are mostly redundant with the callee's
   // argument attributes, and seeding them for every call is expensive.
   AC.SeedCallSiteArguments = false;
+  // Like FunctionAttrs, only deduce noalias and noundef for return values.
+  AC.SeedArgumentNoAliasAndNoUndef = false;
 
   Attributor A(Functions, InfoCache, AC);
 
