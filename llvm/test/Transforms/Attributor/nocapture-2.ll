@@ -18,7 +18,7 @@ declare ptr @unknown()
 define i32 @is_null_return(ptr %p) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define i32 @is_null_return
-; CHECK-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr nofree readnone captures(address_is_null, ret: none) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[P]], null
 ; CHECK-NEXT:    [[CONV:%.*]] = zext i1 [[CMP]] to i32
@@ -44,7 +44,7 @@ entry:
 define i32 @is_null_control(ptr %p) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define i32 @is_null_control
-; CHECK-SAME: (ptr nofree [[P:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree readnone captures(address_is_null, ret: none) [[P:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[RETVAL:%.*]] = alloca i32, align 4
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[P]], null
@@ -164,7 +164,7 @@ entry:
 define ptr @scc_A(ptr dereferenceable_or_null(4) %a) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(none)
 ; CHECK-LABEL: define noundef dereferenceable_or_null(4) ptr @scc_A
-; CHECK-SAME: (ptr nofree noundef readnone returned dereferenceable_or_null(4) [[A:%.*]]) #[[ATTR2:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef readnone returned captures(address, ret: address, provenance) dereferenceable_or_null(4) [[A:%.*]]) #[[ATTR2:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TOBOOL:%.*]] = icmp ne ptr [[A]], null
 ; CHECK-NEXT:    br i1 [[TOBOOL]], label [[COND_TRUE:%.*]], label [[COND_FALSE:%.*]]
@@ -201,7 +201,7 @@ cond.end:                                         ; preds = %cond.false, %cond.t
 define ptr @scc_B(ptr dereferenceable_or_null(8) %a) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(none)
 ; CHECK-LABEL: define noundef dereferenceable_or_null(8) ptr @scc_B
-; CHECK-SAME: (ptr nofree noundef readnone returned dereferenceable_or_null(8) [[A:%.*]]) #[[ATTR2]] {
+; CHECK-SAME: (ptr nofree noundef readnone returned captures(address, ret: address, provenance) dereferenceable_or_null(8) [[A:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TOBOOL:%.*]] = icmp ne ptr [[A]], null
 ; CHECK-NEXT:    br i1 [[TOBOOL]], label [[COND_TRUE:%.*]], label [[COND_FALSE:%.*]]
@@ -237,7 +237,7 @@ cond.end:                                         ; preds = %cond.false, %cond.t
 define ptr @scc_C(ptr dereferenceable_or_null(2) %a) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(none)
 ; CHECK-LABEL: define noundef dereferenceable_or_null(4) ptr @scc_C
-; CHECK-SAME: (ptr nofree noundef readnone returned dereferenceable_or_null(4) [[A:%.*]]) #[[ATTR2]] {
+; CHECK-SAME: (ptr nofree noundef readnone returned captures(address, ret: address, provenance) dereferenceable_or_null(4) [[A:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CALL:%.*]] = call ptr @scc_A(ptr noalias nofree noundef readnone dereferenceable_or_null(4) [[A]]) #[[ATTR2]]
 ; CHECK-NEXT:    [[TOBOOL:%.*]] = icmp ne ptr [[A]], null
@@ -328,7 +328,7 @@ declare i32 @printf(ptr nocapture, ...)
 define ptr @not_captured_but_returned_0(ptr %a) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable
 ; CHECK-LABEL: define noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_0
-; CHECK-SAME: (ptr nofree noundef nonnull returned writeonly align 8 dereferenceable(8) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef nonnull returned writeonly align 8 captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    store i64 0, ptr [[A]], align 8
 ; CHECK-NEXT:    ret ptr [[A]]
@@ -349,7 +349,7 @@ entry:
 define ptr @not_captured_but_returned_1(ptr %a) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable
 ; CHECK-LABEL: define noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_1
-; CHECK-SAME: (ptr nofree nonnull writeonly align 8 dereferenceable(16) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
+; CHECK-SAME: (ptr nofree nonnull writeonly align 8 captures(ret: address, provenance) dereferenceable(16) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 1
 ; CHECK-NEXT:    store i64 1, ptr [[ADD_PTR]], align 8
@@ -379,10 +379,10 @@ define void @test_not_captured_but_returned_calls(ptr %a) #0 {
 ;
 ; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(argmem: write) uwtable
 ; CGSCC-LABEL: define void @test_not_captured_but_returned_calls
-; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A:%.*]]) #[[ATTR5:[0-9]+]] {
+; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 captures(none) dereferenceable(16) [[A:%.*]]) #[[ATTR5:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A]]) #[[ATTR14:[0-9]+]]
-; CGSCC-NEXT:    [[CALL1:%.*]] = call ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A]]) #[[ATTR14]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) "no-capture-maybe-returned" [[A]]) #[[ATTR14:[0-9]+]]
+; CGSCC-NEXT:    [[CALL1:%.*]] = call ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) "no-capture-maybe-returned" [[A]]) #[[ATTR14]]
 ; CGSCC-NEXT:    ret void
 ;
 entry:
@@ -401,16 +401,16 @@ entry:
 define ptr @negative_test_not_captured_but_returned_call_0a(ptr %a) #0 {
 ; TUNIT: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable
 ; TUNIT-LABEL: define align 8 ptr @negative_test_not_captured_but_returned_call_0a
-; TUNIT-SAME: (ptr nofree returned writeonly align 8 "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
+; TUNIT-SAME: (ptr nofree returned writeonly align 8 captures(ret: address, provenance) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @not_captured_but_returned_0(ptr nofree noundef writeonly align 8 "no-capture-maybe-returned" [[A]]) #[[ATTR12]]
 ; TUNIT-NEXT:    ret ptr [[A]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(argmem: write) uwtable
 ; CGSCC-LABEL: define noundef nonnull align 8 dereferenceable(8) ptr @negative_test_not_captured_but_returned_call_0a
-; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) [[A:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR5]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) [[A]]) #[[ATTR14]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR14]]
 ; CGSCC-NEXT:    ret ptr [[CALL]]
 ;
 entry:
@@ -439,7 +439,7 @@ define void @negative_test_not_captured_but_returned_call_0b(ptr %a) #0 {
 ; CGSCC-LABEL: define void @negative_test_not_captured_but_returned_call_0b
 ; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) [[A:%.*]]) #[[ATTR5]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) [[A]]) #[[ATTR14]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @not_captured_but_returned_0(ptr nofree noundef nonnull writeonly align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR14]]
 ; CGSCC-NEXT:    [[TMP0:%.*]] = ptrtoint ptr [[CALL]] to i64
 ; CGSCC-NEXT:    store i64 [[TMP0]], ptr [[A]], align 8
 ; CGSCC-NEXT:    ret void
@@ -461,16 +461,16 @@ entry:
 define ptr @negative_test_not_captured_but_returned_call_1a(ptr %a) #0 {
 ; TUNIT: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(argmem: write) uwtable
 ; TUNIT-LABEL: define noundef nonnull align 8 dereferenceable(8) ptr @negative_test_not_captured_but_returned_call_1a
-; TUNIT-SAME: (ptr nofree writeonly align 8 "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
+; TUNIT-SAME: (ptr nofree writeonly align 8 captures(ret: address, provenance) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR4]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[CALL:%.*]] = call noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_1(ptr nofree writeonly align 8 "no-capture-maybe-returned" [[A]]) #[[ATTR12]]
 ; TUNIT-NEXT:    ret ptr [[CALL]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree noinline nosync nounwind willreturn memory(argmem: write) uwtable
 ; CGSCC-LABEL: define noundef nonnull align 8 dereferenceable(8) ptr @negative_test_not_captured_but_returned_call_1a
-; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 captures(ret: address, provenance) dereferenceable(16) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR5]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A]]) #[[ATTR14]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call noundef nonnull align 8 dereferenceable(8) ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) "no-capture-maybe-returned" [[A]]) #[[ATTR14]]
 ; CGSCC-NEXT:    ret ptr [[CALL]]
 ;
 entry:
@@ -499,7 +499,7 @@ define void @negative_test_not_captured_but_returned_call_1b(ptr %a) #0 {
 ; CGSCC-LABEL: define void @negative_test_not_captured_but_returned_call_1b
 ; CGSCC-SAME: (ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A:%.*]]) #[[ATTR6:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call align 8 ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) [[A]]) #[[ATTR14]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call align 8 ptr @not_captured_but_returned_1(ptr nofree noundef nonnull writeonly align 8 dereferenceable(16) "no-capture-maybe-returned" [[A]]) #[[ATTR14]]
 ; CGSCC-NEXT:    [[TMP0:%.*]] = ptrtoint ptr [[CALL]] to i64
 ; CGSCC-NEXT:    store i64 [[TMP0]], ptr [[CALL]], align 8
 ; CGSCC-NEXT:    ret void
@@ -525,7 +525,7 @@ entry:
 define ptr @ret_arg_or_unknown(ptr %b) #0 {
 ; CHECK: Function Attrs: noinline nounwind uwtable
 ; CHECK-LABEL: define ptr @ret_arg_or_unknown
-; CHECK-SAME: (ptr nofree [[B:%.*]]) #[[ATTR3]] {
+; CHECK-SAME: (ptr nofree readnone captures(address_is_null, ret: address, provenance) [[B:%.*]]) #[[ATTR3]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[RET_ARG:%.*]], label [[RET_UNKNOWN:%.*]]
@@ -550,7 +550,7 @@ ret_unknown:
 define ptr @ret_arg_or_unknown_through_phi(ptr %b) #0 {
 ; CHECK: Function Attrs: noinline nounwind uwtable
 ; CHECK-LABEL: define ptr @ret_arg_or_unknown_through_phi
-; CHECK-SAME: (ptr nofree [[B:%.*]]) #[[ATTR3]] {
+; CHECK-SAME: (ptr nofree readnone captures(address_is_null, ret: address, provenance) [[B:%.*]]) #[[ATTR3]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[RET_ARG:%.*]], label [[RET_UNKNOWN:%.*]]
@@ -736,14 +736,14 @@ entry:
 define ptr @b64613_a(ptr noundef %p) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define noundef ptr @b64613_a
-; TUNIT-SAME: (ptr nofree noundef readnone returned "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR11:[0-9]+]] {
+; TUNIT-SAME: (ptr nofree noundef readnone returned captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR11:[0-9]+]] {
 ; TUNIT-NEXT:    [[P_ADDR:%.*]] = alloca ptr, align 1
 ; TUNIT-NEXT:    store ptr [[P]], ptr [[P_ADDR]], align 1
 ; TUNIT-NEXT:    ret ptr [[P]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define noundef ptr @b64613_a
-; CGSCC-SAME: (ptr nofree noundef readnone returned "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR12:[0-9]+]] {
+; CGSCC-SAME: (ptr nofree noundef readnone returned captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR12:[0-9]+]] {
 ; CGSCC-NEXT:    [[P_ADDR:%.*]] = alloca ptr, align 1
 ; CGSCC-NEXT:    store ptr [[P]], ptr [[P_ADDR]], align 1
 ; CGSCC-NEXT:    ret ptr [[P]]
@@ -809,7 +809,7 @@ attributes #0 = { noinline nounwind uwtable }
 define void @diverge_if_null(ptr %p) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(none)
 ; CHECK-LABEL: define void @diverge_if_null
-; CHECK-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR2]] {
+; CHECK-SAME: (ptr nofree readnone captures(address_is_null, ret: none) [[P:%.*]]) #[[ATTR2]] {
 ; CHECK-NEXT:    [[C:%.*]] = icmp eq ptr [[P]], null
 ; CHECK-NEXT:    br i1 [[C]], label [[LOOP:%.*]], label [[EXIT:%.*]]
 ; CHECK:       loop:

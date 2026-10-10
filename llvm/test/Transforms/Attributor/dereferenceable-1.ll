@@ -14,7 +14,7 @@ declare void @deref_phi_user(ptr %a);
 define ptr @test1(ptr dereferenceable(4) %0, ptr dereferenceable(8) %1, i1 zeroext %2) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test1
-; CHECK-SAME: (ptr nofree noundef nonnull readnone dereferenceable(4) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone dereferenceable(8) "no-capture-maybe-returned" [[TMP1:%.*]], i1 zeroext [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[TMP1:%.*]], i1 zeroext [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP4:%.*]] = select i1 [[TMP2]], ptr [[TMP0]], ptr [[TMP1]]
 ; CHECK-NEXT:    ret ptr [[TMP4]]
 ;
@@ -26,7 +26,7 @@ define ptr @test1(ptr dereferenceable(4) %0, ptr dereferenceable(8) %1, i1 zeroe
 define ptr @test2(ptr dereferenceable_or_null(4) %0, ptr dereferenceable(8) %1, i1 zeroext %2) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test2
-; CHECK-SAME: (ptr nofree noundef readnone dereferenceable_or_null(4) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone dereferenceable(8) "no-capture-maybe-returned" [[TMP1:%.*]], i1 zeroext [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree noundef readnone captures(ret: address, provenance) dereferenceable_or_null(4) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[TMP1:%.*]], i1 zeroext [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CHECK-NEXT:    [[TMP4:%.*]] = select i1 [[TMP2]], ptr [[TMP0]], ptr [[TMP1]]
 ; CHECK-NEXT:    ret ptr [[TMP4]]
 ;
@@ -39,7 +39,7 @@ define ptr @test2(ptr dereferenceable_or_null(4) %0, ptr dereferenceable(8) %1, 
 define ptr @test3_1(ptr dereferenceable(8) %0) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test3_1
-; CHECK-SAME: (ptr nofree noundef nonnull readnone dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CHECK-NEXT:    [[RET:%.*]] = getelementptr inbounds i32, ptr [[TMP0]], i64 1
 ; CHECK-NEXT:    ret ptr [[RET]]
 ;
@@ -50,7 +50,7 @@ define ptr @test3_1(ptr dereferenceable(8) %0) local_unnamed_addr {
 define ptr @test3_2(ptr dereferenceable_or_null(32) %0) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test3_2
-; CHECK-SAME: (ptr nofree noundef readnone dereferenceable_or_null(32) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree noundef readnone captures(ret: address, provenance) dereferenceable_or_null(32) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CHECK-NEXT:    [[RET:%.*]] = getelementptr inbounds i32, ptr [[TMP0]], i64 4
 ; CHECK-NEXT:    ret ptr [[RET]]
 ;
@@ -61,7 +61,7 @@ define ptr @test3_2(ptr dereferenceable_or_null(32) %0) local_unnamed_addr {
 define ptr @test3_3(ptr dereferenceable(8) %0, ptr dereferenceable(16) %1, i1 %2) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test3_3
-; CHECK-SAME: (ptr nofree noundef nonnull readnone dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone dereferenceable(16) "no-capture-maybe-returned" [[TMP1:%.*]], i1 [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]], ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(16) "no-capture-maybe-returned" [[TMP1:%.*]], i1 [[TMP2:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CHECK-NEXT:    [[RET1:%.*]] = getelementptr inbounds i32, ptr [[TMP0]], i64 1
 ; CHECK-NEXT:    [[RET2:%.*]] = getelementptr inbounds i32, ptr [[TMP1]], i64 2
 ; CHECK-NEXT:    [[RET:%.*]] = select i1 [[TMP2]], ptr [[RET1]], ptr [[RET2]]
@@ -79,7 +79,7 @@ define ptr @test3_3(ptr dereferenceable(8) %0, ptr dereferenceable(16) %1, i1 %2
 define dereferenceable(4) ptr @test4(ptr dereferenceable(8) %0) local_unnamed_addr {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test4
-; CHECK-SAME: (ptr nofree noundef nonnull readnone returned dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readnone returned captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[TMP0:%.*]]) local_unnamed_addr #[[ATTR0]] {
 ; CHECK-NEXT:    ret ptr [[TMP0]]
 ;
   ret ptr %0
@@ -280,7 +280,7 @@ define ptr @f7_3() {
 define ptr @test_for_minus_index(ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
 ; CHECK-LABEL: define {{[^@]+}}@test_for_minus_index
-; CHECK-SAME: (ptr nofree nonnull writeonly align 4 "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR3:[0-9]+]] {
+; CHECK-SAME: (ptr nofree nonnull writeonly align 4 captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR3:[0-9]+]] {
 ; CHECK-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 -2
 ; CHECK-NEXT:    store i32 1, ptr [[Q]], align 4
 ; CHECK-NEXT:    ret ptr [[Q]]

@@ -1032,6 +1032,14 @@ static Attribute getAttrToAdd(LLVMContext &Ctx, Attribute Attr,
         return Attribute();
       return Attribute::getWithMemoryEffects(Ctx, ME);
     }
+    if (!ForceReplace && Attr.getKindAsEnum() == Attribute::Captures) {
+      CaptureInfo OldCI = Existing.isValid() ? Existing.getCaptureInfo()
+                                             : CaptureInfo::all();
+      CaptureInfo CI = Attr.getCaptureInfo() & OldCI;
+      if (CI == OldCI)
+        return Attribute();
+      return Attribute::getWithCaptureInfo(Ctx, CI);
+    }
     if (Existing.isValid() && !ForceReplace && isEqualOrWorse(Attr, Existing))
       return Attribute();
     return Attr;

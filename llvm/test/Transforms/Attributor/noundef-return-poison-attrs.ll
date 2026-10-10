@@ -9,7 +9,7 @@
 
 define nonnull ptr @nonnull(ptr noundef %p) {
 ; CHECK-LABEL: define nonnull ptr @nonnull(
-; CHECK-SAME: ptr nofree noundef readnone returned [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: ptr nofree noundef readnone returned captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    ret ptr [[P]]
 ;
   ret ptr %p

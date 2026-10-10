@@ -28,7 +28,7 @@ define void @test1_2(ptr %x1_2, ptr %y1_2, ptr %z1_2) {
 define ptr @test2(ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; CHECK-LABEL: define {{[^@]+}}@test2
-; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr nofree readnone returned captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    store i32 0, ptr @x, align 4
 ; CHECK-NEXT:    ret ptr [[P]]
 ;
@@ -39,7 +39,7 @@ define ptr @test2(ptr %p) {
 define i1 @test3(ptr %p, ptr %q) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test3
-; CHECK-SAME: (ptr nofree readnone [[P:%.*]], ptr nofree readnone [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
+; CHECK-SAME: (ptr nofree readnone captures(address, ret: none) [[P:%.*]], ptr nofree readnone captures(address, ret: none) [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[A:%.*]] = icmp ult ptr [[P]], [[Q]]
 ; CHECK-NEXT:    ret i1 [[A]]
 ;
@@ -99,7 +99,7 @@ define void @test7_1(ptr inalloca(i32) %a) {
 define ptr @test8_1(ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@test8_1
-; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR1]] {
+; CHECK-SAME: (ptr nofree readnone returned captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR1]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    ret ptr [[P]]
 ;
@@ -117,9 +117,9 @@ define void @test8_2(ptr %p) {
 ;
 ; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: write)
 ; CGSCC-LABEL: define {{[^@]+}}@test8_2
-; CGSCC-SAME: (ptr nofree writeonly [[P:%.*]]) #[[ATTR5:[0-9]+]] {
+; CGSCC-SAME: (ptr nofree writeonly captures(none) [[P:%.*]]) #[[ATTR5:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call align 4 ptr @test8_1(ptr noalias nofree readnone [[P]]) #[[ATTR17:[0-9]+]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call align 4 ptr @test8_1(ptr noalias nofree readnone "no-capture-maybe-returned" [[P]]) #[[ATTR17:[0-9]+]]
 ; CGSCC-NEXT:    store i32 10, ptr [[CALL]], align 4
 ; CGSCC-NEXT:    ret void
 ;
@@ -208,13 +208,13 @@ define <4 x i32> @test12_2(<4 x ptr> %ptrs) {
 define i32 @volatile_load(ptr %p) {
 ; TUNIT: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite)
 ; TUNIT-LABEL: define {{[^@]+}}@volatile_load
-; TUNIT-SAME: (ptr nofree noundef align 4 [[P:%.*]]) #[[ATTR9:[0-9]+]] {
+; TUNIT-SAME: (ptr nofree noundef readonly align 4 captures(address, ret: none) [[P:%.*]]) #[[ATTR9:[0-9]+]] {
 ; TUNIT-NEXT:    [[LOAD:%.*]] = load volatile i32, ptr [[P]], align 4
 ; TUNIT-NEXT:    ret i32 [[LOAD]]
 ;
 ; CGSCC: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite)
 ; CGSCC-LABEL: define {{[^@]+}}@volatile_load
-; CGSCC-SAME: (ptr nofree noundef align 4 [[P:%.*]]) #[[ATTR10:[0-9]+]] {
+; CGSCC-SAME: (ptr nofree noundef readonly align 4 captures(address, ret: none) [[P:%.*]]) #[[ATTR10:[0-9]+]] {
 ; CGSCC-NEXT:    [[LOAD:%.*]] = load volatile i32, ptr [[P]], align 4
 ; CGSCC-NEXT:    ret i32 [[LOAD]]
 ;

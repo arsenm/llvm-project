@@ -63,7 +63,7 @@ define internal ptr @foo.4(ptr %__first) {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[__FIRST_ADDR:%.*]] = alloca ptr, i32 0, align 8
 ; CGSCC-NEXT:    store ptr [[__FIRST]], ptr [[__FIRST]], align 8
-; CGSCC-NEXT:    [[CALL1:%.*]] = call noalias noundef nonnull align 8 dereferenceable(8) ptr @bar(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) [[__FIRST]]) #[[ATTR7:[0-9]+]]
+; CGSCC-NEXT:    [[CALL1:%.*]] = call noalias noundef nonnull align 8 dereferenceable(8) ptr @bar(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) "no-capture-maybe-returned" [[__FIRST]]) #[[ATTR7:[0-9]+]]
 ; CGSCC-NEXT:    ret ptr [[CALL1]]
 ;
 entry:
@@ -77,7 +77,7 @@ entry:
 define internal ptr @bar(ptr %QQfirst) {
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@bar
-; CGSCC-SAME: (ptr noalias nofree noundef nonnull readnone returned align 8 dereferenceable(8) "no-capture-maybe-returned" [[QQFIRST:%.*]]) #[[ATTR1:[0-9]+]] {
+; CGSCC-SAME: (ptr noalias nofree noundef nonnull readnone returned align 8 captures(ret: address, provenance) dereferenceable(8) "no-capture-maybe-returned" [[QQFIRST:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[QQFIRST_ADDR:%.*]] = alloca ptr, i32 0, align 8
 ; CGSCC-NEXT:    store ptr [[QQFIRST]], ptr [[QQFIRST_ADDR]], align 8

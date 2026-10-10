@@ -15,7 +15,7 @@ declare ptr @geti1Ptr()
 define internal i1 @recursive_inst_comparator(ptr %a, ptr %b) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@recursive_inst_comparator
-; CHECK-SAME: (ptr noalias nofree readnone [[A:%.*]], ptr noalias nofree readnone [[B:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr noalias nofree readnone captures(address, ret: none) [[A:%.*]], ptr noalias nofree readnone captures(address, ret: none) [[B:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], [[B]]
 ; CHECK-NEXT:    ret i1 [[CMP]]
 ;
@@ -25,25 +25,25 @@ define internal i1 @recursive_inst_comparator(ptr %a, ptr %b) {
 
 define internal i1 @recursive_inst_generator(i1 %c, ptr %p) {
 ; TUNIT-LABEL: define {{[^@]+}}@recursive_inst_generator
-; TUNIT-SAME: (i1 [[C:%.*]], ptr [[P:%.*]]) {
+; TUNIT-SAME: (i1 [[C:%.*]], ptr noalias nofree readnone captures(address, ret: none) [[P:%.*]]) {
 ; TUNIT-NEXT:    [[A:%.*]] = call ptr @geti1Ptr()
 ; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; TUNIT:       t:
 ; TUNIT-NEXT:    [[R1:%.*]] = call i1 @recursive_inst_comparator(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[P]]) #[[ATTR7:[0-9]+]]
 ; TUNIT-NEXT:    ret i1 [[R1]]
 ; TUNIT:       f:
-; TUNIT-NEXT:    [[R2:%.*]] = call i1 @recursive_inst_generator(i1 noundef true, ptr [[A]])
+; TUNIT-NEXT:    [[R2:%.*]] = call i1 @recursive_inst_generator(i1 noundef true, ptr noalias nofree readnone [[A]])
 ; TUNIT-NEXT:    ret i1 [[R2]]
 ;
 ; CGSCC-LABEL: define {{[^@]+}}@recursive_inst_generator
-; CGSCC-SAME: (i1 [[C:%.*]], ptr [[P:%.*]]) {
+; CGSCC-SAME: (i1 [[C:%.*]], ptr noalias nofree readnone captures(address, ret: none) [[P:%.*]]) {
 ; CGSCC-NEXT:    [[A:%.*]] = call ptr @geti1Ptr()
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    [[R1:%.*]] = call i1 @recursive_inst_comparator(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[P]])
 ; CGSCC-NEXT:    ret i1 [[R1]]
 ; CGSCC:       f:
-; CGSCC-NEXT:    [[R2:%.*]] = call i1 @recursive_inst_generator(i1 noundef true, ptr [[A]])
+; CGSCC-NEXT:    [[R2:%.*]] = call i1 @recursive_inst_generator(i1 noundef true, ptr noalias nofree readnone [[A]])
 ; CGSCC-NEXT:    ret i1 [[R2]]
 ;
   %a = call ptr @geti1Ptr()
@@ -58,10 +58,15 @@ f:
 
 ; FIXME: This should *not* return true.
 define i1 @recursive_inst_generator_caller(i1 %c) {
-; CHECK-LABEL: define {{[^@]+}}@recursive_inst_generator_caller
-; CHECK-SAME: (i1 [[C:%.*]]) {
-; CHECK-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_generator(i1 [[C]], ptr undef)
-; CHECK-NEXT:    ret i1 [[CALL]]
+; TUNIT-LABEL: define {{[^@]+}}@recursive_inst_generator_caller
+; TUNIT-SAME: (i1 [[C:%.*]]) {
+; TUNIT-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_generator(i1 [[C]], ptr undef)
+; TUNIT-NEXT:    ret i1 [[CALL]]
+;
+; CGSCC-LABEL: define {{[^@]+}}@recursive_inst_generator_caller
+; CGSCC-SAME: (i1 [[C:%.*]]) {
+; CGSCC-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_generator(i1 [[C]], ptr nofree undef)
+; CGSCC-NEXT:    ret i1 [[CALL]]
 ;
   %call = call i1 @recursive_inst_generator(i1 %c, ptr undef)
   ret i1 %call
@@ -70,14 +75,14 @@ define i1 @recursive_inst_generator_caller(i1 %c) {
 ; Make sure we do *not* return true.
 define internal i1 @recursive_inst_compare(i1 %c, ptr %p) {
 ; CHECK-LABEL: define {{[^@]+}}@recursive_inst_compare
-; CHECK-SAME: (i1 [[C:%.*]], ptr nofree [[P:%.*]]) {
+; CHECK-SAME: (i1 [[C:%.*]], ptr noalias nofree readnone captures(address, ret: none) [[P:%.*]]) {
 ; CHECK-NEXT:    [[A:%.*]] = call ptr @geti1Ptr()
 ; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CHECK:       t:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], [[P]]
 ; CHECK-NEXT:    ret i1 [[CMP]]
 ; CHECK:       f:
-; CHECK-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare(i1 noundef true, ptr nofree [[A]])
+; CHECK-NEXT:    [[CALL:%.*]] = call i1 @recursive_inst_compare(i1 noundef true, ptr noalias nofree readnone [[A]])
 ; CHECK-NEXT:    ret i1 [[CALL]]
 ;
   %a = call ptr @geti1Ptr()
@@ -110,7 +115,7 @@ define i1 @recursive_inst_compare_caller(i1 %c) {
 define internal i1 @recursive_alloca_compare(i1 %c, ptr %p) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@recursive_alloca_compare
-; CHECK-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree readnone [[P:%.*]]) #[[ATTR1:[0-9]+]] {
+; CHECK-SAME: (i1 noundef [[C:%.*]], ptr noalias nofree readnone captures(address, ret: none) [[P:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[A:%.*]] = alloca i1, align 1
 ; CHECK-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CHECK:       t:

@@ -457,12 +457,12 @@ f:
 define internal ptr @test_inalloca(ptr inalloca(i32) %a) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@test_inalloca
-; TUNIT-SAME: (ptr noalias nofree nonnull returned writeonly inalloca(i32) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR2]] {
+; TUNIT-SAME: (ptr noalias nofree nonnull returned writeonly inalloca(i32) captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR2]] {
 ; TUNIT-NEXT:    ret ptr [[A]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@test_inalloca
-; CGSCC-SAME: (ptr noalias nofree noundef nonnull returned writeonly inalloca(i32) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr noalias nofree noundef nonnull returned writeonly inalloca(i32) captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:    ret ptr [[A]]
 ;
   ret ptr %a
@@ -470,14 +470,14 @@ define internal ptr @test_inalloca(ptr inalloca(i32) %a) {
 define ptr @complicated_args_inalloca(ptr %arg) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@complicated_args_inalloca
-; TUNIT-SAME: (ptr nofree nonnull readnone "no-capture-maybe-returned" [[ARG:%.*]]) #[[ATTR2]] {
+; TUNIT-SAME: (ptr nofree nonnull readnone captures(ret: address, provenance) "no-capture-maybe-returned" [[ARG:%.*]]) #[[ATTR2]] {
 ; TUNIT-NEXT:    [[CALL:%.*]] = call nonnull dereferenceable(4) ptr @test_inalloca(ptr noalias nofree nonnull writeonly inalloca(i32) "no-capture-maybe-returned" [[ARG]]) #[[ATTR9:[0-9]+]]
 ; TUNIT-NEXT:    ret ptr [[CALL]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@complicated_args_inalloca
-; CGSCC-SAME: (ptr nofree noundef nonnull readnone dereferenceable(4) [[ARG:%.*]]) #[[ATTR3]] {
-; CGSCC-NEXT:    [[CALL:%.*]] = call noalias noundef nonnull dereferenceable(4) ptr @test_inalloca(ptr noalias nofree noundef nonnull writeonly inalloca(i32) dereferenceable(4) [[ARG]]) #[[ATTR12]]
+; CGSCC-SAME: (ptr nofree noundef nonnull readnone captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[ARG:%.*]]) #[[ATTR3]] {
+; CGSCC-NEXT:    [[CALL:%.*]] = call noalias noundef nonnull dereferenceable(4) ptr @test_inalloca(ptr noalias nofree noundef nonnull writeonly inalloca(i32) dereferenceable(4) "no-capture-maybe-returned" [[ARG]]) #[[ATTR12]]
 ; CGSCC-NEXT:    ret ptr [[CALL]]
 ;
   %call = call ptr @test_inalloca(ptr inalloca(i32) %arg)
@@ -487,12 +487,12 @@ define ptr @complicated_args_inalloca(ptr %arg) {
 define internal ptr @test_preallocated(ptr preallocated(i32) %a) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; TUNIT-LABEL: define {{[^@]+}}@test_preallocated
-; TUNIT-SAME: (ptr noalias nofree noundef nonnull returned writeonly preallocated(i32) align 4294967296 dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR2]] {
+; TUNIT-SAME: (ptr noalias nofree noundef nonnull returned writeonly preallocated(i32) align 4294967296 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR2]] {
 ; TUNIT-NEXT:    ret ptr [[A]]
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define {{[^@]+}}@test_preallocated
-; CGSCC-SAME: (ptr noalias nofree noundef nonnull returned writeonly preallocated(i32) align 4294967296 dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr noalias nofree noundef nonnull returned writeonly preallocated(i32) align 4294967296 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:    ret ptr [[A]]
 ;
   ret ptr %a

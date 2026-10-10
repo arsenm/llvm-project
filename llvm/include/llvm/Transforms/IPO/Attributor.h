@@ -4265,7 +4265,7 @@ struct AAInstanceInfo : public StateWrapper<BooleanState, AbstractAttribute> {
 struct AANoCapture
     : public IRAttribute<
           Attribute::Captures,
-          StateWrapper<BitIntegerState<uint16_t, 7, 0>, AbstractAttribute>,
+          StateWrapper<BitIntegerState<uint16_t, 31, 0>, AbstractAttribute>,
           AANoCapture> {
   AANoCapture(const IRPosition &IRP, Attributor &A) : IRAttribute(IRP) {}
 
@@ -4291,15 +4291,25 @@ struct AANoCapture
     NOT_CAPTURED_IN_MEM = 1 << 0,
     NOT_CAPTURED_IN_INT = 1 << 1,
     NOT_CAPTURED_IN_RET = 1 << 2,
+    /// The address, or only whether it is null, is not captured. Capturing the
+    /// value in memory or through integers also captures the address.
+    NOT_CAPTURED_ADDRESS_IS_NULL = 1 << 3,
+    NOT_CAPTURED_ADDRESS = 1 << 4,
+
+    /// If we do not capture the provenance in memory or through integers, at
+    /// most the address is captured, or it is communicated back as a derived
+    /// pointer.
+    NO_PROVENANCE_CAPTURE_MAYBE_RETURNED = NOT_CAPTURED_IN_MEM |
+        NOT_CAPTURED_IN_INT,
 
     /// If we do not capture the value in memory or through integers we can only
     /// communicate it back as a derived pointer.
-    NO_CAPTURE_MAYBE_RETURNED = NOT_CAPTURED_IN_MEM | NOT_CAPTURED_IN_INT,
+    NO_CAPTURE_MAYBE_RETURNED = NO_PROVENANCE_CAPTURE_MAYBE_RETURNED |
+        NOT_CAPTURED_ADDRESS_IS_NULL | NOT_CAPTURED_ADDRESS,
 
     /// If we do not capture the value in memory, through integers, or as a
     /// derived pointer we know it is not captured.
-    NO_CAPTURE =
-        NOT_CAPTURED_IN_MEM | NOT_CAPTURED_IN_INT | NOT_CAPTURED_IN_RET,
+    NO_CAPTURE = NO_CAPTURE_MAYBE_RETURNED | NOT_CAPTURED_IN_RET,
   };
 
   /// Return true if we know that the underlying value is not captured in its
@@ -4320,6 +4330,30 @@ struct AANoCapture
   /// respective scope but we allow it to escape through a "return".
   bool isAssumedNoCaptureMaybeReturned() const {
     return isAssumed(NO_CAPTURE_MAYBE_RETURNED);
+  }
+
+  /// Return true if we assume that the provenance of the underlying value is
+  /// not captured in its respective scope, but its address may be, and we
+  /// allow it to escape through a "return".
+  bool isAssumedNoProvenanceCaptureMaybeReturned() const {
+    return isAssumed(NO_PROVENANCE_CAPTURE_MAYBE_RETURNED);
+  }
+
+  /// Return the components of the underlying value that are assumed to be
+  /// captured.
+  CaptureInfo getAssumedCaptureInfo() const {
+    CaptureComponents Other = CaptureComponents::All;
+    if (isAssumed(NO_PROVENANCE_CAPTURE_MAYBE_RETURNED)) {
+      Other = CaptureComponents::None;
+      if (!isAssumed(NOT_CAPTURED_ADDRESS))
+        Other = CaptureComponents::Address;
+      else if (!isAssumed(NOT_CAPTURED_ADDRESS_IS_NULL))
+        Other = CaptureComponents::AddressIsNull;
+    }
+    CaptureComponents Ret = isAssumed(NOT_CAPTURED_IN_RET)
+                                ? CaptureComponents::None
+                                : CaptureComponents::All;
+    return CaptureInfo(Other, Ret);
   }
 
   /// Create an abstract attribute view for the position \p IRP.

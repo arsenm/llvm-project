@@ -2318,8 +2318,10 @@ struct AANoFreeFloating : AANoFreeImpl {
                 A, this, IRPosition::callsite_argument(*CB, ArgNo),
                 DepClassTy::REQUIRED, IsKnown,
                 /*IgnoreSubsumingPositions=*/false, &NoCaptureAA)) {
-          if (NoCaptureAA && NoCaptureAA->isAssumedNoCaptureMaybeReturned()) {
-            Follow = true;
+          // Capturing only the address does not allow freeing the value later.
+          if (NoCaptureAA &&
+              NoCaptureAA->isAssumedNoProvenanceCaptureMaybeReturned()) {
+            Follow = !NoCaptureAA->isAssumed(AANoCapture::NOT_CAPTURED_IN_RET);
             return true;
           }
           return false;
@@ -4031,7 +4033,8 @@ struct AANoAliasReturned final : AANoAliasImpl {
           A, this, RVPos, DepClassTy::REQUIRED, IsKnownNoCapture, false,
           &NoCaptureAA);
       return IsAssumedNoCapture ||
-             (NoCaptureAA && NoCaptureAA->isAssumedNoCaptureMaybeReturned());
+             (NoCaptureAA &&
+              NoCaptureAA->isAssumedNoProvenanceCaptureMaybeReturned());
     };
 
     if (!A.checkForAllReturnedValues(CheckReturnValue, *this))
@@ -5845,21 +5848,56 @@ struct AANoCaptureImpl : public AANoCapture {
     assert(!AA::hasAssumedIRAttr<Attribute::Captures>(
         A, nullptr, getIRPosition(), DepClassTy::NONE, IsKnown));
     (void)IsKnown;
+
+    // Use the components known not to be captured from existing attributes.
+    SmallVector<Attribute, 2> Attrs;
+    A.getAttrs(getIRPosition(), {Attribute::Captures}, Attrs,
+               /*IgnoreSubsumingPositions=*/true);
+    if (getIRPosition().getPositionKind() == IRP_CALL_SITE_ARGUMENT) {
+      if (Argument *Arg = getAssociatedArgument())
+        A.getAttrs(IRPosition::argument(*Arg), {Attribute::Captures}, Attrs,
+                   /*IgnoreSubsumingPositions=*/true);
+    }
+    for (const Attribute &Attr : Attrs)
+      addKnownBits(getNotCapturedBits(Attr.getCaptureInfo()));
+  }
+
+  /// Return the state bits for the components not captured according to \p CI.
+  static base_t getNotCapturedBits(CaptureInfo CI) {
+    base_t Bits = 0;
+    CaptureComponents Other = CI.getOtherComponents();
+    if (!capturesAnyProvenance(Other)) {
+      Bits |= NOT_CAPTURED_IN_MEM | NOT_CAPTURED_IN_INT;
+      if (!capturesAddress(Other))
+        Bits |= NOT_CAPTURED_ADDRESS | NOT_CAPTURED_ADDRESS_IS_NULL;
+      else if (capturesAddressIsNullOnly(Other))
+        Bits |= NOT_CAPTURED_ADDRESS;
+    }
+    if (capturesNothing(CI.getRetComponents()))
+      Bits |= NOT_CAPTURED_IN_RET;
+    return Bits;
   }
 
   ChangeStatus updateImpl(Attributor &A) override;
 
   void getDeducedAttributes(Attributor &A, LLVMContext &Ctx,
                             SmallVectorImpl<Attribute> &Attrs) const override {
-    if (!isAssumedNoCaptureMaybeReturned())
+    if (!isArgumentPosition())
       return;
 
-    if (isArgumentPosition()) {
-      if (isAssumedNoCapture())
-        Attrs.emplace_back(Attribute::get(Ctx, Attribute::Captures));
-      else if (ManifestInternal)
-        Attrs.emplace_back(Attribute::get(Ctx, "no-capture-maybe-returned"));
+    if (isAssumedNoCapture()) {
+      Attrs.emplace_back(Attribute::get(Ctx, Attribute::Captures));
+      return;
     }
+    // Like FunctionAttrs, only manifest captures if not everything is captured
+    // other than through the return value. Don't bother for call site
+    // arguments, where this would usually repeat the callee's attribute.
+    CaptureInfo CI = getAssumedCaptureInfo();
+    if (getPositionKind() == IRP_ARGUMENT &&
+        !capturesAll(CI.getOtherComponents()))
+      Attrs.emplace_back(Attribute::getWithCaptureInfo(Ctx, CI));
+    if (isAssumedNoCaptureMaybeReturned() && ManifestInternal)
+      Attrs.emplace_back(Attribute::get(Ctx, "no-capture-maybe-returned"));
   }
 
   const std::string getAsStr(Attributor *A) const override {
@@ -5871,6 +5909,8 @@ struct AANoCaptureImpl : public AANoCapture {
       return "known not-captured-maybe-returned";
     if (isAssumedNoCaptureMaybeReturned())
       return "assumed not-captured-maybe-returned";
+    if (isAssumedNoProvenanceCaptureMaybeReturned())
+      return "assumed address-captured-maybe-returned";
     return "assumed-captured";
   }
 
@@ -5923,8 +5963,13 @@ struct AANoCaptureImpl : public AANoCapture {
     if (IsAssumedNoCapture)
       return isCapturedIn(State, /* Memory */ false, /* Integer */ false,
                           /* Return */ false);
-    if (ArgNoCaptureAA && ArgNoCaptureAA->isAssumedNoCaptureMaybeReturned()) {
-      Follow = true;
+    if (ArgNoCaptureAA &&
+        ArgNoCaptureAA->isAssumedNoProvenanceCaptureMaybeReturned()) {
+      Follow = !ArgNoCaptureAA->isAssumed(AANoCapture::NOT_CAPTURED_IN_RET);
+      // The callee may still capture the address.
+      State.removeAssumedBits(~ArgNoCaptureAA->getAssumed() &
+                              (AANoCapture::NOT_CAPTURED_ADDRESS |
+                               AANoCapture::NOT_CAPTURED_ADDRESS_IS_NULL));
       return isCapturedIn(State, /* Memory */ false, /* Integer */ false,
                           /* Return */ false);
     }
@@ -5945,9 +5990,12 @@ struct AANoCaptureImpl : public AANoCapture {
       State.removeAssumedBits(AANoCapture::NOT_CAPTURED_IN_MEM);
     if (CapturedInInt)
       State.removeAssumedBits(AANoCapture::NOT_CAPTURED_IN_INT);
+    if (CapturedInMem || CapturedInInt)
+      State.removeAssumedBits(AANoCapture::NOT_CAPTURED_ADDRESS |
+                              AANoCapture::NOT_CAPTURED_ADDRESS_IS_NULL);
     if (CapturedInRet)
       State.removeAssumedBits(AANoCapture::NOT_CAPTURED_IN_RET);
-    return State.isAssumed(AANoCapture::NO_CAPTURE_MAYBE_RETURNED);
+    return State.isAssumed(AANoCapture::NO_PROVENANCE_CAPTURE_MAYBE_RETURNED);
   }
 };
 
@@ -6023,11 +6071,21 @@ ChangeStatus AANoCaptureImpl::updateImpl(Attributor &A) {
 
   auto UseCheck = [&](const Use &U, bool &Follow) -> bool {
     // TODO(captures): Make this more precise.
-    UseCaptureInfo CI = DetermineUseCaptureKind(U, /*Base=*/nullptr);
+    UseCaptureInfo CI = DetermineUseCaptureKind(U, /*Base=*/V);
     if (capturesNothing(CI))
       return true;
     if (CI.isPassthrough()) {
       Follow = true;
+      return true;
+    }
+    // Uses which only capture (whether) the address (is null) do not capture
+    // the provenance.
+    if (capturesNothing(CI.ResultCC) && !capturesAnyProvenance(CI.UseCC)) {
+      if (capturesAddressIsNullOnly(CI.UseCC))
+        T.removeAssumedBits(NOT_CAPTURED_ADDRESS_IS_NULL);
+      else
+        T.removeAssumedBits(NOT_CAPTURED_ADDRESS |
+                            NOT_CAPTURED_ADDRESS_IS_NULL);
       return true;
     }
     return checkUse(A, T, U, Follow);
@@ -6039,7 +6097,7 @@ ChangeStatus AANoCaptureImpl::updateImpl(Attributor &A) {
   AANoCapture::StateType &S = getState();
   auto Assumed = S.getAssumed();
   S.intersectAssumedBits(T.getAssumed());
-  if (!isAssumedNoCaptureMaybeReturned())
+  if (!isAssumedNoProvenanceCaptureMaybeReturned())
     return indicatePessimisticFixpoint();
   return Assumed == S.getAssumed() ? ChangeStatus::UNCHANGED
                                    : ChangeStatus::CHANGED;
@@ -6073,7 +6131,7 @@ struct AANoCaptureCallSiteArgument final : AANoCaptureImpl {
             A, this, ArgPos, DepClassTy::REQUIRED, IsKnownNoCapture, false,
             &ArgAA))
       return ChangeStatus::UNCHANGED;
-    if (!ArgAA || !ArgAA->isAssumedNoCaptureMaybeReturned())
+    if (!ArgAA || !ArgAA->isAssumedNoProvenanceCaptureMaybeReturned())
       return indicatePessimisticFixpoint();
     return clampStateAndIndicateChange(getState(), ArgAA->getState());
   }
@@ -8157,7 +8215,8 @@ ChangeStatus AAMemoryBehaviorFloating::updateImpl(Attributor &A) {
       &ArgNoCaptureAA);
 
   if (!IsAssumedNoCapture &&
-      (!ArgNoCaptureAA || !ArgNoCaptureAA->isAssumedNoCaptureMaybeReturned())) {
+      (!ArgNoCaptureAA ||
+       !ArgNoCaptureAA->isAssumedNoProvenanceCaptureMaybeReturned())) {
     S.intersectAssumedBits(FnMemAssumedState);
     return (AssumedState != getAssumed()) ? ChangeStatus::CHANGED
                                           : ChangeStatus::UNCHANGED;
@@ -8212,9 +8271,16 @@ bool AAMemoryBehaviorFloating::followUsersOfUseIn(Attributor &A, const Use &U,
   if (U.get()->getType()->isPointerTy()) {
     unsigned ArgNo = CB->getArgOperandNo(&U);
     bool IsKnownNoCapture;
-    return !AA::hasAssumedIRAttr<Attribute::Captures>(
-        A, this, IRPosition::callsite_argument(*CB, ArgNo),
-        DepClassTy::OPTIONAL, IsKnownNoCapture);
+    const AANoCapture *NoCaptureAA = nullptr;
+    if (AA::hasAssumedIRAttr<Attribute::Captures>(
+            A, this, IRPosition::callsite_argument(*CB, ArgNo),
+            DepClassTy::OPTIONAL, IsKnownNoCapture,
+            /*IgnoreSubsumingPositions=*/false, &NoCaptureAA))
+      return false;
+    // Capturing the provenance otherwise is already ruled out for the
+    // associated value, so only the return matters here.
+    return !NoCaptureAA ||
+           !NoCaptureAA->isAssumed(AANoCapture::NOT_CAPTURED_IN_RET);
   }
 
   return true;

@@ -3082,7 +3082,7 @@ f:
 define void @atomicrmw(ptr %p, i32 %i, i1 %cnd) {
 ; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
 ; TUNIT-LABEL: define void @atomicrmw(
-; TUNIT-SAME: ptr nofree [[P:%.*]], i32 [[I:%.*]], i1 noundef [[CND:%.*]]) #[[ATTR3]] {
+; TUNIT-SAME: ptr nofree readnone captures(address, ret: none) [[P:%.*]], i32 [[I:%.*]], i1 noundef [[CND:%.*]]) #[[ATTR3]] {
 ; TUNIT-NEXT:    br i1 [[CND]], label %[[T:.*]], label %[[M:.*]]
 ; TUNIT:       [[T]]:
 ; TUNIT-NEXT:    br label %[[M]]
@@ -3092,7 +3092,7 @@ define void @atomicrmw(ptr %p, i32 %i, i1 %cnd) {
 ;
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn
 ; CGSCC-LABEL: define void @atomicrmw(
-; CGSCC-SAME: ptr nofree [[P:%.*]], i32 [[I:%.*]], i1 noundef [[CND:%.*]]) #[[ATTR5]] {
+; CGSCC-SAME: ptr nofree readnone captures(address, ret: none) [[P:%.*]], i32 [[I:%.*]], i1 noundef [[CND:%.*]]) #[[ATTR5]] {
 ; CGSCC-NEXT:    br i1 [[CND]], label %[[T:.*]], label %[[M:.*]]
 ; CGSCC:       [[T]]:
 ; CGSCC-NEXT:    br label %[[M]]
@@ -3229,7 +3229,7 @@ entry:
 define internal ptr @passthrough(ptr noundef %P) {
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define internal noundef nonnull align 4 dereferenceable(4) ptr @passthrough(
-; CGSCC-SAME: ptr noalias nofree noundef nonnull readnone returned align 4 dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
+; CGSCC-SAME: ptr noalias nofree noundef nonnull readnone returned align 4 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:  [[ENTRY:.*:]]
 ; CGSCC-NEXT:    ret ptr [[P]]
 ;
@@ -3259,8 +3259,8 @@ define i32 @may_access_after_return_choice(i32 noundef %N, i32 noundef %M, i1 %c
 ; CGSCC-NEXT:  [[ENTRY:.*:]]
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i32, align 4
 ; CGSCC-NEXT:    [[B:%.*]] = alloca i32, align 4
-; CGSCC-NEXT:    [[CALL:%.*]] = call nonnull align 4 dereferenceable(4) ptr @passthrough_choice(i1 [[C]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) [[A]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) [[B]]) #[[ATTR28:[0-9]+]]
-; CGSCC-NEXT:    [[CALL1:%.*]] = call nonnull align 4 dereferenceable(4) ptr @passthrough_choice(i1 [[C]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) [[B]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) [[A]]) #[[ATTR28]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call nonnull align 4 dereferenceable(4) ptr @passthrough_choice(i1 [[C]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[A]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[B]]) #[[ATTR28:[0-9]+]]
+; CGSCC-NEXT:    [[CALL1:%.*]] = call nonnull align 4 dereferenceable(4) ptr @passthrough_choice(i1 [[C]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[B]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[A]]) #[[ATTR28]]
 ; CGSCC-NEXT:    call void @write_both(ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[CALL]], ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[CALL1]]) #[[ATTR21]]
 ; CGSCC-NEXT:    [[TMP0:%.*]] = load i32, ptr [[A]], align 4
 ; CGSCC-NEXT:    [[TMP1:%.*]] = load i32, ptr [[B]], align 4
@@ -3282,7 +3282,7 @@ entry:
 define internal ptr @passthrough_choice(i1 %c, ptr noundef %P, ptr noundef %Q) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define internal noundef nonnull align 4 dereferenceable(4) ptr @passthrough_choice(
-; CHECK-SAME: i1 [[C:%.*]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]], ptr noalias nofree noundef nonnull readnone align 4 dereferenceable(4) "no-capture-maybe-returned" [[Q:%.*]]) #[[ATTR4]] {
+; CHECK-SAME: i1 [[C:%.*]], ptr noalias nofree noundef nonnull readnone align 4 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]], ptr noalias nofree noundef nonnull readnone align 4 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[Q:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
 ; CHECK-NEXT:    [[R:%.*]] = select i1 [[C]], ptr [[P]], ptr [[Q]]
 ; CHECK-NEXT:    ret ptr [[R]]
@@ -3365,7 +3365,7 @@ entry:
 define internal ptr @passthrough_no_choice_true(i1 %c, ptr noundef %P, ptr noundef %Q) {
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define internal noundef nonnull align 4 dereferenceable(4) ptr @passthrough_no_choice_true(
-; CGSCC-SAME: ptr noalias nofree noundef nonnull readnone returned align 4 dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]], i32 [[TMP0:%.*]]) #[[ATTR4]] {
+; CGSCC-SAME: ptr noalias nofree noundef nonnull readnone returned align 4 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[P:%.*]], i32 [[TMP0:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:  [[ENTRY:.*:]]
 ; CGSCC-NEXT:    [[Q_PRIV:%.*]] = alloca i32, align 4
 ; CGSCC-NEXT:    store i32 [[TMP0]], ptr [[Q_PRIV]], align 4
@@ -3378,7 +3378,7 @@ entry:
 define internal ptr @passthrough_no_choice_false(i1 %c, ptr noundef %P, ptr noundef %Q) {
 ; CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CGSCC-LABEL: define internal noundef nonnull align 4 dereferenceable(4) ptr @passthrough_no_choice_false(
-; CGSCC-SAME: i32 [[TMP0:%.*]], ptr noalias nofree noundef nonnull readnone returned align 4 dereferenceable(4) "no-capture-maybe-returned" [[Q:%.*]]) #[[ATTR4]] {
+; CGSCC-SAME: i32 [[TMP0:%.*]], ptr noalias nofree noundef nonnull readnone returned align 4 captures(ret: address, provenance) dereferenceable(4) "no-capture-maybe-returned" [[Q:%.*]]) #[[ATTR4]] {
 ; CGSCC-NEXT:  [[ENTRY:.*:]]
 ; CGSCC-NEXT:    [[P_PRIV:%.*]] = alloca i32, align 4
 ; CGSCC-NEXT:    store i32 [[TMP0]], ptr [[P_PRIV]], align 4
@@ -3392,7 +3392,7 @@ entry:
 define ptr @move2(ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define ptr @move2(
-; CHECK-SAME: ptr nofree readnone "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
+; CHECK-SAME: ptr nofree readnone captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:    [[G:%.*]] = getelementptr i8, ptr [[P]], i32 2
 ; CHECK-NEXT:    ret ptr [[G]]
 ;
@@ -3402,7 +3402,7 @@ define ptr @move2(ptr %p) {
 define internal ptr @move4(ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define internal ptr @move4(
-; CHECK-SAME: ptr noalias nofree readnone "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
+; CHECK-SAME: ptr noalias nofree readnone captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:    [[G:%.*]] = getelementptr i8, ptr [[P]], i32 4
 ; CHECK-NEXT:    ret ptr [[G]]
 ;
@@ -3413,7 +3413,7 @@ define internal ptr @move4(ptr %p) {
 define ptr @move246(i32 %i, ptr %p) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define ptr @move246(
-; CHECK-SAME: i32 [[I:%.*]], ptr nofree readnone "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
+; CHECK-SAME: i32 [[I:%.*]], ptr nofree readnone captures(ret: address, provenance) "no-capture-maybe-returned" [[P:%.*]]) #[[ATTR4]] {
 ; CHECK-NEXT:    [[C0:%.*]] = icmp eq i32 [[I]], 0
 ; CHECK-NEXT:    br i1 [[C0]], label %[[BG2:.*]], label %[[BG46:.*]]
 ; CHECK:       [[BG2]]:
@@ -3461,9 +3461,9 @@ define void @returnedPtrAccesses() {
 ;
 ; CGSCC-LABEL: define void @returnedPtrAccesses() {
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i64, align 8
-; CGSCC-NEXT:    [[A2:%.*]] = call nonnull dereferenceable(1) ptr @move2(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) [[A]]) #[[ATTR29:[0-9]+]]
-; CGSCC-NEXT:    [[A4:%.*]] = call ptr @move4(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) [[A]]) #[[ATTR29]]
-; CGSCC-NEXT:    [[A6:%.*]] = call ptr @move4(ptr noalias nofree noundef nonnull readnone dereferenceable(1) [[A2]]) #[[ATTR29]]
+; CGSCC-NEXT:    [[A2:%.*]] = call nonnull dereferenceable(1) ptr @move2(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR29:[0-9]+]]
+; CGSCC-NEXT:    [[A4:%.*]] = call ptr @move4(ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR29]]
+; CGSCC-NEXT:    [[A6:%.*]] = call ptr @move4(ptr noalias nofree noundef nonnull readnone dereferenceable(1) "no-capture-maybe-returned" [[A2]]) #[[ATTR29]]
 ; CGSCC-NEXT:    [[G2:%.*]] = getelementptr i8, ptr [[A]], i32 2
 ; CGSCC-NEXT:    [[G4:%.*]] = getelementptr i8, ptr [[A]], i32 4
 ; CGSCC-NEXT:    [[G6:%.*]] = getelementptr i8, ptr [[A]], i32 6
@@ -3505,7 +3505,7 @@ define void @returnedPtrAccessesMultiple(i32 %i) {
 ; CGSCC-LABEL: define void @returnedPtrAccessesMultiple(
 ; CGSCC-SAME: i32 [[I:%.*]]) {
 ; CGSCC-NEXT:    [[A:%.*]] = alloca i64, align 8
-; CGSCC-NEXT:    [[AP:%.*]] = call ptr @move246(i32 [[I]], ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) [[A]]) #[[ATTR29]]
+; CGSCC-NEXT:    [[AP:%.*]] = call ptr @move246(i32 [[I]], ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR29]]
 ; CGSCC-NEXT:    [[G2:%.*]] = getelementptr i8, ptr [[A]], i32 2
 ; CGSCC-NEXT:    [[G4:%.*]] = getelementptr i8, ptr [[A]], i32 4
 ; CGSCC-NEXT:    [[G6:%.*]] = getelementptr i8, ptr [[A]], i32 6
@@ -3556,7 +3556,7 @@ define void @returnedPtrAccessesMultiple2(i32 %i) {
 ; CGSCC-NEXT:    store i8 0, ptr [[G2]], align 2
 ; CGSCC-NEXT:    store i8 0, ptr [[G4]], align 4
 ; CGSCC-NEXT:    store i8 0, ptr [[G6]], align 2
-; CGSCC-NEXT:    [[AP:%.*]] = call ptr @move246(i32 [[I]], ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) [[A]]) #[[ATTR29]]
+; CGSCC-NEXT:    [[AP:%.*]] = call ptr @move246(i32 [[I]], ptr noalias nofree noundef nonnull readnone align 8 dereferenceable(8) "no-capture-maybe-returned" [[A]]) #[[ATTR29]]
 ; CGSCC-NEXT:    store i8 2, ptr [[AP]], align 1
 ; CGSCC-NEXT:    [[L2:%.*]] = load i8, ptr [[G2]], align 2
 ; CGSCC-NEXT:    [[L4:%.*]] = load i8, ptr [[G4]], align 4

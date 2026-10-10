@@ -11,7 +11,7 @@
 define ptr addrspace(1) @foo(ptr addrspace(4) %arg) {
 ; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; CHECK-LABEL: define {{[^@]+}}@foo
-; CHECK-SAME: (ptr addrspace(4) nofree readnone [[ARG:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr addrspace(4) nofree readnone captures(ret: address, provenance) [[ARG:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[TMP0:%.*]] = addrspacecast ptr addrspace(4) [[ARG]] to ptr addrspace(1)
 ; CHECK-NEXT:    ret ptr addrspace(1) [[TMP0]]

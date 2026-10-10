@@ -16,7 +16,7 @@
 define ptr @checkAndAdvance(ptr align 16 %0) {
 ; CHECK: Function Attrs: nofree nosync nounwind memory(argmem: read)
 ; CHECK-LABEL: define {{[^@]+}}@checkAndAdvance
-; CHECK-SAME: (ptr nofree noundef nonnull readonly align 16 dereferenceable(4) [[TMP0:%.*]]) #[[ATTR0:[0-9]+]] {
+; CHECK-SAME: (ptr nofree noundef nonnull readonly align 16 captures(ret: address, provenance) dereferenceable(4) [[TMP0:%.*]]) #[[ATTR0:[0-9]+]] {
 ; CHECK-NEXT:    [[TMP2:%.*]] = load i32, ptr [[TMP0]], align 16
 ; CHECK-NEXT:    [[TMP3:%.*]] = icmp eq i32 [[TMP2]], 0
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[TMP4:%.*]], label [[TMP7:%.*]]

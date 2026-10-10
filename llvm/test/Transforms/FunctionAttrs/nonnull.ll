@@ -23,7 +23,7 @@ define ptr @test2(ptr nonnull %p) {
 ; FNATTRS-NEXT:    ret ptr [[P]]
 ;
 ; ATTRIBUTOR-LABEL: define nonnull ptr @test2(
-; ATTRIBUTOR-SAME: ptr nofree nonnull readnone [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; ATTRIBUTOR-SAME: ptr nofree nonnull readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    ret ptr [[P]]
 ;
   ret ptr %p
@@ -198,37 +198,27 @@ define ptr @test7(ptr %a) {
 ; FNATTRS-NEXT:    ret ptr [[A]]
 ;
 ; ATTRIBUTOR-LABEL: define ptr @test7(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[A:%.*]]) #[[ATTR0]] {
+; ATTRIBUTOR-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]]) #[[ATTR0]] {
 ; ATTRIBUTOR-NEXT:    ret ptr [[A]]
 ;
   ret ptr %a
 }
 
 define ptr @test8(ptr %a) {
-; FNATTRS-LABEL: define nonnull ptr @test8(
-; FNATTRS-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]]) #[[ATTR0]] {
-; FNATTRS-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 1
-; FNATTRS-NEXT:    ret ptr [[B]]
-;
-; ATTRIBUTOR-LABEL: define nonnull ptr @test8(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[A:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 1
-; ATTRIBUTOR-NEXT:    ret ptr [[B]]
+; COMMON-LABEL: define nonnull ptr @test8(
+; COMMON-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]]) #[[ATTR0:[0-9]+]] {
+; COMMON-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 1
+; COMMON-NEXT:    ret ptr [[B]]
 ;
   %b = getelementptr inbounds i8, ptr %a, i64 1
   ret ptr %b
 }
 
 define ptr @test9(ptr %a, i64 %n) {
-; FNATTRS-LABEL: define ptr @test9(
-; FNATTRS-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]], i64 [[N:%.*]]) #[[ATTR0]] {
-; FNATTRS-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 [[N]]
-; FNATTRS-NEXT:    ret ptr [[B]]
-;
-; ATTRIBUTOR-LABEL: define ptr @test9(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[A:%.*]], i64 [[N:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 [[N]]
-; ATTRIBUTOR-NEXT:    ret ptr [[B]]
+; COMMON-LABEL: define ptr @test9(
+; COMMON-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]], i64 [[N:%.*]]) #[[ATTR0]] {
+; COMMON-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 [[N]]
+; COMMON-NEXT:    ret ptr [[B]]
 ;
   %b = getelementptr inbounds i8, ptr %a, i64 %n
   ret ptr %b
@@ -245,7 +235,7 @@ define ptr @test10(ptr %a, i64 %n) {
 ; FNATTRS-NEXT:    ret ptr [[B]]
 ;
 ; ATTRIBUTOR-LABEL: define ptr @test10(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[A:%.*]], i64 [[N:%.*]]) #[[ATTR3:[0-9]+]] {
+; ATTRIBUTOR-SAME: ptr nofree readnone captures(ret: address, provenance) [[A:%.*]], i64 [[N:%.*]]) #[[ATTR3:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[CMP:%.*]] = icmp ne i64 [[N]], 0
 ; ATTRIBUTOR-NEXT:    call void @llvm.assume(i1 [[CMP]]) #[[ATTR13:[0-9]+]]
 ; ATTRIBUTOR-NEXT:    [[B:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 [[N]]
@@ -262,27 +252,16 @@ define ptr @test10(ptr %a, i64 %n) {
 ;   return p? p: nonnull();
 ; }
 define ptr @test11(ptr) local_unnamed_addr {
-; FNATTRS-LABEL: define nonnull ptr @test11(
-; FNATTRS-SAME: ptr nofree readnone captures(address_is_null, ret: address, provenance) [[TMP0:%.*]]) local_unnamed_addr {
-; FNATTRS-NEXT:    [[TMP2:%.*]] = icmp eq ptr [[TMP0]], null
-; FNATTRS-NEXT:    br i1 [[TMP2]], label [[TMP3:%.*]], label [[TMP5:%.*]]
-; FNATTRS:       3:
-; FNATTRS-NEXT:    [[TMP4:%.*]] = tail call ptr @ret_nonnull()
-; FNATTRS-NEXT:    br label [[TMP5]]
-; FNATTRS:       5:
-; FNATTRS-NEXT:    [[TMP6:%.*]] = phi ptr [ [[TMP4]], [[TMP3]] ], [ [[TMP0]], [[TMP1:%.*]] ]
-; FNATTRS-NEXT:    ret ptr [[TMP6]]
-;
-; ATTRIBUTOR-LABEL: define nonnull ptr @test11(
-; ATTRIBUTOR-SAME: ptr nofree [[TMP0:%.*]]) local_unnamed_addr {
-; ATTRIBUTOR-NEXT:    [[TMP2:%.*]] = icmp eq ptr [[TMP0]], null
-; ATTRIBUTOR-NEXT:    br i1 [[TMP2]], label [[TMP3:%.*]], label [[TMP5:%.*]]
-; ATTRIBUTOR:       3:
-; ATTRIBUTOR-NEXT:    [[TMP4:%.*]] = tail call ptr @ret_nonnull()
-; ATTRIBUTOR-NEXT:    br label [[TMP5]]
-; ATTRIBUTOR:       5:
-; ATTRIBUTOR-NEXT:    [[TMP6:%.*]] = phi ptr [ [[TMP4]], [[TMP3]] ], [ [[TMP0]], [[TMP1:%.*]] ]
-; ATTRIBUTOR-NEXT:    ret ptr [[TMP6]]
+; COMMON-LABEL: define nonnull ptr @test11(
+; COMMON-SAME: ptr nofree readnone captures(address_is_null, ret: address, provenance) [[TMP0:%.*]]) local_unnamed_addr {
+; COMMON-NEXT:    [[TMP2:%.*]] = icmp eq ptr [[TMP0]], null
+; COMMON-NEXT:    br i1 [[TMP2]], label [[TMP3:%.*]], label [[TMP5:%.*]]
+; COMMON:       3:
+; COMMON-NEXT:    [[TMP4:%.*]] = tail call ptr @ret_nonnull()
+; COMMON-NEXT:    br label [[TMP5]]
+; COMMON:       5:
+; COMMON-NEXT:    [[TMP6:%.*]] = phi ptr [ [[TMP4]], [[TMP3]] ], [ [[TMP0]], [[TMP1:%.*]] ]
+; COMMON-NEXT:    ret ptr [[TMP6]]
 ;
   %2 = icmp eq ptr %0, null
   br i1 %2, label %3, label %5
@@ -383,7 +362,7 @@ define internal ptr @f1(ptr %arg) {
 ; FNATTRS-NEXT:    ret ptr [[TMP10]]
 ;
 ; ATTRIBUTOR-LABEL: define internal ptr @f1(
-; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
+; ATTRIBUTOR-SAME: ptr nofree readonly captures(address_is_null, ret: none) [[ARG:%.*]]) #[[ATTR4:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  bb:
 ; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = icmp eq ptr [[ARG]], null
 ; ATTRIBUTOR-NEXT:    br i1 [[TMP]], label [[BB9:%.*]], label [[BB1:%.*]]
@@ -437,7 +416,7 @@ define internal ptr @f2(ptr %arg) {
 ; FNATTRS-NEXT:    ret ptr [[TMP]]
 ;
 ; ATTRIBUTOR-LABEL: define internal ptr @f2(
-; ATTRIBUTOR-SAME: ptr nofree nonnull readonly [[ARG:%.*]]) #[[ATTR4]] {
+; ATTRIBUTOR-SAME: ptr nofree nonnull readonly captures(address_is_null, ret: none) [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
 ; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = tail call ptr @f1(ptr nofree nonnull readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
@@ -458,7 +437,7 @@ define dso_local noalias ptr @f3(ptr %arg) {
 ; FNATTRS-NEXT:    ret ptr [[TMP]]
 ;
 ; ATTRIBUTOR-LABEL: define dso_local noalias ptr @f3(
-; ATTRIBUTOR-SAME: ptr nofree readonly [[ARG:%.*]]) #[[ATTR4]] {
+; ATTRIBUTOR-SAME: ptr nofree readonly captures(address_is_null, ret: none) [[ARG:%.*]]) #[[ATTR4]] {
 ; ATTRIBUTOR-NEXT:  bb:
 ; ATTRIBUTOR-NEXT:    [[TMP:%.*]] = call ptr @f1(ptr nofree readonly [[ARG]]) #[[ATTR14]]
 ; ATTRIBUTOR-NEXT:    ret ptr [[TMP]]
@@ -862,7 +841,7 @@ define i8 @parent6(ptr %a, ptr %b) {
 ; FNATTRS-NEXT:    ret i8 [[C]]
 ;
 ; ATTRIBUTOR-LABEL: define i8 @parent6(
-; ATTRIBUTOR-SAME: ptr [[A:%.*]], ptr nofree [[B:%.*]]) {
+; ATTRIBUTOR-SAME: ptr [[A:%.*]], ptr nofree readonly captures(address, ret: none) [[B:%.*]]) {
 ; ATTRIBUTOR-NEXT:    [[C:%.*]] = load volatile i8, ptr [[B]], align 1
 ; ATTRIBUTOR-NEXT:    call void @use1nonnull(ptr [[A]])
 ; ATTRIBUTOR-NEXT:    ret i8 [[C]]
@@ -944,15 +923,10 @@ exc:
 }
 
 define ptr @gep1(ptr %p) {
-; FNATTRS-LABEL: define nonnull ptr @gep1(
-; FNATTRS-SAME: ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0]] {
-; FNATTRS-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
-; FNATTRS-NEXT:    ret ptr [[Q]]
-;
-; ATTRIBUTOR-LABEL: define nonnull ptr @gep1(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[P:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
-; ATTRIBUTOR-NEXT:    ret ptr [[Q]]
+; COMMON-LABEL: define nonnull ptr @gep1(
+; COMMON-SAME: ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0]] {
+; COMMON-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
+; COMMON-NEXT:    ret ptr [[Q]]
 ;
   %q = getelementptr inbounds i32, ptr %p, i32 1
   ret ptr %q
@@ -960,30 +934,20 @@ define ptr @gep1(ptr %p) {
 
 define ptr @gep1_no_null_opt(ptr %p) #0 {
 ; Should't be able to derive nonnull based on gep.
-; FNATTRS-LABEL: define ptr @gep1_no_null_opt(
-; FNATTRS-SAME: ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR8:[0-9]+]] {
-; FNATTRS-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
-; FNATTRS-NEXT:    ret ptr [[Q]]
-;
-; ATTRIBUTOR-LABEL: define ptr @gep1_no_null_opt(
-; ATTRIBUTOR-SAME: ptr nofree readnone [[P:%.*]]) #[[ATTR8:[0-9]+]] {
-; ATTRIBUTOR-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
-; ATTRIBUTOR-NEXT:    ret ptr [[Q]]
+; COMMON-LABEL: define ptr @gep1_no_null_opt(
+; COMMON-SAME: ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR8:[0-9]+]] {
+; COMMON-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr [[P]], i32 1
+; COMMON-NEXT:    ret ptr [[Q]]
 ;
   %q = getelementptr inbounds i32, ptr %p, i32 1
   ret ptr %q
 }
 
 define ptr addrspace(3) @gep2(ptr addrspace(3) %p) {
-; FNATTRS-LABEL: define ptr addrspace(3) @gep2(
-; FNATTRS-SAME: ptr addrspace(3) nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0]] {
-; FNATTRS-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr addrspace(3) [[P]], i32 1
-; FNATTRS-NEXT:    ret ptr addrspace(3) [[Q]]
-;
-; ATTRIBUTOR-LABEL: define ptr addrspace(3) @gep2(
-; ATTRIBUTOR-SAME: ptr addrspace(3) nofree readnone [[P:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr addrspace(3) [[P]], i32 1
-; ATTRIBUTOR-NEXT:    ret ptr addrspace(3) [[Q]]
+; COMMON-LABEL: define ptr addrspace(3) @gep2(
+; COMMON-SAME: ptr addrspace(3) nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0]] {
+; COMMON-NEXT:    [[Q:%.*]] = getelementptr inbounds i32, ptr addrspace(3) [[P]], i32 1
+; COMMON-NEXT:    ret ptr addrspace(3) [[Q]]
 ;
   %q = getelementptr inbounds i32, ptr addrspace(3) %p, i32 1
   ret ptr addrspace(3) %q
@@ -996,7 +960,7 @@ define ptr addrspace(3) @as(ptr addrspace(3) dereferenceable(4) %p) {
 ; FNATTRS-NEXT:    ret ptr addrspace(3) [[P]]
 ;
 ; ATTRIBUTOR-LABEL: define ptr addrspace(3) @as(
-; ATTRIBUTOR-SAME: ptr addrspace(3) nofree readnone dereferenceable(4) [[P:%.*]]) #[[ATTR0]] {
+; ATTRIBUTOR-SAME: ptr addrspace(3) nofree readnone captures(ret: address, provenance) dereferenceable(4) [[P:%.*]]) #[[ATTR0]] {
 ; ATTRIBUTOR-NEXT:    ret ptr addrspace(3) [[P]]
 ;
   ret ptr addrspace(3) %p
@@ -1382,15 +1346,10 @@ define void @PR43833_simple(ptr %0, i32 %1) {
 }
 
 define ptr @pr91177_non_inbounds_gep(ptr nonnull %arg) {
-; FNATTRS-LABEL: define ptr @pr91177_non_inbounds_gep(
-; FNATTRS-SAME: ptr nofree nonnull readnone captures(ret: address, provenance) [[ARG:%.*]]) #[[ATTR0]] {
-; FNATTRS-NEXT:    [[RES:%.*]] = getelementptr i8, ptr [[ARG]], i64 -8
-; FNATTRS-NEXT:    ret ptr [[RES]]
-;
-; ATTRIBUTOR-LABEL: define ptr @pr91177_non_inbounds_gep(
-; ATTRIBUTOR-SAME: ptr nofree nonnull readnone [[ARG:%.*]]) #[[ATTR0]] {
-; ATTRIBUTOR-NEXT:    [[RES:%.*]] = getelementptr i8, ptr [[ARG]], i64 -8
-; ATTRIBUTOR-NEXT:    ret ptr [[RES]]
+; COMMON-LABEL: define ptr @pr91177_non_inbounds_gep(
+; COMMON-SAME: ptr nofree nonnull readnone captures(ret: address, provenance) [[ARG:%.*]]) #[[ATTR0]] {
+; COMMON-NEXT:    [[RES:%.*]] = getelementptr i8, ptr [[ARG]], i64 -8
+; COMMON-NEXT:    ret ptr [[RES]]
 ;
   %res = getelementptr i8, ptr %arg, i64 -8
   ret ptr %res

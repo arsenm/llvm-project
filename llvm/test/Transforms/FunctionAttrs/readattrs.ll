@@ -41,13 +41,13 @@ define ptr @test2(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test2
-; ATTRIBUTOR-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr @x, align 4
 ; ATTRIBUTOR-NEXT:    ret ptr [[P]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test2
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR0:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 0, ptr @x, align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret ptr [[P]]
 ;
@@ -64,13 +64,13 @@ define i1 @test3(ptr %p, ptr %q) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test3
-; ATTRIBUTOR-SAME: (ptr nofree readnone [[P:%.*]], ptr nofree readnone [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree readnone captures(address, ret: none) [[P:%.*]], ptr nofree readnone captures(address, ret: none) [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = icmp ult ptr [[P]], [[Q]]
 ; ATTRIBUTOR-NEXT:    ret i1 [[A]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test3
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone [[P:%.*]], ptr nofree readnone [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone captures(address, ret: none) [[P:%.*]], ptr nofree readnone captures(address, ret: none) [[Q:%.*]]) #[[ATTR1:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:    [[A:%.*]] = icmp ult ptr [[P]], [[Q]]
 ; ATTRIBUTOR-CGSCC-NEXT:    ret i1 [[A]]
 ;
@@ -203,13 +203,13 @@ define ptr @test8_1(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@test8_1
-; ATTRIBUTOR-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR1]] {
+; ATTRIBUTOR-SAME: (ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    ret ptr [[P]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_1
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone [[P:%.*]]) #[[ATTR1]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readnone captures(ret: address, provenance) [[P:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
 ; ATTRIBUTOR-CGSCC-NEXT:    ret ptr [[P]]
 ;
@@ -236,7 +236,7 @@ define void @test8_2(ptr %p) {
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test8_2
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree writeonly [[P:%.*]]) #[[ATTR5:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree writeonly captures(none) [[P:%.*]]) #[[ATTR5:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:  entry:
 ; ATTRIBUTOR-CGSCC-NEXT:    [[CALL:%.*]] = call ptr @test8_1(ptr nofree readnone [[P]]) #[[ATTR14:[0-9]+]]
 ; ATTRIBUTOR-CGSCC-NEXT:    store i32 10, ptr [[CALL]], align 4
@@ -354,13 +354,13 @@ define i32 @volatile_load(ptr %p) {
 ;
 ; ATTRIBUTOR: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite)
 ; ATTRIBUTOR-LABEL: define {{[^@]+}}@volatile_load
-; ATTRIBUTOR-SAME: (ptr nofree [[P:%.*]]) #[[ATTR9:[0-9]+]] {
+; ATTRIBUTOR-SAME: (ptr nofree readonly captures(address, ret: none) [[P:%.*]]) #[[ATTR11:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[LOAD:%.*]] = load volatile i32, ptr [[P]], align 4
 ; ATTRIBUTOR-NEXT:    ret i32 [[LOAD]]
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: nofree norecurse nosync nounwind memory(argmem: readwrite)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@volatile_load
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree [[P:%.*]]) #[[ATTR10:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree readonly captures(address, ret: none) [[P:%.*]]) #[[ATTR11:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:    [[LOAD:%.*]] = load volatile i32, ptr [[P]], align 4
 ; ATTRIBUTOR-CGSCC-NEXT:    ret i32 [[LOAD]]
 ;
