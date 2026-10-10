@@ -119,7 +119,7 @@ define void @test5(ptr %p, ptr %q) {
 ;
 ; ATTRIBUTOR-CGSCC: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test5
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree nonnull writeonly captures(none) [[P:%.*]], ptr nofree writeonly [[Q:%.*]]) #[[ATTR4:[0-9]+]] {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree nonnull writeonly captures(none) initializes((0, 8)) [[P:%.*]], ptr nofree writeonly [[Q:%.*]]) #[[ATTR4:[0-9]+]] {
 ; ATTRIBUTOR-CGSCC-NEXT:    store ptr [[Q]], ptr [[P]], align 8
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void
 ;
@@ -144,7 +144,7 @@ define void @test6_2(ptr %p, ptr %q) {
 ; ATTRIBUTOR-NEXT:    ret void
 ;
 ; ATTRIBUTOR-CGSCC-LABEL: define {{[^@]+}}@test6_2
-; ATTRIBUTOR-CGSCC-SAME: (ptr nofree nonnull writeonly captures(none) [[P:%.*]], ptr [[Q:%.*]]) {
+; ATTRIBUTOR-CGSCC-SAME: (ptr nofree nonnull writeonly captures(none) initializes((0, 8)) [[P:%.*]], ptr [[Q:%.*]]) {
 ; ATTRIBUTOR-CGSCC-NEXT:    store ptr [[Q]], ptr [[P]], align 8
 ; ATTRIBUTOR-CGSCC-NEXT:    call void @test6_1()
 ; ATTRIBUTOR-CGSCC-NEXT:    ret void

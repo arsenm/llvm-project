@@ -46,6 +46,7 @@
 #include "llvm/Support/GraphWriter.h"
 #include "llvm/Support/ModRef.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Transforms/IPO/FunctionAttrs.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/Local.h"
@@ -4055,6 +4056,25 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
 
   ChangeStatus Changed = A.run();
 
+  // Like FunctionAttrs, infer initializes once the attributes it depends on,
+  // e.g., writeonly and captures, have been deduced.
+  SmallSetVector<Function *, 8> InitializesChanged;
+  if (!IsModulePass) {
+    for (Function *F : Functions) {
+      if (F->isDeclaration() || !F->hasExactDefinition() ||
+          F->hasOptNone() || F->hasFnAttribute(Attribute::Naked) ||
+          F->isPresplitCoroutine())
+        continue;
+      for (Argument &Arg : F->args()) {
+        if (Arg.getType()->isPointerTy() && !Arg.onlyReadsMemory() &&
+            inferInitializes(Arg))
+          InitializesChanged.insert(F);
+      }
+    }
+    if (!InitializesChanged.empty())
+      Changed = ChangeStatus::CHANGED;
+  }
+
   if (Changed == ChangeStatus::CHANGED) {
     // Invalidate analyses for modified functions so that we don't have to
     // invalidate all analyses for all functions in this SCC.
@@ -4085,7 +4105,9 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
       InvalidateCallers(*Changed);
     }
 
-    for (Function *Changed : A.getAttrModifiedFunctions()) {
+    SmallSetVector<Function *, 8> AttrModified(A.getAttrModifiedFunctions());
+    AttrModified.insert_range(InitializesChanged);
+    for (Function *Changed : AttrModified) {
       if (IRModified.contains(Changed))
         continue;
       FAM.invalidate(*Changed, AttrOnlyPA);

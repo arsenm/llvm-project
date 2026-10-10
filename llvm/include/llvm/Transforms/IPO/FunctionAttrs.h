@@ -23,6 +23,7 @@
 
 namespace llvm {
 
+class Argument;
 class GlobalValueSummary;
 class ModuleSummaryIndex;
 class Function;
@@ -31,6 +32,10 @@ class Module;
 /// Returns the memory access properties of this copy of the function.
 LLVM_ABI MemoryEffects computeFunctionBodyMemoryAccess(Function &F,
                                                        AAResults &AAR);
+
+/// Infer the initializes attribute for the pointer argument \p A from the
+/// accesses in its function, and add it. Returns true if it changed.
+LLVM_ABI bool inferInitializes(Argument &A);
 
 /// Propagate function attributes for function summaries along the index's
 /// callgraph during thinlink

@@ -1120,7 +1120,8 @@ static bool addAccessAttrs(Argument *A, ArgAccessProperties Props) {
   return true;
 }
 
-static bool inferInitializes(Argument &A, Function &F) {
+bool llvm::inferInitializes(Argument &A) {
+  Function &F = *A.getParent();
   auto ArgumentUses = collectArgumentUsesPerBlock(A, F);
   // No write anywhere in the function, bail.
   if (!ArgumentUses.HasAnyWrite)
@@ -1317,7 +1318,7 @@ static void addArgumentAttrs(const SCCNodeSet &SCCNodes,
           Changed.insert(F);
       }
       if (!SkipInitializes && !A.onlyReadsMemory()) {
-        if (inferInitializes(A, *F))
+        if (inferInitializes(A))
           Changed.insert(F);
       }
     }
