@@ -37,6 +37,10 @@ LLVM_ABI MemoryEffects computeFunctionBodyMemoryAccess(Function &F,
 /// function. Returns true if it changed.
 LLVM_ABI bool inferCold(Function &F);
 
+/// Add the noundef attribute to the return value of \p F if all returned
+/// values are known to be well defined. Returns true if it changed.
+LLVM_ABI bool inferNoUndefReturn(Function &F);
+
 /// Add the returned attribute to the argument of \p F that is always returned,
 /// if there is one. Returns true if it changed.
 LLVM_ABI bool inferReturnedArg(Function &F);

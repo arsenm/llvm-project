@@ -1678,14 +1678,70 @@ static void addNonNullAttrs(const SCCNodeSet &SCCNodes,
 }
 
 /// Deduce noundef attributes for the SCC.
+bool llvm::inferNoUndefReturn(Function &F) {
+  // Already noundef.
+  AttributeList Attrs = F.getAttributes();
+  if (Attrs.hasRetAttr(Attribute::NoUndef))
+    return false;
+
+  // MemorySanitizer assumes that the definition and declaration of a
+  // function will be consistent. A function with sanitize_memory attribute
+  // should be skipped from inference.
+  if (F.hasFnAttribute(Attribute::SanitizeMemory))
+    return false;
+
+  if (F.getReturnType()->isVoidTy())
+    return false;
+
+  const DataLayout &DL = F.getDataLayout();
+  if (!all_of(F, [&](BasicBlock &BB) {
+        if (auto *Ret = dyn_cast<ReturnInst>(BB.getTerminator())) {
+          // TODO: perform context-sensitive analysis?
+          Value *RetVal = Ret->getReturnValue();
+          if (!isGuaranteedNotToBeUndefOrPoison(RetVal))
+            return false;
+
+          // We know the original return value is not poison now, but it
+          // could still be converted to poison by another return attribute.
+          // Try to explicitly re-prove the relevant attributes.
+          if (Attrs.hasRetAttr(Attribute::NonNull) &&
+              !isKnownNonZero(RetVal, DL))
+            return false;
+
+          if (MaybeAlign Align = Attrs.getRetAlignment())
+            if (RetVal->getPointerAlignment(DL) < *Align)
+              return false;
+
+          Attribute Attr = Attrs.getRetAttr(Attribute::Range);
+          if (Attr.isValid() &&
+              !Attr.getRange().contains(
+                  computeConstantRange(RetVal, /*ForSigned=*/false,
+                                       SimplifyQuery(F.getDataLayout()))))
+            return false;
+
+          FPClassTest AttrFPClass = Attrs.getRetNoFPClass();
+          if (AttrFPClass != fcNone) {
+            KnownFPClass ComputedFPClass = computeKnownFPClass(RetVal, DL);
+            if (!ComputedFPClass.isKnownNever(AttrFPClass))
+              return false;
+          }
+        }
+        return true;
+      }))
+    return false;
+
+  F.addRetAttr(Attribute::NoUndef);
+  ++NumNoUndefReturn;
+  return true;
+}
+
 static void addNoUndefAttrs(const SCCNodeSet &SCCNodes,
                             SmallPtrSet<Function *, 8> &Changed) {
   // Check each function in turn, determining which functions return noundef
   // values.
   for (Function *F : SCCNodes) {
     // Already noundef.
-    AttributeList Attrs = F->getAttributes();
-    if (Attrs.hasRetAttr(Attribute::NoUndef))
+    if (F->getAttributes().hasRetAttr(Attribute::NoUndef))
       continue;
 
     // We can infer and propagate function attributes only when we know that the
@@ -1694,54 +1750,8 @@ static void addNoUndefAttrs(const SCCNodeSet &SCCNodes,
     if (!F->hasExactDefinition())
       return;
 
-    // MemorySanitizer assumes that the definition and declaration of a
-    // function will be consistent. A function with sanitize_memory attribute
-    // should be skipped from inference.
-    if (F->hasFnAttribute(Attribute::SanitizeMemory))
-      continue;
-
-    if (F->getReturnType()->isVoidTy())
-      continue;
-
-    const DataLayout &DL = F->getDataLayout();
-    if (all_of(*F, [&](BasicBlock &BB) {
-          if (auto *Ret = dyn_cast<ReturnInst>(BB.getTerminator())) {
-            // TODO: perform context-sensitive analysis?
-            Value *RetVal = Ret->getReturnValue();
-            if (!isGuaranteedNotToBeUndefOrPoison(RetVal))
-              return false;
-
-            // We know the original return value is not poison now, but it
-            // could still be converted to poison by another return attribute.
-            // Try to explicitly re-prove the relevant attributes.
-            if (Attrs.hasRetAttr(Attribute::NonNull) &&
-                !isKnownNonZero(RetVal, DL))
-              return false;
-
-            if (MaybeAlign Align = Attrs.getRetAlignment())
-              if (RetVal->getPointerAlignment(DL) < *Align)
-                return false;
-
-            Attribute Attr = Attrs.getRetAttr(Attribute::Range);
-            if (Attr.isValid() &&
-                !Attr.getRange().contains(
-                    computeConstantRange(RetVal, /*ForSigned=*/false,
-                                         SimplifyQuery(F->getDataLayout()))))
-              return false;
-
-            FPClassTest AttrFPClass = Attrs.getRetNoFPClass();
-            if (AttrFPClass != fcNone) {
-              KnownFPClass ComputedFPClass = computeKnownFPClass(RetVal, DL);
-              if (!ComputedFPClass.isKnownNever(AttrFPClass))
-                return false;
-            }
-          }
-          return true;
-        })) {
-      F->addRetAttr(Attribute::NoUndef);
-      ++NumNoUndefReturn;
+    if (inferNoUndefReturn(*F))
       Changed.insert(F);
-    }
   }
 }
 
