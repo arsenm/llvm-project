@@ -4009,28 +4009,7 @@ struct AANoAliasReturned final : AANoAliasImpl {
 
   ChangeStatus updateImpl(Attributor &A) override {
 
-    auto CheckReturnValue = [&](Value &ReturnedV) -> bool {
-      if (Constant *C = dyn_cast<Constant>(&ReturnedV))
-        if (C->isNullValue() || isa<UndefValue>(C))
-          return true;
-
-      // A pointer derived from a noalias pointer is noalias as well.
-      Value *V = &ReturnedV;
-      while (auto *Op = dyn_cast<Operator>(V)) {
-        unsigned Opcode = Op->getOpcode();
-        if (Opcode != Instruction::GetElementPtr &&
-            Opcode != Instruction::BitCast &&
-            Opcode != Instruction::AddrSpaceCast)
-          break;
-        V = Op->getOperand(0);
-      }
-      Value &RV = *V;
-
-      /// For now, we can only deduce noalias if we have call sites.
-      /// FIXME: add more support.
-      if (!isa<CallBase>(&RV))
-        return false;
-
+    auto CheckNoAliasCall = [&](Value &RV) -> bool {
       const IRPosition &RVPos = IRPosition::value(RV);
       bool IsKnownNoAlias;
       if (!AA::hasAssumedIRAttr<Attribute::NoAlias>(
@@ -4044,6 +4023,44 @@ struct AANoAliasReturned final : AANoAliasImpl {
           &NoCaptureAA);
       return IsAssumedNoCapture ||
              (NoCaptureAA && NoCaptureAA->isAssumedNoCaptureMaybeReturned());
+    };
+
+    auto CheckReturnValue = [&](Value &ReturnedV) -> bool {
+      // Like FunctionAttrs, look through pointers derived from noalias
+      // pointers, and through phis and selects.
+      SmallSetVector<Value *, 8> Worklist;
+      Worklist.insert(&ReturnedV);
+      for (unsigned I = 0; I < Worklist.size(); ++I) {
+        Value *V = Worklist[I];
+        if (auto *C = dyn_cast<Constant>(V)) {
+          if (C->isNullValue() || isa<UndefValue>(C))
+            continue;
+          return false;
+        }
+        if (auto *Op = dyn_cast<Operator>(V)) {
+          unsigned Opcode = Op->getOpcode();
+          if (Opcode == Instruction::GetElementPtr ||
+              Opcode == Instruction::BitCast ||
+              Opcode == Instruction::AddrSpaceCast) {
+            Worklist.insert(Op->getOperand(0));
+            continue;
+          }
+        }
+        if (auto *PHI = dyn_cast<PHINode>(V)) {
+          Worklist.insert_range(PHI->incoming_values());
+          continue;
+        }
+        if (auto *SI = dyn_cast<SelectInst>(V)) {
+          Worklist.insert(SI->getTrueValue());
+          Worklist.insert(SI->getFalseValue());
+          continue;
+        }
+        /// For now, we can only deduce noalias if we have call sites.
+        /// FIXME: add more support.
+        if (!isa<CallBase>(V) || !CheckNoAliasCall(*V))
+          return false;
+      }
+      return true;
     };
 
     if (!A.checkForAllReturnedValues(CheckReturnValue, *this))

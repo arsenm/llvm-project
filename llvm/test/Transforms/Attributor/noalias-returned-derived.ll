@@ -38,3 +38,57 @@ define ptr @return_gep_of_arg(ptr %p) {
   %g = getelementptr i8, ptr %p, i64 8
   ret ptr %g
 }
+
+define ptr @return_gep_of_phi_of_mallocs(i64 %n, i1 %c) {
+; CHECK-LABEL: define noalias ptr @return_gep_of_phi_of_mallocs(
+; CHECK-SAME: i64 [[N:%.*]], i1 noundef [[C:%.*]]) {
+; CHECK-NEXT:  [[ENTRY:.*:]]
+; CHECK-NEXT:    br i1 [[C]], label %[[A:.*]], label %[[B:.*]]
+; CHECK:       [[A]]:
+; CHECK-NEXT:    [[P1:%.*]] = call noalias ptr @malloc(i64 [[N]])
+; CHECK-NEXT:    br label %[[JOIN:.*]]
+; CHECK:       [[B]]:
+; CHECK-NEXT:    [[P2:%.*]] = call noalias ptr @malloc(i64 [[N]])
+; CHECK-NEXT:    br label %[[JOIN]]
+; CHECK:       [[JOIN]]:
+; CHECK-NEXT:    [[P:%.*]] = phi ptr [ [[P1]], %[[A]] ], [ [[P2]], %[[B]] ]
+; CHECK-NEXT:    [[G:%.*]] = getelementptr i8, ptr [[P]], i64 8
+; CHECK-NEXT:    [[R:%.*]] = select i1 [[C]], ptr [[G]], ptr null
+; CHECK-NEXT:    ret ptr [[R]]
+;
+entry:
+  br i1 %c, label %a, label %b
+a:
+  %p1 = call noalias ptr @malloc(i64 %n)
+  br label %join
+b:
+  %p2 = call noalias ptr @malloc(i64 %n)
+  br label %join
+join:
+  %p = phi ptr [ %p1, %a ], [ %p2, %b ]
+  %g = getelementptr i8, ptr %p, i64 8
+  %r = select i1 %c, ptr %g, ptr null
+  ret ptr %r
+}
+
+define ptr @return_phi_of_malloc_and_arg(i64 %n, i1 %c, ptr %arg) {
+; CHECK-LABEL: define ptr @return_phi_of_malloc_and_arg(
+; CHECK-SAME: i64 [[N:%.*]], i1 noundef [[C:%.*]], ptr nofree readnone [[ARG:%.*]]) {
+; CHECK-NEXT:  [[ENTRY:.*]]:
+; CHECK-NEXT:    br i1 [[C]], label %[[A:.*]], label %[[JOIN:.*]]
+; CHECK:       [[A]]:
+; CHECK-NEXT:    [[P1:%.*]] = call noalias ptr @malloc(i64 [[N]])
+; CHECK-NEXT:    br label %[[JOIN]]
+; CHECK:       [[JOIN]]:
+; CHECK-NEXT:    [[P:%.*]] = phi ptr [ [[P1]], %[[A]] ], [ [[ARG]], %[[ENTRY]] ]
+; CHECK-NEXT:    ret ptr [[P]]
+;
+entry:
+  br i1 %c, label %a, label %join
+a:
+  %p1 = call noalias ptr @malloc(i64 %n)
+  br label %join
+join:
+  %p = phi ptr [ %p1, %a ], [ %arg, %entry ]
+  ret ptr %p
+}
