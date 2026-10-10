@@ -1134,6 +1134,10 @@ bool Attributor::getAttrsFromAssumes(const IRPosition &IRP,
                                      SmallVectorImpl<Attribute> &Attrs) {
   assert(IRP.getPositionKind() != IRPosition::IRP_INVALID &&
          "Did expect a valid position!");
+  const RetainedKnowledgeMap &KnowledgeMap = getInfoCache().getKnowledgeMap();
+  if (KnowledgeMap.empty())
+    return false;
+
   MustBeExecutedContextExplorer *Explorer =
       getInfoCache().getMustBeExecutedContextExplorer();
   if (!Explorer)
@@ -1141,8 +1145,7 @@ bool Attributor::getAttrsFromAssumes(const IRPosition &IRP,
 
   Value &AssociatedValue = IRP.getAssociatedValue();
 
-  const Assume2KnowledgeMap &A2K =
-      getInfoCache().getKnowledgeMap().lookup({&AssociatedValue, AK});
+  const Assume2KnowledgeMap &A2K = KnowledgeMap.lookup({&AssociatedValue, AK});
 
   // Check if we found any potential assume use, if not we don't need to create
   // explorer iterators.
