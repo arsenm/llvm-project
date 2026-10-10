@@ -4009,10 +4009,22 @@ struct AANoAliasReturned final : AANoAliasImpl {
 
   ChangeStatus updateImpl(Attributor &A) override {
 
-    auto CheckReturnValue = [&](Value &RV) -> bool {
-      if (Constant *C = dyn_cast<Constant>(&RV))
+    auto CheckReturnValue = [&](Value &ReturnedV) -> bool {
+      if (Constant *C = dyn_cast<Constant>(&ReturnedV))
         if (C->isNullValue() || isa<UndefValue>(C))
           return true;
+
+      // A pointer derived from a noalias pointer is noalias as well.
+      Value *V = &ReturnedV;
+      while (auto *Op = dyn_cast<Operator>(V)) {
+        unsigned Opcode = Op->getOpcode();
+        if (Opcode != Instruction::GetElementPtr &&
+            Opcode != Instruction::BitCast &&
+            Opcode != Instruction::AddrSpaceCast)
+          break;
+        V = Op->getOperand(0);
+      }
+      Value &RV = *V;
 
       /// For now, we can only deduce noalias if we have call sites.
       /// FIXME: add more support.
