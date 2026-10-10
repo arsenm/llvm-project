@@ -95,12 +95,10 @@ define amdgpu_kernel void @pos_empty_7a() "kernel" {
   call void @unknown()
   ret void
 }
-; FIXME: We should remove the barrier.
 define amdgpu_kernel void @pos_empty_7b() "kernel" {
 ; CHECK-LABEL: define {{[^@]+}}@pos_empty_7b
 ; CHECK-SAME: () #[[ATTR4]] {
 ; CHECK-NEXT:    call void @unknown() #[[ATTR5:[0-9]+]]
-; CHECK-NEXT:    call void @llvm.amdgcn.s.barrier()
 ; CHECK-NEXT:    call void @unknown()
 ; CHECK-NEXT:    ret void
 ;

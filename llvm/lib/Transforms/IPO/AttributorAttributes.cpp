@@ -8343,7 +8343,29 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
   void initialize(Attributor &A) override {
     intersectAssumedBits(BEST_STATE);
     getKnownStateFromValue(A, getIRPosition(), getState());
+    SmallVector<Attribute, 2> Attrs;
+    A.getAttrs(getIRPosition(), {Attribute::Memory}, Attrs);
+    for (const Attribute &Attr : Attrs)
+      IRMemoryEffects &= Attr.getMemoryEffects();
     AAMemoryLocation::initialize(A);
+  }
+
+  /// Return the effects of \p ME on the memory location kind \p MLK.
+  static ModRefInfo getModRef(MemoryEffects ME, MemoryLocationsKind MLK) {
+    switch (MLK) {
+    case NO_ARGUMENT_MEM:
+      return ME.getModRef(IRMemLocation::ArgMem);
+    case NO_INACCESSIBLE_MEM:
+      return ME.getModRef(IRMemLocation::InaccessibleMem);
+    case NO_GLOBAL_INTERNAL_MEM:
+    case NO_GLOBAL_EXTERNAL_MEM:
+    case NO_MALLOCED_MEM:
+    case NO_UNKNOWN_OBJECT_MEM:
+      return ME.getModRef(IRMemLocation::Other) |
+             ME.getModRef(IRMemLocation::ErrnoMem);
+    default:
+      return ME.getModRef();
+    }
   }
 
   /// Return the memory behavior information encoded in the IR for \p IRP.
@@ -8403,6 +8425,26 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
         }
         continue;
       }
+      // Otherwise, use the locations that are not accessed. If argument memory
+      // is accessed but other memory is not, we need to be able to use
+      // argmemonly, as above.
+      bool AccessesOther =
+          ME.getModRef(IRMemLocation::Other) != ModRefInfo::NoModRef ||
+          ME.getModRef(IRMemLocation::ErrnoMem) != ModRefInfo::NoModRef;
+      bool AccessesArg =
+          ME.getModRef(IRMemLocation::ArgMem) != ModRefInfo::NoModRef;
+      if (!UseArgMemOnly && AccessesArg && !AccessesOther)
+        continue;
+      if (!AccessesArg)
+        State.addKnownBits(NO_ARGUMENT_MEM);
+      if (ME.getModRef(IRMemLocation::InaccessibleMem) == ModRefInfo::NoModRef)
+        State.addKnownBits(NO_INACCESSIBLE_MEM);
+      if (!AccessesOther)
+        State.addKnownBits(NO_GLOBAL_MEM | NO_MALLOCED_MEM |
+                           NO_UNKNOWN_OBJECT_MEM);
+      if (ME.getModRef(IRMemLocation::TargetMem0) == ModRefInfo::NoModRef &&
+          ME.getModRef(IRMemLocation::TargetMem1) == ModRefInfo::NoModRef)
+        State.addKnownBits(NO_UNKOWN_MEM);
     }
   }
 
@@ -8416,23 +8458,23 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
           Attribute::getWithMemoryEffects(Ctx, MemoryEffects::none()));
       return;
     }
-    // Accesses to unknown memory can be to any location.
-    if (!isAssumed(NO_UNKOWN_MEM))
-      return;
-
     // Local and constant memory accesses are not visible to the caller. Other
-    // memory, e.g. globals or allocated memory, could also be errno.
-    MemoryEffects ME = MemoryEffects::none();
-    if (!isAssumed(NO_ARGUMENT_MEM))
-      ME |= MemoryEffects::argMemOnly();
-    if (!isAssumed(NO_INACCESSIBLE_MEM))
-      ME |= MemoryEffects::inaccessibleMemOnly();
-    if (!isAssumed(NO_GLOBAL_MEM | NO_MALLOCED_MEM))
-      ME |= MemoryEffects::otherMemOnly() | MemoryEffects::errnoMemOnly();
-    // Accesses through pointers to unknown objects are also recorded as
-    // argument memory accesses.
-    if (!isAssumed(NO_UNKNOWN_OBJECT_MEM))
-      ME |= MemoryEffects::otherMemOnly() | MemoryEffects::errnoMemOnly();
+    // memory, e.g. globals or allocated memory, could also be errno. Accesses
+    // through pointers to unknown objects are also recorded as argument memory
+    // accesses.
+    auto GetMR = [&](MemoryLocationsKind MLK) {
+      return ModRefInfo(getAccessKind(MLK));
+    };
+    ModRefInfo OtherMR = GetMR(NO_GLOBAL_INTERNAL_MEM) |
+                         GetMR(NO_GLOBAL_EXTERNAL_MEM) |
+                         GetMR(NO_MALLOCED_MEM) | GetMR(NO_UNKNOWN_OBJECT_MEM);
+    // Accesses to unknown memory can be to any location.
+    MemoryEffects ME =
+        MemoryEffects(GetMR(NO_UNKOWN_MEM)) |
+        MemoryEffects::argMemOnly(GetMR(NO_ARGUMENT_MEM)) |
+        MemoryEffects::inaccessibleMemOnly(GetMR(NO_INACCESSIBLE_MEM)) |
+        MemoryEffects::otherMemOnly(OtherMR) |
+        MemoryEffects::errnoMemOnly(OtherMR);
     Attrs.push_back(Attribute::getWithMemoryEffects(Ctx, ME));
   }
 
@@ -8478,18 +8520,42 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
     return true;
   }
 
+  /// See AAMemoryLocation::getAccessKind(...).
+  AccessKind getAccessKind(MemoryLocationsKind MLK) const override {
+    if (!isValidState())
+      return READ_WRITE;
+    if (isAssumed(MLK))
+      return NONE;
+    // Without any recorded accesses, e.g., for declarations, only the memory
+    // effects in the IR are known.
+    if (llvm::all_of(AccessKind2Accesses,
+                     [](const AccessSet *AS) { return !AS || AS->empty(); }))
+      return AccessKind(getModRef(IRMemoryEffects, MLK));
+    AccessKind AK = NONE;
+    if (const AccessSet *Accesses = AccessKind2Accesses[llvm::Log2_32(MLK)])
+      for (const AccessInfo &AI : *Accesses)
+        AK = AccessKind(AK | AI.Kind);
+    return AK;
+  }
+
   ChangeStatus indicatePessimisticFixpoint() override {
     // If we give up and indicate a pessimistic fixpoint this instruction will
-    // become an access for all potential access kinds:
+    // become an access for all potential access kinds, as far as allowed by
+    // the memory effects in the IR:
     // TODO: Add pointers for argmemonly and globals to improve the results of
     //       checkForAllAccessesToMemoryKind.
     bool Changed = false;
     MemoryLocationsKind KnownMLK = getKnown();
     Instruction *I = dyn_cast<Instruction>(&getAssociatedValue());
-    for (MemoryLocationsKind CurMLK = 1; CurMLK < NO_LOCATIONS; CurMLK *= 2)
-      if (!(CurMLK & KnownMLK))
-        updateStateAndAccessesMap(getState(), CurMLK, I, nullptr, Changed,
-                                  getAccessKindFromInst(I));
+    for (MemoryLocationsKind CurMLK = 1; CurMLK < NO_LOCATIONS; CurMLK *= 2) {
+      if (CurMLK & KnownMLK)
+        continue;
+      AccessKind AK =
+          AccessKind(getAccessKindFromInst(I) &
+                     AccessKind(getModRef(IRMemoryEffects, CurMLK)));
+      if (AK != NONE)
+        updateStateAndAccessesMap(getState(), CurMLK, I, nullptr, Changed, AK);
+    }
     return AAMemoryLocation::indicatePessimisticFixpoint();
   }
 
@@ -8532,7 +8598,7 @@ protected:
   void
   categorizeArgumentPointerLocations(Attributor &A, CallBase &CB,
                                      AAMemoryLocation::StateType &AccessedLocs,
-                                     bool &Changed);
+                                     bool &Changed, AccessKind AK);
 
   /// Return the kind(s) of location that may be accessed by \p V.
   AAMemoryLocation::MemoryLocationsKind
@@ -8570,15 +8636,21 @@ protected:
   /// arguments, and update the state and access map accordingly.
   void categorizePtrValue(Attributor &A, const Instruction &I, const Value &Ptr,
                           AAMemoryLocation::StateType &State, bool &Changed,
-                          unsigned AccessAS = 0);
+                          unsigned AccessAS = 0,
+                          std::optional<AccessKind> AK = std::nullopt);
 
   /// Used to allocate access sets.
   BumpPtrAllocator &Allocator;
+
+  /// The memory effects of the position as given by the IR.
+  MemoryEffects IRMemoryEffects = MemoryEffects::unknown();
 };
 
 void AAMemoryLocationImpl::categorizePtrValue(
     Attributor &A, const Instruction &I, const Value &Ptr,
-    AAMemoryLocation::StateType &State, bool &Changed, unsigned AccessAS) {
+    AAMemoryLocation::StateType &State, bool &Changed, unsigned AccessAS,
+    std::optional<AccessKind> AK) {
+  AccessKind Kind = AK.value_or(getAccessKindFromInst(&I));
   LLVM_DEBUG(dbgs() << "[AAMemoryLocation] Categorize pointer locations for "
                     << Ptr << " ["
                     << getMemoryLocationsAsStr(State.getAssumed()) << "]\n");
@@ -8641,12 +8713,11 @@ void AAMemoryLocationImpl::categorizePtrValue(
     assert(MLK != NO_LOCATIONS && "No location specified!");
     LLVM_DEBUG(dbgs() << "[AAMemoryLocation] Ptr value can be categorized: "
                       << Obj << " -> " << getMemoryLocationsAsStr(MLK) << "\n");
-    updateStateAndAccessesMap(State, MLK, &I, &Obj, Changed,
-                              getAccessKindFromInst(&I));
+    updateStateAndAccessesMap(State, MLK, &I, &Obj, Changed, Kind);
     // A pointer to an unknown object may also point to argument memory.
     if (MLK == NO_UNKNOWN_OBJECT_MEM)
       updateStateAndAccessesMap(State, NO_ARGUMENT_MEM, &I, &Obj, Changed,
-                                getAccessKindFromInst(&I));
+                                Kind);
 
     return true;
   };
@@ -8657,9 +8728,9 @@ void AAMemoryLocationImpl::categorizePtrValue(
     LLVM_DEBUG(
         dbgs() << "[AAMemoryLocation] Pointer locations not categorized\n");
     updateStateAndAccessesMap(State, NO_UNKNOWN_OBJECT_MEM, &I, nullptr,
-                              Changed, getAccessKindFromInst(&I));
+                              Changed, Kind);
     updateStateAndAccessesMap(State, NO_ARGUMENT_MEM, &I, nullptr, Changed,
-                              getAccessKindFromInst(&I));
+                              Kind);
     return;
   }
 
@@ -8670,7 +8741,7 @@ void AAMemoryLocationImpl::categorizePtrValue(
 
 void AAMemoryLocationImpl::categorizeArgumentPointerLocations(
     Attributor &A, CallBase &CB, AAMemoryLocation::StateType &AccessedLocs,
-    bool &Changed) {
+    bool &Changed, AccessKind AK) {
   for (unsigned ArgNo = 0, E = CB.arg_size(); ArgNo < E; ++ArgNo) {
 
     // Skip non-pointer arguments.
@@ -8688,7 +8759,8 @@ void AAMemoryLocationImpl::categorizeArgumentPointerLocations(
 
     // Categorize potentially accessed pointer arguments as if there was an
     // access instruction with them as pointer.
-    categorizePtrValue(A, CB, *ArgOp, AccessedLocs, Changed);
+    categorizePtrValue(A, CB, *ArgOp, AccessedLocs, Changed, /*AccessAS=*/0,
+                       AK);
   }
 }
 
@@ -8717,9 +8789,16 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
     if (CBMemLocationAA->isAssumedReadNone())
       return NO_LOCATIONS;
 
+    // The kind of the accesses of the call to a single location kind.
+    auto GetCallAccessKind = [&](MemoryLocationsKind MLK) {
+      return AccessKind(getAccessKindFromInst(&I) &
+                        CBMemLocationAA->getAccessKind(MLK));
+    };
+
     if (CBMemLocationAA->isAssumedInaccessibleMemOnly()) {
       updateStateAndAccessesMap(AccessedLocs, NO_INACCESSIBLE_MEM, &I, nullptr,
-                                Changed, getAccessKindFromInst(&I));
+                                Changed,
+                                GetCallAccessKind(NO_INACCESSIBLE_MEM));
       return AccessedLocs.getAssumed();
     }
 
@@ -8734,7 +8813,7 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
       if (CBAssumedNotAccessedLocsNoArgMem & CurMLK)
         continue;
       updateStateAndAccessesMap(AccessedLocs, CurMLK, &I, nullptr, Changed,
-                                getAccessKindFromInst(&I));
+                                GetCallAccessKind(CurMLK));
     }
 
     // Now handle global memory if it might be accessed. This is slightly tricky
@@ -8744,7 +8823,7 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
       auto AccessPred = [&](const Instruction *, const Value *Ptr,
                             AccessKind Kind, MemoryLocationsKind MLK) {
         updateStateAndAccessesMap(AccessedLocs, MLK, &I, Ptr, Changed,
-                                  getAccessKindFromInst(&I));
+                                  AccessKind(getAccessKindFromInst(&I) & Kind));
         return true;
       };
       if (!CBMemLocationAA->checkForAllAccessesToMemoryKind(
@@ -8759,7 +8838,8 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
     // Now handle argument memory if it might be accessed.
     bool HasArgAccesses = ((~CBAssumedNotAccessedLocs) & NO_ARGUMENT_MEM);
     if (HasArgAccesses)
-      categorizeArgumentPointerLocations(A, *CB, AccessedLocs, Changed);
+      categorizeArgumentPointerLocations(A, *CB, AccessedLocs, Changed,
+                                         GetCallAccessKind(NO_ARGUMENT_MEM));
 
     LLVM_DEBUG(
         dbgs() << "[AAMemoryLocation] Accessed state after argument handling: "
@@ -8812,8 +8892,10 @@ struct AAMemoryLocationFunction final : public AAMemoryLocationImpl {
                         << ": " << getMemoryLocationsAsStr(MLK) << "\n");
       removeAssumedBits(inverseLocation(MLK, false, false));
       // Stop once only the valid bit set in the *not assumed location*, thus
-      // once we don't actually exclude any memory locations in the state.
-      return getAssumedNotAccessedLocation() != VALID_STATE;
+      // once we don't actually exclude any memory locations in the state, and
+      // we also don't exclude reads or writes.
+      return getAssumedNotAccessedLocation() != VALID_STATE ||
+             getAccessKind(NO_UNKOWN_MEM) != READ_WRITE;
     };
 
     bool UsedAssumedInformation = false;
@@ -8856,8 +8938,7 @@ struct AAMemoryLocationCallSite final : AAMemoryLocationImpl {
     bool Changed = false;
     auto AccessPred = [&](const Instruction *I, const Value *Ptr,
                           AccessKind Kind, MemoryLocationsKind MLK) {
-      updateStateAndAccessesMap(getState(), MLK, I, Ptr, Changed,
-                                getAccessKindFromInst(I));
+      updateStateAndAccessesMap(getState(), MLK, I, Ptr, Changed, Kind);
       return true;
     };
     if (!FnAA->checkForAllAccessesToMemoryKind(AccessPred, ALL_LOCATIONS))

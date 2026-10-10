@@ -4752,6 +4752,10 @@ struct AAMemoryLocation
           Pred,
       MemoryLocationsKind MLK) const = 0;
 
+  /// Return the kind of the accesses to the single memory location kind
+  /// \p MLK.
+  virtual AccessKind getAccessKind(MemoryLocationsKind MLK) const = 0;
+
   /// Create an abstract attribute view for the position \p IRP.
   LLVM_ABI static AAMemoryLocation &createForPosition(const IRPosition &IRP,
                                                       Attributor &A);

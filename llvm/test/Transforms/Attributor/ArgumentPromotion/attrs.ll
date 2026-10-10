@@ -54,7 +54,7 @@ define i32 @test(ptr %X) {
 ; TUNIT-NEXT:    [[C:%.*]] = call i32 @f(i32 [[TMP0]], i64 [[TMP1]], i32 [[TMP2]]) #[[ATTR2:[0-9]+]]
 ; TUNIT-NEXT:    ret i32 [[C]]
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: readwrite)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(argmem: read)
 ; CGSCC-LABEL: define {{[^@]+}}@test
 ; CGSCC-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[X:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
@@ -80,6 +80,6 @@ entry:
 ; TUNIT: attributes #[[ATTR2]] = { nofree nosync nounwind willreturn }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(argmem: readwrite) }
+; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(argmem: read) }
 ; CGSCC: attributes #[[ATTR2]] = { nofree nosync willreturn }
 ;.

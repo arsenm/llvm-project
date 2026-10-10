@@ -41,7 +41,7 @@ entry:
 }
 
 define i32 @main() {
-; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
+; TUNIT: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: write, inaccessiblemem: none, target_mem: none)
 ; TUNIT-LABEL: define noundef i32 @main(
 ; TUNIT-SAME: ) #[[ATTR1:[0-9]+]] {
 ; TUNIT-NEXT:  [[ENTRY:.*:]]
@@ -52,7 +52,7 @@ define i32 @main() {
 ; TUNIT-NEXT:    call fastcc void @fn() #[[ATTR2:[0-9]+]]
 ; TUNIT-NEXT:    ret i32 0
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(readwrite, argmem: write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define noundef i32 @main(
 ; CGSCC-SAME: ) #[[ATTR1:[0-9]+]] {
 ; CGSCC-NEXT:  [[ENTRY:.*:]]
@@ -85,11 +85,11 @@ entry:
 
 ;.
 ; TUNIT: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none) }
-; TUNIT: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none) }
+; TUNIT: attributes #[[ATTR1]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: write, inaccessiblemem: none, target_mem: none) }
 ; TUNIT: attributes #[[ATTR2]] = { nofree nosync nounwind willreturn }
 ;.
 ; CGSCC: attributes #[[ATTR0]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, inaccessiblemem: none, target_mem: none) }
-; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn }
+; CGSCC: attributes #[[ATTR1]] = { mustprogress nofree nosync nounwind willreturn memory(readwrite, argmem: write, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR2]] = { nofree nounwind willreturn }
 ;.
 ; TUNIT: [[INT_TBAA0]] = !{[[META1:![0-9]+]], [[META1]], i64 0}

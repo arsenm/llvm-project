@@ -2283,7 +2283,7 @@ define float @assume_select_condition_not_nan_commute(float noundef %arg) {
 
 ; Implies no return nan
 define float @assume_load(ptr %ptr) {
-; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
+; CHECK: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read, inaccessiblemem: write)
 ; CHECK-LABEL: define nofpclass(nan) float @assume_load
 ; CHECK-SAME: (ptr nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[PTR:%.*]]) #[[ATTR12:[0-9]+]] {
 ; CHECK-NEXT:    [[VAL:%.*]] = load float, ptr [[PTR]], align 4

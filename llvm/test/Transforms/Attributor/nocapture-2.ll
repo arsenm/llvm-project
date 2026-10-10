@@ -709,7 +709,7 @@ entry:
 
 declare ptr @readonly_i32p(ptr) readonly
 define void @nocapture_is_not_subsumed_2(ptr nocapture %b) {
-; TUNIT: Function Attrs: nosync
+; TUNIT: Function Attrs: nosync memory(readwrite, inaccessiblemem: read, target_mem: read)
 ; TUNIT-LABEL: define void @nocapture_is_not_subsumed_2
 ; TUNIT-SAME: (ptr captures(none) [[B:%.*]]) #[[ATTR10:[0-9]+]] {
 ; TUNIT-NEXT:  entry:
@@ -717,7 +717,7 @@ define void @nocapture_is_not_subsumed_2(ptr nocapture %b) {
 ; TUNIT-NEXT:    store i32 0, ptr [[CALL]], align 4
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: nosync
+; CGSCC: Function Attrs: nosync memory(readwrite, inaccessiblemem: read, target_mem: read)
 ; CGSCC-LABEL: define void @nocapture_is_not_subsumed_2
 ; CGSCC-SAME: (ptr captures(none) [[B:%.*]]) #[[ATTR11:[0-9]+]] {
 ; CGSCC-NEXT:  entry:
@@ -836,7 +836,7 @@ exit:
 ; TUNIT: attributes #[[ATTR7]] = { noinline nosync nounwind memory(read) uwtable }
 ; TUNIT: attributes #[[ATTR8]] = { nosync nounwind memory(read) }
 ; TUNIT: attributes #[[ATTR9:[0-9]+]] = { nounwind memory(read) }
-; TUNIT: attributes #[[ATTR10]] = { nosync }
+; TUNIT: attributes #[[ATTR10]] = { nosync memory(readwrite, inaccessiblemem: read, target_mem: read) }
 ; TUNIT: attributes #[[ATTR11]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; TUNIT: attributes #[[ATTR12]] = { nofree nosync nounwind willreturn memory(write) }
 ; TUNIT: attributes #[[ATTR13]] = { nosync memory(read) }
@@ -852,7 +852,7 @@ exit:
 ; CGSCC: attributes #[[ATTR8]] = { noinline nosync nounwind memory(read) uwtable }
 ; CGSCC: attributes #[[ATTR9]] = { nosync nounwind memory(read) }
 ; CGSCC: attributes #[[ATTR10:[0-9]+]] = { nounwind memory(read) }
-; CGSCC: attributes #[[ATTR11]] = { nosync }
+; CGSCC: attributes #[[ATTR11]] = { nosync memory(readwrite, inaccessiblemem: read, target_mem: read) }
 ; CGSCC: attributes #[[ATTR12]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR13]] = { mustprogress nofree nosync nounwind willreturn memory(none) }
 ; CGSCC: attributes #[[ATTR14]] = { nofree nounwind willreturn memory(write) }

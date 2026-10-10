@@ -272,9 +272,9 @@ define i32 @test_read_arg_access_alloca(ptr %ptr) {
 ; FNATTRS-NEXT:    [[L_2:%.*]] = load i32, ptr [[A]], align 4
 ; FNATTRS-NEXT:    ret i32 [[L_2]]
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read)
 ; ATTRIBUTOR-LABEL: define i32 @test_read_arg_access_alloca
-; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR9]] {
+; ATTRIBUTOR-SAME: (ptr nofree nonnull readonly captures(none) [[PTR:%.*]]) #[[ATTR1]] {
 ; ATTRIBUTOR-NEXT:  entry:
 ; ATTRIBUTOR-NEXT:    [[A:%.*]] = alloca i32, align 4
 ; ATTRIBUTOR-NEXT:    [[L:%.*]] = load i32, ptr [[PTR]], align 4
@@ -348,7 +348,7 @@ define void @test_inaccessibleorargmemonly_readwrite(ptr %arg) {
 ; FNATTRS-NEXT:    call void @fn_inaccessiblememonly() #[[ATTR19]]
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nosync memory(argmem: readwrite, inaccessiblemem: readwrite)
+; ATTRIBUTOR: Function Attrs: nosync memory(argmem: write, inaccessiblemem: read)
 ; ATTRIBUTOR-LABEL: define void @test_inaccessibleorargmemonly_readwrite
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull writeonly captures(none) [[ARG:%.*]]) #[[ATTR15:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    store i32 0, ptr [[ARG]], align 4

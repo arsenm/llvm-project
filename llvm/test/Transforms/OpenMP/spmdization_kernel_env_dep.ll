@@ -102,7 +102,7 @@ attributes #0 = { nocallback nofree nosync nounwind speculatable willreturn memo
 
 ;.
 ; AMDGPU: attributes #[[ATTR0]] = { nounwind }
-; AMDGPU: attributes #[[ATTR1]] = { norecurse nosync nounwind memory(readwrite, inaccessiblemem: none, target_mem: none) }
+; AMDGPU: attributes #[[ATTR1]] = { norecurse nosync nounwind memory(write, inaccessiblemem: none, target_mem: none) }
 ; AMDGPU: attributes #[[ATTR2:[0-9]+]] = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
 ; AMDGPU: attributes #[[ATTR3]] = { nosync }
 ; AMDGPU: attributes #[[ATTR4]] = { nosync nounwind }

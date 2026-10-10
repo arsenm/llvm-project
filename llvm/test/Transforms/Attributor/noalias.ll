@@ -675,7 +675,7 @@ define void @test15_caller(ptr noalias %p, i32 %c) {
 ; TUNIT-NEXT:    tail call void @make_alias(ptr nofree writeonly [[P]]) #[[ATTR15]]
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test15_caller
 ; CGSCC-SAME: (ptr noalias nofree writeonly [[P:%.*]], i32 [[C:%.*]]) #[[ATTR11:[0-9]+]] {
 ; CGSCC-NEXT:    [[TOBOOL:%.*]] = icmp eq i32 [[C]], 0
@@ -738,7 +738,7 @@ define internal void @test16_sub(ptr noalias %p, i32 %c1, i32 %c2) {
 ; TUNIT:       if.end3:
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test16_sub
 ; CGSCC-SAME: (ptr noalias nofree writeonly [[P:%.*]], i32 [[C1:%.*]], i32 [[C2:%.*]]) #[[ATTR11]] {
 ; CGSCC-NEXT:    [[TOBOOL:%.*]] = icmp eq i32 [[C1]], 0
@@ -783,7 +783,7 @@ define void @test16_caller(ptr %p, i32 %c) {
 ; TUNIT-NEXT:    tail call void @test16_sub(ptr nofree writeonly [[P]], i32 [[C]], i32 [[C]]) #[[ATTR15]]
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test16_caller
 ; CGSCC-SAME: (ptr nofree writeonly [[P:%.*]], i32 [[C:%.*]]) #[[ATTR11]] {
 ; CGSCC-NEXT:    tail call void @test16_sub(ptr nofree writeonly [[P]], i32 [[C]], i32 [[C]]) #[[ATTR15]]
@@ -828,7 +828,7 @@ define void @test17_caller(ptr noalias %p, i32 %c) {
 ; TUNIT:       l3:
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test17_caller
 ; CGSCC-SAME: (ptr noalias nofree writeonly [[P:%.*]], i32 [[C:%.*]]) #[[ATTR11]] {
 ; CGSCC-NEXT:  entry:
@@ -899,7 +899,7 @@ define void @test18_caller(ptr noalias %p, i32 %c) {
 ; TUNIT-NEXT:    tail call void @only_store(ptr nofree noundef writeonly align 4 captures(none) [[P]]) #[[ATTR15]]
 ; TUNIT-NEXT:    ret void
 ;
-; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write)
+; CGSCC: Function Attrs: mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; CGSCC-LABEL: define {{[^@]+}}@test18_caller
 ; CGSCC-SAME: (ptr noalias nofree nonnull writeonly align 4 dereferenceable(4) [[P:%.*]], i32 [[C:%.*]]) #[[ATTR11]] {
 ; CGSCC-NEXT:  entry:
@@ -954,7 +954,7 @@ l2:
 ; CGSCC: attributes #[[ATTR8:[0-9]+]] = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
 ; CGSCC: attributes #[[ATTR9]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR10]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write) }
-; CGSCC: attributes #[[ATTR11]] = { mustprogress nofree nosync nounwind willreturn memory(write) }
+; CGSCC: attributes #[[ATTR11]] = { mustprogress nofree nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none) }
 ; CGSCC: attributes #[[ATTR12]] = { nofree nosync willreturn }
 ; CGSCC: attributes #[[ATTR13]] = { nofree willreturn memory(read) }
 ; CGSCC: attributes #[[ATTR14]] = { nofree willreturn memory(readwrite) }

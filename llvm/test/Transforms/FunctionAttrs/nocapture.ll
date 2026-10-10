@@ -257,7 +257,7 @@ define i32 @nc1(ptr %q, ptr %p, i1 %b) {
 ; FNATTRS-NEXT:    store ptr [[Y]], ptr @g, align 8
 ; FNATTRS-NEXT:    ret i32 [[VAL]]
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define i32 @nc1
 ; ATTRIBUTOR-SAME: (ptr nofree [[Q:%.*]], ptr nofree captures(none) [[P:%.*]], i1 [[B:%.*]]) #[[ATTR6:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  e:
@@ -299,7 +299,7 @@ define i32 @nc1_addrspace(ptr %q, ptr addrspace(1) %p, i1 %b) {
 ; FNATTRS-NEXT:    store ptr [[Y]], ptr @g, align 8
 ; FNATTRS-NEXT:    ret i32 [[VAL]]
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define i32 @nc1_addrspace
 ; ATTRIBUTOR-SAME: (ptr nofree [[Q:%.*]], ptr addrspace(1) nofree captures(none) [[P:%.*]], i1 [[B:%.*]]) #[[ATTR6]] {
 ; ATTRIBUTOR-NEXT:  e:
@@ -334,7 +334,7 @@ define void @nc2(ptr %p, ptr %q) {
 ; FNATTRS-NEXT:    [[TMP1:%.*]] = call i32 @nc1(ptr [[Q]], ptr [[P]], i1 false)
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, inaccessiblemem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @nc2
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]], ptr nofree [[Q:%.*]]) #[[ATTR6]] {
 ; ATTRIBUTOR-NEXT:    [[TMP1:%.*]] = call i32 @nc1(ptr nofree [[Q]], ptr nofree captures(none) [[P]], i1 false) #[[ATTR25:[0-9]+]]
@@ -728,7 +728,7 @@ define void @nocaptureLaunder(ptr %p) {
 ; FNATTRS-NEXT:    store i8 42, ptr [[B]], align 1
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite, inaccessiblemem: readwrite)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write, inaccessiblemem: readwrite)
 ; ATTRIBUTOR-LABEL: define void @nocaptureLaunder
 ; ATTRIBUTOR-SAME: (ptr nofree captures(none) [[P:%.*]]) #[[ATTR14:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:  entry:
@@ -751,7 +751,7 @@ define void @captureLaunder(ptr %p) {
 ; FNATTRS-NEXT:    store ptr [[B]], ptr @g2, align 8
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(readwrite, argmem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(write, argmem: none, inaccessiblemem: readwrite, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @captureLaunder
 ; ATTRIBUTOR-SAME: (ptr nofree [[P:%.*]]) #[[ATTR15:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[B:%.*]] = call ptr @llvm.launder.invariant.group.p0(ptr [[P]]) #[[ATTR28]]
@@ -1255,7 +1255,7 @@ define void @addr_only_scc(ptr %p) {
 ; FNATTRS-NEXT:    call void @addr_only_scc2(ptr [[P]])
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(readwrite, inaccessiblemem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write, argmem: read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @addr_only_scc
 ; ATTRIBUTOR-SAME: (ptr nofree nonnull [[P:%.*]]) #[[ATTR18:[0-9]+]] {
 ; ATTRIBUTOR-NEXT:    [[V:%.*]] = load i8, ptr [[P]], align 1
@@ -1281,7 +1281,7 @@ define void @addr_only_scc2(ptr %p) {
 ; FNATTRS:       exit:
 ; FNATTRS-NEXT:    ret void
 ;
-; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(readwrite, inaccessiblemem: none, target_mem: none)
+; ATTRIBUTOR: Function Attrs: nofree nosync nounwind memory(write, argmem: read, inaccessiblemem: none, target_mem: none)
 ; ATTRIBUTOR-LABEL: define void @addr_only_scc2
 ; ATTRIBUTOR-SAME: (ptr nofree [[P:%.*]]) #[[ATTR18]] {
 ; ATTRIBUTOR-NEXT:    [[CMP:%.*]] = icmp ne ptr [[P]], null
