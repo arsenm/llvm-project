@@ -4027,8 +4027,7 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
   // attributes are expected to be deduced already, bottom-up.
   if (TopDownOnly) {
     Allowed = DenseSet<const char *>(
-        {&AANoRecurse::ID, &AANonNull::ID, &AANoFPClass::ID, &AACallEdges::ID,
-         &AAInterFnReachability::ID, &AAIntraFnReachability::ID});
+        {&AANoRecurse::ID, &AANonNull::ID, &AANoFPClass::ID});
   }
   AC.Allowed = &Allowed;
   AC.UseLiveness = false;
@@ -4043,6 +4042,11 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
       NumFnWithExactDefinition++;
     else
       NumFnWithoutExactDefinition++;
+
+    // Attributes that depend on the callers can only be improved if all of
+    // them are known.
+    if (TopDownOnly && !F->hasLocalLinkage())
+      continue;
 
     // We look at internal functions only on-demand but if any use is not a
     // direct call or outside the current set of analyzed functions, we have

@@ -3,36 +3,42 @@
 ; RUN: opt -S -passes='attributor-light<top-down>' %s | FileCheck %s --check-prefix=TOPDOWN
 
 ; In top-down mode, only attributes which use information from the callers,
-; such as nonnull arguments of internal functions, are deduced.
+; such as nonnull arguments of internal functions, are deduced. @callee calls
+; an unknown function, so it is only norecurse because its caller is.
+
+declare void @unknown()
 
 define internal void @callee(ptr %p) {
-; FULL: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
+; FULL: Function Attrs: norecurse
 ; FULL-LABEL: define internal void @callee(
 ; FULL-SAME: ptr nofree nonnull writeonly captures(none) [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; FULL-NEXT:    store i32 0, ptr [[P]], align 4
+; FULL-NEXT:    call void @unknown()
 ; FULL-NEXT:    ret void
 ;
 ; TOPDOWN: Function Attrs: norecurse
 ; TOPDOWN-LABEL: define internal void @callee(
 ; TOPDOWN-SAME: ptr nonnull [[P:%.*]]) #[[ATTR0:[0-9]+]] {
 ; TOPDOWN-NEXT:    store i32 0, ptr [[P]], align 4
+; TOPDOWN-NEXT:    call void @unknown()
 ; TOPDOWN-NEXT:    ret void
 ;
   store i32 0, ptr %p
+  call void @unknown()
   ret void
 }
 
-define void @caller(ptr nonnull %p) {
-; FULL: Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: write)
+define void @caller(ptr nonnull %p) norecurse {
+; FULL: Function Attrs: norecurse
 ; FULL-LABEL: define void @caller(
 ; FULL-SAME: ptr nofree nonnull writeonly captures(none) [[P:%.*]]) #[[ATTR0]] {
-; FULL-NEXT:    call void @callee(ptr nofree nonnull writeonly captures(none) [[P]]) #[[ATTR1:[0-9]+]]
+; FULL-NEXT:    call void @callee(ptr nofree nonnull writeonly captures(none) [[P]])
 ; FULL-NEXT:    ret void
 ;
 ; TOPDOWN: Function Attrs: norecurse
 ; TOPDOWN-LABEL: define void @caller(
 ; TOPDOWN-SAME: ptr nonnull [[P:%.*]]) #[[ATTR0]] {
-; TOPDOWN-NEXT:    call void @callee(ptr nonnull [[P]])
+; TOPDOWN-NEXT:    call void @callee(ptr [[P]])
 ; TOPDOWN-NEXT:    ret void
 ;
   call void @callee(ptr %p)

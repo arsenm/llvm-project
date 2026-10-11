@@ -2812,7 +2812,7 @@ struct AANoRecurseFunction final : AANoRecurseImpl {
     const AAInterFnReachability *EdgeReachability =
         A.getAAFor<AAInterFnReachability>(*this, getIRPosition(),
                                           DepClassTy::REQUIRED);
-    if (EdgeReachability && EdgeReachability->canReach(A, *getAnchorScope()))
+    if (!EdgeReachability || EdgeReachability->canReach(A, *getAnchorScope()))
       return indicatePessimisticFixpoint();
     return ChangeStatus::UNCHANGED;
   }
