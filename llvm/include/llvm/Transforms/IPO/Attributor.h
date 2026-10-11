@@ -1406,6 +1406,11 @@ struct AttributorConfig {
   /// is, no outside functions exist.
   bool IsClosedWorldModule = false;
 
+  /// Flag to determine if AAMemoryLocation keeps every access, with its
+  /// instruction and pointer, for checkForAllAccessesToMemoryKind. If not, only
+  /// the accessed locations and the kind of their accesses are kept for calls.
+  bool TrackMemoryAccesses = true;
+
   /// Callback function to be invoked on internal functions marked live.
   std::function<void(Attributor &A, const Function &F)> InitializationCallback =
       nullptr;
@@ -1684,6 +1689,12 @@ struct Attributor {
 
   /// Return true if this is a module pass, false otherwise.
   bool isModulePass() const { return Configuration.IsModulePass; }
+
+  /// Return true if every memory access is tracked for
+  /// AAMemoryLocation::checkForAllAccessesToMemoryKind.
+  bool tracksMemoryAccesses() const {
+    return Configuration.TrackMemoryAccesses;
+  }
 
   /// Return true if we should specialize the call site \b CB for the potential
   /// callee \p Fn.

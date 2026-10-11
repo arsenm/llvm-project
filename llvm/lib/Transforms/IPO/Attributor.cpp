@@ -4024,6 +4024,8 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
        &AADenormalFPMath::ID});
   AC.Allowed = &Allowed;
   AC.UseLiveness = false;
+  // Nothing in the light pass needs the individual memory accesses.
+  AC.TrackMemoryAccesses = false;
 
   Attributor A(Functions, InfoCache, AC);
 

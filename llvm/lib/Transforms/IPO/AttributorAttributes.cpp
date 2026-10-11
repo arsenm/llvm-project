@@ -8820,9 +8820,13 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
     // as NO_GLOBAL_MEM has multiple bits set.
     bool HasGlobalAccesses = ((~CBAssumedNotAccessedLocs) & NO_GLOBAL_MEM);
     if (HasGlobalAccesses) {
+      // Without tracking every access, only the kind of the global memory
+      // accesses is needed.
+      bool TrackPtr = A.tracksMemoryAccesses();
       auto AccessPred = [&](const Instruction *, const Value *Ptr,
                             AccessKind Kind, MemoryLocationsKind MLK) {
-        updateStateAndAccessesMap(AccessedLocs, MLK, &I, Ptr, Changed,
+        updateStateAndAccessesMap(AccessedLocs, MLK, &I,
+                                  TrackPtr ? Ptr : nullptr, Changed,
                                   AccessKind(getAccessKindFromInst(&I) & Kind));
         return true;
       };
@@ -8936,6 +8940,25 @@ struct AAMemoryLocationCallSite final : AAMemoryLocationImpl {
     if (!FnAA)
       return indicatePessimisticFixpoint();
     bool Changed = false;
+    if (!A.tracksMemoryAccesses()) {
+      // Only keep one access per location, with the kinds of all accesses.
+      std::array<AccessKind, llvm::ConstantLog2<VALID_STATE>()> Kinds = {};
+      auto AccessPred = [&](const Instruction *, const Value *, AccessKind Kind,
+                            MemoryLocationsKind MLK) {
+        AccessKind &K = Kinds[llvm::Log2_32(MLK)];
+        K = AccessKind(K | Kind);
+        return true;
+      };
+      if (!FnAA->checkForAllAccessesToMemoryKind(AccessPred, ALL_LOCATIONS))
+        return indicatePessimisticFixpoint();
+      for (auto [Idx, Kind] : enumerate(Kinds)) {
+        if (Kind != NONE)
+          updateStateAndAccessesMap(getState(), 1 << Idx, getCtxI(), nullptr,
+                                    Changed, Kind);
+      }
+      return Changed ? ChangeStatus::CHANGED : ChangeStatus::UNCHANGED;
+    }
+
     auto AccessPred = [&](const Instruction *I, const Value *Ptr,
                           AccessKind Kind, MemoryLocationsKind MLK) {
       updateStateAndAccessesMap(getState(), MLK, I, Ptr, Changed, Kind);
