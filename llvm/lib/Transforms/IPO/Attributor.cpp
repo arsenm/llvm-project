@@ -4098,18 +4098,19 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
     // Also invalidate any direct callers of changed functions since analyses
     // may care about attributes of direct callees. For example, MemorySSA
     // cares about whether or not a call's callee modifies memory and queries
-    // that through function attributes.
-    auto InvalidateCallers = [&](Function &Changed) {
+    // that through function attributes. Invalidate each function only once.
+    SmallSetVector<Function *, 16> Callers;
+    auto CollectCallers = [&](Function &Changed) {
       for (auto *U : Changed.users()) {
         auto *Call = dyn_cast<CallBase>(U);
         if (Call && Call->getCalledFunction() == &Changed)
-          FAM.invalidate(*Call->getFunction(), AttrOnlyPA);
+          Callers.insert(Call->getFunction());
       }
     };
 
     for (Function *Changed : IRModified) {
       FAM.invalidate(*Changed, FuncPA);
-      InvalidateCallers(*Changed);
+      CollectCallers(*Changed);
     }
 
     SmallSetVector<Function *, 8> AttrModified(A.getAttrModifiedFunctions());
@@ -4118,7 +4119,12 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
       if (IRModified.contains(Changed))
         continue;
       FAM.invalidate(*Changed, AttrOnlyPA);
-      InvalidateCallers(*Changed);
+      CollectCallers(*Changed);
+    }
+
+    for (Function *Caller : Callers) {
+      if (!IRModified.contains(Caller) && !AttrModified.contains(Caller))
+        FAM.invalidate(*Caller, AttrOnlyPA);
     }
   }
   LLVM_DEBUG(dbgs() << "[Attributor] Done with " << Functions.size()
