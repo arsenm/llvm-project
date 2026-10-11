@@ -264,11 +264,25 @@ CaptureComponents EarliestEscapeAnalysis::getCapturesBefore(
       return isNotInCycle(I, &DT, LI, CI);
     }
 
-    return !isPotentiallyReachable(CaptureInst, I, nullptr, &DT, LI, CI);
+    return !isPotentiallyReachable(CaptureInst, I);
   };
   if (IsNotCapturedBefore())
     return CaptureComponents::None;
   return Iter.first->second.second.WithoutRet;
+}
+
+bool EarliestEscapeAnalysis::isPotentiallyReachable(const Instruction *From,
+                                                    const Instruction *To) {
+  // Reachability between instructions in different blocks only depends on
+  // the blocks.
+  if (!CacheBlockReachability || From->getParent() == To->getParent())
+    return llvm::isPotentiallyReachable(From, To, nullptr, &DT, LI, CI);
+  auto [It, Inserted] =
+      BlockReachable.try_emplace({From->getParent(), To->getParent()});
+  if (Inserted)
+    It->second = llvm::isPotentiallyReachable(
+        From->getParent(), To->getParent(), nullptr, &DT, LI, CI);
+  return It->second;
 }
 
 bool EarliestEscapeAnalysis::callsReturnsTwiceFn() {

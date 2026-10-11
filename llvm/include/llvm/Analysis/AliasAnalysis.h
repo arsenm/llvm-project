@@ -196,13 +196,26 @@ class LLVM_ABI EarliestEscapeAnalysis final : public CaptureAnalysis {
   /// account for longjmp re-entry paths not visible to the forward CFG.
   std::optional<bool> CallsReturnsTwiceFn;
 
+  /// Whether reachability between blocks may be cached, because the CFG does
+  /// not change during the lifetime of the analysis.
+  bool CacheBlockReachability;
+
+  /// Cached reachability between blocks, if CacheBlockReachability is set.
+  DenseMap<std::pair<const BasicBlock *, const BasicBlock *>, bool>
+      BlockReachable;
+
   /// Whether the function contains a call that may return twice (e.g., setjmp).
   bool callsReturnsTwiceFn();
 
+  /// Return true if \p To may be reachable from \p From.
+  bool isPotentiallyReachable(const Instruction *From, const Instruction *To);
+
 public:
   EarliestEscapeAnalysis(DominatorTree &DT, const LoopInfo *LI = nullptr,
-                         const CycleInfo *CI = nullptr)
-      : DT(DT), LI(LI), CI(CI) {}
+                         const CycleInfo *CI = nullptr,
+                         bool CacheBlockReachability = false)
+      : DT(DT), LI(LI), CI(CI), CacheBlockReachability(CacheBlockReachability) {
+  }
 
   CaptureComponents getCapturesBefore(const Value *Object, const Instruction *I,
                                       bool OrAt, bool ReturnCaptures) override;

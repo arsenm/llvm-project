@@ -1124,7 +1124,9 @@ static bool isFuncLocalAndNotCaptured(Value *Arg, const CallBase *CB,
 DSEState::DSEState(const ScalarOptions &Opts, Function &F, AliasAnalysis &AA,
                    MemorySSA &MSSA, DominatorTree &DT, PostDominatorTree &PDT,
                    const TargetLibraryInfo &TLI, const CycleInfo &CI)
-    : Opts(Opts), F(F), AA(AA), EA(DT, nullptr, &CI), BatchAA(AA, &EA),
+    : Opts(Opts), F(F), AA(AA),
+      // DSE does not change the CFG.
+      EA(DT, nullptr, &CI, /*CacheBlockReachability=*/true), BatchAA(AA, &EA),
       MSSA(MSSA), DT(DT), PDT(PDT), TLI(TLI), DL(F.getDataLayout()), CI(CI) {
   // Collect blocks with throwing instructions not modeled in MemorySSA and
   // alloc-like objects.
