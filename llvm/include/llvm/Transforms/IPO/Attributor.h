@@ -1231,6 +1231,10 @@ struct InformationCache {
     return Explorer;
   }
 
+  /// Return true if \p V is known to not be undef or poison. The result is
+  /// cached, which is fine as the IR does not change while it is used.
+  LLVM_ABI bool isGuaranteedNotToBeUndefOrPoison(const Value &V);
+
   /// Return TargetLibraryInfo for function \p F.
   TargetLibraryInfo *getTargetLibraryInfoForFunction(const Function &F) {
     return AG.getAnalysis<TargetLibraryAnalysis>(F);
@@ -1354,6 +1358,9 @@ private:
 
   /// MustBeExecutedContextExplorer
   MustBeExecutedContextExplorer *Explorer = nullptr;
+
+  /// Cached results of isGuaranteedNotToBeUndefOrPoison.
+  DenseMap<const Value *, bool> GuaranteedNotUndefOrPoison;
 
   /// A map with knowledge retained in `llvm.assume` instructions.
   RetainedKnowledgeMap KnowledgeMap;
