@@ -2700,14 +2700,14 @@ define internal fastcc void @nested_memory_callee(ptr nocapture readonly %S) nof
 ; TUNIT-NEXT:    [[S_PRIV_B16:%.*]] = getelementptr i8, ptr [[S_PRIV]], i64 16
 ; TUNIT-NEXT:    store ptr [[TMP2]], ptr [[S_PRIV_B16]], align 8
 ; TUNIT-NEXT:    [[INNER:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[S_PRIV]], i64 0, i32 2
-; TUNIT-NEXT:    [[TMP3:%.*]] = load ptr, ptr [[INNER]], align 8, !invariant.load [[META32:![0-9]+]]
+; TUNIT-NEXT:    [[TMP3:%.*]] = load ptr, ptr [[INNER]], align 8
 ; TUNIT-NEXT:    [[INNER1:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[TMP3]], i64 0, i32 2
-; TUNIT-NEXT:    [[TMP4:%.*]] = load ptr, ptr [[INNER1]], align 8, !invariant.load [[META32]]
+; TUNIT-NEXT:    [[TMP4:%.*]] = load ptr, ptr [[INNER1]], align 8
 ; TUNIT-NEXT:    [[SRC:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[TMP4]], i64 0, i32 1
-; TUNIT-NEXT:    [[TMP5:%.*]] = load ptr, ptr [[SRC]], align 8, !invariant.load [[META32]]
-; TUNIT-NEXT:    [[TMP6:%.*]] = load double, ptr [[TMP5]], align 8, !invariant.load [[META32]]
+; TUNIT-NEXT:    [[TMP5:%.*]] = load ptr, ptr [[SRC]], align 8
+; TUNIT-NEXT:    [[TMP6:%.*]] = load double, ptr [[TMP5]], align 8
 ; TUNIT-NEXT:    [[CONV:%.*]] = fptrunc double [[TMP6]] to float
-; TUNIT-NEXT:    [[TMP7:%.*]] = load ptr, ptr [[TMP4]], align 8, !invariant.load [[META32]]
+; TUNIT-NEXT:    [[TMP7:%.*]] = load ptr, ptr [[TMP4]], align 8
 ; TUNIT-NEXT:    store float [[CONV]], ptr [[TMP7]], align 4
 ; TUNIT-NEXT:    ret void
 ;
@@ -2722,14 +2722,14 @@ define internal fastcc void @nested_memory_callee(ptr nocapture readonly %S) nof
 ; CGSCC-NEXT:    [[S_PRIV_B16:%.*]] = getelementptr i8, ptr [[S_PRIV]], i64 16
 ; CGSCC-NEXT:    store ptr [[TMP2]], ptr [[S_PRIV_B16]], align 8
 ; CGSCC-NEXT:    [[INNER:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[S_PRIV]], i64 0, i32 2
-; CGSCC-NEXT:    [[TMP3:%.*]] = load ptr, ptr [[INNER]], align 8, !invariant.load [[META32:![0-9]+]]
+; CGSCC-NEXT:    [[TMP3:%.*]] = load ptr, ptr [[INNER]], align 8
 ; CGSCC-NEXT:    [[INNER1:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[TMP3]], i64 0, i32 2
-; CGSCC-NEXT:    [[TMP4:%.*]] = load ptr, ptr [[INNER1]], align 8, !invariant.load [[META32]]
+; CGSCC-NEXT:    [[TMP4:%.*]] = load ptr, ptr [[INNER1]], align 8
 ; CGSCC-NEXT:    [[SRC:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[TMP4]], i64 0, i32 1
-; CGSCC-NEXT:    [[TMP5:%.*]] = load ptr, ptr [[SRC]], align 8, !invariant.load [[META32]]
-; CGSCC-NEXT:    [[TMP6:%.*]] = load double, ptr [[TMP5]], align 8, !invariant.load [[META32]]
+; CGSCC-NEXT:    [[TMP5:%.*]] = load ptr, ptr [[SRC]], align 8
+; CGSCC-NEXT:    [[TMP6:%.*]] = load double, ptr [[TMP5]], align 8
 ; CGSCC-NEXT:    [[CONV:%.*]] = fptrunc double [[TMP6]] to float
-; CGSCC-NEXT:    [[TMP7:%.*]] = load ptr, ptr [[TMP4]], align 8, !invariant.load [[META32]]
+; CGSCC-NEXT:    [[TMP7:%.*]] = load ptr, ptr [[TMP4]], align 8
 ; CGSCC-NEXT:    store float [[CONV]], ptr [[TMP7]], align 4
 ; CGSCC-NEXT:    ret void
 ;
@@ -2766,7 +2766,7 @@ define hidden void @no_propagation_of_unknown_index_access(ptr %in, ptr %out, i3
 ; TUNIT:       [[FOR_BODY]]:
 ; TUNIT-NEXT:    [[IDXPROM:%.*]] = sext i32 [[I_0]] to i64
 ; TUNIT-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, ptr [[IN]], i64 [[IDXPROM]]
-; TUNIT-NEXT:    [[TMP0:%.*]] = load i32, ptr [[ARRAYIDX]], align 4, !invariant.load [[META32]]
+; TUNIT-NEXT:    [[TMP0:%.*]] = load i32, ptr [[ARRAYIDX]], align 4
 ; TUNIT-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds [128 x i32], ptr [[BUF]], i64 0, i64 [[IDXPROM]]
 ; TUNIT-NEXT:    store i32 [[TMP0]], ptr [[ARRAYIDX2]], align 4
 ; TUNIT-NEXT:    [[INC]] = add nsw i32 [[I_0]], 1
@@ -2808,7 +2808,7 @@ define hidden void @no_propagation_of_unknown_index_access(ptr %in, ptr %out, i3
 ; CGSCC:       [[FOR_BODY]]:
 ; CGSCC-NEXT:    [[IDXPROM:%.*]] = sext i32 [[I_0]] to i64
 ; CGSCC-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, ptr [[IN]], i64 [[IDXPROM]]
-; CGSCC-NEXT:    [[TMP0:%.*]] = load i32, ptr [[ARRAYIDX]], align 4, !invariant.load [[META32]]
+; CGSCC-NEXT:    [[TMP0:%.*]] = load i32, ptr [[ARRAYIDX]], align 4
 ; CGSCC-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds [128 x i32], ptr [[BUF]], i64 0, i64 [[IDXPROM]]
 ; CGSCC-NEXT:    store i32 [[TMP0]], ptr [[ARRAYIDX2]], align 4
 ; CGSCC-NEXT:    [[INC]] = add nsw i32 [[I_0]], 1
@@ -2892,7 +2892,7 @@ define internal i1 @alloca_non_unique(ptr %p, i32 %in, i1 %c) {
 ; TUNIT-NEXT:    [[R:%.*]] = call i1 @alloca_non_unique(ptr noalias nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[A]], i32 noundef 42, i1 noundef false) #[[ATTR14:[0-9]+]]
 ; TUNIT-NEXT:    ret i1 [[R]]
 ; TUNIT:       [[F]]:
-; TUNIT-NEXT:    [[L:%.*]] = load i32, ptr [[P]], align 4, !invariant.load [[META32]]
+; TUNIT-NEXT:    [[L:%.*]] = load i32, ptr [[P]], align 4
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq i32 [[IN]], [[L]]
 ; TUNIT-NEXT:    ret i1 [[CMP]]
 ;
@@ -2906,7 +2906,7 @@ define internal i1 @alloca_non_unique(ptr %p, i32 %in, i1 %c) {
 ; CGSCC-NEXT:    [[R:%.*]] = call i1 @alloca_non_unique(ptr noalias nofree noundef nonnull readonly align 4 captures(none) dereferenceable(4) [[A]], i32 noundef 42, i1 noundef false) #[[ATTR17:[0-9]+]]
 ; CGSCC-NEXT:    ret i1 [[R]]
 ; CGSCC:       [[F]]:
-; CGSCC-NEXT:    [[L:%.*]] = load i32, ptr [[P]], align 4, !invariant.load [[META32]]
+; CGSCC-NEXT:    [[L:%.*]] = load i32, ptr [[P]], align 4
 ; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq i32 [[IN]], [[L]]
 ; CGSCC-NEXT:    ret i1 [[CMP]]
 ;
@@ -3707,7 +3707,6 @@ declare void @llvm.assume(i1 noundef)
 ; TUNIT: [[META29]] = !{!"long long", [[META5]], i64 0}
 ; TUNIT: [[LOOP30]] = distinct !{[[LOOP30]], [[META16]]}
 ; TUNIT: [[LOOP31]] = distinct !{[[LOOP31]], [[META16]]}
-; TUNIT: [[META32]] = !{}
 ;.
 ; CGSCC: [[META0:![0-9]+]] = !{i32 1, !"wchar_size", i32 4}
 ; CGSCC: [[META1:![0-9]+]] = !{i32 7, !"uwtable", i32 1}
@@ -3741,5 +3740,4 @@ declare void @llvm.assume(i1 noundef)
 ; CGSCC: [[LOOP29]] = distinct !{[[LOOP29]], [[META17]]}
 ; CGSCC: [[LOOP30]] = distinct !{[[LOOP30]], [[META17]]}
 ; CGSCC: [[LOOP31]] = distinct !{[[LOOP31]], [[META17]]}
-; CGSCC: [[META32]] = !{}
 ;.

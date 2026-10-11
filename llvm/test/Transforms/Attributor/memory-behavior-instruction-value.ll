@@ -28,7 +28,7 @@ define i32 @load_through_loaded_pointer(ptr noalias readonly %p) {
 ; CHECK-SAME: ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(8) [[P:%.*]]) #[[ATTR1:[0-9]+]] {
 ; CHECK-NEXT:    [[Q:%.*]] = load ptr, ptr [[P]], align 8, !invariant.load [[META0:![0-9]+]]
 ; CHECK-NEXT:    [[F:%.*]] = getelementptr i8, ptr [[Q]], i64 128
-; CHECK-NEXT:    [[V:%.*]] = load i32, ptr [[F]], align 8, !invariant.load [[META0]]
+; CHECK-NEXT:    [[V:%.*]] = load i32, ptr [[F]], align 8
 ; CHECK-NEXT:    ret i32 [[V]]
 ;
   %q = load ptr, ptr %p, align 8, !invariant.load !0

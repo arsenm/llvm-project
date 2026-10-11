@@ -425,7 +425,7 @@ define i32 @loop_constant_trip_count(ptr nocapture readonly %0) #0 {
 ; CHECK-NEXT:    [[TMP4:%.*]] = phi i64 [ 0, [[TMP1:%.*]] ], [ [[TMP9:%.*]], [[TMP3]] ]
 ; CHECK-NEXT:    [[TMP5:%.*]] = phi i32 [ 0, [[TMP1]] ], [ [[TMP8]], [[TMP3]] ]
 ; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i32, ptr [[TMP0]], i64 [[TMP4]]
-; CHECK-NEXT:    [[TMP7:%.*]] = load i32, ptr [[TMP6]], align 4, !invariant.load [[META0:![0-9]+]]
+; CHECK-NEXT:    [[TMP7:%.*]] = load i32, ptr [[TMP6]], align 4
 ; CHECK-NEXT:    [[TMP8]] = add nsw i32 [[TMP7]], [[TMP5]]
 ; CHECK-NEXT:    [[TMP9]] = add nuw nsw i64 [[TMP4]], 1
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[TMP9]], 10
@@ -472,7 +472,7 @@ define i32 @loop_trip_count_unbound(i32 %0, i32 %1, ptr nocapture readonly %2, i
 ; CHECK-NEXT:    [[TMP10:%.*]] = phi i32 [ [[TMP14]], [[TMP8]] ], [ 0, [[TMP4]] ]
 ; CHECK-NEXT:    [[TMP11:%.*]] = zext i32 [[TMP9]] to i64
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i32, ptr [[TMP2]], i64 [[TMP11]]
-; CHECK-NEXT:    [[TMP13:%.*]] = load i32, ptr [[TMP12]], align 4, !invariant.load [[META0]]
+; CHECK-NEXT:    [[TMP13:%.*]] = load i32, ptr [[TMP12]], align 4
 ; CHECK-NEXT:    [[TMP14]] = add nsw i32 [[TMP13]], [[TMP10]]
 ; CHECK-NEXT:    [[TMP15]] = add i32 [[TMP9]], [[TMP3]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = icmp eq i32 [[TMP15]], [[TMP1]]
@@ -522,7 +522,7 @@ define i32 @loop_trip_dec(i32 %0, ptr nocapture readonly %1) local_unnamed_addr 
 ; CHECK-NEXT:    [[TMP7:%.*]] = phi i64 [ [[TMP5]], [[TMP4]] ], [ [[TMP12:%.*]], [[TMP6]] ]
 ; CHECK-NEXT:    [[TMP8:%.*]] = phi i32 [ 0, [[TMP4]] ], [ [[TMP11:%.*]], [[TMP6]] ]
 ; CHECK-NEXT:    [[TMP9:%.*]] = getelementptr inbounds i32, ptr [[TMP1]], i64 [[TMP7]]
-; CHECK-NEXT:    [[TMP10:%.*]] = load i32, ptr [[TMP9]], align 4, !invariant.load [[META0]]
+; CHECK-NEXT:    [[TMP10:%.*]] = load i32, ptr [[TMP9]], align 4
 ; CHECK-NEXT:    [[TMP11]] = add nsw i32 [[TMP10]], [[TMP8]]
 ; CHECK-NEXT:    [[TMP12]] = add nsw i64 [[TMP7]], -1
 ; CHECK-NEXT:    [[TMP13:%.*]] = icmp sgt i64 [[TMP7]], 0
@@ -1363,8 +1363,4 @@ attributes #1 = { uwtable noinline }
 ; CGSCC: attributes #[[ATTR36]] = { nosync }
 ; CGSCC: attributes #[[ATTR37]] = { nosync willreturn memory(read) }
 ; CGSCC: attributes #[[ATTR38]] = { willreturn memory(read) }
-;.
-; TUNIT: [[META0]] = !{}
-;.
-; CGSCC: [[META0]] = !{}
 ;.

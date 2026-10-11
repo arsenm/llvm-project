@@ -5351,7 +5351,7 @@ entry:
 ; CHECK2-NEXT:    [[TOBOOL_NOT:%.*]] = icmp eq i32 [[TMP0]], 0
 ; CHECK2-NEXT:    br i1 [[TOBOOL_NOT]], label [[IF_END:%.*]], label [[IF_THEN:%.*]]
 ; CHECK2:       if.then:
-; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4, !invariant.load [[META7:![0-9]+]]
+; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4
 ; CHECK2-NEXT:    [[TMP2:%.*]] = call i32 @__kmpc_cancel(ptr noundef nonnull @[[GLOB1]], i32 [[TMP1]], i32 noundef 1)
 ; CHECK2-NEXT:    ret void
 ; CHECK2:       if.end:
@@ -5365,7 +5365,7 @@ entry:
 ; CHECK2-NEXT:    [[TOBOOL_NOT:%.*]] = icmp eq i32 [[TMP0]], 0
 ; CHECK2-NEXT:    br i1 [[TOBOOL_NOT]], label [[IF_END:%.*]], label [[IF_THEN:%.*]]
 ; CHECK2:       if.then:
-; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4, !invariant.load [[META7]]
+; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4
 ; CHECK2-NEXT:    [[TMP2:%.*]] = call i32 @__kmpc_cancel(ptr noundef nonnull @[[GLOB1]], i32 [[TMP1]], i32 noundef 1)
 ; CHECK2-NEXT:    ret void
 ; CHECK2:       if.end:
@@ -5463,7 +5463,7 @@ entry:
 ; CHECK2-NEXT:    [[TOBOOL_NOT:%.*]] = icmp eq i32 [[TMP0]], 0
 ; CHECK2-NEXT:    br i1 [[TOBOOL_NOT]], label [[IF_END:%.*]], label [[IF_THEN:%.*]]
 ; CHECK2:       if.then:
-; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4, !invariant.load [[META7]]
+; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4
 ; CHECK2-NEXT:    [[TMP2:%.*]] = call i32 @__kmpc_cancel(ptr noundef nonnull @[[GLOB1]], i32 [[TMP1]], i32 noundef 1)
 ; CHECK2-NEXT:    ret void
 ; CHECK2:       if.end:
@@ -5477,7 +5477,7 @@ entry:
 ; CHECK2-NEXT:    [[TOBOOL_NOT:%.*]] = icmp eq i32 [[TMP0]], 0
 ; CHECK2-NEXT:    br i1 [[TOBOOL_NOT]], label [[IF_END:%.*]], label [[IF_THEN:%.*]]
 ; CHECK2:       if.then:
-; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4, !invariant.load [[META7]]
+; CHECK2-NEXT:    [[TMP1:%.*]] = load i32, ptr [[DOTGLOBAL_TID_]], align 4
 ; CHECK2-NEXT:    [[TMP2:%.*]] = call i32 @__kmpc_cancel(ptr noundef nonnull @[[GLOB1]], i32 [[TMP1]], i32 noundef 1)
 ; CHECK2-NEXT:    ret void
 ; CHECK2:       if.end:

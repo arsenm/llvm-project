@@ -2001,7 +2001,7 @@ define internal float @through_memory0(ptr %ptr.arg) {
 ; CGSCC-SAME: (float [[TMP0:%.*]]) #[[ATTR3]] {
 ; CGSCC-NEXT:    [[PTR_ARG_PRIV:%.*]] = alloca float, align 4
 ; CGSCC-NEXT:    store float [[TMP0]], ptr [[PTR_ARG_PRIV]], align 4
-; CGSCC-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4, !invariant.load [[META0]]
+; CGSCC-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4
 ; CGSCC-NEXT:    ret float [[LOAD]]
 ;
   %load = load float, ptr %ptr.arg
@@ -2024,7 +2024,7 @@ define internal float @through_memory1(ptr %ptr.arg) {
 ; CGSCC-SAME: (float [[TMP0:%.*]]) #[[ATTR3]] {
 ; CGSCC-NEXT:    [[PTR_ARG_PRIV:%.*]] = alloca float, align 4
 ; CGSCC-NEXT:    store float [[TMP0]], ptr [[PTR_ARG_PRIV]], align 4
-; CGSCC-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4, !invariant.load [[META0]]
+; CGSCC-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4
 ; CGSCC-NEXT:    [[CALL:%.*]] = call float @llvm.arithmetic.fence.f32(float [[LOAD]]) #[[ATTR15]]
 ; CGSCC-NEXT:    ret float [[CALL]]
 ;
@@ -2040,7 +2040,7 @@ define internal float @through_memory2(ptr %ptr.arg) {
 ; CHECK-SAME: (float [[TMP0:%.*]]) #[[ATTR9:[0-9]+]] {
 ; CHECK-NEXT:    [[PTR_ARG_PRIV:%.*]] = alloca float, align 4
 ; CHECK-NEXT:    store float [[TMP0]], ptr [[PTR_ARG_PRIV]], align 4
-; CHECK-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4, !invariant.load [[META0]]
+; CHECK-NEXT:    [[LOAD:%.*]] = load float, ptr [[PTR_ARG_PRIV]], align 4
 ; CHECK-NEXT:    [[CALL:%.*]] = call float @extern.f32(float [[LOAD]])
 ; CHECK-NEXT:    ret float [[CALL]]
 ;

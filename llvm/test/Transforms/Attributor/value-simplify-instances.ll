@@ -158,7 +158,7 @@ define internal i8 @recursive_alloca_load_return(i1 %c, ptr %p, i8 %v) {
 ; TUNIT-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; TUNIT:       t:
 ; TUNIT-NEXT:    store i8 0, ptr [[A]], align 1
-; TUNIT-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1, !invariant.load [[META0:![0-9]+]]
+; TUNIT-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1
 ; TUNIT-NEXT:    ret i8 [[L]]
 ; TUNIT:       f:
 ; TUNIT-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef true, ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[A]], i8 noundef 1) #[[ATTR4:[0-9]+]]
@@ -172,7 +172,7 @@ define internal i8 @recursive_alloca_load_return(i1 %c, ptr %p, i8 %v) {
 ; CGSCC-NEXT:    br i1 [[C]], label [[T:%.*]], label [[F:%.*]]
 ; CGSCC:       t:
 ; CGSCC-NEXT:    store i8 0, ptr [[A]], align 1
-; CGSCC-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1, !invariant.load [[META0:![0-9]+]]
+; CGSCC-NEXT:    [[L:%.*]] = load i8, ptr [[P]], align 1
 ; CGSCC-NEXT:    ret i8 [[L]]
 ; CGSCC:       f:
 ; CGSCC-NEXT:    [[CALL:%.*]] = call i8 @recursive_alloca_load_return(i1 noundef true, ptr noalias nofree noundef nonnull readonly captures(none) dereferenceable(1) [[A]], i8 noundef 1) #[[ATTR3:[0-9]+]]
@@ -397,7 +397,7 @@ define i32 @non_unique_phi_ops(ptr %ptr) {
 ; TUNIT-NEXT:    [[P:%.*]] = phi i32 [ [[NON_UNIQUE:%.*]], [[F]] ], [ poison, [[ENTRY]] ]
 ; TUNIT-NEXT:    [[ADD]] = add i32 [[I]], 1
 ; TUNIT-NEXT:    [[G:%.*]] = getelementptr i32, ptr [[PTR]], i32 [[I]]
-; TUNIT-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0]]
+; TUNIT-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4
 ; TUNIT-NEXT:    [[CMP1:%.*]] = icmp eq i32 [[I]], [[NON_UNIQUE_INPUT]]
 ; TUNIT-NEXT:    br i1 [[CMP1]], label [[T:%.*]], label [[F]]
 ; TUNIT:       t:
@@ -419,7 +419,7 @@ define i32 @non_unique_phi_ops(ptr %ptr) {
 ; CGSCC-NEXT:    [[P:%.*]] = phi i32 [ [[NON_UNIQUE:%.*]], [[F]] ], [ poison, [[ENTRY]] ]
 ; CGSCC-NEXT:    [[ADD]] = add i32 [[I]], 1
 ; CGSCC-NEXT:    [[G:%.*]] = getelementptr i32, ptr [[PTR]], i32 [[I]]
-; CGSCC-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4, !invariant.load [[META0]]
+; CGSCC-NEXT:    [[NON_UNIQUE_INPUT:%.*]] = load i32, ptr [[G]], align 4
 ; CGSCC-NEXT:    [[CMP1:%.*]] = icmp eq i32 [[I]], [[NON_UNIQUE_INPUT]]
 ; CGSCC-NEXT:    br i1 [[CMP1]], label [[T:%.*]], label [[F]]
 ; CGSCC:       t:
@@ -469,8 +469,4 @@ end:
 ; CGSCC: attributes #[[ATTR3]] = { nofree nosync nounwind }
 ; CGSCC: attributes #[[ATTR4]] = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: read) }
 ; CGSCC: attributes #[[ATTR5]] = { nofree nounwind }
-;.
-; TUNIT: [[META0]] = !{}
-;.
-; CGSCC: [[META0]] = !{}
 ;.

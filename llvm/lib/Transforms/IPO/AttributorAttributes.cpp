@@ -12533,6 +12533,8 @@ struct AAInvariantLoadPointerImpl
 
     Changed |= updateLocalInvariance(A);
 
+    Changed |= updateLocallyConstrained(A);
+
     return Changed;
   }
 
@@ -12690,6 +12692,59 @@ private:
     }
 
     return ChangeStatus::UNCHANGED;
+  }
+
+  /// The memory is only constrained to the function if it is constrained for
+  /// every place the pointer may come from: invariant loads may be moved across
+  /// writes to the memory outside of the function, e.g., after inlining.
+  ChangeStatus updateLocallyConstrained(Attributor &A) {
+    if (isKnown(IS_LOCALLY_CONSTRAINED) || !isAssumed(IS_LOCALLY_CONSTRAINED))
+      return ChangeStatus::UNCHANGED;
+
+    // Check that the loads through the pointer at \p IRP are invariant for all
+    // of its underlying objects. Values that are their own underlying object,
+    // e.g., loaded pointers, may point to memory written anywhere.
+    auto UnderlyingObjectsInvariant = [&](const IRPosition &IRP) {
+      const auto *AUO =
+          A.getAAFor<AAUnderlyingObjects>(*this, IRP, DepClassTy::REQUIRED);
+      if (!AUO)
+        return false;
+      return AUO->forallUnderlyingObjects([&](const Value &V) {
+        IRPosition VPos = IRPosition::value(V);
+        if (VPos == IRP)
+          return false;
+        const auto *AA = A.getAAFor<AAInvariantLoadPointer>(
+            *this, VPos, DepClassTy::REQUIRED);
+        return AA && AA->isAssumedInvariant();
+      });
+    };
+
+    bool Constrained = true;
+    switch (getPositionKind()) {
+    case IRP_ARGUMENT: {
+      // The pointer must be invariant in all callers.
+      unsigned ArgNo = getIRPosition().getCallSiteArgNo();
+      bool UsedAssumedInformation = false;
+      Constrained = A.checkForAllCallSites(
+          [&](AbstractCallSite ACS) {
+            IRPosition CSArgPos = IRPosition::callsite_argument(ACS, ArgNo);
+            return CSArgPos.getPositionKind() != IRP_INVALID &&
+                   UnderlyingObjectsInvariant(CSArgPos);
+          },
+          *this, /*RequireAllCallSites=*/true, UsedAssumedInformation);
+      break;
+    }
+    case IRP_FLOAT:
+    case IRP_CALL_SITE_ARGUMENT:
+      Constrained = UnderlyingObjectsInvariant(getIRPosition());
+      break;
+    default:
+      break;
+    }
+    if (Constrained)
+      return ChangeStatus::UNCHANGED;
+    removeAssumedBits(IS_LOCALLY_CONSTRAINED);
+    return ChangeStatus::CHANGED;
   }
 
   ChangeStatus updateLocalInvariance(Attributor &A) {
