@@ -639,6 +639,20 @@ static void followUsesInContext(AAType &AA, Attributor &A,
   }
 }
 
+/// Return true if adding the known information of \p New to \p S would not
+/// change \p S.
+template <typename StateType>
+static bool addsNoKnownInformation(const StateType &S, const StateType &New) {
+  StateType Tmp = S;
+  Tmp += New;
+  return Tmp == S;
+}
+
+static bool addsNoKnownInformation(const DerefState &S, const DerefState &New) {
+  return addsNoKnownInformation(S.DerefBytesState, New.DerefBytesState) &&
+         addsNoKnownInformation(S.GlobalState, New.GlobalState);
+}
+
 /// Use the must-be-executed-context around \p I to add information into \p S.
 /// The AAType class is required to have `followUseInMBEC` method with the
 /// following signature and behaviour:
@@ -724,10 +738,14 @@ static void followUsesInMBEC(AAType &AA, Attributor &A, StateType &S,
       followUsesInContext(AA, A, *Explorer, &BB->front(), Uses, ChildState);
 
       // Erase uses which only appear in the child.
-      for (auto It = Uses.begin() + BeforeSize; It != Uses.end();)
-        It = Uses.erase(It);
+      while (Uses.size() > BeforeSize)
+        Uses.pop_back();
 
       ParentState &= ChildState;
+      // The remaining children can only weaken the parent state, so stop once
+      // it cannot add anything.
+      if (addsNoKnownInformation(S, ParentState))
+        break;
     }
 
     // Use only known state.
