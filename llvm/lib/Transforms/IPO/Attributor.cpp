@@ -116,6 +116,12 @@ static cl::opt<unsigned, true> MaxInitializationChainLengthX(
     cl::location(MaxInitializationChainLength), cl::init(1024));
 unsigned llvm::MaxInitializationChainLength;
 
+static cl::opt<unsigned> MaxPotentialCopiesToFollow(
+    "attributor-max-potential-copies-to-follow", cl::Hidden,
+    cl::desc("Maximal number of potential copies of a stored value that are "
+             "followed when checking all uses of a value"),
+    cl::init(16));
+
 static cl::opt<bool> AnnotateDeclarationCallSites(
     "attributor-annotate-decl-cs", cl::Hidden,
     cl::desc("Annotate call sites of function declarations."), cl::init(false));
@@ -1912,9 +1918,13 @@ bool Attributor::checkForAllUses(
         if (!Visited.insert(U).second)
           continue;
         SmallSetVector<Value *, 4> PotentialCopies;
+        // Following many potential copies, e.g., all loads of a global that
+        // is accessed in many places, makes checking the uses of every value
+        // stored there quadratic.
         if (AA::getPotentialCopiesOfStoredValue(
                 *this, *SI, PotentialCopies, QueryingAA, UsedAssumedInformation,
-                /* OnlyExact */ true)) {
+                /* OnlyExact */ true) &&
+            PotentialCopies.size() <= MaxPotentialCopiesToFollow) {
           DEBUG_WITH_TYPE(VERBOSE_DEBUG_TYPE,
                           dbgs()
                               << "[Attributor] Value is stored, continue with "
