@@ -1008,12 +1008,15 @@ public:
   /// If \p LiveOutSets is provided, it must hold the indexes of the virtual
   /// registers live out of each block, indexed by block number. Only those
   /// registers are considered when updating LiveIntervals, and the set for the
-  /// new block is added.
+  /// new block is added. \p LiveInSets may additionally hold the registers live
+  /// in to \p Succ, which then answers whether each live-out register stays
+  /// live out of the new block.
   struct SplitCriticalEdgeAnalyses {
     LiveIntervals *LIS;
     SlotIndexes *SI;
     MachineLoopInfo *MLI;
     std::vector<SparseBitVector<>> *LiveOutSets = nullptr;
+    std::vector<SparseBitVector<>> *LiveInSets = nullptr;
   };
 
   MachineBasicBlock *

@@ -100,7 +100,7 @@ class PHIEliminationImpl {
   bool SplitPHIEdges(MachineFunction &MF, MachineBasicBlock &MBB,
                      MachineLoopInfo *MLI, MachineDomTreeUpdater &MDTU);
 
-  void computeLiveOutSets(const MachineFunction &MF);
+  void computeLiveSets(const MachineFunction &MF);
 
   bool isLiveIn(Register Reg, const MachineBasicBlock *MBB);
   bool isLiveOutPastPHIs(Register Reg, const MachineBasicBlock *MBB);
@@ -126,6 +126,7 @@ class PHIEliminationImpl {
   // A set of live-out regs for each MBB which is used to update LIS
   // efficiently also with large functions.
   std::vector<SparseBitVector<>> LiveOutSets;
+  std::vector<SparseBitVector<>> LiveInSets;
 
 public:
   PHIEliminationImpl(MachineFunctionPass *P) {
@@ -734,9 +735,9 @@ bool PHIEliminationImpl::SplitPHIEdges(MachineFunction &MF,
       if (!ShouldSplit && !SplitAllCriticalEdges)
         continue;
       if (LiveOutSets.empty())
-        computeLiveOutSets(MF);
-      MachineBasicBlock *NewBB =
-          PreMBB->SplitCriticalEdge(&MBB, {LIS, SI, MLI, &LiveOutSets}, &MDTU);
+        computeLiveSets(MF);
+      MachineBasicBlock *NewBB = PreMBB->SplitCriticalEdge(
+          &MBB, {LIS, SI, MLI, &LiveOutSets, &LiveInSets}, &MDTU);
       if (!NewBB) {
         LLVM_DEBUG(dbgs() << "Failed to split critical edge.\n");
         continue;
@@ -755,17 +756,29 @@ bool PHIEliminationImpl::SplitPHIEdges(MachineFunction &MF,
   return Changed;
 }
 
-void PHIEliminationImpl::computeLiveOutSets(const MachineFunction &MF) {
+void PHIEliminationImpl::computeLiveSets(const MachineFunction &MF) {
   LiveOutSets.resize(MF.getNumBlockIDs());
+  LiveInSets.resize(MF.getNumBlockIDs());
+  BitVector HasPHIs(MF.getNumBlockIDs());
+  for (const MachineBasicBlock &MBB : MF)
+    if (!MBB.empty() && MBB.front().isPHI())
+      HasPHIs.set(MBB.getNumber());
   for (unsigned Idx = 0, NumVRegs = MRI->getNumVirtRegs(); Idx != NumVRegs;
        ++Idx) {
     Register Reg = Register::index2VirtReg(Idx);
     if (!LIS->hasInterval(Reg))
       continue;
     for (const LiveRange::Segment &S : LIS->getInterval(Reg)) {
-      for (const MachineBasicBlock *MBB = LIS->getMBBFromIndex(S.start);
-           MBB && LIS->getMBBEndIdx(MBB) <= S.end; MBB = MBB->getNextNode())
+      const MachineBasicBlock *MBB = LIS->getMBBFromIndex(S.start);
+      if (HasPHIs.test(MBB->getNumber()) && S.start == LIS->getMBBStartIdx(MBB))
+        LiveInSets[MBB->getNumber()].set(Idx);
+      for (; MBB && LIS->getMBBEndIdx(MBB) <= S.end; MBB = MBB->getNextNode()) {
         LiveOutSets[MBB->getNumber()].set(Idx);
+        const MachineBasicBlock *Next = MBB->getNextNode();
+        if (Next && HasPHIs.test(Next->getNumber()) &&
+            LIS->getMBBStartIdx(Next) < S.end)
+          LiveInSets[Next->getNumber()].set(Idx);
+      }
     }
   }
 }

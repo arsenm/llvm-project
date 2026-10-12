@@ -1326,17 +1326,7 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
       }
     }
 
-    auto UpdateLiveOutReg = [&](Register Reg) {
-      if (PHISrcRegs.count(Reg))
-        return true;
-      if (!LIS->hasInterval(Reg))
-        return false;
-
-      LiveInterval &LI = LIS->getInterval(Reg);
-      if (!LI.liveAt(PrevIndex))
-        return false;
-
-      bool isLiveOut = LI.liveAt(LIS->getMBBStartIdx(Succ));
+    auto UpdateLiveRange = [&](LiveInterval &LI, bool isLiveOut) {
       if (isLiveOut && isLastMBB) {
         VNInfo *VNI = LI.getVNInfoAt(PrevIndex);
         assert(VNI && "LiveInterval should have VNInfo where it is live.");
@@ -1356,6 +1346,20 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
             SR.removeSegment(StartIndex, EndIndex);
         }
       }
+    };
+
+    auto UpdateLiveOutReg = [&](Register Reg) {
+      if (PHISrcRegs.count(Reg))
+        return true;
+      if (!LIS->hasInterval(Reg))
+        return false;
+
+      LiveInterval &LI = LIS->getInterval(Reg);
+      if (!LI.liveAt(PrevIndex))
+        return false;
+
+      bool isLiveOut = LI.liveAt(LIS->getMBBStartIdx(Succ));
+      UpdateLiveRange(LI, isLiveOut);
       return isLiveOut;
     };
 
@@ -1363,9 +1367,24 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
       LiveOutSets->resize(MF->getNumBlockIDs());
       const SparseBitVector<> &LiveOut = (*LiveOutSets)[getNumber()];
       SparseBitVector<> &NewLiveOut = (*LiveOutSets)[NMBB->getNumber()];
-      for (unsigned Idx : LiveOut) {
-        if (UpdateLiveOutReg(Register::index2VirtReg(Idx)))
-          NewLiveOut.set(Idx);
+      if (std::vector<SparseBitVector<>> *LiveInSets = Analyses.LiveInSets) {
+        LiveInSets->resize(MF->getNumBlockIDs());
+        const SparseBitVector<> &SuccLiveIn = (*LiveInSets)[Succ->getNumber()];
+        for (unsigned Idx : LiveOut) {
+          Register Reg = Register::index2VirtReg(Idx);
+          bool isLiveOut = SuccLiveIn.test(Idx);
+          if (PHISrcRegs.count(Reg))
+            isLiveOut = true;
+          else
+            UpdateLiveRange(LIS->getInterval(Reg), isLiveOut);
+          if (isLiveOut)
+            NewLiveOut.set(Idx);
+        }
+      } else {
+        for (unsigned Idx : LiveOut) {
+          if (UpdateLiveOutReg(Register::index2VirtReg(Idx)))
+            NewLiveOut.set(Idx);
+        }
       }
     } else {
       MachineRegisterInfo *MRI = &getParent()->getRegInfo();
