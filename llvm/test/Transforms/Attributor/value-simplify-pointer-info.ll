@@ -2372,7 +2372,7 @@ define dso_local i32 @round_trip_malloc(i32 %x) {
 ; CHECK-LABEL: define dso_local i32 @round_trip_malloc(
 ; CHECK-SAME: i32 returned [[X:%.*]]) {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    store i32 [[X]], ptr [[CALL_H2S]], align 4
 ; CHECK-NEXT:    ret i32 [[X]]
 ;
@@ -2405,7 +2405,7 @@ define dso_local i32 @conditional_malloc(i32 %x) {
 ; CHECK-LABEL: define dso_local i32 @conditional_malloc(
 ; CHECK-SAME: i32 returned [[X:%.*]]) {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    [[TOBOOL:%.*]] = icmp ne i32 [[X]], 0
 ; CHECK-NEXT:    br i1 [[TOBOOL]], label %[[IF_THEN:.*]], label %[[IF_END:.*]]
 ; CHECK:       [[IF_THEN]]:
@@ -2432,7 +2432,7 @@ define dso_local i32 @round_trip_calloc(i32 %x) {
 ; CHECK-LABEL: define dso_local i32 @round_trip_calloc(
 ; CHECK-SAME: i32 returned [[X:%.*]]) {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr [[CALL_H2S]], i8 0, i64 4, i1 false)
 ; CHECK-NEXT:    store i32 [[X]], ptr [[CALL_H2S]], align 4
 ; CHECK-NEXT:    ret i32 [[X]]
@@ -2447,7 +2447,7 @@ entry:
 define dso_local i32 @round_trip_calloc_constant() {
 ; CHECK-LABEL: define dso_local noundef i32 @round_trip_calloc_constant() {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr [[CALL_H2S]], i8 0, i64 4, i1 false)
 ; CHECK-NEXT:    ret i32 11
 ;
@@ -2464,7 +2464,7 @@ define dso_local i32 @conditional_calloc(i32 %x) {
 ; CHECK-LABEL: define dso_local i32 @conditional_calloc(
 ; CHECK-SAME: i32 [[X:%.*]]) {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr [[CALL_H2S]], i8 0, i64 4, i1 false)
 ; CHECK-NEXT:    [[TOBOOL:%.*]] = icmp ne i32 [[X]], 0
 ; CHECK-NEXT:    br i1 [[TOBOOL]], label %[[IF_END:.*]], label %[[IF_THEN:.*]]
@@ -2494,7 +2494,7 @@ define dso_local i32 @conditional_calloc_zero(i1 %c) {
 ; CHECK-LABEL: define dso_local noundef i32 @conditional_calloc_zero(
 ; CHECK-SAME: i1 [[C:%.*]]) {
 ; CHECK-NEXT:  [[ENTRY:.*:]]
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr [[CALL_H2S]], i8 0, i64 4, i1 false)
 ; CHECK-NEXT:    br i1 [[C]], label %[[IF_END:.*]], label %[[IF_THEN:.*]]
 ; CHECK:       [[IF_THEN]]:
@@ -2646,7 +2646,7 @@ define dso_local void @test_nested_memory(ptr %dst, ptr %src) {
 ; TUNIT-LABEL: define dso_local void @test_nested_memory(
 ; TUNIT-SAME: ptr nofree writeonly captures(none) [[DST:%.*]], ptr nofree readonly captures(none) [[SRC:%.*]]) {
 ; TUNIT-NEXT:  [[ENTRY:.*:]]
-; TUNIT-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 24, align 1
+; TUNIT-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 24, align 8
 ; TUNIT-NEXT:    [[LOCAL:%.*]] = alloca [[STRUCT_STY:%.*]], align 8
 ; TUNIT-NEXT:    [[INNER:%.*]] = getelementptr inbounds [[STRUCT_STY]], ptr [[LOCAL]], i64 0, i32 2
 ; TUNIT-NEXT:    store ptr @global, ptr [[INNER]], align 8

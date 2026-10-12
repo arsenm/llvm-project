@@ -11,7 +11,7 @@ declare void @write_ptr(ptr nocapture) nounwind willreturn nosync
 
 define i32 @tail_call_uses_h2s() {
 ; CHECK-LABEL: define i32 @tail_call_uses_h2s() {
-; CHECK-NEXT:    [[P_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[P_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    store i32 0, ptr [[P_H2S]], align 4
 ; CHECK-NEXT:    call void @write_ptr(ptr noundef captures(none) [[P_H2S]]) #[[ATTR3:[0-9]+]]
 ; CHECK-NEXT:    [[V:%.*]] = load i32, ptr [[P_H2S]], align 4

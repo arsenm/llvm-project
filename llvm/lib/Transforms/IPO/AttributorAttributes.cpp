@@ -6813,6 +6813,21 @@ struct AAHeapToStackFunction final : public AAHeapToStack {
             std::max(Alignment, assumeAligned(AlignmentAPI->getZExtValue()));
       }
 
+      // The memory is accessed assuming the alignment guaranteed by the
+      // allocation function, which need not be known here.
+      auto AccessPred = [&](const Use &U, bool &Follow) {
+        if (isa<GetElementPtrInst, CastInst, PHINode, SelectInst>(
+                U.getUser())) {
+          Follow = true;
+          return true;
+        }
+
+        if (MaybeAlign AccessAlign = getAccessAlignment(U))
+          Alignment = std::max(Alignment, *AccessAlign);
+        return true;
+      };
+      A.checkForAllUses(AccessPred, *this, *AI.CB);
+
       // TODO: Hoist the alloca towards the function entry.
       unsigned AS = DL.getAllocaAddrSpace();
       Instruction *Alloca =
@@ -6853,6 +6868,46 @@ struct AAHeapToStackFunction final : public AAHeapToStack {
       CI->setTailCall(false);
 
     return HasChanged;
+  }
+
+  /// Return the alignment that the access of the pointer used by \p U
+  /// assumes, if \p U is the pointer operand of a memory access or a call
+  /// argument.
+  static MaybeAlign getAccessAlignment(const Use &U) {
+    const auto *I = cast<Instruction>(U.getUser());
+    unsigned OpNo = U.getOperandNo();
+    if (const auto *LI = dyn_cast<LoadInst>(I))
+      return LI->getAlign();
+    if (const auto *SI = dyn_cast<StoreInst>(I)) {
+      if (OpNo == SI->getPointerOperandIndex())
+        return SI->getAlign();
+      return std::nullopt;
+    }
+
+    if (const auto *RMWI = dyn_cast<AtomicRMWInst>(I)) {
+      if (OpNo == RMWI->getPointerOperandIndex())
+        return RMWI->getAlign();
+      return std::nullopt;
+    }
+
+    if (const auto *CXI = dyn_cast<AtomicCmpXchgInst>(I)) {
+      if (OpNo == CXI->getPointerOperandIndex())
+        return CXI->getAlign();
+      return std::nullopt;
+    }
+
+    const auto *CB = dyn_cast<CallBase>(I);
+    if (!CB || !CB->isArgOperand(&U))
+      return std::nullopt;
+
+    unsigned ArgNo = CB->getArgOperandNo(&U);
+    if (MaybeAlign ArgAlign = CB->getParamAlign(ArgNo))
+      return ArgAlign;
+
+    const Function *Callee = CB->getCalledFunction();
+    if (Callee && ArgNo < Callee->arg_size())
+      return Callee->getParamAlign(ArgNo);
+    return std::nullopt;
   }
 
   std::optional<APInt> getAPInt(Attributor &A, const AbstractAttribute &AA,

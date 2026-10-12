@@ -359,7 +359,7 @@ define void @exclusion_set1(i1 %c1, i1 %c2, i1 %c3) {
 ; CHECK-LABEL: define {{[^@]+}}@exclusion_set1
 ; CHECK-SAME: (i1 [[C1:%.*]], i1 [[C2:%.*]], i1 [[C3:%.*]]) {
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[CALL_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr [[CALL_H2S]], i8 0, i64 4, i1 false)
 ; CHECK-NEXT:    [[GEP1:%.*]] = getelementptr inbounds i8, ptr [[CALL_H2S]], i64 1
 ; CHECK-NEXT:    [[GEP2:%.*]] = getelementptr inbounds i8, ptr [[CALL_H2S]], i64 2

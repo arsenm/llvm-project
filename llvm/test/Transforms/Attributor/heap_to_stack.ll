@@ -378,7 +378,7 @@ bb:
 define i32 @test10() {
 ; CHECK-LABEL: define {{[^@]+}}@test10() {
 ; CHECK-NEXT:  bb:
-; CHECK-NEXT:    [[I_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[I_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    call void @no_sync_func(ptr noalias nofree captures(none) [[I_H2S]])
 ; CHECK-NEXT:    store i32 10, ptr [[I_H2S]], align 4
 ; CHECK-NEXT:    [[I2:%.*]] = load i32, ptr [[I_H2S]], align 4
@@ -414,7 +414,7 @@ define i32 @irreducible_cfg(i32 %arg) {
 ; CHECK-LABEL: define {{[^@]+}}@irreducible_cfg
 ; CHECK-SAME: (i32 [[ARG:%.*]]) {
 ; CHECK-NEXT:  bb:
-; CHECK-NEXT:    [[I_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[I_H2S:%.*]] = alloca i8, i64 4, align 4
 ; CHECK-NEXT:    store i32 10, ptr [[I_H2S]], align 4
 ; CHECK-NEXT:    [[I2:%.*]] = icmp eq i32 [[ARG]], 1
 ; CHECK-NEXT:    br i1 [[I2]], label [[BB3:%.*]], label [[BB5:%.*]]
@@ -493,7 +493,7 @@ define i32 @malloc_in_loop(i32 %arg) {
 ; CHECK-NEXT:    [[I5:%.*]] = icmp sgt i32 [[I4]], 0
 ; CHECK-NEXT:    br i1 [[I5]], label [[BB6:%.*]], label [[BB9:%.*]]
 ; CHECK:       bb6:
-; CHECK-NEXT:    [[I7_H2S:%.*]] = alloca i8, i64 4, align 1
+; CHECK-NEXT:    [[I7_H2S:%.*]] = alloca i8, i64 4, align 8
 ; CHECK-NEXT:    br label [[BB2]]
 ; CHECK:       bb9:
 ; CHECK-NEXT:    ret i32 5
