@@ -901,7 +901,7 @@ PassBuilder::buildInlinerPipeline(OptimizationLevel Level,
   // function simplification pipeline, which is only the case with recursive
   // functions.
   if (Opts.attributor_enable & AttributorRunOption::CGSCC_LIGHT) {
-    MainCGPipeline.addPass(AttributorLightCGSCCPass());
+    MainCGPipeline.addPass(AttributorLightCGSCCPass(/*SkipNonRecursive=*/true));
   } else {
     MainCGPipeline.addPass(
         PostOrderFunctionAttrsPass(/*SkipNonRecursive*/ true));
@@ -1432,7 +1432,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // attributes where applicable.
   // FIXME: Is this really an optimization rather than a canonicalization?
   if (Opts.attributor_enable & AttributorRunOption::MODULE_LIGHT)
-    MPM.addPass(AttributorLightPass());
+    MPM.addPass(AttributorLightPass(/*TopDownOnly=*/true));
   else
     MPM.addPass(ReversePostOrderFunctionAttrsPass());
 
@@ -2020,7 +2020,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
   // attributes where applicable.
   // FIXME: Is this really an optimization rather than a canonicalization?
   if (Opts.attributor_enable & AttributorRunOption::MODULE_LIGHT)
-    MPM.addPass(AttributorLightPass());
+    MPM.addPass(AttributorLightPass(/*TopDownOnly=*/true));
   else
     MPM.addPass(ReversePostOrderFunctionAttrsPass());
 

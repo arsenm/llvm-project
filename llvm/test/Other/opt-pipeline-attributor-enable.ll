@@ -10,22 +10,22 @@
 ; RUN: opt -S -passes='default<O1>' -attributor-enable=module -print-pipeline-passes %s 2>&1 | FileCheck -check-prefix=MODULE %s
 ; RUN: opt -S -passes='default<O1>' -attributor-enable=full -print-pipeline-passes %s 2>&1 | FileCheck -check-prefix=FULL %s
 
-; CGSCCLIGHT: inline,attributor-light-cgscc,function<
+; CGSCCLIGHT: inline,attributor-light-cgscc<skip-non-recursive>,function<
 ; CGSCCLIGHT-SAME: ),attributor-light-cgscc,function(
 ; CGSCCLIGHT-SAME: ,elim-avail-extern,rpo-function-attrs,
 
 ; MODULELIGHT: openmp-opt,attributor-light,ipsccp
 ; MODULELIGHT-SAME: inline,function-attrs<skip-non-recursive-function-attrs>,
 ; MODULELIGHT-SAME: ),function-attrs,function(
-; MODULELIGHT-SAME: ,elim-avail-extern,attributor-light,
+; MODULELIGHT-SAME: ,elim-avail-extern,attributor-light<top-down>,
 
 ; LIGHT: openmp-opt,attributor-light,
-; LIGHT-SAME: inline,attributor-light-cgscc,
+; LIGHT-SAME: inline,attributor-light-cgscc<skip-non-recursive>,
 ; LIGHT-SAME: ),attributor-light-cgscc,function(
-; LIGHT-RPO-SAME: ,elim-avail-extern,attributor-light,
+; LIGHT-RPO-SAME: ,elim-avail-extern,attributor-light<top-down>,
 
 ; LIGHT-LTO: ,pgo-icall-prom,cgscc(attributor-light-cgscc,argpromotion,
-; LIGHT-LTO-SAME: ,called-value-propagation,attributor-light,globalsplit,
+; LIGHT-LTO-SAME: ,called-value-propagation,attributor-light<top-down>,globalsplit,
 ; LIGHT-LTO-SAME: ,tailcallelim),cgscc(attributor-light-cgscc),
 
 ; MODULE: ,openmp-opt,attributor,ipsccp
