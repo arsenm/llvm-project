@@ -11664,16 +11664,28 @@ struct AAPotentialValuesCallSiteReturned : AAPotentialValuesImpl {
           // Nothing to do as long as no value was determined.
           continue;
         }
+
+        // A value of the caller that was not translated to the call site may be
+        // a different instance of it if the caller is recursive.
+        bool OtherInstance = false;
+        if (!*CallerV && !isa<Constant>(V) && AA::isValidInScope(*V, Caller)) {
+          bool IsKnownNoRecurse;
+          OtherInstance = !AA::hasAssumedIRAttr<Attribute::NoRecurse>(
+              A, this, IRPosition::function(*Caller), DepClassTy::OPTIONAL,
+              IsKnownNoRecurse);
+        }
         V = *CallerV ? *CallerV : V;
         if (*CallerV && AA::isDynamicallyUnique(A, *this, *V)) {
           if (recurseForValue(A, IRPosition::value(*V), S))
             continue;
         }
-        if (S == AA::Intraprocedural && !AA::isValidInScope(*V, Caller)) {
+        if (S == AA::Intraprocedural &&
+            (OtherInstance || !AA::isValidInScope(*V, Caller))) {
           giveUpOnIntraprocedural(A);
           return true;
         }
-        addValue(A, getState(), *V, CB, S, getAnchorScope());
+        addValue(A, getState(), OtherInstance ? *CB : *V, CB, S,
+                 getAnchorScope());
       }
       return true;
     };

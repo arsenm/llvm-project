@@ -22,12 +22,12 @@ define ptr @checkAndAdvance(ptr align 16 %0) {
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[TMP4:%.*]], label [[TMP7:%.*]]
 ; CHECK:       4:
 ; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, ptr [[TMP0]], i64 4
-; CHECK-NEXT:    [[TMP6:%.*]] = call ptr @checkAndAdvance(ptr nofree noundef nonnull readonly align 16 [[TMP5]]) #[[ATTR1:[0-9]+]]
+; CHECK-NEXT:    [[TMP6:%.*]] = call nonnull align 16 ptr @checkAndAdvance(ptr nofree noundef nonnull readonly align 16 [[TMP5]]) #[[ATTR1:[0-9]+]]
 ; CHECK-NEXT:    br label [[TMP8:%.*]]
 ; CHECK:       7:
 ; CHECK-NEXT:    br label [[TMP8]]
 ; CHECK:       8:
-; CHECK-NEXT:    [[DOT0:%.*]] = phi ptr [ [[TMP5]], [[TMP4]] ], [ [[TMP0]], [[TMP7]] ]
+; CHECK-NEXT:    [[DOT0:%.*]] = phi ptr [ [[TMP6]], [[TMP4]] ], [ [[TMP0]], [[TMP7]] ]
 ; CHECK-NEXT:    ret ptr [[DOT0]]
 ;
   %2 = load i32, ptr %0, align 4
