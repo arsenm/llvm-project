@@ -338,9 +338,9 @@ entry:
 define ptr @ptr_scc_r1(ptr %a, ptr %r, ptr %b) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@ptr_scc_r1
-; TUNIT-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone returned [[R:%.*]], ptr nofree readnone captures(none) [[B:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[R:%.*]], ptr nofree readnone captures(none) [[B:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    [[CALL1:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[R]], ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL1:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[R]], ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret ptr [[R]]
 ;
 ; CGSCC: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
@@ -359,23 +359,23 @@ entry:
 define ptr @ptr_scc_r2(ptr %a, ptr %b, ptr %r) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@ptr_scc_r2
-; TUNIT-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone [[B:%.*]], ptr nofree readnone returned [[R:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone captures(address) [[B:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[R:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp ugt ptr [[A]], [[B]]
 ; TUNIT-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
 ; TUNIT:       if.then:
-; TUNIT-NEXT:    [[CALL1:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[B]], ptr noalias nofree nonnull readnone [[A]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL1:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[B]], ptr noalias nofree nonnull readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
 ; TUNIT-NEXT:    br label [[RETURN:%.*]]
 ; TUNIT:       if.end:
 ; TUNIT-NEXT:    [[CMP2:%.*]] = icmp ult ptr [[A]], [[B]]
 ; TUNIT-NEXT:    br i1 [[CMP2]], label [[IF_THEN3:%.*]], label [[IF_END12:%.*]]
 ; TUNIT:       if.then3:
-; TUNIT-NEXT:    [[CALL5:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone [[A]], ptr noalias nofree nonnull readnone [[B]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
-; TUNIT-NEXT:    [[CALL6:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[R]], ptr noalias nofree readnone [[R]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
-; TUNIT-NEXT:    [[CALL7:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[R]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
-; TUNIT-NEXT:    [[CALL8:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[A]], ptr noalias nofree nonnull readnone [[B]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
-; TUNIT-NEXT:    [[CALL9:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[B]], ptr noalias nofree readnone [[R]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
-; TUNIT-NEXT:    [[CALL11:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone [[B]], ptr noalias nofree readnone [[R]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL5:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree nonnull readnone "no-capture-maybe-returned" [[B]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL6:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[R]], ptr noalias nofree readnone captures(address) [[R]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL7:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL8:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree nonnull readnone captures(address) [[B]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL9:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[B]], ptr noalias nofree readnone captures(address) [[R]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL11:%.*]] = call ptr @ptr_scc_r1(ptr noalias nofree readnone captures(address) [[B]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]], ptr noalias nofree readnone captures(none) undef) #[[ATTR8]]
 ; TUNIT-NEXT:    br label [[RETURN]]
 ; TUNIT:       if.end12:
 ; TUNIT-NEXT:    [[CMP13:%.*]] = icmp eq ptr [[A]], [[B]]
@@ -383,7 +383,7 @@ define ptr @ptr_scc_r2(ptr %a, ptr %b, ptr %r) #0 {
 ; TUNIT:       cond.true:
 ; TUNIT-NEXT:    br label [[COND_END:%.*]]
 ; TUNIT:       cond.false:
-; TUNIT-NEXT:    [[CALL14:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone [[B]], ptr noalias nofree readnone [[R]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL14:%.*]] = call ptr @ptr_scc_r2(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone captures(address) [[B]], ptr noalias nofree readnone "no-capture-maybe-returned" [[R]]) #[[ATTR8]]
 ; TUNIT-NEXT:    br label [[COND_END]]
 ; TUNIT:       cond.end:
 ; TUNIT-NEXT:    [[COND:%.*]] = phi ptr [ [[R]], [[COND_TRUE]] ], [ [[R]], [[COND_FALSE]] ]
@@ -533,16 +533,16 @@ entry:
 define ptr @rt2_helper(ptr %a) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@rt2_helper
-; TUNIT-SAME: (ptr nofree readnone returned [[A:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt2(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt2(ptr noalias nofree readnone "no-capture-maybe-returned" [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret ptr [[A]]
 ;
 ; CGSCC: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; CGSCC-LABEL: define {{[^@]+}}@rt2_helper
-; CGSCC-SAME: (ptr nofree readnone returned [[A:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[A:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt2(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt2(ptr noalias nofree readnone "no-capture-maybe-returned" [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR7]]
 ; CGSCC-NEXT:    ret ptr [[A]]
 ;
 entry:
@@ -553,12 +553,12 @@ entry:
 define ptr @rt2(ptr %a, ptr %b) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@rt2
-; TUNIT-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone "no-capture-maybe-returned" [[A:%.*]], ptr nofree readnone "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], null
 ; TUNIT-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
 ; TUNIT:       if.then:
-; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt2_helper(ptr noalias nofree readnone [[A]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt2_helper(ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR8]]
 ; TUNIT-NEXT:    br label [[IF_END]]
 ; TUNIT:       if.end:
 ; TUNIT-NEXT:    [[SEL:%.*]] = phi ptr [ [[B]], [[ENTRY:%.*]] ], [ [[A]], [[IF_THEN]] ]
@@ -566,12 +566,12 @@ define ptr @rt2(ptr %a, ptr %b) #0 {
 ;
 ; CGSCC: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; CGSCC-LABEL: define {{[^@]+}}@rt2
-; CGSCC-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr nofree readnone "no-capture-maybe-returned" [[A:%.*]], ptr nofree readnone "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], null
 ; CGSCC-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
 ; CGSCC:       if.then:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt2_helper(ptr noalias nofree readnone [[A]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt2_helper(ptr noalias nofree readnone "no-capture-maybe-returned" [[A]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br label [[IF_END]]
 ; CGSCC:       if.end:
 ; CGSCC-NEXT:    [[SEL:%.*]] = phi ptr [ [[B]], [[ENTRY:%.*]] ], [ [[A]], [[IF_THEN]] ]
@@ -595,16 +595,16 @@ if.end:
 define ptr @rt3_helper(ptr %a, ptr %b) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@rt3_helper
-; TUNIT-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
-; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt3(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt3(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR8]]
 ; TUNIT-NEXT:    ret ptr [[B]]
 ;
 ; CGSCC: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; CGSCC-LABEL: define {{[^@]+}}@rt3_helper
-; CGSCC-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:  entry:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt3(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt3(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR7]]
 ; CGSCC-NEXT:    ret ptr [[B]]
 ;
 entry:
@@ -615,12 +615,12 @@ entry:
 define ptr @rt3(ptr %a, ptr %b) #0 {
 ; TUNIT: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; TUNIT-LABEL: define {{[^@]+}}@rt3
-; TUNIT-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; TUNIT-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; TUNIT-NEXT:  entry:
 ; TUNIT-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], null
 ; TUNIT-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
 ; TUNIT:       if.then:
-; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt3_helper(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR8]]
+; TUNIT-NEXT:    [[CALL:%.*]] = call ptr @rt3_helper(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR8]]
 ; TUNIT-NEXT:    br label [[IF_END]]
 ; TUNIT:       if.end:
 ; TUNIT-NEXT:    [[SEL:%.*]] = phi ptr [ [[B]], [[ENTRY:%.*]] ], [ [[B]], [[IF_THEN]] ]
@@ -628,12 +628,12 @@ define ptr @rt3(ptr %a, ptr %b) #0 {
 ;
 ; CGSCC: Function Attrs: nofree noinline nosync nounwind memory(none) uwtable
 ; CGSCC-LABEL: define {{[^@]+}}@rt3
-; CGSCC-SAME: (ptr nofree readnone [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
+; CGSCC-SAME: (ptr nofree readnone captures(address) [[A:%.*]], ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR1]] {
 ; CGSCC-NEXT:  entry:
 ; CGSCC-NEXT:    [[CMP:%.*]] = icmp eq ptr [[A]], null
 ; CGSCC-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
 ; CGSCC:       if.then:
-; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt3_helper(ptr noalias nofree readnone [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR7]]
+; CGSCC-NEXT:    [[CALL:%.*]] = call ptr @rt3_helper(ptr noalias nofree readnone captures(address) [[A]], ptr noalias nofree readnone "no-capture-maybe-returned" [[B]]) #[[ATTR7]]
 ; CGSCC-NEXT:    br label [[IF_END]]
 ; CGSCC:       if.end:
 ; CGSCC-NEXT:    [[SEL:%.*]] = phi ptr [ [[B]], [[ENTRY:%.*]] ], [ [[B]], [[IF_THEN]] ]
@@ -903,7 +903,7 @@ entry:
 define ptr @bitcasts_select_and_phi(ptr %b) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@bitcasts_select_and_phi
-; CHECK-SAME: (ptr nofree readnone returned [[B:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[IF_THEN:%.*]], label [[IF_END:%.*]]
@@ -941,7 +941,7 @@ if.end:                                           ; preds = %if.then, %entry
 define ptr @ret_arg_arg_undef(ptr %b) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@ret_arg_arg_undef
-; CHECK-SAME: (ptr nofree readnone returned [[B:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[RET_ARG0:%.*]], label [[IF_END:%.*]]
@@ -985,7 +985,7 @@ ret_undef:
 define ptr @ret_undef_arg_arg(ptr %b) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@ret_undef_arg_arg
-; CHECK-SAME: (ptr nofree readnone returned [[B:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[RET_UNDEF:%.*]], label [[IF_END:%.*]]
@@ -1029,7 +1029,7 @@ ret_arg1:
 define ptr @ret_undef_arg_undef(ptr %b) #0 {
 ; CHECK: Function Attrs: mustprogress nofree noinline norecurse nosync nounwind willreturn memory(none) uwtable
 ; CHECK-LABEL: define {{[^@]+}}@ret_undef_arg_undef
-; CHECK-SAME: (ptr nofree readnone returned [[B:%.*]]) #[[ATTR0]] {
+; CHECK-SAME: (ptr nofree readnone returned "no-capture-maybe-returned" [[B:%.*]]) #[[ATTR0]] {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq ptr [[B]], null
 ; CHECK-NEXT:    br i1 [[CMP]], label [[RET_UNDEF0:%.*]], label [[IF_END:%.*]]
