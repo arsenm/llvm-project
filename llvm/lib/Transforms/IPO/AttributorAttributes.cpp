@@ -5731,6 +5731,11 @@ struct AAInstanceInfoCallSiteReturned final : AAInstanceInfoFloating {
 } // namespace
 
 /// ----------------------- Variable Capturing ---------------------------------
+static bool isVolatileMemIntrinsic(const Value &V) {
+  auto *MI = dyn_cast<MemIntrinsic>(&V);
+  return MI && MI->isVolatile();
+}
+
 bool AANoCapture::isImpliedByIR(Attributor &A, const IRPosition &IRP,
                                 Attribute::AttrKind ImpliedAttributeKind,
                                 bool IgnoreSubsumingPositions) {
@@ -5754,6 +5759,12 @@ bool AANoCapture::isImpliedByIR(Attributor &A, const IRPosition &IRP,
   for (const Attribute &Attr : Attrs)
     if (capturesNothing(Attr.getCaptureInfo()))
       return true;
+
+  // Volatile memory intrinsics capture the address, even though the
+  // arguments of their declarations are not captured.
+  if (IRP.getPositionKind() == IRP_CALL_SITE_ARGUMENT &&
+      isVolatileMemIntrinsic(IRP.getAnchorValue()))
+    return false;
 
   if (IRP.getPositionKind() == IRP_CALL_SITE_ARGUMENT)
     if (Argument *Arg = IRP.getAssociatedArgument()) {
@@ -6064,7 +6075,7 @@ struct AANoCaptureCallSiteArgument final : AANoCaptureImpl {
     //       sense to specialize attributes for call sites arguments instead of
     //       redirecting requests to the callee argument.
     Argument *Arg = getAssociatedArgument();
-    if (!Arg)
+    if (!Arg || isVolatileMemIntrinsic(getAnchorValue()))
       return indicatePessimisticFixpoint();
     const IRPosition &ArgPos = IRPosition::argument(*Arg);
     bool IsKnownNoCapture;
