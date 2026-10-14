@@ -3,11 +3,16 @@
 
 ; The alloca that replaces a heap allocation must be aligned for the accesses
 ; to the memory, even if the allocation call does not say anything about the
-; alignment.
+; alignment. If not all accesses are known, use the natural stack alignment.
+
+target datalayout = "S128"
 
 declare noalias ptr @malloc(i64) allockind("alloc,uninitialized") allocsize(0) "alloc-family"="malloc"
 declare void @free(ptr) allockind("free") "alloc-family"="malloc"
 declare void @use(ptr nocapture align 16) nounwind willreturn nosync
+declare void @use_noalign(ptr nocapture) nounwind willreturn nosync
+
+@escape = global ptr null
 
 define i64 @align_from_accesses(i1 %c) {
 ; CHECK-LABEL: define i64 @align_from_accesses(
@@ -36,4 +41,48 @@ e:
   %v = load i64, ptr %p, align 8
   call void @free(ptr %p)
   ret i64 %v
+}
+
+; @use_noalign may access the memory assuming more than its alignment.
+define void @unknown_call_access() {
+; CHECK-LABEL: define void @unknown_call_access() {
+; CHECK-NEXT:    [[P_H2S:%.*]] = alloca i8, i64 8, align 16
+; CHECK-NEXT:    call void @use_noalign(ptr captures(none) [[P_H2S]]) #[[ATTR3]]
+; CHECK-NEXT:    ret void
+;
+  %p = call noalias ptr @malloc(i64 8)
+  call void @use_noalign(ptr %p)
+  call void @free(ptr %p)
+  ret void
+}
+
+; Comparing the pointer does not access the memory.
+define i1 @compare_only() {
+; CHECK-LABEL: define noundef i1 @compare_only() {
+; CHECK-NEXT:    [[P_H2S:%.*]] = alloca i8, i64 8, align 4
+; CHECK-NEXT:    store i32 0, ptr [[P_H2S]], align 4
+; CHECK-NEXT:    ret i1 false
+;
+  %p = call noalias ptr @malloc(i64 8)
+  store i32 0, ptr %p, align 4
+  %c = icmp eq ptr %p, null
+  call void @free(ptr %p)
+  ret i1 %c
+}
+
+; The pointer escapes into memory before it is freed.
+define void @escape_to_memory() {
+; CHECK-LABEL: define void @escape_to_memory() {
+; CHECK-NEXT:    [[P_H2S:%.*]] = alloca i8, i64 8, align 16
+; CHECK-NEXT:    store ptr [[P_H2S]], ptr @escape, align 8
+; CHECK-NEXT:    store i32 0, ptr [[P_H2S]], align 4
+; CHECK-NEXT:    store ptr null, ptr @escape, align 8
+; CHECK-NEXT:    ret void
+;
+  %p = call noalias ptr @malloc(i64 8)
+  store ptr %p, ptr @escape, align 8
+  store i32 0, ptr %p, align 4
+  store ptr null, ptr @escape, align 8
+  call void @free(ptr %p)
+  ret void
 }

@@ -6815,18 +6815,43 @@ struct AAHeapToStackFunction final : public AAHeapToStack {
 
       // The memory is accessed assuming the alignment guaranteed by the
       // allocation function, which need not be known here.
+      bool UnknownAccesses = false;
       auto AccessPred = [&](const Use &U, bool &Follow) {
-        if (isa<GetElementPtrInst, CastInst, PHINode, SelectInst>(
-                U.getUser())) {
+        auto *UserI = cast<Instruction>(U.getUser());
+        if (isa<GetElementPtrInst, PHINode, SelectInst>(UserI) ||
+            (isa<CastInst>(UserI) &&
+             !isa<PtrToIntInst, PtrToAddrInst>(UserI))) {
           Follow = true;
           return true;
         }
 
-        if (MaybeAlign AccessAlign = getAccessAlignment(U))
+        if (MaybeAlign AccessAlign = getAccessAlignment(U)) {
           Alignment = std::max(Alignment, *AccessAlign);
+          return true;
+        }
+
+        // Comparisons, lifetime markers and the removed frees do not access
+        // the memory.
+        if (isa<ICmpInst>(UserI))
+          return true;
+        if (auto *CB = dyn_cast<CallBase>(UserI);
+            CB &&
+            (CB->isLifetimeStartOrEnd() || AI.PotentialFreeCalls.count(CB)))
+          return true;
+
+        // Otherwise, e.g., if the pointer escapes into memory or is passed to
+        // a call without an alignment, it may be accessed assuming more.
+        UnknownAccesses = true;
         return true;
       };
       A.checkForAllUses(AccessPred, *this, *AI.CB);
+
+      // Aligning to the natural stack alignment is free, so use it for the
+      // accesses that are not known.
+      if (UnknownAccesses) {
+        if (MaybeAlign StackAlign = DL.getStackAlignment())
+          Alignment = std::max(Alignment, *StackAlign);
+      }
 
       // TODO: Hoist the alloca towards the function entry.
       unsigned AS = DL.getAllocaAddrSpace();
