@@ -229,10 +229,10 @@ public:
   unsigned getNumOperands() const { return NumUserOperands; }
 
   /// Returns the descriptor co-allocated with this User instance.
-  LLVM_ABI ArrayRef<const uint8_t> getDescriptor() const;
+  LLVM_ABI ArrayRef<const uint8_t> getDescriptor() const LLVM_READONLY;
 
   /// Returns the descriptor co-allocated with this User instance.
-  LLVM_ABI MutableArrayRef<uint8_t> getDescriptor();
+  LLVM_ABI MutableArrayRef<uint8_t> getDescriptor() LLVM_READONLY;
 
   /// Subclasses with hung off uses need to manage the operand count
   /// themselves.  In these instances, the operand count isn't used to find the
@@ -246,7 +246,7 @@ public:
   /// A droppable user is a user for which uses can be dropped without affecting
   /// correctness and should be dropped rather than preventing a transformation
   /// from happening.
-  LLVM_ABI bool isDroppable() const;
+  LLVM_ABI bool isDroppable() const LLVM_READONLY;
 
   // ---------------------------------------------------------------------------
   // Operand Iterator interface...

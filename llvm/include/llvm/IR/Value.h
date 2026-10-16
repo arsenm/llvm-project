@@ -441,12 +441,12 @@ public:
   bool hasOneUse() const { return UseList && hasSingleElement(uses()); }
 
   /// Return true if this Value has exactly N uses.
-  LLVM_ABI bool hasNUses(unsigned N) const;
+  LLVM_ABI bool hasNUses(unsigned N) const LLVM_READONLY;
 
   /// Return true if this value has N uses or more.
   ///
   /// This is logically equivalent to getNumUses() >= N.
-  LLVM_ABI bool hasNUsesOrMore(unsigned N) const;
+  LLVM_ABI bool hasNUsesOrMore(unsigned N) const LLVM_READONLY;
 
   /// Return true if there is exactly one user of this value.
   ///
@@ -456,7 +456,7 @@ public:
   ///
   /// This check is potentially costly, since it requires traversing,
   /// in the worst case, the whole use list of a value.
-  LLVM_ABI bool hasOneUser() const;
+  LLVM_ABI bool hasOneUser() const LLVM_READONLY;
 
   /// Return true if there is exactly one use of this value that cannot be
   /// dropped.
@@ -503,13 +503,13 @@ public:
   /// Check if this value is used in the specified basic block.
   ///
   /// Not supported for ConstantData.
-  LLVM_ABI bool isUsedInBasicBlock(const BasicBlock *BB) const;
+  LLVM_ABI bool isUsedInBasicBlock(const BasicBlock *BB) const LLVM_READONLY;
 
   /// This method computes the number of uses of this Value.
   ///
   /// This is a linear time operation.  Use hasOneUse, hasNUses, or
   /// hasNUsesOrMore to check for specific values.
-  LLVM_ABI unsigned getNumUses() const;
+  LLVM_ABI unsigned getNumUses() const LLVM_READONLY;
 
   /// This method should only be used by the Use class.
   void addUse(Use &U) {

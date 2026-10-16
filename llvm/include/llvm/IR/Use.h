@@ -71,7 +71,7 @@ public:
   Use *getNext() const { return Next; }
 
   /// Return the operand # of this use in its User.
-  LLVM_ABI unsigned getOperandNo() const;
+  LLVM_ABI unsigned getOperandNo() const LLVM_READONLY;
 
   /// Destroys Use operands when the number of operands of
   /// a User changes.
