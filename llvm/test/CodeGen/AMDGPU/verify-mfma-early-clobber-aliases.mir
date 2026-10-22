@@ -1,0 +1,21 @@
+# RUN: not --crash llc -mtriple=amdgpu9.0a -run-pass=machineverifier -filetype=null %s 2>&1 | FileCheck %s
+
+# An MFMA whose accumulator carries the EARLY_CLOBBER_ALIASES constraint requires
+# vdst and src2 to be allocated the same register (equal) or completely disjoint
+# registers, never partially overlapping. The constraint is materialized as an
+# ordinary tie, so the machine verifier enforces that the tied physical registers
+# match. A partial overlap (here vdst = $vgpr2..17, src2 = $vgpr4..19) must be
+# rejected.
+
+# CHECK: Bad machine code: Tied physical registers must match.
+
+---
+name:            mfma_early_clobber_aliases_partial_overlap
+tracksRegLiveness: true
+body:             |
+  bb.0:
+    liveins: $vgpr0, $vgpr1
+
+    $vgpr2_vgpr3_vgpr4_vgpr5_vgpr6_vgpr7_vgpr8_vgpr9_vgpr10_vgpr11_vgpr12_vgpr13_vgpr14_vgpr15_vgpr16_vgpr17 = V_MFMA_F32_16X16X1F32_vgprcd_e64 $vgpr0, $vgpr1, $vgpr4_vgpr5_vgpr6_vgpr7_vgpr8_vgpr9_vgpr10_vgpr11_vgpr12_vgpr13_vgpr14_vgpr15_vgpr16_vgpr17_vgpr18_vgpr19, 0, 0, 0, implicit $mode, implicit $exec
+    S_ENDPGM 0
+...

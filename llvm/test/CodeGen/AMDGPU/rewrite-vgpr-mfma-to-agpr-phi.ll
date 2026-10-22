@@ -103,9 +103,9 @@ define amdgpu_kernel void @test_rewrite_mfma_copy_to_agpr_phi_loop(ptr addrspace
 ; CHECK-NEXT:    v_mov_b64_e32 v[36:37], v[4:5]
 ; CHECK-NEXT:    v_mov_b64_e32 v[34:35], v[2:3]
 ; CHECK-NEXT:    v_mov_b64_e32 v[32:33], v[0:1]
+; CHECK-NEXT:    v_mfma_f32_32x32x1_2b_f32 v[0:31], v65, v64, v[0:31]
 ; CHECK-NEXT:    s_add_i32 s1, s1, 1
 ; CHECK-NEXT:    s_cmp_lt_u32 s1, s0
-; CHECK-NEXT:    v_mfma_f32_32x32x1_2b_f32 v[0:31], v65, v64, v[32:63]
 ; CHECK-NEXT:    v_mfma_f32_32x32x1_2b_f32 v[0:31], v65, v64, v[0:31]
 ; CHECK-NEXT:    s_cbranch_scc1 .LBB1_1
 ; CHECK-NEXT:  ; %bb.2: ; %endif

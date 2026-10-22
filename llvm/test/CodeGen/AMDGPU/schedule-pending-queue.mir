@@ -21,9 +21,9 @@ body:             |
     %14:vgpr_32 = IMPLICIT_DEF
     %15:vgpr_32 = IMPLICIT_DEF
     %18:areg_512 = IMPLICIT_DEF
-    %18:areg_512 = V_MFMA_F32_16X16X1F32_mac_e64 %15, %14, %18, 0, 0, 0, implicit $mode, implicit $exec
+    %18:areg_512 = V_MFMA_F32_16X16X1F32_e64 %15, %14, %18, 0, 0, 0, implicit $mode, implicit $exec
     %5:vreg_128 = BUFFER_LOAD_DWORDX4_OFFSET %2, 0, 0, 0, 0, implicit $exec
-    %18:areg_512 = V_MFMA_F32_16X16X1F32_mac_e64 %15, %14, %18, 0, 0, 0, implicit $mode, implicit $exec
+    %18:areg_512 = V_MFMA_F32_16X16X1F32_e64 %15, %14, %18, 0, 0, 0, implicit $mode, implicit $exec
     undef %84.sub0:vreg_128_align2 = V_ADD_U32_e32 %5.sub0, %14, implicit $exec
     %7:vreg_512 = COPY %18
     SCHED_BARRIER 0

@@ -709,15 +709,17 @@ bool SIFoldOperandsImpl::updateOperand(FoldCandidate &Fold) const {
 
   if (ImmVal) {
     if (Old.isTied()) {
-      int NewMFMAOpc = AMDGPU::getMFMAEarlyClobberOp(MI->getOpcode());
-      if (NewMFMAOpc == -1)
+      // Folding an immediate into a tied src2 (an MFMA accumulator carrying an
+      // EARLY_CLOBBER_ALIASES constraint). The immediate has no register to
+      // alias, so simply break the tie in place: the def is unconstrained with
+      // respect to the (now immediate) source and needs no early-clobber. Only
+      // this relaxable constraint permits untying here; other tied operands must
+      // not be folded.
+      unsigned UseOpIdx = MI->getOperandNo(&Old);
+      if (MI->getDesc().getOperandConstraint(
+              UseOpIdx, MCOI::EARLY_CLOBBER_ALIASES) == -1)
         return false;
-      MI->setDesc(TII->get(NewMFMAOpc));
-      MI->untieRegOperand(0);
-      const MCInstrDesc &MCID = MI->getDesc();
-      for (unsigned I = 0; I < MI->getNumDefs(); ++I)
-        if (MCID.getOperandConstraint(I, MCOI::EARLY_CLOBBER) != -1)
-          MI->getOperand(I).setIsEarlyClobber(true);
+      MI->untieRegOperand(UseOpIdx);
     }
 
     // TODO: Should we try to avoid adding this to the candidate list?

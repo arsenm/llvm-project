@@ -120,16 +120,16 @@ body:             |
     %147.sub1:av_512 = COPY %149.sub1
     %147.sub0:av_512 = COPY %149.sub0
     %149:areg_512 = COPY %147
-    %149:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %149, 0, 0, 0, implicit $mode, implicit $exec
+    %149:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %149, 0, 0, 0, implicit $mode, implicit $exec
     %162:areg_512 = COPY %146
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
     %158:vgpr_32 = DS_READ_B32_gfx9 %159, 0, 0, implicit $exec :: (load (s32) from `ptr addrspace(3) null`, addrspace 3)
     %160:vgpr_32 = DS_READ_B32_gfx9 %161, 0, 0, implicit $exec :: (load (s32) from `ptr addrspace(3) null`, addrspace 3)
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %158, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %160, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %158, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %160, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
     dead %335:sreg_64 = S_AND_B64 %413, $exec, implicit-def $scc
     %176:sreg_32 = S_CSELECT_B32 65537, 0, implicit killed $scc
     %178:sreg_32 = S_LSHR_B32 %176, 16, implicit-def dead $scc
@@ -174,7 +174,7 @@ body:             |
     DS_WRITE_B64_gfx9 %330.sub1, %242, 0, 0, implicit $exec :: (store (s64) into `ptr addrspace(3) null`, addrspace 3)
     %409:sreg_64_xexec = V_CMP_GT_I32_e64 0, %237, implicit $exec
     %411:vgpr_32 = V_ADD_U32_e32 1, %411, implicit $exec
-    %162:areg_512 = V_MFMA_F32_32X32X4BF16_mac_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
+    %162:areg_512 = V_MFMA_F32_32X32X4BF16_e64 %330.sub1, %330.sub1, %162, 0, 0, 0, implicit $mode, implicit $exec
     %412:sreg_64 = S_MOV_B64 -1
     $vcc = COPY %248
     %413:sreg_64 = COPY %9

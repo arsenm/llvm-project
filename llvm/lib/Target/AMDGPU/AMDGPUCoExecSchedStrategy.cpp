@@ -209,44 +209,30 @@ llvm::AMDGPU::CoExecInfo llvm::AMDGPU::getMFMACoExecInfo(unsigned Opcode) {
 
   // 4-cycle occupancy, 8-cycle window.
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f4_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f6_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f4_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f6_gfx940_vcd:
   case V_MFMA_F32_32X32X16_BF16_e64:
-  case V_MFMA_F32_32X32X16_BF16_mac_e64:
-  case V_MFMA_F32_32X32X16_BF16_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X16_BF16_vgprcd_e64:
   case V_MFMA_F32_32X32X16_BF16_gfx940_acd:
   case V_MFMA_F32_32X32X16_BF16_gfx940_vcd:
   case V_MFMA_I32_32X32X32_I8_e64:
-  case V_MFMA_I32_32X32X32_I8_mac_e64:
-  case V_MFMA_I32_32X32X32_I8_mac_vgprcd_e64:
   case V_MFMA_I32_32X32X32_I8_vgprcd_e64:
   case V_MFMA_I32_32X32X32_I8_gfx940_acd:
   case V_MFMA_I32_32X32X32_I8_gfx940_vcd:
   case V_MFMA_F32_32X32X16_F16_e64:
-  case V_MFMA_F32_32X32X16_F16_mac_e64:
-  case V_MFMA_F32_32X32X16_F16_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X16_F16_vgprcd_e64:
   case V_MFMA_F32_32X32X16_F16_gfx940_acd:
   case V_MFMA_F32_32X32X16_F16_gfx940_vcd:
@@ -266,14 +252,6 @@ llvm::AMDGPU::CoExecInfo llvm::AMDGPU::getMFMACoExecInfo(unsigned Opcode) {
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f6_vgprcd_e64:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f4_vgprcd_e64:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f6_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f4_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f6_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f4_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f6_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f4_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f6_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f4_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f6_mac_vgprcd_e64:
     Res.TotalWindow = 8;
     allowCoExec(Res, CoExecMask::SALU, 1);
     allowCoExec(Res, CoExecMask::DS | CoExecMask::VALU | CoExecMask::VMEM, 2);
@@ -282,32 +260,22 @@ llvm::AMDGPU::CoExecInfo llvm::AMDGPU::getMFMACoExecInfo(unsigned Opcode) {
 
   // 16-cycle occupancy, 20-cycle window.
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f4_f8_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f6_f8_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f4_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f6_gfx940_vcd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_mac_e64:
-  case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_mac_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_vgprcd_e64:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_gfx940_acd:
   case V_MFMA_F32_32X32X64_F8F6F4_f8_f8_gfx940_vcd:
@@ -321,16 +289,6 @@ llvm::AMDGPU::CoExecInfo llvm::AMDGPU::getMFMACoExecInfo(unsigned Opcode) {
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f4_vgprcd_e64:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f6_vgprcd_e64:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f8_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f8_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f8_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f4_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f6_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f8_mac_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f8_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f8_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f4_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f6_mac_vgprcd_e64:
-  case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f8_f8_mac_vgprcd_e64:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f8_gfx940_acd:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f4_f8_gfx940_vcd:
   case V_MFMA_SCALE_F32_32X32X64_F8F6F4_f6_f8_gfx940_acd:
@@ -371,8 +329,6 @@ llvm::AMDGPU::CoExecInfo llvm::AMDGPU::getMFMACoExecInfo(unsigned Opcode) {
 
   // 18-cycle occupancy, 19-cycle window.
   case V_MFMA_F64_16X16X4F64_e64:
-  case V_MFMA_F64_16X16X4F64_mac_e64:
-  case V_MFMA_F64_16X16X4F64_mac_vgprcd_e64:
   case V_MFMA_F64_16X16X4F64_vgprcd_e64:
     Res.TotalWindow = 19;
     allowCoExec(Res, CoExecMask::DS | CoExecMask::SALU | CoExecMask::VMEM, 0);

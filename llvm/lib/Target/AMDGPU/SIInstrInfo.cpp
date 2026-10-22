@@ -4523,16 +4523,6 @@ SIInstrInfo::convertToThreeAddressImpl(MachineInstr &MI,
   MachineBasicBlock &MBB = *MI.getParent();
   unsigned Opc = MI.getOpcode();
 
-  // Handle MFMA.
-  int NewMFMAOpc = AMDGPU::getMFMAEarlyClobberOp(Opc);
-  if (NewMFMAOpc != -1) {
-    MachineInstrBuilder MIB =
-        BuildMI(MBB, MI, MI.getDebugLoc(), get(NewMFMAOpc));
-    for (unsigned I = 0, E = MI.getNumExplicitOperands(); I != E; ++I)
-      MIB.add(MI.getOperand(I));
-    return MIB;
-  }
-
   if (SIInstrInfo::isWMMA(MI)) {
     unsigned NewOpc = AMDGPU::mapWMMA2AddrTo3AddrOpcode(MI.getOpcode());
     MachineInstrBuilder MIB = BuildMI(MBB, MI, MI.getDebugLoc(), get(NewOpc))
@@ -11043,12 +11033,6 @@ int SIInstrInfo::pseudoToMCOpcode(int Opcode) const {
       Gen = SIEncodingFamily::SDWA10;
       break;
     }
-  }
-
-  if (isMAI(Opcode)) {
-    int MFMAOp = AMDGPU::getMFMAEarlyClobberOp(Opcode);
-    if (MFMAOp != -1)
-      Opcode = MFMAOp;
   }
 
   int32_t MCOp = AMDGPU::getMCOpcode(Opcode, Gen);

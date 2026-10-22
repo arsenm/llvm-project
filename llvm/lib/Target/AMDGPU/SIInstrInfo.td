@@ -3559,14 +3559,6 @@ def getFlatScratchInstSVfromSS : InstrMapping {
   let ValueCols = [["SV"]];
 }
 
-def getMFMAEarlyClobberOp : InstrMapping {
-  let FilterClass = "MFMATable";
-  let RowFields = ["FMAOp"];
-  let ColFields = ["IsMac"];
-  let KeyCol = ["1"];
-  let ValueCols = [["0"]];
-}
-
 // Map from an instruction using VGPRs to one using AGPRs.
 def getAGPRFormOp : InstrMapping {
   let FilterClass = "AGPRFormTable";

@@ -3382,22 +3382,19 @@ int GCNHazardRecognizer::checkMAIHazards908(MachineInstr *MI) const {
   return WaitStatesNeeded;
 }
 
-/// One MFMA can be written with up to four opcodes that differ only in how vdst
-/// and src2 are encoded: both are either AGPRs or VGPRs, and the mac form ties
-/// vdst to src2 instead of taking them as separate operands. \returns the AGPR,
-/// non-mac opcode, so that every form of the same MFMA maps to one value.
-static unsigned getMFMANonMacAGPRFormOp(unsigned Opc) {
-  if (int NonMacOp = AMDGPU::getMFMAEarlyClobberOp(Opc); NonMacOp != -1)
-    Opc = NonMacOp;
+/// One MFMA can be written with two opcodes that differ only in whether vdst
+/// and src2 are AGPRs or VGPRs. \returns the AGPR opcode, so that both forms of
+/// the same MFMA map to one value.
+static unsigned getMFMAAGPRFormOp(unsigned Opc) {
   if (int AGPROp = AMDGPU::getAGPRFormOp(Opc); AGPROp != -1)
     Opc = AGPROp;
   return Opc;
 }
 
-/// \returns true if \p Opc0 and \p Opc1 are the same MFMA, ignoring the mac
-/// form and whether vdst/src2 are AGPRs or VGPRs.
+/// \returns true if \p Opc0 and \p Opc1 are the same MFMA, ignoring whether
+/// vdst/src2 are AGPRs or VGPRs.
 static bool isSameMFMA(unsigned Opc0, unsigned Opc1) {
-  return getMFMANonMacAGPRFormOp(Opc0) == getMFMANonMacAGPRFormOp(Opc1);
+  return getMFMAAGPRFormOp(Opc0) == getMFMAAGPRFormOp(Opc1);
 }
 
 static int
@@ -3470,8 +3467,6 @@ int GCNHazardRecognizer::getMFMAOverlappedSrcCWaitStates(
   switch (Writer->getOpcode()) {
   case AMDGPU::V_MFMA_F64_16X16X4F64_e64:
   case AMDGPU::V_MFMA_F64_16X16X4F64_vgprcd_e64:
-  case AMDGPU::V_MFMA_F64_16X16X4F64_mac_e64:
-  case AMDGPU::V_MFMA_F64_16X16X4F64_mac_vgprcd_e64:
     return ST.hasGFX950Insts()
                ? GFX950_DMFMA16x16WritesVGPROverlappedSrcCWaitStates
                : DMFMA16x16WritesVGPROverlappedSrcCWaitStates;
@@ -3556,8 +3551,6 @@ int GCNHazardRecognizer::getMFMAReadWaitStates(const MachineInstr &Consumer,
     switch (Opc1) {
     case AMDGPU::V_MFMA_F64_16X16X4F64_e64:
     case AMDGPU::V_MFMA_F64_16X16X4F64_vgprcd_e64:
-    case AMDGPU::V_MFMA_F64_16X16X4F64_mac_e64:
-    case AMDGPU::V_MFMA_F64_16X16X4F64_mac_vgprcd_e64:
       NeedWaitStates =
           ST.hasGFX950Insts()
               ? GFX950_DMFMA16x16WritesVGPROverlappedMFMASrcABWaitStates

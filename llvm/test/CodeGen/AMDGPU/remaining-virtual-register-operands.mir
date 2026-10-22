@@ -1,4 +1,4 @@
-# RUN: not llc -mtriple=amdgpu9.08-amd-amdhsa -verify-machineinstrs -start-before=greedy,2 -filetype=null %s 2>&1 | FileCheck %s
+# RUN: not llc -mtriple=amdgpu9.08-amd-amdhsa -verify-machineinstrs -start-before=greedy,2 -stop-after=greedy,2 -stress-regalloc=2 -filetype=null %s 2>&1 | FileCheck %s
 
 # This testcase fails register allocation at the same time it performs
 # virtual register splitting (by introducing VGPR to AGPR copies). We
@@ -62,7 +62,8 @@ body:             |
     %2:vreg_512 = COPY %1
     %2.sub8:vreg_512 = COPY %4.sub0
     %5:areg_512 = COPY %2
-    %5:areg_512 = V_MFMA_F32_16X16X1F32_mac_e64 %6, %7, %5, 0, 0, 0, implicit $mode, implicit $exec
+    %5:areg_512 = V_MFMA_F32_16X16X1F32_e64 %6, %7, %5, 0, 0, 0, implicit $mode, implicit $exec
+    S_NOP 0, implicit %1
     %8:vgpr_32 = COPY %5.sub3
     $agpr1 = COPY %8
     INLINEASM &"; use $0", sideeffect attdialect, reguse, killed $agpr1

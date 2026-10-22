@@ -74,11 +74,11 @@ body:             |
 
     $exec = S_OR_B64 $exec, killed undef %4, implicit-def $scc
     %13:vreg_512_align2 = IMPLICIT_DEF
-    %13 = V_MFMA_F32_32X32X16_BF16_mac_vgprcd_e64 undef %2, undef %2, %13, 0, 0, 0, implicit $mode, implicit $exec
+    %13 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 undef %2, undef %2, %13, 0, 0, 0, implicit $mode, implicit $exec
     %14:vreg_64_align2 = IMPLICIT_DEF
     undef %15.sub0:vreg_512_align2 = IMPLICIT_DEF
     %16:vreg_512_align2 = IMPLICIT_DEF
-    %16 = V_MFMA_F32_32X32X16_BF16_mac_vgprcd_e64 undef %2, undef %2, %16, 0, 0, 0, implicit $mode, implicit $exec
+    %16 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 undef %2, undef %2, %16, 0, 0, 0, implicit $mode, implicit $exec
     %17:vreg_512_align2 = COPY undef %0
     early-clobber %18:vreg_512_align2 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 %2, killed undef %2, %17, 0, 0, 0, implicit $mode, implicit $exec
     early-clobber %19:vreg_512_align2 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 killed undef %2, undef %2, killed %17, 0, 0, 0, implicit $mode, implicit $exec
@@ -108,7 +108,7 @@ body:             |
     undef %32.sub0:vreg_64_align2 = COPY %13.sub14
     %33:vreg_64_align2 = V_PK_MUL_F32 8, killed %32, 0, 0, 0, 0, 0, 0, 0, implicit $mode, implicit $exec
     %34:vreg_512_align2 = COPY killed undef %19
-    %34 = V_MFMA_F32_32X32X16_BF16_mac_vgprcd_e64 killed undef %2, undef %2, undef %34, 0, 0, 0, implicit $mode, implicit $exec
+    %34 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 killed undef %2, undef %2, undef %34, 0, 0, 0, implicit $mode, implicit $exec
     undef %35.sub0:vreg_64_align2 = COPY %16.sub6
     %36:vreg_64_align2 = V_PK_MUL_F32 8, killed %35, 0, 0, 0, 0, 0, 0, 0, implicit $mode, implicit $exec
     undef %37.sub0:vreg_64_align2 = COPY %16.sub12
@@ -116,7 +116,7 @@ body:             |
     %39:av_512_align2 = IMPLICIT_DEF
     undef %40.sub0:vreg_512_align2 = IMPLICIT_DEF
     %41:vreg_512_align2 = IMPLICIT_DEF
-    %41 = V_MFMA_F32_32X32X16_BF16_mac_vgprcd_e64 undef %2, undef %2, undef %41, 0, 0, 0, implicit $mode, implicit $exec
+    %41 = V_MFMA_F32_32X32X16_BF16_vgprcd_e64 undef %2, undef %2, undef %41, 0, 0, 0, implicit $mode, implicit $exec
     %42:vreg_64_align2 = V_PK_MUL_F32 8, killed %18.sub0_sub1, 0, 0, 0, 0, 0, 0, 0, implicit $mode, implicit $exec
     %10 = COPY killed %39
     %11 = IMPLICIT_DEF
