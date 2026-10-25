@@ -95,6 +95,12 @@ public:
 
   static bool isConstantOrUndefValuePhi(const InstructionT &Instr);
 
+  /// Append the block-argument values of \p block (values defined by the block
+  /// itself, with no defining instruction). Empty for contexts without block
+  /// arguments.
+  static void appendBlockArgs(SmallVectorImpl<ConstValueRefT> &args,
+                              const BlockT &block);
+
   /// Whether \p V is always uniform and will not be added to UniformValues.
   /// For IR this identifies constants and globals; for MIR it returns false
   /// (all registers are tracked).

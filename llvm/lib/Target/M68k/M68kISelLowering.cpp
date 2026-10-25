@@ -3238,17 +3238,16 @@ M68kTargetLowering::EmitLoweredSelect(MachineInstr &MI,
   MachineBasicBlock::iterator MIItBegin = MachineBasicBlock::iterator(MI);
   MachineBasicBlock::iterator MIItEnd =
       std::next(MachineBasicBlock::iterator(LastCMOV));
-  MachineBasicBlock::iterator SinkInsertionPoint = SinkMBB->begin();
   DenseMap<unsigned, std::pair<unsigned, unsigned>> RegRewriteTable;
-  MachineInstrBuilder MIB;
 
-  // As we are creating the PHIs, we have to be careful if there is more than
+  // As we are creating the merges, we have to be careful if there is more than
   // one.  Later CMOVs may reference the results of earlier CMOVs, but later
-  // PHIs have to reference the individual true/false inputs from earlier PHIs.
-  // That also means that PHI construction must work forward from earlier to
-  // later, and that the code must maintain a mapping from earlier PHI's
-  // destination registers, and the registers that went into the PHI.
+  // merges have to reference the individual true/false inputs from earlier
+  // merges.  That also means that construction must work forward from earlier
+  // to later, and that the code must maintain a mapping from earlier merge
+  // destination registers, and the registers that went into the merge.
 
+  SmallVector<std::pair<Register, std::array<Register, 2>>, 4> Merges;
   for (MachineBasicBlock::iterator MIIt = MIItBegin; MIIt != MIItEnd; ++MIIt) {
     Register DestReg = MIIt->getOperand(0).getReg();
     Register Op1Reg = MIIt->getOperand(1).getReg();
@@ -3256,7 +3255,7 @@ M68kTargetLowering::EmitLoweredSelect(MachineInstr &MI,
 
     // If this CMOV we are generating is the opposite condition from
     // the jump we generated, then we have to swap the operands for the
-    // PHI that is going to be generated.
+    // merge that is going to be generated.
     if (MIIt->getOperand(3).getImm() == OppCC)
       std::swap(Op1Reg, Op2Reg);
 
@@ -3266,32 +3265,43 @@ M68kTargetLowering::EmitLoweredSelect(MachineInstr &MI,
     if (RegRewriteTable.find(Op2Reg) != RegRewriteTable.end())
       Op2Reg = RegRewriteTable[Op2Reg].second;
 
-    MIB =
-        BuildMI(*SinkMBB, SinkInsertionPoint, DL, TII->get(M68k::PHI), DestReg)
-            .addReg(Op1Reg)
-            .addMBB(Copy0MBB)
-            .addReg(Op2Reg)
-            .addMBB(ThisMBB);
+    Merges.push_back({DestReg, {Op1Reg, Op2Reg}});
 
-    // Add this PHI to the rewrite table.
+    // Add this merge to the rewrite table.
     RegRewriteTable[DestReg] = std::make_pair(Op1Reg, Op2Reg);
   }
 
-  // If we have a cascaded CMOV, the second Jcc provides the same incoming
-  // value as the first Jcc (the True operand of the SELECT_CC/CMOV nodes).
+  Register CascadedDest;
+  Register CascadedSrc;
+  Register CascadedJcc1Reg;
   if (CascadedCMOV) {
-    MIB.addReg(MI.getOperand(2).getReg()).addMBB(Jcc1MBB);
-    // Copy the PHI result to the register defined by the second CMOV.
-    BuildMI(*SinkMBB, std::next(MachineBasicBlock::iterator(MIB.getInstr())),
-            DL, TII->get(TargetOpcode::COPY),
-            CascadedCMOV->getOperand(0).getReg())
-        .addReg(MI.getOperand(0).getReg());
+    CascadedDest = CascadedCMOV->getOperand(0).getReg();
+    CascadedSrc = MI.getOperand(0).getReg();
+    CascadedJcc1Reg = MI.getOperand(2).getReg();
     CascadedCMOV->eraseFromParent();
   }
 
   // Now remove the CMOV(s).
   for (MachineBasicBlock::iterator MIIt = MIItBegin; MIIt != MIItEnd;)
     (MIIt++)->eraseFromParent();
+
+  // If we have a cascaded CMOV, the second Jcc provides the same incoming
+  // value as the first Jcc (the True operand of the SELECT_CC/CMOV nodes).
+  for (unsigned I = 0, E = Merges.size(); I != E; ++I) {
+    auto &[DestReg, Ops] = Merges[I];
+    if (CascadedCMOV && I + 1 == E)
+      TII->buildValueMerge(
+          *SinkMBB, DestReg,
+          {{Ops[0], Copy0MBB}, {Ops[1], ThisMBB}, {CascadedJcc1Reg, Jcc1MBB}});
+    else
+      TII->buildValueMerge(*SinkMBB, DestReg,
+                           {{Ops[0], Copy0MBB}, {Ops[1], ThisMBB}});
+  }
+
+  if (CascadedCMOV)
+    BuildMI(*SinkMBB, SinkMBB->getFirstNonPHI(), DL,
+            TII->get(TargetOpcode::COPY), CascadedDest)
+        .addReg(CascadedSrc);
 
   return SinkMBB;
 }

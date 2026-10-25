@@ -1,0 +1,37 @@
+# RUN: llc -mtriple=aarch64 -run-pass=aarch64-prelegalizer-combiner %s -o - | FileCheck %s
+
+# matchFoldBinOpIntoSelect checks whether a G_SELECT's arms are constant vectors
+# via isConstantOrConstantVector, which iterates a G_BUILD_VECTOR's element
+# operands and inspects each one's defining instruction. A block-argument
+# element has no defining instruction, so the check must treat it as non-constant
+# rather than dereferencing a null def.
+---
+name:            fold_binop_into_select_block_arg_element
+tracksRegLiveness: true
+usesBlockArgs:   true
+body:             |
+  ; CHECK-LABEL: name: fold_binop_into_select_block_arg_element
+  ; CHECK: %r:_(<2 x s32>) = G_ADD %sel, %other
+  bb.0:
+    liveins: $w0
+    successors: %bb.1
+
+    %0:_(s32) = COPY $w0
+    G_SUCC_ARGS %bb.1, %0(s32)
+
+  bb.1:
+    liveins: $x2
+    arguments: %arg:_(s32)
+
+    %cond:_(s1) = G_TRUNC %arg
+    %c1:_(s32) = G_CONSTANT i32 3
+    %c2:_(s32) = G_CONSTANT i32 4
+    %c3:_(s32) = G_CONSTANT i32 5
+    %tv:_(<2 x s32>) = G_BUILD_VECTOR %arg(s32), %c1(s32)
+    %fv:_(<2 x s32>) = G_BUILD_VECTOR %c2(s32), %c3(s32)
+    %sel:_(<2 x s32>) = G_SELECT %cond(s1), %tv, %fv
+    %other:_(<2 x s32>) = COPY $x2
+    %r:_(<2 x s32>) = G_ADD %sel, %other
+    $x0 = COPY %r(<2 x s32>)
+    RET_ReallyLR implicit $x0
+...

@@ -570,7 +570,11 @@ inline GInstrBind<const GConstant> m_GConstant(const GConstant *&Inst) {
 struct GConstantBitsMatch {
   APInt &Bits;
   bool match(const MachineRegisterInfo &MRI, Register Reg) {
+    // A block-argument register has no defining instruction and so is never a
+    // constant.
     MachineInstr *MI = MRI.getVRegDef(Reg);
+    if (!MI)
+      return false;
     if (MI->getOpcode() == TargetOpcode::G_CONSTANT) {
       Bits = MI->getOperand(1).getCImm()->getValue();
       return true;

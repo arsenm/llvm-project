@@ -51,6 +51,15 @@ public:
   void collectIncomingValuesFromPhi(
       const MachineInstr *MI,
       SmallVectorImpl<AMDGPU::Incoming> &Incomings) const override;
+  void getBlockArgCandidatesForLowering(
+      SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &Candidates)
+      const override;
+  void collectIncomingValuesFromBlockArg(
+      MachineBasicBlock &MBB, unsigned ArgIdx,
+      SmallVectorImpl<AMDGPU::Incoming> &Incomings) const override;
+  void collectIncomingValue(Register IncomingReg,
+                            MachineBasicBlock *IncomingMBB,
+                            SmallVectorImpl<AMDGPU::Incoming> &Incomings) const;
   void replaceDstReg(Register NewReg, Register OldReg,
                      MachineBasicBlock *MBB) override;
   void buildMergeLaneMasks(MachineBasicBlock &MBB,
@@ -392,7 +401,7 @@ insertUndefLaneMask(MachineBasicBlock *MBB, MachineRegisterInfo *MRI,
   const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
   const SIInstrInfo *TII = ST.getInstrInfo();
   Register UndefReg = AMDGPU::createLaneMaskReg(MRI, LaneMaskRegAttrs);
-  BuildMI(*MBB, MBB->getFirstTerminator(), {}, TII->get(AMDGPU::IMPLICIT_DEF),
+  BuildMI(*MBB, MBB->getBlockEndInsertPt(), {}, TII->get(AMDGPU::IMPLICIT_DEF),
           UndefReg);
   return UndefReg;
 }
@@ -581,6 +590,73 @@ bool AMDGPU::PhiLoweringHelper::lowerPhis() {
   return true;
 }
 
+bool AMDGPU::PhiLoweringHelper::lowerBlockArgs() {
+  SmallVector<std::pair<MachineBasicBlock *, Register>, 4> Candidates;
+
+  getBlockArgCandidatesForLowering(Candidates);
+  if (Candidates.empty())
+    return false;
+
+  LoopFinder LF(DT, PDT);
+  PhiIncomingAnalysis PIA(PDT, TII);
+
+  DT.updateDFSNumbers();
+
+  // Collect the incoming values for every candidate up front, before any block
+  // argument is removed. Removing an argument drops the matching operand from
+  // each predecessor's SUCC_ARGS and shifts the remaining operands, so reading
+  // incomings lazily per-candidate would corrupt the values of later arguments
+  // in the same block.
+  SmallVector<SmallVector<Incoming, 4>, 4> AllIncomings(Candidates.size());
+  for (auto [I, Cand] : enumerate(Candidates)) {
+    auto [MBB, DstReg] = Cand;
+    ArrayRef<Register> Args = MBB->getBlockArgs();
+    unsigned ArgIdx = std::distance(Args.begin(), llvm::find(Args, DstReg));
+    collectIncomingValuesFromBlockArg(*MBB, ArgIdx, AllIncomings[I]);
+  }
+
+  for (auto [I, Cand] : enumerate(Candidates)) {
+    auto [MBB, DstReg] = Cand;
+
+    markAsLaneMask(DstReg);
+    initializeLaneMaskRegisterAttributes(DstReg);
+
+#ifndef NDEBUG
+    PhiRegisters.insert(DstReg);
+#endif
+
+    MachineIDFSSAUpdater SSAUpdater(DT, MF, DstReg);
+    mergeIncomingLaneMasks(DstReg, *MBB, AllIncomings[I], SSAUpdater, LF, PIA);
+
+    Register NewReg = SSAUpdater.getValueInMiddleOfBlock(MBB);
+    if (NewReg != DstReg) {
+      // Look the index up now: an earlier candidate in the same block may have
+      // already been removed, shifting the indices.
+      ArrayRef<Register> Args = MBB->getBlockArgs();
+      unsigned ArgIdx = std::distance(Args.begin(), llvm::find(Args, DstReg));
+      replaceBlockArgDstReg(*MBB, ArgIdx, NewReg, DstReg);
+    }
+  }
+  return true;
+}
+
+// Replace the i1 block argument at index \p ArgIdx of \p MBB, now merged into
+// the lane mask \p NewReg defined in \p MBB, and drop the argument (and its
+// SUCC_ARGS forwarders) from the block-argument list.
+void AMDGPU::PhiLoweringHelper::replaceBlockArgDstReg(MachineBasicBlock &MBB,
+                                                      unsigned ArgIdx,
+                                                      Register NewReg,
+                                                      Register OldReg) {
+  // Keep OldReg live as a copy of the merged mask rather than replacing all its
+  // uses, mirroring replaceDstReg for G_PHIs. The temporal-divergence lowering
+  // runs first and may already reference OldReg (a divergent i1 used outside
+  // its cycle), so those references must remain valid after the block argument,
+  // its only definition, is removed.
+  BuildMI(MBB, MBB.getFirstNonPHI(), {}, TII->get(AMDGPU::COPY), OldReg)
+      .addReg(NewReg);
+  MBB.removeBlockArgAndUpdateSuccArgs(ArgIdx);
+}
+
 bool Vreg1LoweringHelper::lowerCopiesToI1() {
   bool Changed = false;
   AMDGPU::LoopFinder LF(DT, PDT);
@@ -663,6 +739,10 @@ bool AMDGPU::PhiLoweringHelper::isConstantLaneMask(Register Reg,
                                                    bool &Val) const {
   const MachineInstr *MI;
   for (;;) {
+    // A block-argument receiver is a def-less register carrying a runtime
+    // lane-mask value forwarded through SUCC_ARGS; it is not a constant.
+    if (MRI->isBlockArgDef(Reg))
+      return false;
     MI = MRI->getUniqueVRegDef(Reg);
     if (MI->getOpcode() == AMDGPU::IMPLICIT_DEF)
       return true;
@@ -714,7 +794,9 @@ static void instrDefsUsesSCC(const MachineInstr &MI, bool &Def, bool &Use) {
 /// for lane mask calculation. Take terminators and SCC into account.
 MachineBasicBlock::iterator
 AMDGPU::PhiLoweringHelper::getSaluInsertionAtEnd(MachineBasicBlock &MBB) const {
-  auto InsertionPt = MBB.getFirstTerminator();
+  // Insert before the SUCC_ARGS cluster as well as the terminators, so a lane
+  // mask feeding a SUCC_ARGS is defined before it is read.
+  auto InsertionPt = MBB.getBlockEndInsertPt();
   bool TerminatorsUseSCC = false;
   for (auto I = InsertionPt, E = MBB.end(); I != E; ++I) {
     bool DefsSCC;
@@ -754,26 +836,67 @@ void Vreg1LoweringHelper::getCandidatesForLowering(
   }
 }
 
+void Vreg1LoweringHelper::collectIncomingValue(
+    Register IncomingReg, MachineBasicBlock *IncomingMBB,
+    SmallVectorImpl<AMDGPU::Incoming> &Incomings) const {
+  MachineInstr *IncomingDef = MRI->getVRegDef(IncomingReg);
+  // A def-less register is either a genuine undef (contributes no lane mask) or
+  // a block-argument receiver forwarded through a SUCC_ARGS. The latter is a
+  // real lane-mask value (defined by its owning block, lowered like any other
+  // block arg), so take it as-is; only a true undef is dropped.
+  if (!IncomingDef) {
+    if (MRI->isBlockArgDef(IncomingReg))
+      Incomings.emplace_back(IncomingReg, IncomingMBB, Register());
+    return;
+  }
+
+  // Look through a COPY of a lane mask (or an i1 that will become one). Other
+  // COPYs, and any other defining instruction, are taken as-is: a PHI operand
+  // is always a lane mask, COPY, or IMPLICIT_DEF, while a SUCC_ARGS operand may
+  // forward an arbitrary value.
+  if (IncomingDef->getOpcode() == AMDGPU::COPY) {
+    Register SrcReg = IncomingDef->getOperand(1).getReg();
+    if (isLaneMaskReg(SrcReg) || isVreg1(SrcReg))
+      IncomingReg = SrcReg;
+  } else if (IncomingDef->getOpcode() == AMDGPU::IMPLICIT_DEF) {
+    return;
+  }
+
+  Incomings.emplace_back(IncomingReg, IncomingMBB, Register());
+}
+
 void Vreg1LoweringHelper::collectIncomingValuesFromPhi(
     const MachineInstr *MI,
     SmallVectorImpl<AMDGPU::Incoming> &Incomings) const {
   for (unsigned i = 1; i < MI->getNumOperands(); i += 2) {
     assert(i + 1 < MI->getNumOperands());
-    Register IncomingReg = MI->getOperand(i).getReg();
-    MachineBasicBlock *IncomingMBB = MI->getOperand(i + 1).getMBB();
-    MachineInstr *IncomingDef = MRI->getUniqueVRegDef(IncomingReg);
+    collectIncomingValue(MI->getOperand(i).getReg(),
+                         MI->getOperand(i + 1).getMBB(), Incomings);
+  }
+}
 
-    if (IncomingDef->getOpcode() == AMDGPU::COPY) {
-      IncomingReg = IncomingDef->getOperand(1).getReg();
-      assert(isLaneMaskReg(IncomingReg) || isVreg1(IncomingReg));
-      assert(!IncomingDef->getOperand(1).getSubReg());
-    } else if (IncomingDef->getOpcode() == AMDGPU::IMPLICIT_DEF) {
-      continue;
-    } else {
-      assert(IncomingDef->isPHI() || PhiRegisters.count(IncomingReg));
+void Vreg1LoweringHelper::getBlockArgCandidatesForLowering(
+    SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &Candidates)
+    const {
+  for (MachineBasicBlock &MBB : MF) {
+    for (Register Arg : MBB.getBlockArgs()) {
+      if (isVreg1(Arg))
+        Candidates.emplace_back(&MBB, Arg);
     }
+  }
+}
 
-    Incomings.emplace_back(IncomingReg, IncomingMBB, Register());
+void Vreg1LoweringHelper::collectIncomingValuesFromBlockArg(
+    MachineBasicBlock &MBB, unsigned ArgIdx,
+    SmallVectorImpl<AMDGPU::Incoming> &Incomings) const {
+  for (MachineBasicBlock *Pred : MBB.predecessors()) {
+    for (MachineInstr &SA : Pred->succ_args()) {
+      if (SA.getOperand(0).getMBB() == &MBB) {
+        collectIncomingValue(SA.getOperand(ArgIdx + 1).getReg(), Pred,
+                             Incomings);
+        break;
+      }
+    }
   }
 }
 
@@ -871,7 +994,11 @@ static bool runFixI1Copies(MachineFunction &MF, MachineDominatorTree &MDT,
   Vreg1LoweringHelper Helper(MF, MDT, MPDT);
   bool Changed = false;
   Changed |= Helper.lowerCopiesFromI1();
-  Changed |= Helper.lowerPhis();
+  // PHIs and block arguments are mutually exclusive within a function.
+  if (MF.getProperties().hasUsesBlockArgs())
+    Changed |= Helper.lowerBlockArgs();
+  else
+    Changed |= Helper.lowerPhis();
   Changed |= Helper.lowerCopiesToI1();
   return Helper.cleanConstrainRegs(Changed);
 }

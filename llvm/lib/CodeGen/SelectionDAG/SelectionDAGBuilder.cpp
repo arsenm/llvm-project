@@ -12554,6 +12554,7 @@ void SelectionDAGISel::LowerArguments(const Function &F, bool FastISel) {
 void
 SelectionDAGBuilder::HandlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
+  const bool UseBlockArgs = FuncInfo.useBlockArgs();
 
   SmallPtrSet<MachineBasicBlock *, 4> SuccsHandled;
 
@@ -12568,7 +12569,11 @@ SelectionDAGBuilder::HandlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
     if (!SuccsHandled.insert(SuccMBB).second)
       continue;
 
-    MachineBasicBlock::iterator MBBI = SuccMBB->begin();
+    // With machine PHIs, walk the pre-created PHI instructions at the top of
+    // the successor. With block arguments there are no such instructions; the
+    // forwarded values are recorded against the successor directly.
+    MachineBasicBlock::iterator MBBI =
+        UseBlockArgs ? SuccMBB->end() : SuccMBB->begin();
 
     // At this point we know that there is a 1-1 correspondence between LLVM PHI
     // nodes and Machine PHI nodes, but the incoming operands have not been
@@ -12611,14 +12616,18 @@ SelectionDAGBuilder::HandlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
         }
       }
 
-      // Remember that this register needs to added to the machine PHI node as
-      // the input for this MBB.
+      // Remember that this register needs to be added to the machine PHI node
+      // (or the successor's block-argument list) as the input for this MBB.
       SmallVector<EVT, 4> ValueVTs;
       ComputeValueVTs(TLI, DAG.getDataLayout(), PN.getType(), ValueVTs);
       for (EVT VT : ValueVTs) {
         const unsigned NumRegisters = TLI.getNumRegisters(*DAG.getContext(), VT);
-        for (unsigned i = 0; i != NumRegisters; ++i)
-          FuncInfo.PHINodesToUpdate.emplace_back(&*MBBI++, Reg + i);
+        for (unsigned i = 0; i != NumRegisters; ++i) {
+          if (UseBlockArgs)
+            FuncInfo.SuccArgsToUpdate.emplace_back(SuccMBB, Reg + i);
+          else
+            FuncInfo.PHINodesToUpdate.emplace_back(&*MBBI++, Reg + i);
+        }
         Reg += NumRegisters;
       }
     }

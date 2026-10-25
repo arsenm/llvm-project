@@ -6342,16 +6342,31 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
           .addMBB(ComputeLoop);
       // clang-format on
 
-      // Start constructing ComputeLoop
+      // Start constructing ComputeLoop. AccumulatorReg and ActiveBitsReg are
+      // loop-header merges: an initial value from BB and a back-edge value
+      // computed below. Represent them as block arguments when the function
+      // uses them, otherwise as PHIs; either way the value lives in
+      // AccumulatorReg / ActiveBitsReg. The back-edge operands are added after
+      // the loop terminator is built (see below).
+      const bool UsesBlockArgs =
+          BB.getParent()->getProperties().hasUsesBlockArgs();
       I = ComputeLoop->begin();
-      auto Accumulator =
-          BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::PHI), AccumulatorReg)
-              .addReg(IdentityValReg)
-              .addMBB(&BB);
-      auto ActiveBits =
-          BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::PHI), ActiveBitsReg)
-              .addReg(LoopIterator)
-              .addMBB(&BB);
+      MachineInstrBuilder Accumulator, ActiveBits;
+      if (UsesBlockArgs) {
+        TII->forwardSuccArgs(BB, *ComputeLoop,
+                             {{IdentityValReg, false}, {LoopIterator, false}});
+        ComputeLoop->addBlockArg(AccumulatorReg);
+        ComputeLoop->addBlockArg(ActiveBitsReg);
+      } else {
+        Accumulator =
+            BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::PHI), AccumulatorReg)
+                .addReg(IdentityValReg)
+                .addMBB(&BB);
+        ActiveBits =
+            BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::PHI), ActiveBitsReg)
+                .addReg(LoopIterator)
+                .addMBB(&BB);
+      }
 
       I = ComputeLoop->end();
       MachineInstr *NewAccumulator;
@@ -6430,7 +6445,7 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
         case AMDGPU::S_AND_B64:
         case AMDGPU::S_XOR_B64: {
           NewAccumulator = BuildMI(*ComputeLoop, I, DL, TII->get(Opc), DstReg)
-                               .addReg(Accumulator->getOperand(0).getReg())
+                               .addReg(AccumulatorReg)
                                .addReg(LaneValue->getOperand(0).getReg())
                                .setOperandDead(3); // Dead scc
           break;
@@ -6447,8 +6462,10 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
           const TargetRegisterClass *VregClass =
               TRI->getAllocatableClass(TII->getRegClass(MI.getDesc(), SrcIdx));
           Register AccumulatorVReg = MRI.createVirtualRegister(VregClass);
-          auto [SrcReg0Sub0, SrcReg0Sub1] = ExtractSubRegs(
-              MI, Accumulator->getOperand(0), VregClass, ST, MRI);
+          MachineOperand AccumulatorOp =
+              MachineOperand::CreateReg(AccumulatorReg, /*isDef=*/false);
+          auto [SrcReg0Sub0, SrcReg0Sub1] =
+              ExtractSubRegs(MI, AccumulatorOp, VregClass, ST, MRI);
           BuildRegSequence(*ComputeLoop, I, AccumulatorVReg, SrcReg0Sub0,
                            SrcReg0Sub1);
           BuildMI(*ComputeLoop, I, DL, TII->get(Opc), LaneMaskReg)
@@ -6463,7 +6480,7 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
           NewAccumulator = BuildMI(*ComputeLoop, I, DL,
                                    TII->get(AMDGPU::S_CSELECT_B64), DstReg)
                                .addReg(LaneValue->getOperand(0).getReg())
-                               .addReg(Accumulator->getOperand(0).getReg());
+                               .addReg(AccumulatorReg);
           break;
         }
         case AMDGPU::V_MIN_F64_e64:
@@ -6483,7 +6500,7 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
           Register LaneValHi =
               MRI.createVirtualRegister(&AMDGPU::SReg_32_XM0RegClass);
           BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::COPY), AccumulatorVReg)
-              .addReg(Accumulator->getOperand(0).getReg());
+              .addReg(AccumulatorReg);
           unsigned Modifier =
               MI.getOpcode() == AMDGPU::WAVE_REDUCE_FSUB_PSEUDO_F64
                   ? SISrcMods::NEG
@@ -6514,7 +6531,7 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
         case AMDGPU::S_ADD_U64_PSEUDO:
         case AMDGPU::S_SUB_U64_PSEUDO: {
           NewAccumulator = BuildMI(*ComputeLoop, I, DL, TII->get(Opc), DstReg)
-                               .addReg(Accumulator->getOperand(0).getReg())
+                               .addReg(AccumulatorReg)
                                .addReg(LaneValue->getOperand(0).getReg())
                                .setOperandDead(3); // Dead scc
           ComputeLoop =
@@ -6530,9 +6547,13 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
           .addReg(FF1Reg)
           .addReg(ActiveBitsReg);
 
-      // Add phi nodes
-      Accumulator.addReg(DstReg).addMBB(ComputeLoop);
-      ActiveBits.addReg(NewActiveBitsReg).addMBB(ComputeLoop);
+      // Add the back-edge incoming values. For PHIs this can be done now; for
+      // block arguments the SUCC_ARGS forwarder must sit in the terminator
+      // cluster, so it is emitted after the loop branch is built below.
+      if (!UsesBlockArgs) {
+        Accumulator.addReg(DstReg).addMBB(ComputeLoop);
+        ActiveBits.addReg(NewActiveBitsReg).addMBB(ComputeLoop);
+      }
 
       // Creating branching
       MachineInstrBuilder SetSCCInstr;
@@ -6554,6 +6575,12 @@ static MachineBasicBlock *lowerWaveReduce(MachineInstr &MI,
         SetSCCInstr.addReg(NewActiveBitsReg);
       BuildMI(*ComputeLoop, I, DL, TII->get(AMDGPU::S_CBRANCH_SCC1))
           .addMBB(ComputeLoop);
+
+      // Now that the loop terminator exists, forward the back-edge values into
+      // the block arguments through ComputeLoop's self-edge SUCC_ARGS.
+      if (UsesBlockArgs)
+        TII->forwardSuccArgs(*ComputeLoop, *ComputeLoop,
+                             {{DstReg, false}, {NewActiveBitsReg, false}});
 
       RetBB = ComputeEnd;
     } else {
@@ -16523,6 +16550,10 @@ bool SITargetLowering::isCanonicalized(Register Reg, const MachineFunction &MF,
                                        unsigned MaxDepth) const {
   const MachineRegisterInfo &MRI = MF.getRegInfo();
   MachineInstr *MI = MRI.getVRegDef(Reg);
+  // A block-argument register has no defining instruction to inspect, so its
+  // canonicalization cannot be established; assume it is not canonicalized.
+  if (!MI)
+    return false;
   unsigned Opcode = MI->getOpcode();
 
   if (Opcode == AMDGPU::G_FCANONICALIZE)

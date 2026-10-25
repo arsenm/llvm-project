@@ -113,8 +113,12 @@ bool GISelValueTracking::isKnownNeverZero(Register R, const APInt &DemandedElts,
   if (Depth >= getMaxDepth())
     return false;
 
+  MachineInstr *DefMI = MRI.getVRegDef(R);
+  if (!DefMI)
+    return false;
+  MachineInstr &MI = *DefMI;
+
   const APInt ScalarDemandedElts(1, 1);
-  MachineInstr &MI = *MRI.getVRegDef(R);
 
   switch (MI.getOpcode()) {
   default:
@@ -249,10 +253,125 @@ static KnownBits extractBits(unsigned BitWidth, const KnownBits &SrcOpKnown,
   return KnownBits::lshr(SrcOpKnown, OffsetKnown) & Mask;
 }
 
+void GISelValueTracking::computeKnownBitsBlockArg(Register R, KnownBits &Known,
+                                                  const APInt &DemandedElts,
+                                                  unsigned Depth) {
+  LLT DstTy = MRI.getType(R);
+  unsigned BitWidth = DstTy.getScalarSizeInBits();
+  Known = KnownBits(BitWidth); // Don't know anything
+
+  // Bound the recursion for loop-carried arguments, whose feeders can reference
+  // the argument through the back-edge.
+  if (Depth >= getMaxDepth())
+    return;
+
+  MachineBasicBlock *MBB = MRI.getBlockArgDef(R);
+  ArrayRef<Register> Args = MBB->getBlockArgs();
+  unsigned ArgIdx = llvm::find(Args, R) - Args.begin();
+  assert(ArgIdx != Args.size() && "block-argument register not in its block");
+
+  // Intersect the known bits forwarded on each incoming edge, like the G_PHI
+  // operand walk.
+  Known.One = APInt::getAllOnes(BitWidth);
+  Known.Zero = APInt::getAllOnes(BitWidth);
+  for (MachineBasicBlock *Pred : MBB->predecessors()) {
+    MachineInstr *SA = nullptr;
+    for (MachineInstr &MI : Pred->succ_args()) {
+      if (MI.getOperand(0).getMBB() == MBB) {
+        SA = &MI;
+        break;
+      }
+    }
+    // A missing SUCC_ARGS is malformed; be conservative rather than assert.
+    if (!SA) {
+      Known = KnownBits(BitWidth);
+      return;
+    }
+
+    Register SrcReg = SA->getOperand(ArgIdx + 1).getReg();
+    LLT SrcTy = MRI.getType(SrcReg);
+    // A class-only or subreg operand tells us nothing (as for a G_PHI).
+    if (!SrcReg.isVirtual() || SA->getOperand(ArgIdx + 1).getSubReg() != 0 ||
+        !SrcTy.isValid()) {
+      Known = KnownBits(BitWidth);
+      return;
+    }
+
+    KnownBits Known2;
+    computeKnownBitsImpl(SrcReg, Known2, DemandedElts, Depth + 1);
+    Known2 = Known2.anyextOrTrunc(BitWidth);
+    Known = Known.intersectWith(Known2);
+    if (Known.isUnknown())
+      return;
+  }
+}
+
+void GISelValueTracking::computeKnownFPClassBlockArg(
+    Register R, const APInt &DemandedElts, FPClassTest InterestedClasses,
+    KnownFPClass &Known, unsigned Depth) {
+  // Cap recursion below the global limit to avoid chasing loop back-edges, as
+  // the G_PHI case does.
+  if (Depth + 2 > MaxAnalysisRecursionDepth) {
+    Known.resetAll();
+    return;
+  }
+
+  MachineBasicBlock *MBB = MRI.getBlockArgDef(R);
+  ArrayRef<Register> Args = MBB->getBlockArgs();
+  unsigned ArgIdx = llvm::find(Args, R) - Args.begin();
+  assert(ArgIdx != Args.size() && "block-argument register not in its block");
+
+  // Intersect the known class forwarded on each incoming edge, like the G_PHI
+  // operand walk.
+  bool First = true;
+  for (MachineBasicBlock *Pred : MBB->predecessors()) {
+    MachineInstr *SA = nullptr;
+    for (MachineInstr &MI : Pred->succ_args()) {
+      if (MI.getOperand(0).getMBB() == MBB) {
+        SA = &MI;
+        break;
+      }
+    }
+    // A missing SUCC_ARGS is malformed; be conservative rather than assert.
+    if (!SA) {
+      Known.resetAll();
+      return;
+    }
+
+    Register SrcReg = SA->getOperand(ArgIdx + 1).getReg();
+    // A class-only or subreg operand tells us nothing (as for a G_PHI).
+    if (!SrcReg.isVirtual() || SA->getOperand(ArgIdx + 1).getSubReg() != 0 ||
+        !MRI.getType(SrcReg).isValid()) {
+      Known.resetAll();
+      return;
+    }
+
+    if (First) {
+      computeKnownFPClass(SrcReg, DemandedElts, InterestedClasses, Known,
+                          Depth + 1);
+      First = false;
+    } else {
+      KnownFPClass Known2;
+      computeKnownFPClass(SrcReg, DemandedElts, InterestedClasses, Known2,
+                          Depth + 1);
+      Known = Known.intersectWith(Known2);
+    }
+    if (Known.isUnknown())
+      return;
+  }
+}
+
 void GISelValueTracking::computeKnownBits(Register R, KnownBits &Known,
                                           const APInt &DemandedElts,
                                           unsigned Depth) {
-  MachineInstr &MI = *MRI.getVRegDef(R);
+  MachineInstr *DefMI = MRI.getVRegDef(R);
+  if (!DefMI) {
+    assert(MRI.isBlockArgDef(R));
+    computeKnownBitsBlockArg(R, Known, DemandedElts, Depth);
+    return;
+  }
+
+  MachineInstr &MI = *DefMI;
   unsigned Opcode = MI.getOpcode();
   LLT DstTy = MRI.getType(R);
 
@@ -1349,6 +1468,14 @@ void GISelValueTracking::computeKnownFPClass(Register R,
   }
 
   assert(Depth <= MaxAnalysisRecursionDepth && "Limit Search Depth");
+
+  // A block argument is forwarded by a SUCC_ARGS in each predecessor; handle it
+  // like a PHI over those feeders.
+  if (MRI.isBlockArgDef(R)) {
+    computeKnownFPClassBlockArg(R, DemandedElts, InterestedClasses, Known,
+                                Depth);
+    return;
+  }
 
   MachineInstr &MI = *MRI.getVRegDef(R);
   unsigned Opcode = MI.getOpcode();
@@ -2581,6 +2708,11 @@ static unsigned computeNumSignBitsFromRangeMetadata(const GAnyLoad *Ld,
 unsigned GISelValueTracking::computeNumSignBits(Register R,
                                                 const APInt &DemandedElts,
                                                 unsigned Depth) {
+  // A block argument has no defining instruction; conservatively report one
+  // sign bit (computeNumSignBits does not look through PHIs either).
+  if (MRI.isBlockArgDef(R))
+    return 1;
+
   MachineInstr &MI = *MRI.getVRegDef(R);
   unsigned Opcode = MI.getOpcode();
 
@@ -2703,8 +2835,10 @@ unsigned GISelValueTracking::computeNumSignBits(Register R,
       uint64_t MaxShAmt = ShAmtRange->getUnsignedMax().getZExtValue();
       uint64_t MinShAmt = ShAmtRange->getUnsignedMin().getZExtValue();
 
-      MachineInstr &ExtMI = *MRI.getVRegDef(Src1);
-      unsigned ExtOpc = ExtMI.getOpcode();
+      // A block-argument shift operand has no defining instruction to look
+      // through.
+      MachineInstr *ExtMI = MRI.getVRegDef(Src1);
+      unsigned ExtOpc = ExtMI ? ExtMI->getOpcode() : 0;
 
       // Try to look through ZERO/SIGN/ANY_EXTEND. If all extended bits are
       // shifted out, then we can compute the number of sign bits for the
@@ -2714,7 +2848,7 @@ unsigned GISelValueTracking::computeNumSignBits(Register R,
       if (ExtOpc == TargetOpcode::G_SEXT || ExtOpc == TargetOpcode::G_ZEXT ||
           ExtOpc == TargetOpcode::G_ANYEXT) {
         LLT ExtTy = MRI.getType(Src1);
-        Register Extendee = ExtMI.getOperand(1).getReg();
+        Register Extendee = ExtMI->getOperand(1).getReg();
         LLT ExtendeeTy = MRI.getType(Extendee);
         uint64_t SizeDiff =
             ExtTy.getScalarSizeInBits() - ExtendeeTy.getScalarSizeInBits();
@@ -3119,6 +3253,10 @@ unsigned GISelValueTracking::computeNumSignBits(Register R, unsigned Depth) {
 
 std::optional<ConstantRange> GISelValueTracking::getValidShiftAmountRange(
     Register R, const APInt &DemandedElts, unsigned Depth) {
+  // A block argument has no defining instruction to analyze.
+  if (MRI.isBlockArgDef(R))
+    return std::nullopt;
+
   // Shifting more than the bitwidth is not valid.
   MachineInstr &MI = *MRI.getVRegDef(R);
   unsigned Opcode = MI.getOpcode();

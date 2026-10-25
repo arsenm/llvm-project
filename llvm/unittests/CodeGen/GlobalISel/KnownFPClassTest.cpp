@@ -78,6 +78,39 @@ TEST_F(AArch64GISelMITest, TestFPClassFMADemandNaN) {
   EXPECT_FALSE(QNaNQueryFMAD.isKnownNever(fcQNan));
 }
 
+// A block argument fed +0.0 on one edge and -0.0 on the other: the known FP
+// class is the union of the forwarded values (fcZero), like a G_PHI.
+TEST_F(AArch64GISelMITest, TestFPClassBlockArgZero) {
+  StringRef MIRString = "  bb.10:\n"
+                        "  %10:_(s32) = G_FCONSTANT float 0.0\n"
+                        "  %11:_(s1) = G_IMPLICIT_DEF\n"
+                        "  SUCC_ARGS %bb.12, %10(s32)\n"
+                        "  G_BRCOND %11(s1), %bb.11\n"
+                        "  G_BR %bb.12\n"
+                        "\n"
+                        "  bb.11:\n"
+                        "  %12:_(s32) = G_FCONSTANT float -0.0\n"
+                        "  SUCC_ARGS %bb.12, %12(s32)\n"
+                        "  G_BR %bb.12\n"
+                        "\n"
+                        "  bb.12:\n"
+                        "  arguments: %13:_(s32)\n"
+                        "  %14:_(s32) = COPY %13\n";
+  setUp(MIRString);
+  if (!TM)
+    GTEST_SKIP();
+  Register CopyReg = Copies[Copies.size() - 1];
+  MachineInstr *FinalCopy = MRI->getVRegDef(CopyReg);
+  Register SrcReg = FinalCopy->getOperand(1).getReg();
+
+  GISelValueTracking Info(*MF);
+
+  KnownFPClass Known = Info.computeKnownFPClass(SrcReg);
+
+  EXPECT_EQ(fcZero, Known.getKnownFPClasses());
+  EXPECT_EQ(std::nullopt, Known.getSignBit());
+}
+
 TEST_F(AArch64GISelMITest, TestFPClassFLogPPCF128) {
   StringRef MIRString = R"(
     %val:_(s128) = G_IMPLICIT_DEF

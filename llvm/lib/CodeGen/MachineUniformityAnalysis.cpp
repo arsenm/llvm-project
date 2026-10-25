@@ -60,6 +60,10 @@ void llvm::GenericUniformityAnalysisImpl<MachineSSAContext>::initialize() {
           UniformValues.insert(Reg);
       }
     }
+    // Block arguments are defined by the block, not by an instruction, so they
+    // are not covered by the def walk above.
+    for (Register Arg : BB.getBlockArgs())
+      UniformValues.insert(Arg);
   }
 
   const auto &InstrInfo = *F.getSubtarget().getInstrInfo();
@@ -90,6 +94,19 @@ void llvm::GenericUniformityAnalysisImpl<MachineSSAContext>::pushUsers(
   assert(isDivergent(Reg));
   const auto &RegInfo = F.getRegInfo();
   for (MachineInstr &UserInstr : RegInfo.use_instructions(Reg)) {
+    // A SUCC_ARGS defines no register; a divergent forwarded value instead
+    // makes the corresponding successor block argument divergent.
+    if (UserInstr.isSuccArgs()) {
+      MachineBasicBlock &Succ = *UserInstr.getOperand(0).getMBB();
+      for (unsigned I = 1, E = UserInstr.getNumOperands(); I != E; ++I) {
+        if (UserInstr.getOperand(I).getReg() == Reg) {
+          Register Arg = Succ.getBlockArg(I - 1);
+          if (markDivergent(Arg))
+            pushUsers(Arg);
+        }
+      }
+      continue;
+    }
     markDivergent(UserInstr);
   }
 }
@@ -121,8 +138,28 @@ bool llvm::GenericUniformityAnalysisImpl<MachineSSAContext>::usesValueFromCycle(
     if (Reg.isPhysical())
       return true;
 
-    auto *Def = F.getRegInfo().getVRegDef(Reg);
-    if (CI.contains(DefCycle, Def->getParent()))
+    // A block-argument register is defined by its block, not an instruction.
+    const MachineBasicBlock *DefBlock = F.getRegInfo().getDefBlock(Reg);
+    if (CI.contains(DefCycle, DefBlock))
+      return true;
+  }
+  return false;
+}
+
+template <>
+bool llvm::GenericUniformityAnalysisImpl<
+    MachineSSAContext>::blockArgUsesValueFromCycle(Register Arg,
+                                                   CycleRef DefCycle) const {
+  const MachineRegisterInfo &MRI = F.getRegInfo();
+  const MachineBasicBlock *MBB = MRI.getBlockArgDef(Arg);
+  ArrayRef<Register> Args = MBB->getBlockArgs();
+  unsigned ArgIdx = llvm::find(Args, Arg) - Args.begin();
+  for (const MachineBasicBlock *Pred : MBB->predecessors()) {
+    if (!CI.contains(DefCycle, Pred))
+      continue;
+    const MachineInstr *SA = Pred->findSuccArgs(MBB);
+    Register Reg = SA->getOperand(ArgIdx + 1).getReg();
+    if (Reg.isPhysical() || CI.contains(DefCycle, MRI.getDefBlock(Reg)))
       return true;
   }
   return false;

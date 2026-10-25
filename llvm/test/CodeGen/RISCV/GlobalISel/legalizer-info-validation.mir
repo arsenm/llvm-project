@@ -104,6 +104,11 @@
 # DEBUG-NEXT: .. the first uncovered type index: 1, OK
 # DEBUG-NEXT: .. the first uncovered imm index: 0, OK
 #
+# DEBUG-NEXT: G_SUCC_ARGS (opcode {{[0-9]+}}): 1 type index, 0 imm indices
+# DEBUG-NEXT: .. opcode {{[0-9]+}} is aliased to {{[0-9]+}}
+# DEBUG-NEXT: .. the first uncovered type index: 1, OK
+# DEBUG-NEXT: .. the first uncovered imm index: 0, OK
+#
 # DEBUG-NEXT: G_FRAME_INDEX (opcode {{[0-9]+}}): 1 type index, 0 imm indices
 # DEBUG-NEXT: .. the first uncovered type index: 1, OK
 # DEBUG-NEXT: .. the first uncovered imm index: 0, OK

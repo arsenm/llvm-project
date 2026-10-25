@@ -218,6 +218,16 @@ bool GIMatchTableExecutor::executeMatchTable(
       else
         NewMI = MRI.getVRegDef(MO.getReg());
 
+      // A block-argument register has no defining instruction. As with a
+      // physical register, there is nothing to match on, so reject.
+      if (!NewMI) {
+        DEBUG_WITH_TYPE(TgtExecutor::getName(),
+                        dbgs() << CurrentIdx << ": No defining instruction\n");
+        if (handleReject() == RejectAndGiveUp)
+          return false;
+        break;
+      }
+
       if ((size_t)NewInsnID < State.MIs.size())
         State.MIs[NewInsnID] = NewMI;
       else {

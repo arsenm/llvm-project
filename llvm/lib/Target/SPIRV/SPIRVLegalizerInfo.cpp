@@ -433,7 +433,7 @@ SPIRVLegalizerInfo::SPIRVLegalizerInfo(const SPIRVSubtarget &ST) {
                            0, ElementCount::getFixed(MaxVectorSize)))
       .lower();
 
-  getActionDefinitionsBuilder(G_PHI)
+  getActionDefinitionsBuilder({G_PHI, G_SUCC_ARGS})
       .legalIf(typeOfLongVectors(0, IsLongVecs))
       .fewerElementsIf(vectorElementCountIsGreaterThan(0, MaxVectorSize),
                        LegalizeMutations::changeElementCountTo(

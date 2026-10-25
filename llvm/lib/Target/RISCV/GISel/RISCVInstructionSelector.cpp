@@ -1307,7 +1307,8 @@ bool RISCVInstructionSelector::select(MachineInstr &MI) {
   preISelLower(MI);
   const unsigned Opc = MI.getOpcode();
 
-  if (!MI.isPreISelOpcode() || Opc == TargetOpcode::G_PHI) {
+  if (!MI.isPreISelOpcode() || Opc == TargetOpcode::G_PHI ||
+      Opc == TargetOpcode::G_SUCC_ARGS) {
     if (Opc == TargetOpcode::PHI || Opc == TargetOpcode::G_PHI) {
       const Register DefReg = MI.getOperand(0).getReg();
       const LLT DefTy = MRI->getType(DefReg);
@@ -1333,6 +1334,38 @@ bool RISCVInstructionSelector::select(MachineInstr &MI) {
 
       MI.setDesc(TII.get(TargetOpcode::PHI));
       return RBI.constrainGenericRegister(DefReg, *DefRC, *MRI);
+    }
+
+    // G_SUCC_ARGS lowers directly to the SUCC_ARGS pseudo. The block-argument
+    // receiver registers on the successor have no defining instruction, so
+    // constrain them to a register class here (like a PHI def), based on each
+    // receiver's type and bank.
+    if (Opc == TargetOpcode::G_SUCC_ARGS) {
+      MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+      for (unsigned Idx = 0, E = SuccMBB.getNumBlockArgs(); Idx != E; ++Idx) {
+        Register ArgReg = SuccMBB.getBlockArg(Idx);
+        const RegClassOrRegBank &RegClassOrBank =
+            MRI->getRegClassOrRegBank(ArgReg);
+        const TargetRegisterClass *ArgRC =
+            dyn_cast<const TargetRegisterClass *>(RegClassOrBank);
+        if (!ArgRC) {
+          const LLT ArgTy = MRI->getType(ArgReg);
+          if (!ArgTy.isValid()) {
+            LLVM_DEBUG(dbgs() << "block argument has no type, not a gvreg?\n");
+            return false;
+          }
+          const RegisterBank &RB = *cast<const RegisterBank *>(RegClassOrBank);
+          ArgRC = TRI.getRegClassForTypeOnBank(ArgTy, RB, STI.is64Bit());
+          if (!ArgRC) {
+            LLVM_DEBUG(dbgs() << "block argument has unexpected size/bank\n");
+            return false;
+          }
+        }
+        if (!RBI.constrainGenericRegister(ArgReg, *ArgRC, *MRI))
+          return false;
+      }
+      MI.setDesc(TII.get(TargetOpcode::SUCC_ARGS));
+      return true;
     }
 
     // Certain non-generic instructions also need some special handling.

@@ -92,7 +92,7 @@ X86LegalizerInfo::X86LegalizerInfo(const X86Subtarget &STI,
   // s64 = EXTEND (G_IMPLICIT_DEF s32) -> s64 = G_IMPLICIT_DEF
   // s128 = EXTEND (G_IMPLICIT_DEF s32/s64) -> s128 = G_IMPLICIT_DEF
   getActionDefinitionsBuilder(
-      {G_IMPLICIT_DEF, G_PHI, G_FREEZE, G_CONSTANT_FOLD_BARRIER})
+      {G_IMPLICIT_DEF, G_PHI, G_SUCC_ARGS, G_FREEZE, G_CONSTANT_FOLD_BARRIER})
       .legalFor({p0, s1, s8, s16, s32, s64})
       .legalFor(UseX87, {s80})
       .legalFor(Is64Bit, {s128})

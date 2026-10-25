@@ -1593,8 +1593,12 @@ bool AArch64InstructionSelector::selectCompareBranchFedByFCmp(
   // Unfortunately, the mapping of LLVM FP CC's onto AArch64 CC's isn't
   // totally clean.  Some of them require two branches to implement.
   auto Pred = (CmpInst::Predicate)FCmp.getOperand(1).getPredicate();
+  // The compare is not a terminator, so emit it before any SUCC_ARGS cluster,
+  // then put the builder back at the branch for the terminators.
+  MIB.setInsertPt(*I.getParent(), I.getParent()->getBlockEndInsertPt());
   emitFPCompare(FCmp.getOperand(2).getReg(), FCmp.getOperand(3).getReg(), MIB,
                 Pred);
+  MIB.setInstr(I);
   AArch64CC::CondCode CC1, CC2;
   changeFCMPPredToAArch64CC(Pred, CC1, CC2);
   MachineBasicBlock *DestMBB = I.getOperand(1).getMBB();
@@ -1710,7 +1714,11 @@ bool AArch64InstructionSelector::selectCompareBranchFedByICmp(
   // Couldn't optimize. Emit a compare + a Bcc.
   MachineBasicBlock *DestMBB = I.getOperand(1).getMBB();
   auto &PredOp = ICmp.getOperand(1);
+  // The compare is not a terminator, so emit it before any SUCC_ARGS cluster,
+  // then put the builder back at the branch for the Bcc.
+  MIB.setInsertPt(*I.getParent(), I.getParent()->getBlockEndInsertPt());
   emitIntegerCompare(ICmp.getOperand(2), ICmp.getOperand(3), PredOp, MIB);
+  MIB.setInstr(I);
   const AArch64CC::CondCode CC = changeICMPPredToAArch64CC(
       static_cast<CmpInst::Predicate>(PredOp.getPredicate()),
       ICmp.getOperand(3).getReg(), MIB.getMRI());
@@ -1741,10 +1749,14 @@ bool AArch64InstructionSelector::selectCompareBranch(
     return true;
   }
 
-  // Can't emit TB(N)Z/CB(N)Z. Emit a tst + bcc instead.
+  // Can't emit TB(N)Z/CB(N)Z. Emit a tst + bcc instead. The tst is not a
+  // terminator, so emit it before any SUCC_ARGS cluster, then put the builder
+  // back at the branch for the Bcc.
+  MIB.setInsertPt(*I.getParent(), I.getParent()->getBlockEndInsertPt());
   auto TstMI =
       MIB.buildInstr(AArch64::ANDSWri, {LLT::scalar(32)}, {CondReg}).addImm(1);
   constrainSelectedInstRegOperands(*TstMI, TII, TRI, RBI);
+  MIB.setInstr(I);
   auto Bcc = MIB.buildInstr(AArch64::Bcc)
                  .addImm(AArch64CC::NE)
                  .addMBB(I.getOperand(1).getMBB());
@@ -2567,12 +2579,45 @@ bool AArch64InstructionSelector::select(MachineInstr &I) {
   MIB.setInstrAndDebugLoc(I);
 
   unsigned Opcode = I.getOpcode();
-  // G_PHI requires same handling as PHI
-  if (!I.isPreISelOpcode() || Opcode == TargetOpcode::G_PHI) {
+  // G_PHI and G_SUCC_ARGS require the same handling as their non-generic forms.
+  if (!I.isPreISelOpcode() || Opcode == TargetOpcode::G_PHI ||
+      Opcode == TargetOpcode::G_SUCC_ARGS) {
     // Certain non-generic instructions also need some special handling.
 
     if (Opcode == TargetOpcode::LOAD_STACK_GUARD) {
       constrainSelectedInstRegOperands(I, TII, TRI, RBI);
+      return true;
+    }
+
+    // G_SUCC_ARGS lowers directly to the SUCC_ARGS pseudo. The block-argument
+    // receiver registers on the successor have no defining instruction, so
+    // constrain them to a register class here (like a PHI def), based on each
+    // forwarded value's type and bank.
+    if (Opcode == TargetOpcode::G_SUCC_ARGS) {
+      MachineBasicBlock &SuccMBB = *I.getOperand(0).getMBB();
+      for (unsigned Idx = 0, E = SuccMBB.getNumBlockArgs(); Idx != E; ++Idx) {
+        Register ArgReg = SuccMBB.getBlockArg(Idx);
+        const RegClassOrRegBank &RegClassOrBank =
+            MRI.getRegClassOrRegBank(ArgReg);
+        const TargetRegisterClass *ArgRC =
+            dyn_cast<const TargetRegisterClass *>(RegClassOrBank);
+        if (!ArgRC) {
+          const LLT ArgTy = MRI.getType(ArgReg);
+          if (!ArgTy.isValid()) {
+            LLVM_DEBUG(dbgs() << "block argument has no type, not a gvreg?\n");
+            return false;
+          }
+          const RegisterBank &RB = *cast<const RegisterBank *>(RegClassOrBank);
+          ArgRC = getRegClassForTypeOnBank(ArgTy, RB);
+          if (!ArgRC) {
+            LLVM_DEBUG(dbgs() << "block argument has unexpected size/bank\n");
+            return false;
+          }
+        }
+        if (!RBI.constrainGenericRegister(ArgReg, *ArgRC, MRI))
+          return false;
+      }
+      I.setDesc(TII.get(TargetOpcode::SUCC_ARGS));
       return true;
     }
 
@@ -3676,6 +3721,12 @@ bool AArch64InstructionSelector::selectBrJT(MachineInstr &I,
   Register TargetReg = MRI.createVirtualRegister(&AArch64::GPR64RegClass);
   Register ScratchReg = MRI.createVirtualRegister(&AArch64::GPR64spRegClass);
 
+  // The jump-table address computation and its debug marker are not
+  // terminators, so emit them before any SUCC_ARGS cluster rather than at the
+  // branch (which sits after the cluster). Restore the builder to the branch
+  // for the terminator.
+  MachineBasicBlock &BrMBB = *I.getParent();
+  MIB.setInsertPt(BrMBB, BrMBB.getBlockEndInsertPt());
   auto JumpTableInst = MIB.buildInstr(AArch64::JumpTableDest32,
                                       {TargetReg, ScratchReg}, {JTAddr, Index})
                            .addJumpTableIndex(JTI);
@@ -3683,6 +3734,7 @@ bool AArch64InstructionSelector::selectBrJT(MachineInstr &I,
   MIB.buildInstr(TargetOpcode::JUMP_TABLE_DEBUG_INFO, {},
                  {static_cast<int64_t>(JTI)});
   // Build the indirect branch.
+  MIB.setInstr(I);
   MIB.buildInstr(AArch64::BR, {}, {TargetReg});
   I.eraseFromParent();
   constrainSelectedInstRegOperands(*JumpTableInst, TII, TRI, RBI);
@@ -7371,7 +7423,10 @@ AArch64InstructionSelector::selectExtendedSHL(
   assert(Offset.isReg() && "Expected offset to be a register operand");
 
   MachineRegisterInfo &MRI = Root.getParent()->getMF()->getRegInfo();
+  // A block-argument offset has no defining instruction to fold.
   MachineInstr *OffsetInst = MRI.getVRegDef(Offset.getReg());
+  if (!OffsetInst)
+    return std::nullopt;
 
   unsigned OffsetOpc = OffsetInst->getOpcode();
   bool LookedThroughZExt = false;
@@ -7381,6 +7436,8 @@ AArch64InstructionSelector::selectExtendedSHL(
       return std::nullopt;
 
     OffsetInst = MRI.getVRegDef(OffsetInst->getOperand(1).getReg());
+    if (!OffsetInst)
+      return std::nullopt;
     OffsetOpc = OffsetInst->getOpcode();
     LookedThroughZExt = true;
 
@@ -7441,6 +7498,9 @@ AArch64InstructionSelector::selectExtendedSHL(
     // G_ZEXT earlier.
     if (!LookedThroughZExt) {
       MachineInstr *ExtInst = getDefIgnoringCopies(OffsetReg, MRI);
+      // A block-argument offset has no defining extend to fold.
+      if (!ExtInst)
+        return std::nullopt;
       auto Ext = getExtendTypeForInst(*ExtInst, MRI, true);
       if (Ext == AArch64_AM::InvalidShiftExtend)
         return std::nullopt;
@@ -7505,6 +7565,8 @@ AArch64InstructionSelector::selectAddrModeShiftedExtendXReg(
   // We want a G_SHL or a G_MUL.
   MachineInstr *OffsetInst =
       getDefIgnoringCopies(PtrAdd->getOperand(2).getReg(), MRI);
+  if (!OffsetInst)
+    return std::nullopt;
   return selectExtendedSHL(Root, PtrAdd->getOperand(1),
                            OffsetInst->getOperand(0), SizeInBytes,
                            /*WantsExt=*/false);
@@ -7634,6 +7696,9 @@ AArch64InstructionSelector::selectAddrModeWRO(MachineOperand &Root,
   MachineOperand &LHS = PtrAdd->getOperand(1);
   MachineOperand &RHS = PtrAdd->getOperand(2);
   MachineInstr *OffsetInst = getDefIgnoringCopies(RHS.getReg(), MRI);
+  // A block-argument offset has no defining instruction to fold.
+  if (!OffsetInst)
+    return std::nullopt;
 
   // The first case is the same as selectAddrModeXRO, except we need an extend.
   // In this case, we try to find a shift and extend, and fold them into the
@@ -7770,8 +7835,10 @@ AArch64InstructionSelector::selectAddrModeIndexed(MachineOperand &Root,
   if (!Root.isReg())
     return std::nullopt;
 
+  // A block-argument pointer has no defining instruction to fold; use it
+  // directly as the base with a zero offset (handled by the fallthrough below).
   MachineInstr *RootDef = MRI.getVRegDef(Root.getReg());
-  if (RootDef->getOpcode() == TargetOpcode::G_FRAME_INDEX) {
+  if (RootDef && RootDef->getOpcode() == TargetOpcode::G_FRAME_INDEX) {
     return {{
         [=](MachineInstrBuilder &MIB) { MIB.add(RootDef->getOperand(1)); },
         [=](MachineInstrBuilder &MIB) { MIB.addImm(0); },
@@ -7783,7 +7850,7 @@ AArch64InstructionSelector::selectAddrModeIndexed(MachineOperand &Root,
   // HACK: ld64 on Darwin doesn't support relocations on PRFM, so we can't fold
   // globals into the offset.
   MachineInstr *RootParent = Root.getParent();
-  if (CM == CodeModel::Small &&
+  if (RootDef && CM == CodeModel::Small &&
       !(RootParent->getOpcode() == AArch64::G_AARCH64_PREFETCH &&
         STI.isTargetDarwin())) {
     auto OpFns = tryFoldAddLowIntoImm(*RootDef, Size, MRI);
@@ -7800,7 +7867,7 @@ AArch64InstructionSelector::selectAddrModeIndexed(MachineOperand &Root,
     int64_t RHSC = (int64_t)RHSDef->getOperand(1).getCImm()->getZExtValue();
     unsigned Scale = Log2_32(Size);
     if ((RHSC & (Size - 1)) == 0 && RHSC >= 0 && RHSC < (0x1000 << Scale)) {
-      if (LHSDef->getOpcode() == TargetOpcode::G_FRAME_INDEX)
+      if (LHSDef && LHSDef->getOpcode() == TargetOpcode::G_FRAME_INDEX)
         return {{
             [=](MachineInstrBuilder &MIB) { MIB.add(LHSDef->getOperand(1)); },
             [=](MachineInstrBuilder &MIB) { MIB.addImm(RHSC >> Scale); },
@@ -7852,8 +7919,11 @@ AArch64InstructionSelector::selectShiftedRegister(MachineOperand &Root,
       Root.getParent()->getParent()->getParent()->getRegInfo();
 
   // Check if the operand is defined by an instruction which corresponds to
-  // a ShiftExtendType. E.g. a G_SHL, G_LSHR, etc.
+  // a ShiftExtendType. E.g. a G_SHL, G_LSHR, etc. A block argument has no
+  // defining instruction and cannot be a shift.
   MachineInstr *ShiftInst = MRI.getVRegDef(Root.getReg());
+  if (!ShiftInst)
+    return std::nullopt;
   AArch64_AM::ShiftExtendType ShType = getShiftTypeForInst(*ShiftInst);
   if (ShType == AArch64_AM::InvalidShiftExtend)
     return std::nullopt;
@@ -8007,8 +8077,10 @@ AArch64InstructionSelector::selectArithExtendedRegister(
     // FIXME: We actually emit the extend right now even though we don't have
     // to.
     if (Ext == AArch64_AM::UXTW && MRI.getType(ExtReg).getSizeInBits() == 32) {
+      // A block-argument source has no defining instruction, so it cannot be a
+      // known high-half-zeroing def; keep the explicit extend.
       MachineInstr *ExtInst = MRI.getVRegDef(ExtReg);
-      if (isDef32(*ExtInst))
+      if (ExtInst && isDef32(*ExtInst))
         return std::nullopt;
     }
   }

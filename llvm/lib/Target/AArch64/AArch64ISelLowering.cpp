@@ -3234,11 +3234,8 @@ AArch64TargetLowering::EmitF128CSEL(MachineInstr &MI,
     EndBB->addLiveIn(AArch64::NZCV);
   }
 
-  BuildMI(*EndBB, EndBB->begin(), DL, TII->get(AArch64::PHI), DestReg)
-      .addReg(IfTrueReg)
-      .addMBB(TrueBB)
-      .addReg(IfFalseReg)
-      .addMBB(MBB);
+  TII->buildValueMerge(*EndBB, DestReg,
+                       {{IfTrueReg, TrueBB}, {IfFalseReg, MBB}});
 
   MI.eraseFromParent();
   return EndBB;

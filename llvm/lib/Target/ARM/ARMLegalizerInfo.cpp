@@ -125,10 +125,9 @@ ARMLegalizerInfo::ARMLegalizerInfo(const ARMSubtarget &ST) : ST(ST) {
   getActionDefinitionsBuilder(G_FRAME_INDEX).legalFor({p0});
   getActionDefinitionsBuilder(G_GLOBAL_VALUE).legalFor({p0});
 
-  auto &PhiBuilder =
-      getActionDefinitionsBuilder(G_PHI)
-          .legalFor({s32, p0})
-          .minScalar(0, s32);
+  auto &PhiBuilder = getActionDefinitionsBuilder({G_PHI, G_SUCC_ARGS})
+                         .legalFor({s32, p0})
+                         .minScalar(0, s32);
 
   getActionDefinitionsBuilder(G_PTR_ADD)
       .legalFor({{p0, s32}})

@@ -597,11 +597,8 @@ static MachineBasicBlock *LowerFPToInt(MachineInstr &MI, DebugLoc DL,
   BuildMI(FalseMBB, DL, TII.get(LoweredOpcode), FalseReg).addReg(InReg);
   BuildMI(FalseMBB, DL, TII.get(WebAssembly::BR)).addMBB(DoneMBB);
   BuildMI(TrueMBB, DL, TII.get(IConst), TrueReg).addImm(Substitute);
-  BuildMI(*DoneMBB, DoneMBB->begin(), DL, TII.get(TargetOpcode::PHI), OutReg)
-      .addReg(FalseReg)
-      .addMBB(FalseMBB)
-      .addReg(TrueReg)
-      .addMBB(TrueMBB);
+  TII.buildValueMerge(*DoneMBB, OutReg,
+                      {{FalseReg, FalseMBB}, {TrueReg, TrueMBB}});
 
   return DoneMBB;
 }

@@ -50,6 +50,13 @@ void LiveIntervalCalc::calculate(LiveInterval &LI, bool TrackSubRegs) {
   // createDeadDef() will deduplicate.
   const TargetRegisterInfo &TRI = *MRI->getTargetRegisterInfo();
   Register Reg = LI.reg();
+
+  // A block argument has no defining instruction; its value is defined at the
+  // entry of its block.
+  MachineBasicBlock *ArgMBB = MRI->getBlockArgDef(Reg);
+  if (ArgMBB)
+    LI.createDeadDef(Indexes->getMBBStartIdx(ArgMBB), *Alloc);
+
   for (const MachineOperand &MO : MRI->reg_nodbg_operands(Reg)) {
     if (!MO.isDef() && !MO.readsReg())
       continue;
@@ -93,7 +100,15 @@ void LiveIntervalCalc::calculate(LiveInterval &LI, bool TrackSubRegs) {
     for (LiveInterval::SubRange &S : LI.subranges()) {
       SubLIC.reset(MF, Indexes, DomTree, Alloc);
       SubLIC.extendToUses(S, Reg, S.LaneMask, &LI);
+      if (ArgMBB) {
+        SlotIndex ArgDef = Indexes->getMBBStartIdx(ArgMBB);
+        LiveRange::iterator I = S.find(ArgDef);
+        if (I != S.end() && I->start == ArgDef &&
+            I->end == ArgDef.getDeadSlot())
+          S.removeValNo(I->valno);
+      }
     }
+    LI.removeEmptySubRanges();
     LI.clear();
     constructMainRangeFromSubranges(LI);
   } else {
@@ -115,6 +130,10 @@ void LiveIntervalCalc::constructMainRangeFromSubranges(LiveInterval &LI) {
         MainRange.createDeadDef(VNI->def, *Alloc);
     }
   }
+
+  if (MachineBasicBlock *ArgMBB = getRegInfo()->getBlockArgDef(LI.reg()))
+    MainRange.createDeadDef(getIndexes()->getMBBStartIdx(ArgMBB), *Alloc);
+
   resetLiveOutMap();
   extendToUses(MainRange, LI.reg(), LaneBitmask::getAll(), &LI);
 }

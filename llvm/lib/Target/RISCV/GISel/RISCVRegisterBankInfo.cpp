@@ -419,8 +419,9 @@ RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &MI) const {
       break;
     }
 
+    // A block-argument stored value has no defining instruction to inspect.
     MachineInstr *DefMI = MRI.getVRegDef(MI.getOperand(0).getReg());
-    if (onlyDefinesFP(*DefMI, MRI, TRI))
+    if (DefMI && onlyDefinesFP(*DefMI, MRI, TRI))
       OpdsMapping[0] = getFPValueMapping(Ty.getSizeInBits());
     break;
   }
@@ -476,9 +477,10 @@ RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &MI) const {
       // integer.
       for (unsigned Idx = 2; Idx < 4; ++Idx) {
         Register VReg = MI.getOperand(Idx).getReg();
+        // A block-argument source has no defining instruction to inspect.
         MachineInstr *DefMI = MRI.getVRegDef(VReg);
         if (getRegBank(VReg, MRI, TRI) == &RISCV::FPRBRegBank ||
-            onlyDefinesFP(*DefMI, MRI, TRI))
+            (DefMI && onlyDefinesFP(*DefMI, MRI, TRI)))
           ++NumFP;
       }
     }
@@ -559,9 +561,10 @@ RISCVRegisterBankInfo::getInstrMapping(const MachineInstr &MI) const {
                                             .getKnownMinValue());
 
     LLT ScalarTy = MRI.getType(MI.getOperand(1).getReg());
+    // A block-argument scalar source has no defining instruction to inspect.
     MachineInstr *DefMI = MRI.getVRegDef(MI.getOperand(1).getReg());
     if ((GPRSize == 32 && ScalarTy.getSizeInBits() == 64) ||
-        onlyDefinesFP(*DefMI, MRI, TRI)) {
+        (DefMI && onlyDefinesFP(*DefMI, MRI, TRI))) {
       assert(MF.getSubtarget<RISCVSubtarget>().hasStdExtD());
       OpdsMapping[1] = getFPValueMapping(ScalarTy.getSizeInBits());
     } else

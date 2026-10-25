@@ -127,6 +127,11 @@ LegalizerHelper::legalizeInstrStep(MachineInstr &MI,
 
   if (isa<GIntrinsic>(MI))
     return LI.legalizeIntrinsic(*this, MI) ? Legalized : UnableToLegalize;
+
+  // G_SUCC_ARGS is legalized in one pass rather than one action per type index.
+  if (MI.getOpcode() == TargetOpcode::G_SUCC_ARGS)
+    return legalizeSuccArgs(MI);
+
   auto Step = LI.getAction(MI, MRI);
   switch (Step.Action) {
   case Legal:
@@ -3325,11 +3330,14 @@ LegalizerHelper::widenScalar(MachineInstr &MI, unsigned TypeIdx, LLT WideTy) {
     Observer.changedInstr(MI);
     return Legalized;
   }
-  case TargetOpcode::G_BRCOND:
+  case TargetOpcode::G_BRCOND: {
     Observer.changingInstr(MI);
+    MachineBasicBlock &BrMBB = *MI.getParent();
+    MIRBuilder.setInsertPt(BrMBB, BrMBB.getBlockEndInsertPt());
     widenScalarSrc(MI, WideTy, 0, MIRBuilder.getBoolExtOp(false, false));
     Observer.changedInstr(MI);
     return Legalized;
+  }
 
   case TargetOpcode::G_FCMP:
     Observer.changingInstr(MI);
@@ -4599,6 +4607,241 @@ LegalizerHelper::scalarizeVectorBooleanStore(GStore &StoreMI) {
 
   // TODO: implement simple scalarization.
   return UnableToLegalize;
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::widenScalarSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                     LLT WideTy) {
+  // Widening preserves the argument count: anyext the value in every
+  // forwarder, retype the shared block argument, and truncate it back to the
+  // original type for the block's own uses.
+  MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+  Register ArgReg = SuccMBB.getBlockArg(ArgNo);
+  LLT ArgTy = MRI.getType(ArgReg);
+
+  Observer.changingInstr(MI);
+  for (MachineBasicBlock *Pred : SuccMBB.predecessors()) {
+    for (MachineInstr &SA : Pred->succ_args()) {
+      if (SA.getOperand(0).getMBB() != &SuccMBB)
+        continue;
+      MachineOperand &ValMO = SA.getOperand(ArgNo + 1);
+      MIRBuilder.setInsertPt(*Pred, SA.getIterator());
+      auto Ext = MIRBuilder.buildAnyExt(WideTy, ValMO);
+      ValMO.setReg(Ext.getReg(0));
+    }
+  }
+  Register OrigArg = MRI.createGenericVirtualRegister(ArgTy);
+  MRI.replaceRegWith(ArgReg, OrigArg);
+  MRI.setType(ArgReg, WideTy);
+  MIRBuilder.setInsertPt(SuccMBB, SuccMBB.getFirstNonPHI());
+  MIRBuilder.buildTrunc(OrigArg, ArgReg);
+  Observer.changedInstr(MI);
+  return Legalized;
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::moreElementsSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                      LLT MoreTy) {
+  // Widening the element count preserves the argument count: pad the value with
+  // undef elements in every forwarder, retype the shared block argument, and
+  // drop the trailing elements to recover the original type for the block's own
+  // uses.
+  MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+  Register ArgReg = SuccMBB.getBlockArg(ArgNo);
+  LLT ArgTy = MRI.getType(ArgReg);
+
+  Observer.changingInstr(MI);
+  for (MachineBasicBlock *Pred : SuccMBB.predecessors()) {
+    for (MachineInstr &SA : Pred->succ_args()) {
+      if (SA.getOperand(0).getMBB() != &SuccMBB)
+        continue;
+      MachineOperand &ValMO = SA.getOperand(ArgNo + 1);
+      MIRBuilder.setInsertPt(*Pred, SA.getIterator());
+      auto Pad = MIRBuilder.buildPadVectorWithUndefElements(MoreTy, ValMO);
+      ValMO.setReg(Pad.getReg(0));
+    }
+  }
+  Register OrigArg = MRI.createGenericVirtualRegister(ArgTy);
+  MRI.replaceRegWith(ArgReg, OrigArg);
+  MRI.setType(ArgReg, MoreTy);
+  MIRBuilder.setInsertPt(SuccMBB, SuccMBB.getFirstNonPHI());
+  MIRBuilder.buildDeleteTrailingVectorElements(OrigArg, ArgReg);
+  Observer.changedInstr(MI);
+  return Legalized;
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::splitSuccArg(MachineInstr &MI, unsigned ArgNo, LLT PartTy) {
+  // Splitting a forwarded value into N parts changes the argument count, so
+  // rewrite the receiver arg list and each predecessor's forwarders in
+  // lockstep. The narrow-scalar and fewer-elements helpers share this because
+  // buildMergeLikeInstr / buildUnmerge already pick MERGE_VALUES vs
+  // CONCAT_VECTORS from the operand types.
+  MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+  Register ArgReg = SuccMBB.getBlockArg(ArgNo);
+  LLT ArgTy = MRI.getType(ArgReg);
+
+  // Only handle exact multiples with a compatible shape: scalar->scalar,
+  // vector->vector with the same element type, or vector->scalar (scalarize)
+  // where the part is the vector's element type. A vector part with a different
+  // element type would need a bitcast, which is not handled here.
+  bool CompatibleShape;
+  if (!PartTy.isValid() ||
+      ArgTy.getSizeInBits() % PartTy.getSizeInBits() != 0) {
+    CompatibleShape = false;
+  } else if (!ArgTy.isVector()) {
+    CompatibleShape = !PartTy.isVector();
+  } else if (PartTy.isVector()) {
+    CompatibleShape = ArgTy.getElementType() == PartTy.getElementType();
+  } else {
+    // vector -> scalar: only when scalarizing to the element type.
+    CompatibleShape = ArgTy.getElementType() == PartTy;
+  }
+  if (!CompatibleShape)
+    return UnableToLegalize;
+  unsigned N = ArgTy.getSizeInBits() / PartTy.getSizeInBits();
+
+  Observer.changingInstr(MI);
+
+  // Merge the parts back to the original type for the block's own uses.
+  SmallVector<Register, 4> Parts;
+  for (unsigned P = 0; P != N; ++P)
+    Parts.push_back(MRI.createGenericVirtualRegister(PartTy));
+  Register Merged = MRI.createGenericVirtualRegister(ArgTy);
+  MRI.replaceRegWith(ArgReg, Merged);
+  MIRBuilder.setInsertPt(SuccMBB, SuccMBB.getFirstNonPHI());
+  MIRBuilder.buildMergeLikeInstr(Merged, Parts);
+  SuccMBB.replaceBlockArgWithParts(ArgNo, Parts);
+
+  // In every predecessor's SUCC_ARGS for this block, unmerge the forwarded
+  // value into parts and rebuild the operand list so the parts occupy positions
+  // ArgNo + 1 .. ArgNo + N (removeOperand + addUse would append at the tail and
+  // break the positional correspondence for interior args).
+  for (MachineBasicBlock *Pred : SuccMBB.predecessors()) {
+    for (MachineInstr &SA : Pred->succ_args()) {
+      if (SA.getOperand(0).getMBB() != &SuccMBB)
+        continue;
+      Register SrcReg = SA.getOperand(ArgNo + 1).getReg();
+      MIRBuilder.setInsertPt(*Pred, SA.getIterator());
+      auto Unmerge = MIRBuilder.buildUnmerge(PartTy, SrcReg);
+
+      SmallVector<Register, 8> NewVals;
+      for (unsigned I = 1, E = SA.getNumOperands(); I != E; ++I) {
+        if (I == ArgNo + 1)
+          for (unsigned P = 0; P != N; ++P)
+            NewVals.push_back(Unmerge.getReg(P));
+        else
+          NewVals.push_back(SA.getOperand(I).getReg());
+      }
+      while (SA.getNumOperands() > 1)
+        SA.removeOperand(SA.getNumOperands() - 1);
+      MachineInstrBuilder MIB(*SA.getMF(), &SA);
+      for (Register V : NewVals)
+        MIB.addUse(V);
+    }
+  }
+
+  Observer.changedInstr(MI);
+  return Legalized;
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::narrowScalarSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                      LLT NarrowTy) {
+  return splitSuccArg(MI, ArgNo, NarrowTy);
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::fewerElementsSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                       LLT PartTy) {
+  return splitSuccArg(MI, ArgNo, PartTy);
+}
+
+LegalizerHelper::LegalizeResult
+LegalizerHelper::legalizeSuccArgs(MachineInstr &MI) {
+  // A G_SUCC_ARGS forwards a variadic list of independently-typed values, but
+  // the type-index model surfaces only the first. Legalizing one type index per
+  // invocation would leave the instruction partially legal between fixpoint
+  // iterations, so query the target per argument and dispatch to the matching
+  // helper, fully legalizing it in one pass.
+  MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+  unsigned NumArgs = MI.getNumOperands() - 1;
+  assert(NumArgs == SuccMBB.getNumBlockArgs() &&
+         "forwarded value count must match block argument count");
+
+  auto ActionFor = [&](unsigned ArgNo) {
+    LLT ArgTy = MRI.getType(SuccMBB.getBlockArg(ArgNo));
+    return LI.getAction({TargetOpcode::G_SUCC_ARGS, {ArgTy}});
+  };
+
+  bool AnyChange = false;
+
+  // Widens preserve the argument count, so run them first in a forward pass;
+  // argument indices stay stable throughout.
+  for (unsigned ArgNo = 0; ArgNo != NumArgs; ++ArgNo) {
+    LegalizeActionStep Step = ActionFor(ArgNo);
+    LegalizeResult Res;
+    switch (Step.Action) {
+    case WidenScalar:
+      Res = widenScalarSuccArgs(MI, ArgNo, Step.NewType);
+      break;
+    case MoreElements:
+      Res = moreElementsSuccArgs(MI, ArgNo, Step.NewType);
+      break;
+    default:
+      continue;
+    }
+    if (Res != Legalized)
+      return UnableToLegalize;
+    AnyChange = true;
+  }
+
+  // Splits change the argument count, so run them high-to-low: expanding a
+  // higher argument leaves the indices of lower ones untouched. Any argument
+  // that is already legal (or was widened above) needs no further work.
+  for (unsigned ArgNo = NumArgs; ArgNo-- != 0;) {
+    LegalizeActionStep Step = ActionFor(ArgNo);
+    LegalizeResult Res;
+    switch (Step.Action) {
+    case Legal:
+    case WidenScalar:
+    case MoreElements:
+      continue;
+    case NarrowScalar:
+      Res = narrowScalarSuccArgs(MI, ArgNo, Step.NewType);
+      break;
+    case FewerElements:
+      Res = fewerElementsSuccArgs(MI, ArgNo, Step.NewType);
+      break;
+    default:
+      return UnableToLegalize;
+    }
+    if (Res != Legalized)
+      return UnableToLegalize;
+    AnyChange = true;
+  }
+
+  // Reconcile this instruction's forwarded values against the (now legal)
+  // receiver types. After a block argument is widened, legalizing a feeder can
+  // reset a forwarder operand back to the original narrow type; getAction only
+  // inspects the receiver, so such a mismatch is invisible above. Any-extend
+  // any forwarder narrower than its receiver so the operand types stay in sync.
+  for (unsigned ArgNo = 0; ArgNo != NumArgs; ++ArgNo) {
+    MachineOperand &ValMO = MI.getOperand(ArgNo + 1);
+    LLT ArgTy = MRI.getType(SuccMBB.getBlockArg(ArgNo));
+    LLT ValTy = MRI.getType(ValMO.getReg());
+    if (ValTy == ArgTy || !ValTy.isScalar() || !ArgTy.isScalar() ||
+        ValTy.getSizeInBits() >= ArgTy.getSizeInBits())
+      continue;
+    if (!AnyChange)
+      Observer.changingInstr(MI);
+    MIRBuilder.setInsertPt(*MI.getParent(), MI.getIterator());
+    auto Ext = MIRBuilder.buildAnyExt(ArgTy, ValMO);
+    ValMO.setReg(Ext.getReg(0));
+    AnyChange = true;
+  }
+
+  return AnyChange ? Legalized : AlreadyLegal;
 }
 
 LegalizerHelper::LegalizeResult

@@ -1,4 +1,5 @@
 ; RUN: llc < %s -mtriple=x86_64-pc-linux | FileCheck %s
+; RUN: llc < %s -mtriple=x86_64-pc-linux -sdag-use-block-args | FileCheck %s
 
 ; CHECK-LABEL: pr13209:
 ; CHECK-NOT: mov

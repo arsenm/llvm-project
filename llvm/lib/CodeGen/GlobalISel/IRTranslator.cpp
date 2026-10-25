@@ -10,6 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/CodeGen/GlobalISel/IRTranslator.h"
+#include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/PostOrderIterator.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/ScopeExit.h"
@@ -105,6 +106,10 @@ static cl::opt<bool>
     EnableCSEInIRTranslator("enable-cse-in-ir-translator",
                             cl::desc("Should enable CSE in ir-translator"),
                             cl::init(false));
+
+static cl::opt<bool>
+    UseBlockArgs("gisel-use-block-args", cl::Hidden, cl::init(true),
+                 cl::desc("Lower PHI nodes to block arguments"));
 
 namespace llvm {
 
@@ -394,6 +399,11 @@ class IRTranslatorImpl {
   /// Describe any constants in PendingConstDbgValues that are
   /// materialized as vregs.
   void finishPendingConstDbgValues();
+
+  /// Emit a G_SUCC_ARGS in each predecessor forwarding the block-argument
+  /// values, used instead of finishPendingPhis when block arguments are
+  /// enabled.
+  void finishPendingBlockArgs();
 
   /// Translate \p Inst into a unary operation \p Opcode.
   /// \pre \p U is a unary operation.
@@ -4454,6 +4464,19 @@ bool IRTranslatorImpl::translatePHI(const User &U,
                                     MachineIRBuilder &MIRBuilder) {
   const PHINode &PI = cast<PHINode>(U);
 
+  // In the block-arguments representation the PHI has no defining instruction:
+  // its component registers become arguments of the containing block, and each
+  // predecessor forwards values to them with a G_SUCC_ARGS (emitted in
+  // finishPendingPhis). Register the block arguments here, in PHI order.
+  if (UseBlockArgs) {
+    MachineBasicBlock &MBB = MIRBuilder.getMBB();
+    for (Register Reg : getOrCreateVRegs(PI))
+      MBB.addBlockArg(Reg);
+    MF->getProperties().setUsesBlockArgs();
+    PendingPHIs.emplace_back(&PI, SmallVector<MachineInstr *, 1>());
+    return true;
+  }
+
   SmallVector<MachineInstr *, 4> Insts;
   for (auto Reg : getOrCreateVRegs(PI)) {
     auto MIB = MIRBuilder.buildInstr(TargetOpcode::G_PHI, {Reg}, {});
@@ -4622,11 +4645,15 @@ void IRTranslatorImpl::finishPendingConstDbgValues() {
 }
 
 void IRTranslatorImpl::finishPendingPhis() {
+  if (UseBlockArgs)
+    return finishPendingBlockArgs();
+
 #ifndef NDEBUG
   DILocationVerifier Verifier;
   GISelObserverWrapper WrapperObserver(&Verifier);
   RAIIMFObsDelInstaller ObsInstall(*MF, WrapperObserver);
 #endif // ifndef NDEBUG
+
   for (auto &Phi : PendingPHIs) {
     const PHINode *PI = Phi.first;
     if (PI->getType()->isEmptyTy())
@@ -4653,6 +4680,66 @@ void IRTranslatorImpl::finishPendingPhis() {
         }
       }
     }
+  }
+}
+
+void IRTranslatorImpl::finishPendingBlockArgs() {
+  // In the block-arguments representation a block owns its PHI values as
+  // arguments (registered in translatePHI). Here each predecessor forwards the
+  // values with a single G_SUCC_ARGS listing every argument of the successor in
+  // block-argument order. Group the forwarded values per (predecessor,
+  // successor) edge first, then emit one forwarder per edge.
+  //
+  // The key is the (predecessor, successor) pair, not the predecessor alone: a
+  // predecessor may forward to several block-argument successors (e.g. a latch
+  // branching to both the loop header and a side exit), and those edges each
+  // need their own G_SUCC_ARGS.
+  //
+  // PendingPHIs preserves PHI declaration order within each block, which is the
+  // order translatePHI added the block arguments, so appending values in this
+  // loop keeps them in block-argument order.
+  using EdgeKey = std::pair<MachineBasicBlock *, MachineBasicBlock *>;
+  MapVector<EdgeKey, SmallVector<Register, 4>> Edges;
+
+#ifndef NDEBUG
+  DILocationVerifier Verifier;
+  GISelObserverWrapper WrapperObserver(&Verifier);
+  RAIIMFObsDelInstaller ObsInstall(*MF, WrapperObserver);
+#endif // ifndef NDEBUG
+
+  for (auto &Phi : PendingPHIs) {
+    const PHINode *PI = Phi.first;
+    if (PI->getType()->isEmptyTy())
+      continue;
+    MachineBasicBlock *PhiMBB = &getMBB(*PI->getParent());
+    EntryBuilder->setDebugLoc(PI->getDebugLoc());
+#ifndef NDEBUG
+    Verifier.setCurrentInst(PI);
+#endif // ifndef NDEBUG
+
+    SmallPtrSet<const MachineBasicBlock *, 16> SeenPreds;
+    for (unsigned I = 0; I < PI->getNumIncomingValues(); ++I) {
+      const BasicBlock *IRPred = PI->getIncomingBlock(I);
+      ArrayRef<Register> ValRegs = getOrCreateVRegs(*PI->getIncomingValue(I));
+      for (MachineBasicBlock *Pred :
+           getMachinePredBBs({IRPred, PI->getParent()})) {
+        if (SeenPreds.count(Pred) || !PhiMBB->isPredecessor(Pred))
+          continue;
+        SeenPreds.insert(Pred);
+        SmallVectorImpl<Register> &Values = Edges[{Pred, PhiMBB}];
+        Values.append(ValRegs.begin(), ValRegs.end());
+      }
+    }
+  }
+
+  for (auto &KV : Edges) {
+    MachineBasicBlock *Pred = KV.first.first;
+    MachineBasicBlock *Succ = KV.first.second;
+    const SmallVectorImpl<Register> &Values = KV.second;
+    EntryBuilder->setInsertPt(*Pred, Pred->getBlockEndInsertPt());
+    auto MIB = EntryBuilder->buildInstr(TargetOpcode::G_SUCC_ARGS).addMBB(Succ);
+    for (Register Val : Values)
+      MIB.addUse(Val);
   }
 }
 

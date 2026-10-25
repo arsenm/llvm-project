@@ -3967,6 +3967,22 @@ AMDGPURegisterBankInfo::getInstrMapping(const MachineInstr &MI) const {
         /*OperandsMapping*/ getOperandsMapping({&ValMap}), 1);
   }
 
+  if (MI.getOpcode() == AMDGPU::G_SUCC_ARGS) {
+    // Operand 0 is the successor block; operands 1.. forward one value to each
+    // of its block arguments. Like a copy, each forwarded value imposes no
+    // constraint of its own, so map it to whatever bank it already has (the
+    // receiver was seeded to match in RegBankSelect).
+    SmallVector<const ValueMapping *, 8> OpdsMapping(MI.getNumOperands());
+    for (unsigned I = 1, E = MI.getNumOperands(); I != E; ++I) {
+      Register Reg = MI.getOperand(I).getReg();
+      unsigned Size = getSizeInBits(Reg, MRI, *TRI);
+      unsigned BankID = getRegBankID(Reg, MRI, AMDGPU::VGPRRegBankID);
+      OpdsMapping[I] = AMDGPU::getValueMapping(BankID, Size);
+    }
+    return getInstructionMapping(1, /*Cost*/ 1, getOperandsMapping(OpdsMapping),
+                                 MI.getNumOperands());
+  }
+
   const RegisterBankInfo::InstructionMapping &Mapping = getInstrMappingImpl(MI);
   if (Mapping.isValid())
     return Mapping;

@@ -206,6 +206,7 @@ static void printMF(raw_ostream &OS, MFGetterFnT Fn, const MachineFunction &MF,
   YamlMF.NoPHIs = Props.hasNoPHIs();
   YamlMF.IsSSA = Props.hasIsSSA();
   YamlMF.NoVRegs = Props.hasNoVRegs();
+  YamlMF.UsesBlockArgs = Props.hasUsesBlockArgs();
 
   convertMRI(YamlMF, MF, MF.getRegInfo(), MF.getSubtarget().getRegisterInfo(),
              VRM);
@@ -815,6 +816,22 @@ void printMBB(raw_ostream &OS, MFPrintState &State,
         OS << ":0x" << PrintLaneMask(LI.LaneMask);
     }
     OS << "\n";
+    HasLineAttributes = true;
+  }
+
+  // Print the block arguments. Generic registers carry their low-level type
+  // here, since it cannot be recovered from a defining instruction.
+  if (!MBB.getBlockArgs().empty()) {
+    const TargetRegisterInfo &TRI = *MRI.getTargetRegisterInfo();
+    OS.indent(2) << "arguments: ";
+    ListSeparator LS;
+    for (Register Arg : MBB.getBlockArgs()) {
+      OS << LS << printReg(Arg, &TRI);
+      LLT Ty = MRI.getType(Arg);
+      if (Ty.isValid())
+        OS << '(' << Ty << ')';
+    }
+    OS << '\n';
     HasLineAttributes = true;
   }
 

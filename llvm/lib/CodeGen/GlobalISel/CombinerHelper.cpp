@@ -1693,7 +1693,12 @@ bool CombinerHelper::matchOptBrCondByInvertingCond(
 void CombinerHelper::applyOptBrCondByInvertingCond(
     MachineInstr &MI, MachineInstr *&BrCond) const {
   MachineBasicBlock *BrTarget = MI.getOperand(0).getMBB();
-  Builder.setInstrAndDebugLoc(*BrCond);
+  // The inverted condition (constant + xor) is not a terminator, so emit it
+  // before any SUCC_ARGS cluster rather than at the branch, which sits after
+  // the cluster.
+  Builder.setDebugLoc(BrCond->getDebugLoc());
+  Builder.setInsertPt(*BrCond->getParent(),
+                      BrCond->getParent()->getBlockEndInsertPt());
   LLT Ty = MRI.getType(BrCond->getOperand(0).getReg());
   // FIXME: Does int/fp matter for this? If so, we might need to restrict
   // this to i1 only since we might not know for sure what kind of
@@ -2648,6 +2653,8 @@ bool CombinerHelper::matchCombineTruncOfShift(
   LLT DstTy = MRI.getType(DstReg);
 
   MachineInstr *SrcMI = getDefIgnoringCopies(SrcReg, MRI);
+  if (!SrcMI)
+    return false;
   const auto &TL = getTargetLowering();
 
   LLT NewShiftTy;

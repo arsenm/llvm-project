@@ -62,6 +62,7 @@ protected:
 
 public:
   bool lowerPhis();
+  bool lowerBlockArgs();
   bool isConstantLaneMask(Register Reg, bool &Val) const;
 
   /// Merge the \p Incomings lane masks into \p DstReg, the value owned by \p
@@ -105,6 +106,18 @@ public:
                                    const DebugLoc &DL, Register DstReg,
                                    Register PrevReg, Register CurReg) = 0;
   virtual void constrainAsLaneMask(Incoming &In) = 0;
+
+  // Block-argument analogues of getCandidatesForLowering /
+  // collectIncomingValuesFromPhi, used by lowerBlockArgs.
+  virtual void getBlockArgCandidatesForLowering(
+      SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &Candidates)
+      const {}
+  virtual void collectIncomingValuesFromBlockArg(
+      MachineBasicBlock &MBB, unsigned ArgIdx,
+      SmallVectorImpl<Incoming> &Incomings) const {}
+
+  void replaceBlockArgDstReg(MachineBasicBlock &MBB, unsigned ArgIdx,
+                             Register NewReg, Register OldReg);
 };
 } // namespace AMDGPU
 } // end namespace llvm

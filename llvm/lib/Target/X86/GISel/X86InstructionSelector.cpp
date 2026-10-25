@@ -119,6 +119,7 @@ private:
   bool materializeFP(MachineInstr &I, MachineRegisterInfo &MRI,
                      MachineFunction &MF) const;
   bool selectImplicitDefOrPHI(MachineInstr &I, MachineRegisterInfo &MRI) const;
+  bool selectSuccArgs(MachineInstr &I, MachineRegisterInfo &MRI) const;
   bool selectMulDivRem(MachineInstr &I, MachineRegisterInfo &MRI,
                        MachineFunction &MF) const;
   bool selectSelect(MachineInstr &I, MachineRegisterInfo &MRI,
@@ -483,6 +484,8 @@ bool X86InstructionSelector::select(MachineInstr &I) {
   case TargetOpcode::G_IMPLICIT_DEF:
   case TargetOpcode::G_PHI:
     return selectImplicitDefOrPHI(I, MRI);
+  case TargetOpcode::G_SUCC_ARGS:
+    return selectSuccArgs(I, MRI);
   case TargetOpcode::G_MUL:
   case TargetOpcode::G_SMULH:
   case TargetOpcode::G_UMULH:
@@ -1592,8 +1595,13 @@ bool X86InstructionSelector::selectCondBranch(MachineInstr &I,
   const Register CondReg = I.getOperand(0).getReg();
   MachineBasicBlock *DestMBB = I.getOperand(1).getMBB();
 
+  // The TEST is not a terminator, so emit it before any SUCC_ARGS cluster
+  // (which precedes the terminators) rather than at the branch position, to
+  // preserve the SUCC_ARGS clustering invariant. Without block args this is the
+  // first terminator, i.e. the branch position, so codegen is unchanged.
   MachineInstr &TestInst =
-      *BuildMI(*I.getParent(), I, I.getDebugLoc(), TII.get(X86::TEST8ri))
+      *BuildMI(*I.getParent(), I.getParent()->getBlockEndInsertPt(),
+               I.getDebugLoc(), TII.get(X86::TEST8ri))
            .addReg(CondReg)
            .addImm(1);
   BuildMI(*I.getParent(), I, I.getDebugLoc(), TII.get(X86::JCC_1))
@@ -1697,6 +1705,31 @@ bool X86InstructionSelector::selectImplicitDefOrPHI(
   else
     I.setDesc(TII.get(X86::PHI));
 
+  return true;
+}
+
+bool X86InstructionSelector::selectSuccArgs(MachineInstr &I,
+                                            MachineRegisterInfo &MRI) const {
+  assert(I.getOpcode() == TargetOpcode::G_SUCC_ARGS &&
+         "unexpected instruction");
+
+  // G_SUCC_ARGS lowers directly to the SUCC_ARGS pseudo. The block-argument
+  // receiver registers on the successor have no defining instruction, so
+  // constrain them to a register class here (like a PHI def).
+  MachineBasicBlock &SuccMBB = *I.getOperand(0).getMBB();
+  for (unsigned Idx = 0, E = SuccMBB.getNumBlockArgs(); Idx != E; ++Idx) {
+    Register ArgReg = SuccMBB.getBlockArg(Idx);
+    if (MRI.getRegClassOrNull(ArgReg))
+      continue;
+    const TargetRegisterClass *RC =
+        getRegClass(MRI.getType(ArgReg), ArgReg, MRI);
+    if (!RBI.constrainGenericRegister(ArgReg, *RC, MRI)) {
+      LLVM_DEBUG(dbgs() << "Failed to constrain block argument\n");
+      return false;
+    }
+  }
+
+  I.setDesc(TII.get(X86::SUCC_ARGS));
   return true;
 }
 

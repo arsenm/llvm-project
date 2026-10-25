@@ -280,9 +280,10 @@ public:
     }
 
     // Try to fold trunc(merge) to directly use the source of the merge.
-    // This gets rid of large, difficult to legalize, merges
+    // This gets rid of large, difficult to legalize, merges. The source may
+    // have no defining instruction (e.g. a block argument).
     MachineInstr *SrcMI = MRI.getVRegDef(SrcReg);
-    if (auto *SrcMerge = dyn_cast<GMerge>(SrcMI)) {
+    if (auto *SrcMerge = dyn_cast_or_null<GMerge>(SrcMI)) {
       const Register MergeSrcReg = SrcMerge->getSourceReg(0);
       const LLT MergeSrcTy = MRI.getType(MergeSrcReg);
 
@@ -843,6 +844,9 @@ public:
                                   unsigned Size, LLT DstTy) {
       std::optional<DefinitionAndSourceRegister> DefSrcReg =
           getDefSrcRegIgnoringCopies(DefReg, MRI);
+      // A block-argument register has no defining instruction to look through.
+      if (!DefSrcReg)
+        return CurrentBest;
       MachineInstr *Def = DefSrcReg->MI;
       DefReg = DefSrcReg->Reg;
       // If the instruction has a single def, then simply delegate the search.

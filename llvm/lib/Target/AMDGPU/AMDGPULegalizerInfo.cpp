@@ -740,7 +740,7 @@ AMDGPULegalizerInfo::AMDGPULegalizerInfo(const GCNSubtarget &ST_,
 
   // TODO: All multiples of 32, vectors of pointers, all v2s16 pairs, more
   // elements for v3s16
-  getActionDefinitionsBuilder(G_PHI)
+  getActionDefinitionsBuilder({G_PHI, G_SUCC_ARGS})
       .legalFor({S32, S64, V2S16, S16, V4S16, S1, S128, S256})
       .legalFor(AllS32Vectors)
       .legalFor(AllS64Vectors)
@@ -8406,8 +8406,9 @@ bool AMDGPULegalizerInfo::legalizeIntrinsic(LegalizerHelper &Helper,
       if (Negated)
         std::swap(CondBrTarget, UncondBrTarget);
 
-      B.setInsertPt(B.getMBB(), BrCond->getIterator());
+      B.setInsertPt(B.getMBB(), B.getMBB().getFirstSuccArgs());
       B.buildCopy(NewUse, Use);
+      B.setInsertPt(B.getMBB(), BrCond->getIterator());
       if (IntrID == Intrinsic::amdgcn_if) {
         B.buildInstr(AMDGPU::SI_IF)
             .addDef(NewDef)
@@ -8460,8 +8461,9 @@ bool AMDGPULegalizerInfo::legalizeIntrinsic(LegalizerHelper &Helper,
       if (Negated)
         std::swap(CondBrTarget, UncondBrTarget);
 
-      B.setInsertPt(B.getMBB(), BrCond->getIterator());
+      B.setInsertPt(B.getMBB(), B.getMBB().getFirstSuccArgs());
       B.buildCopy(NewReg, Reg);
+      B.setInsertPt(B.getMBB(), BrCond->getIterator());
       B.buildInstr(AMDGPU::SI_LOOP)
           .addUse(NewReg)
           .addMBB(UncondBrTarget)
