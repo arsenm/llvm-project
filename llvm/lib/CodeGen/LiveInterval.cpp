@@ -21,6 +21,7 @@
 #include "LiveRangeUtils.h"
 #include "RegisterCoalescer.h"
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
@@ -1367,6 +1368,20 @@ unsigned ConnectedVNInfoEqClasses::Classify(const LiveRange &LR) {
   // Lump all the unused values in with the last used value.
   if (used && unused)
     EqClass.join(used->id, unused->id);
+
+  const VNInfo *Defined = nullptr;
+  BitVector HasDef(LR.getNumValNums());
+  for (const VNInfo *VNI : LR.valnos) {
+    if (VNI->isPHIDef())
+      continue;
+    HasDef.set(EqClass.findLeader(VNI->id));
+    Defined = VNI;
+  }
+
+  for (const VNInfo *VNI : LR.valnos) {
+    if (!HasDef.test(EqClass.findLeader(VNI->id)))
+      EqClass.join(Defined->id, VNI->id);
+  }
 
   EqClass.compress();
   return EqClass.getNumClasses();
