@@ -26,6 +26,10 @@ AMDGPU::getBaseWithConstantOffset(MachineRegisterInfo &MRI, Register Reg,
                                   GISelValueTracking *ValueTracking,
                                   bool CheckNUW) {
   MachineInstr *Def = getDefIgnoringCopies(Reg, MRI);
+  // A block-argument register has no defining instruction; it contributes no
+  // known constant offset.
+  if (!Def)
+    return std::pair(Reg, 0);
   if (Def->getOpcode() == TargetOpcode::G_CONSTANT) {
     unsigned Offset;
     const MachineOperand &Op = Def->getOperand(1);

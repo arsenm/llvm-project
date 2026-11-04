@@ -658,8 +658,8 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
     return true;
 
   // BreakPHIEdge is true if all the uses are in the successor MBB being sunken
-  // into and they are all PHI nodes. In this case, machine-sink must break
-  // the critical edge first. e.g.
+  // into and they are all PHI nodes (or SUCC_ARGS forwarding into MBB). In this
+  // case, machine-sink must break the critical edge first. e.g.
   //
   // %bb.1:
   //   Predecessors according to CFG: %bb.0
@@ -675,6 +675,11 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
         MachineInstr *UseInst = MO.getParent();
         unsigned OpNo = MO.getOperandNo();
         MachineBasicBlock *UseBlock = UseInst->getParent();
+        if (UseInst->isSuccArgs()) {
+          // Like a PHI, a SUCC_ARGS use lives on the edge from its block to
+          // its successor (operand 0).
+          return UseBlock == DefMBB && UseInst->getOperand(0).getMBB() == MBB;
+        }
         return UseBlock == MBB && UseInst->isPHI() &&
                UseInst->getOperand(OpNo + 1).getMBB() == DefMBB;
       })) {
@@ -691,6 +696,9 @@ bool MachineSinking::AllUsesDominatedByBlock(Register Reg,
       // PHI nodes use the operand in the predecessor block, not the block with
       // the PHI.
       UseBlock = UseInst->getOperand(OpNo + 1).getMBB();
+    } else if (UseInst->isSuccArgs()) {
+      // The use lives on the edge from UseBlock to its successor, so it is not
+      // a local use even in DefMBB. UseBlock is already the predecessor block.
     } else if (UseBlock == DefMBB) {
       LocalUse = true;
       return false;
@@ -1289,7 +1297,7 @@ bool MachineSinking::isProfitableToSinkTo(Register Reg, MachineInstr &MI,
   bool NonPHIUse = false;
   for (MachineInstr &UseInst : MRI->use_nodbg_instructions(Reg)) {
     MachineBasicBlock *UseBlock = UseInst.getParent();
-    if (UseBlock == SuccToSinkTo && !UseInst.isPHI())
+    if (UseBlock == SuccToSinkTo && !UseInst.isPHI() && !UseInst.isSuccArgs())
       NonPHIUse = true;
   }
   if (!NonPHIUse)
@@ -1337,16 +1345,18 @@ bool MachineSinking::isProfitableToSinkTo(Register Reg, MachineInstr &MI,
         return false;
     } else {
       MachineInstr *DefMI = MRI->getVRegDef(Reg);
-      if (!DefMI)
+      MachineBasicBlock *DefBlock =
+          DefMI ? DefMI->getParent() : MRI->getBlockArgDef(Reg);
+      if (!DefBlock)
         continue;
-      CycleRef Cycle = CI->getCycle(DefMI->getParent());
+      CycleRef Cycle = CI->getCycle(DefBlock);
       // DefMI is defined outside of cycle. There should be no live range
       // impact for this operand. Defination outside of cycle means:
       // 1: defination is outside of cycle.
       // 2: defination is in this cycle, but it is a PHI in the cycle header.
       if (Cycle != MCycle ||
-          (DefMI->isPHI() && Cycle && CI->isReducible(Cycle) &&
-           CI->getHeader(Cycle) == DefMI->getParent()))
+          ((!DefMI || DefMI->isPHI()) && Cycle && CI->isReducible(Cycle) &&
+           CI->getHeader(Cycle) == DefBlock))
         continue;
       // The DefMI is defined inside the cycle.
       // If sinking this operand makes some register pressure set exceed limit,

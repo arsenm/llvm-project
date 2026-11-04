@@ -27,6 +27,13 @@
 /// Every instruction defined here must also appear in Target.td.
 ///
 HANDLE_TARGET_OPCODE(PHI)
+
+/// SUCC_ARGS - Forwards values along one CFG edge to a successor block's
+/// arguments. Operand 0 is the successor MachineBasicBlock; the rest are the
+/// forwarded value registers, mapped positionally onto that successor's block
+/// arguments.
+HANDLE_TARGET_OPCODE(SUCC_ARGS)
+
 HANDLE_TARGET_OPCODE(INLINEASM)
 HANDLE_TARGET_OPCODE(INLINEASM_BR)
 HANDLE_TARGET_OPCODE(CFI_INSTRUCTION)
@@ -320,6 +327,9 @@ HANDLE_TARGET_OPCODE(G_IMPLICIT_DEF)
 
 /// Generic PHI instruction with types.
 HANDLE_TARGET_OPCODE(G_PHI)
+
+/// Generic form of SUCC_ARGS with types.
+HANDLE_TARGET_OPCODE(G_SUCC_ARGS)
 
 /// Generic instruction to materialize the address of an alloca or other
 /// stack-based object.

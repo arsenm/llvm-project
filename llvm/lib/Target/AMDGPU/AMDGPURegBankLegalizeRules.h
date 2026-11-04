@@ -339,6 +339,7 @@ enum LoweringMethodID {
   AextToS32InIncomingBlockGPHI,
   VerifyAllSgprGPHI,
   VerifyAllSgprOrVgprGPHI,
+  SuccArgs,
   ApplyINTRIN_IMAGE,
   ApplyBVH_INTERSECT_RAY,
   SplitBitCount64To32,

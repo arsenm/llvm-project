@@ -251,6 +251,31 @@ MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
   return I;
 }
 
+MachineBasicBlock::iterator MachineBasicBlock::getFirstSuccArgs() {
+  // SUCC_ARGS are clustered contiguously immediately before the terminators,
+  // mirroring how PHIs are clustered at the top of a block. Walk backward from
+  // the first terminator over that cluster; the result is the first SUCC_ARGS,
+  // or the first terminator if there are none. Nothing (not even a debug
+  // instruction) may be interspersed in the cluster, so the succ_args() range
+  // yields only SUCC_ARGS.
+  iterator B = begin(), I = getFirstTerminator();
+  while (I != B && std::prev(I)->isSuccArgs())
+    --I;
+  return I;
+}
+
+MachineInstr *MachineBasicBlock::findSuccArgs(const MachineBasicBlock *Succ) {
+  for (MachineInstr &MI : reverse(instrs())) {
+    if (MI.isSuccArgs()) {
+      if (MI.getOperand(0).getMBB() == Succ)
+        return &MI;
+    } else if (!MI.isTerminator() && !MI.isDebugInstr()) {
+      break;
+    }
+  }
+  return nullptr;
+}
+
 MachineBasicBlock::instr_iterator MachineBasicBlock::getFirstInstrTerminator() {
   instr_iterator B = instr_begin(), E = instr_end(), I = E;
   while (I != B && ((--I)->isTerminator() || I->isDebugInstr()))
@@ -1302,6 +1327,30 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
     TII->insertBranch(*NMBB, Succ, nullptr, Cond, DL);
   }
 
+  // Block arguments and PHI nodes are mutually exclusive within a function.
+  // With block arguments the forwarded values are carried by this block's
+  // SUCC_ARGS. The edge to Succ now runs through NMBB, so move the SUCC_ARGS
+  // into NMBB: a SUCC_ARGS must live in the immediate predecessor of the block
+  // whose arguments it feeds, and after the split that predecessor is NMBB.
+  SmallVector<Register, 4> SuccArgRegs;
+  SlotIndex OldSuccArgsIdx;
+  MachineInstr *SA = findSuccArgs(Succ);
+  if (SA) {
+    if (Indexes) {
+      OldSuccArgsIdx = Indexes->getInstructionIndex(*SA).getRegSlot();
+      Indexes->removeMachineInstrFromMaps(*SA);
+    }
+    SA->removeFromParent();
+    NMBB->insert(NMBB->getFirstTerminator(), SA);
+    if (Indexes)
+      Indexes->insertMachineInstrInMaps(*SA);
+    for (const MachineOperand &MO : drop_begin(SA->operands())) {
+      if (MO.readsReg() && MO.getReg().isVirtual() &&
+          !is_contained(SuccArgRegs, MO.getReg()))
+        SuccArgRegs.push_back(MO.getReg());
+    }
+  }
+
   // Fix PHI nodes in Succ so they refer to NMBB instead of this, and find the
   // registers used from NMBB in them.
   SmallSet<Register, 8> PHISrcRegs;
@@ -1345,7 +1394,8 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
       if (!LI.liveAt(PrevIndex))
         return false;
 
-      bool isLiveOut = LI.liveAt(LIS->getMBBStartIdx(Succ));
+      bool isLiveOut = LI.liveAt(LIS->getMBBStartIdx(Succ)) &&
+                       MF->getRegInfo().getBlockArgDef(Reg) != Succ;
       if (!isLiveOut) {
         LI.removeSegment(StartIndex, EndIndex);
         // The main range is live across NMBB, but an individual lane need not
@@ -1366,6 +1416,8 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
         if (UpdateLiveOutReg(Register::index2VirtReg(Idx)))
           NewLiveOut.set(Idx);
       }
+      for (Register Reg : SuccArgRegs)
+        (*LiveOutSets)[getNumber()].set(Reg.virtRegIndex());
     } else {
       MachineRegisterInfo *MRI = &getParent()->getRegInfo();
       for (unsigned i = 0, e = MRI->getNumVirtRegs(); i != e; ++i)
@@ -1381,6 +1433,24 @@ MachineBasicBlock::SplitCriticalEdge(MachineBasicBlock *Succ,
     for (Register Reg : UsedRegs) {
       if (Reg.isPhysical())
         LIS->removeAllRegUnitsForPhysReg(Reg.asMCReg());
+    }
+
+    for (Register Reg : SuccArgRegs) {
+      LiveInterval &LI = LIS->getInterval(Reg);
+      if (LI.hasSubRanges()) {
+        LIS->removeInterval(Reg);
+        LIS->createAndComputeVirtRegInterval(Reg);
+        continue;
+      }
+      SlotIndex NewIdx = LIS->getInstructionIndex(*SA).getRegSlot();
+      VNInfo *VNI = LI.getVNInfoBefore(OldSuccArgsIdx);
+      if (!VNI) {
+        LIS->extendToIndices(LI, NewIdx);
+        continue;
+      }
+      LI.addSegment(
+          LiveRange::Segment(OldSuccArgsIdx, LIS->getMBBEndIdx(this), VNI));
+      LI.addSegment(LiveRange::Segment(LIS->getMBBStartIdx(NMBB), NewIdx, VNI));
     }
   }
 
@@ -1799,6 +1869,58 @@ MachineBasicBlock::getEndClobberMask(const TargetRegisterInfo *TRI) const {
   // which does not preserve any registers. If there are no successors, we don't
   // care what kind of return it is, putting a mask after it is a no-op.
   return isReturnBlock() && !succ_empty() ? TRI->getNoPreservedMask() : nullptr;
+}
+
+void MachineBasicBlock::addBlockArg(Register Reg) {
+  BlockArgs.push_back(Reg);
+  getParent()->getRegInfo().setBlockArgDef(Reg, this);
+}
+
+void MachineBasicBlock::clearBlockArgs() {
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  for (Register Reg : BlockArgs)
+    MRI.clearBlockArgDef(Reg);
+  BlockArgs.clear();
+}
+
+void MachineBasicBlock::setBlockArg(unsigned I, Register Reg) {
+  assert(I < BlockArgs.size() && "Block argument index out of range");
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  MRI.clearBlockArgDef(BlockArgs[I]);
+  BlockArgs[I] = Reg;
+  MRI.setBlockArgDef(Reg, this);
+}
+
+void MachineBasicBlock::removeBlockArgAndUpdateSuccArgs(unsigned I) {
+  assert(I < BlockArgs.size() && "Block argument index out of range");
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  MRI.clearBlockArgDef(BlockArgs[I]);
+  BlockArgs.erase(BlockArgs.begin() + I);
+
+  // Drop the matching forwarded operand (index I + 1, past the successor MBB
+  // operand) from each predecessor's SUCC_ARGS that targets this block. If that
+  // leaves a SUCC_ARGS with no forwarded values (only the successor operand),
+  // erase it.
+  for (MachineBasicBlock *Pred : predecessors()) {
+    MachineInstr *SA = Pred->findSuccArgs(this);
+    if (!SA)
+      continue;
+    assert(I + 1 < SA->getNumOperands() && "SUCC_ARGS operand count mismatch");
+    SA->removeOperand(I + 1);
+    if (SA->getNumOperands() == 1)
+      SA->eraseFromParent();
+  }
+}
+
+void MachineBasicBlock::replaceBlockArgWithParts(unsigned I,
+                                                 ArrayRef<Register> Parts) {
+  assert(I < BlockArgs.size() && "Block argument index out of range");
+  MachineRegisterInfo &MRI = getParent()->getRegInfo();
+  MRI.clearBlockArgDef(BlockArgs[I]);
+  BlockArgs.erase(BlockArgs.begin() + I);
+  BlockArgs.insert(BlockArgs.begin() + I, Parts.begin(), Parts.end());
+  for (Register Part : Parts)
+    MRI.setBlockArgDef(Part, this);
 }
 
 void MachineBasicBlock::clearLiveIns() {

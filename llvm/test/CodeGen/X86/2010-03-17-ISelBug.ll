@@ -1,4 +1,5 @@
 ; RUN: llc < %s -mtriple=i386-apple-darwin5
+; RUN: llc < %s -mtriple=i386-apple-darwin5 -sdag-use-block-args -verify-machineinstrs
 
 ; rdar://7761790
 

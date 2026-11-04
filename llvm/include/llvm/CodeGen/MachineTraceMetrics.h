@@ -329,6 +329,10 @@ public:
     /// The PHI does not have to be part of the trace.
     LLVM_ABI unsigned getPHIDepth(const MachineInstr &PHI) const;
 
+    LLVM_ABI unsigned getSuccArgDepth(const MachineInstr &SuccArgs,
+                                      unsigned OpIdx) const;
+    LLVM_ABI unsigned getBlockArgHeight(Register Arg) const;
+
     /// A dependence is useful if the basic block of the defining instruction
     /// is part of the trace of the user instruction. It is assumed that DefMI
     /// dominates UseMI (see also isUsefulDominator).
@@ -355,6 +359,9 @@ public:
     void computeInstrHeights(const MachineBasicBlock*);
     void addLiveIns(const MachineInstr *DefMI, unsigned DefOp,
                     ArrayRef<const MachineBasicBlock*> Trace);
+    const MachineOperand *getBlockArgSource(Register Arg,
+                                            const TraceBlockInfo &TBI) const;
+    unsigned getBlockArgHeight(Register Arg, unsigned Depth = 0) const;
 
   protected:
     MachineTraceMetrics &MTM;

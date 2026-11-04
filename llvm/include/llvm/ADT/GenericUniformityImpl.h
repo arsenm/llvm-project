@@ -497,6 +497,7 @@ private:
   void pushUsers(ConstValueRefT V);
 
   bool usesValueFromCycle(const InstructionT &I, CycleRef DefCycle) const;
+  bool blockArgUsesValueFromCycle(ConstValueRefT Arg, CycleRef DefCycle) const;
 
   /// \brief Whether \p Def is divergent when read in \p ObservingBlock.
   bool isTemporalDivergent(const BlockT &ObservingBlock,
@@ -891,6 +892,13 @@ void GenericUniformityAnalysisImpl<ContextT>::analyzeCycleExitDivergence(
         markDivergent(Phi);
       }
     }
+
+    SmallVector<ConstValueRefT, 4> BlockArgs;
+    ContextT::appendBlockArgs(BlockArgs, *Exit);
+    for (ConstValueRefT Arg : BlockArgs) {
+      if (blockArgUsesValueFromCycle(Arg, DefCycle) && markDivergent(Arg))
+        pushUsers(Arg);
+    }
   }
 
   for (auto *BB : CI.getBlocks(DefCycle)) {
@@ -969,6 +977,17 @@ void GenericUniformityAnalysisImpl<ContextT>::taintAndPushPhiNodes(
     if (ContextT::isConstantOrUndefValuePhi(Phi))
       continue;
     markDivergent(Phi);
+  }
+
+  // Block arguments are the block-argument-representation equivalent of phi
+  // nodes: a control-divergent join makes them divergent too. They have no
+  // defining instruction, so propagate to their users directly rather than
+  // through the instruction worklist.
+  SmallVector<ConstValueRefT, 4> BlockArgs;
+  ContextT::appendBlockArgs(BlockArgs, JoinBlock);
+  for (ConstValueRefT Arg : BlockArgs) {
+    if (markDivergent(Arg))
+      pushUsers(Arg);
   }
 }
 

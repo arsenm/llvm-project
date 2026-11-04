@@ -143,7 +143,7 @@ AArch64LegalizerInfo::AArch64LegalizerInfo(const AArch64Subtarget &ST)
       .clampMaxNumElements(0, p0, 2)
       .scalarizeIf(scalarOrEltWiderThan(0, 64), 0);
 
-  getActionDefinitionsBuilder(G_PHI)
+  getActionDefinitionsBuilder({G_PHI, G_SUCC_ARGS})
       .legalFor({p0, s16, s32, s64})
       .legalFor(PackedVectorAllTypeList)
       .widenScalarToNextPow2(0)

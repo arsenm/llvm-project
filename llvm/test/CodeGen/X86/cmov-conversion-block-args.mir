@@ -1,0 +1,32 @@
+# RUN: llc -mtriple=x86_64-- -run-pass=x86-cmov-conversion \
+# RUN:   -x86-cmov-converter-force-all -verify-machineinstrs -o - %s | FileCheck %s
+
+# X86CmovConversion turns a CMOV group into a branch and merges the results in
+# the sink block. Under block arguments the merges must be block arguments fed
+# by SUCC_ARGS instead of PHIs. With more than one CMOV the merges must be
+# collected before the SUCC_ARGS are inserted into the predecessors, otherwise
+# building a merge would splice a SUCC_ARGS into the CMOV range still being
+# walked.
+
+# CHECK-LABEL: name: two_cmovs
+# CHECK-NOT:   = PHI
+# CHECK:       SUCC_ARGS
+# CHECK:       arguments: %[[#]], %[[#]]
+---
+name: two_cmovs
+tracksRegLiveness: true
+usesBlockArgs: true
+body: |
+  bb.0:
+    liveins: $rdi, $rsi, $rdx, $rcx
+    %0:gr64 = COPY $rdi
+    %1:gr64 = COPY $rsi
+    %2:gr64 = COPY $rdx
+    %3:gr64 = COPY $rcx
+    TEST64rr %0, %0, implicit-def $eflags
+    %4:gr64 = CMOV64rr %0, %1, 5, implicit $eflags
+    %5:gr64 = CMOV64rr %2, %3, 5, implicit $eflags
+    $rax = COPY %4
+    $rdx = COPY %5
+    RET64 implicit $rax, implicit $rdx
+...

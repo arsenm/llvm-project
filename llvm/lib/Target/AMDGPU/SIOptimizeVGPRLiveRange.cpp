@@ -106,6 +106,9 @@ private:
   // in.
   bool isLiveIntoMBB(Register Reg, const MachineBasicBlock *MBB) const;
 
+  void forwardSuccArg(MachineBasicBlock &Pred, MachineBasicBlock &Succ,
+                      Register Reg, bool IsUndef) const;
+
 public:
   SIOptimizeVGPRLiveRange(LiveIntervals *LIS, MachineDominatorTree *MDT,
                           MachineLoopInfo *Loops)
@@ -195,6 +198,15 @@ bool SIOptimizeVGPRLiveRange::isLiveIntoMBB(
     Register Reg, const MachineBasicBlock *MBB) const {
   const LiveInterval &LI = LIS->getInterval(Reg);
   return LIS->isLiveInToMBB(LI, MBB);
+}
+
+void SIOptimizeVGPRLiveRange::forwardSuccArg(MachineBasicBlock &Pred,
+                                             MachineBasicBlock &Succ,
+                                             Register Reg, bool IsUndef) const {
+  TII->forwardSuccArgs(Pred, Succ, {{Reg, IsUndef}});
+  MachineInstr &SA = *Pred.findSuccArgs(&Succ);
+  if (!LIS->getSlotIndexes()->hasIndex(SA))
+    LIS->InsertMachineInstrInMaps(SA);
 }
 
 void SIOptimizeVGPRLiveRange::collectElseRegionBlocks(
@@ -409,13 +421,25 @@ void SIOptimizeVGPRLiveRange::optimizeLiveRange(
   const auto *RC = MRI->getRegClass(Reg);
   Register NewReg = MRI->createVirtualRegister(RC);
   Register UndefReg = MRI->createVirtualRegister(RC);
-  MachineInstrBuilder PHI = BuildMI(*Flow, Flow->getFirstNonPHI(), DebugLoc(),
-                                    TII->get(TargetOpcode::PHI), NewReg);
-  for (auto *Pred : Flow->predecessors()) {
-    if (Pred == If)
-      PHI.addReg(Reg).addMBB(Pred);
-    else
-      PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
+  // NewReg merges Reg (from the THEN region, entering via If) with undef on the
+  // other edges. Represent it as a block argument fed by SUCC_ARGS when the
+  // function uses block arguments, otherwise as a PHI.
+  if (Flow->getParent()->getProperties().hasUsesBlockArgs()) {
+    for (MachineBasicBlock *Pred : Flow->predecessors()) {
+      bool IsUndef = Pred != If;
+      forwardSuccArg(*Pred, *Flow, IsUndef ? UndefReg : Reg, IsUndef);
+    }
+    Flow->addBlockArg(NewReg);
+  } else {
+    MachineInstrBuilder PHI = BuildMI(*Flow, Flow->getFirstNonPHI(), DebugLoc(),
+                                      TII->get(TargetOpcode::PHI), NewReg);
+    for (MachineBasicBlock *Pred : Flow->predecessors()) {
+      if (Pred == If)
+        PHI.addReg(Reg).addMBB(Pred);
+      else
+        PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
+    }
+    LIS->InsertMachineInstrInMaps(*PHI);
   }
 
   // Replace all uses in the ELSE region or the PHIs in ENDIF block
@@ -450,7 +474,6 @@ void SIOptimizeVGPRLiveRange::optimizeLiveRange(
   // and let the recomputed intervals be the source of truth.
   MRI->clearKillFlags(Reg);
   MRI->clearKillFlags(NewReg);
-  LIS->InsertMachineInstrInMaps(*PHI);
   LIS->removeInterval(Reg);
   LIS->createAndComputeVirtRegInterval(Reg);
   LIS->createAndComputeVirtRegInterval(NewReg);
@@ -477,17 +500,29 @@ void SIOptimizeVGPRLiveRange::optimizeWaterfallLiveRange(
       O.setReg(NewReg);
   }
 
-  MachineInstrBuilder PHI =
-      BuildMI(*LoopHeader, LoopHeader->getFirstNonPHI(), DebugLoc(),
-              TII->get(TargetOpcode::PHI), NewReg);
-  for (auto *Pred : LoopHeader->predecessors()) {
-    if (Blocks.contains(Pred))
-      PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
-    else
-      PHI.addReg(Reg).addMBB(Pred);
+  // NewReg merges Reg (from outside the loop) with undef on the back-edge(s),
+  // so the value is not preserved across iterations. Represent it as a block
+  // argument fed by SUCC_ARGS when the function uses block arguments, otherwise
+  // as a PHI.
+  if (LoopHeader->getParent()->getProperties().hasUsesBlockArgs()) {
+    for (MachineBasicBlock *Pred : LoopHeader->predecessors()) {
+      bool IsUndef = Blocks.contains(Pred);
+      forwardSuccArg(*Pred, *LoopHeader, IsUndef ? UndefReg : Reg, IsUndef);
+    }
+    LoopHeader->addBlockArg(NewReg);
+  } else {
+    MachineInstrBuilder PHI =
+        BuildMI(*LoopHeader, LoopHeader->getFirstNonPHI(), DebugLoc(),
+                TII->get(TargetOpcode::PHI), NewReg);
+    for (MachineBasicBlock *Pred : LoopHeader->predecessors()) {
+      if (Blocks.contains(Pred))
+        PHI.addReg(UndefReg, RegState::Undef).addMBB(Pred);
+      else
+        PHI.addReg(Reg).addMBB(Pred);
+    }
+    LIS->InsertMachineInstrInMaps(*PHI);
   }
 
-  LIS->InsertMachineInstrInMaps(*PHI);
   LIS->removeInterval(Reg);
   LIS->createAndComputeVirtRegInterval(Reg);
   LIS->createAndComputeVirtRegInterval(NewReg);

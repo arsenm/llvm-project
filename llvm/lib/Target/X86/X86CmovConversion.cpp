@@ -397,6 +397,8 @@ bool X86CmovConversionImpl::checkForProfitableCmovCandidates(
   /// Maps register operand to its def instruction, which can be nullptr if it
   /// is unknown (e.g., operand is defined outside the loop).
   DenseMap<MachineOperand *, MachineInstr *> OperandToDefMap;
+  DenseMap<Register, DepthInfo> BlockArgDepths;
+  DenseMap<Register, DepthInfo> BlockArgEntryDepths;
 
   // Set depth of unknown instruction (i.e., nullptr) to zero.
   DepthMap[nullptr] = {0, 0};
@@ -404,6 +406,14 @@ bool X86CmovConversionImpl::checkForProfitableCmovCandidates(
   SmallPtrSet<MachineInstr *, 4> CmovInstructions;
   for (auto &Group : CmovInstGroups)
     CmovInstructions.insert_range(Group);
+
+  auto GetOperandDepth = [&](MachineOperand &MO) -> DepthInfo {
+    if (MachineInstr *DefMI = OperandToDefMap.lookup(&MO))
+      return DepthMap.lookup(DefMI);
+    if (BlockArgEntryDepths.empty())
+      return DepthInfo{0, 0};
+    return BlockArgEntryDepths.lookup(MO.getReg());
+  };
 
   //===--------------------------------------------------------------------===//
   // Step 1: Calculate instruction depth and loop depth.
@@ -432,6 +442,8 @@ bool X86CmovConversionImpl::checkForProfitableCmovCandidates(
     for (auto *MBB : Blocks) {
       // Clear physical registers Def map.
       RegDefMaps[PhyRegType].clear();
+      for (Register Arg : MBB->getBlockArgs())
+        BlockArgEntryDepths[Arg] = BlockArgDepths.lookup(Arg);
       for (MachineInstr &MI : *MBB) {
         // Skip debug instructions.
         if (MI.isDebugInstr())
@@ -445,19 +457,32 @@ bool X86CmovConversionImpl::checkForProfitableCmovCandidates(
             continue;
           Register Reg = MO.getReg();
           auto &RDM = RegDefMaps[Reg.isVirtual()];
+          DepthInfo Info{0, 0};
           if (MachineInstr *DefMI = RDM.lookup(Reg)) {
             OperandToDefMap[&MO] = DefMI;
-            DepthInfo Info = DepthMap.lookup(DefMI);
-            MIDepth = std::max(MIDepth, Info.Depth);
-            if (!IsCMOV)
-              MIDepthOpt = std::max(MIDepthOpt, Info.OptDepth);
+            Info = DepthMap.lookup(DefMI);
+          } else if (!BlockArgEntryDepths.empty()) {
+            Info = BlockArgEntryDepths.lookup(Reg);
           }
+          MIDepth = std::max(MIDepth, Info.Depth);
+          if (!IsCMOV)
+            MIDepthOpt = std::max(MIDepthOpt, Info.OptDepth);
         }
 
         if (IsCMOV)
-          MIDepthOpt = getDepthOfOptCmov(
-              DepthMap[OperandToDefMap.lookup(&MI.getOperand(1))].OptDepth,
-              DepthMap[OperandToDefMap.lookup(&MI.getOperand(2))].OptDepth);
+          MIDepthOpt =
+              getDepthOfOptCmov(GetOperandDepth(MI.getOperand(1)).OptDepth,
+                                GetOperandDepth(MI.getOperand(2)).OptDepth);
+
+        if (MI.isSuccArgs()) {
+          MachineBasicBlock *Succ = MI.getOperand(0).getMBB();
+          for (unsigned I = 1, E = MI.getNumOperands(); I != E; ++I) {
+            DepthInfo Info = GetOperandDepth(MI.getOperand(I));
+            DepthInfo &ArgInfo = BlockArgDepths[Succ->getBlockArg(I - 1)];
+            ArgInfo.Depth = std::max(ArgInfo.Depth, Info.Depth);
+            ArgInfo.OptDepth = std::max(ArgInfo.OptDepth, Info.OptDepth);
+          }
+        }
 
         // Iterates over all operands to handle implicit definitions as well.
         for (auto &MO : MI.operands()) {
@@ -551,11 +576,10 @@ bool X86CmovConversionImpl::checkForProfitableCmovCandidates(
         }
       }
 
-      unsigned CondCost =
-          DepthMap[OperandToDefMap.lookup(&MI->getOperand(4))].Depth;
-      unsigned ValCost = getDepthOfOptCmov(
-          DepthMap[OperandToDefMap.lookup(&MI->getOperand(1))].Depth,
-          DepthMap[OperandToDefMap.lookup(&MI->getOperand(2))].Depth);
+      unsigned CondCost = GetOperandDepth(MI->getOperand(4)).Depth;
+      unsigned ValCost =
+          getDepthOfOptCmov(GetOperandDepth(MI->getOperand(1)).Depth,
+                            GetOperandDepth(MI->getOperand(2)).Depth);
       if (ValCost > CondCost || (CondCost - ValCost) * 4 < MispredictPenalty) {
         WorthOpGroup = false;
         break;
@@ -671,6 +695,7 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   MachineBasicBlock *MBB = MI.getParent();
   MachineFunction::iterator It = ++MBB->getIterator();
   MachineFunction *F = MBB->getParent();
+  const bool UsesBlockArgs = F->getProperties().hasUsesBlockArgs();
   const BasicBlock *BB = MBB->getBasicBlock();
 
   MachineBasicBlock *FalseMBB = F->CreateMachineBasicBlock(BB);
@@ -700,12 +725,10 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   // Add the sink block to the false block successors.
   FalseMBB->addSuccessor(SinkMBB);
 
-  MachineInstrBuilder MIB;
   MachineBasicBlock::iterator MIItBegin = MachineBasicBlock::iterator(MI);
   MachineBasicBlock::iterator MIItEnd =
       std::next(MachineBasicBlock::iterator(LastCMOV));
   MachineBasicBlock::iterator FalseInsertionPoint = FalseMBB->begin();
-  MachineBasicBlock::iterator SinkInsertionPoint = SinkMBB->begin();
 
   // First we need to insert an explicit load on the false path for any memory
   // operand. We also need to potentially do register rewriting here, but it is
@@ -820,6 +843,17 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
   // destination registers, and the registers that went into the PHI.
   DenseMap<Register, std::pair<Register, Register>> RegRewriteTable;
 
+  // Compute the merge for each CMOV first, then build them after erasing the
+  // CMOVs. buildValueMerge may insert a SUCC_ARGS into MBB (the block that held
+  // the CMOVs) under block arguments, so materializing the merges inside the
+  // loop would splice new instructions into the range being walked.
+  struct MergeSpec {
+    Register DestReg;
+    Register Op1Reg;
+    Register Op2Reg;
+    unsigned DebugInstrNum;
+  };
+  SmallVector<MergeSpec, 4> Merges;
   for (MachineBasicBlock::iterator MIIt = MIItBegin; MIIt != MIItEnd; ++MIIt) {
     Register DestReg = MIIt->getOperand(0).getReg();
     Register Op1Reg = MIIt->getOperand(1).getReg();
@@ -839,34 +873,37 @@ void X86CmovConversionImpl::convertCmovInstsToBranches(
     if (Op2Itr != RegRewriteTable.end())
       Op2Reg = Op2Itr->second.second;
 
-    //  SinkMBB:
-    //   %Result = phi [ %FalseValue, FalseMBB ], [ %TrueValue, MBB ]
-    //  ...
-    MIB = BuildMI(*SinkMBB, SinkInsertionPoint, DL, TII->get(X86::PHI), DestReg)
-              .addReg(Op1Reg)
-              .addMBB(FalseMBB)
-              .addReg(Op2Reg)
-              .addMBB(MBB);
-    (void)MIB;
-    LLVM_DEBUG(dbgs() << "\tFrom: "; MIIt->dump());
-    LLVM_DEBUG(dbgs() << "\tTo: "; MIB->dump());
+    Merges.push_back({DestReg, Op1Reg, Op2Reg, MIIt->peekDebugInstrNum()});
 
-    // debug-info: we can just copy the instr-ref number from one instruction
-    // to the other, seeing how it's a one-for-one substitution.
-    if (unsigned InstrNum = MIIt->peekDebugInstrNum())
-      MIB->setDebugInstrNum(InstrNum);
-
-    // Add this PHI to the rewrite table.
+    // Add this merge to the rewrite table.
     RegRewriteTable[DestReg] = std::make_pair(Op1Reg, Op2Reg);
   }
 
   // Reset the NoPHIs property if a PHI was inserted to prevent a conflict with
-  // the MachineVerifier during testing.
-  if (MIItBegin != MIItEnd)
+  // the MachineVerifier during testing. Block arguments keep the no-PHI form.
+  if (MIItBegin != MIItEnd && !UsesBlockArgs)
     F->getProperties().resetNoPHIs();
 
-  // Now remove the CMOV(s).
+  // Now remove the CMOV(s), then build the merges: under block arguments
+  // buildValueMerge forwards a value from MBB with a SUCC_ARGS, which must not
+  // land inside the erased CMOV range.
   MBB->erase(MIItBegin, MIItEnd);
+
+  for (const MergeSpec &M : Merges) {
+    //  SinkMBB:
+    //   %Result = phi [ %FalseValue, FalseMBB ], [ %TrueValue, MBB ]
+    //  ...
+    // Under block arguments this instead makes DestReg a block argument of
+    // SinkMBB fed by SUCC_ARGS, and returns nullptr.
+    MachineInstr *Merge = TII->buildValueMerge(
+        *SinkMBB, M.DestReg, {{M.Op1Reg, FalseMBB}, {M.Op2Reg, MBB}});
+
+    // debug-info: we can just copy the instr-ref number from one instruction to
+    // the other, seeing how it's a one-for-one substitution. A block argument
+    // has no defining instruction to carry the number.
+    if (M.DebugInstrNum && Merge)
+      Merge->setDebugInstrNum(M.DebugInstrNum);
+  }
 
   // Add new basic blocks to MachineLoopInfo.
   if (MachineLoop *L = MLI->getLoopFor(MBB)) {

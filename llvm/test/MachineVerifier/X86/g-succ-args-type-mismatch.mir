@@ -1,0 +1,23 @@
+# RUN: not --crash llc -mtriple=x86_64-- -run-pass=none -filetype=null %s 2>&1 | FileCheck %s
+
+# A G_SUCC_ARGS forwarded value must have the same type as the corresponding
+# successor block argument. The forwarded count here matches the argument count,
+# so the count/structural checks stay silent and only the per-operand type check
+# fires.
+# CHECK: *** Bad machine code: G_SUCC_ARGS operand has incompatible/missing type ***
+# CHECK-NOT: operand count does not match
+---
+name: type_mismatch
+tracksRegLiveness: true
+usesBlockArgs: true
+body: |
+  bb.0:
+    successors: %bb.1
+    %0:_(s64) = G_IMPLICIT_DEF
+    G_SUCC_ARGS %bb.1, %0
+    G_BR %bb.1
+
+  bb.1:
+    arguments: %1:_(s32)
+    RET64
+...

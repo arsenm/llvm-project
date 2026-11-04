@@ -1,0 +1,83 @@
+# RUN: llc -mtriple=aarch64 -run-pass=aarch64-prelegalizer-combiner --aarch64prelegalizercombiner-only-enable-rule="icmp_to_lhs_known_bits" %s -o - | FileCheck %s
+# REQUIRES: asserts
+
+# The G_ICMP LHS is a block argument fed a value with known high-zero bits on
+# every incoming edge (each feeder is masked with 1). GISelValueTracking must
+# intersect the forwarded values' known bits, as it does for a G_PHI, so the
+# combiner can fold `ne 0` to a truncate.
+---
+name:            fold_icmp_block_arg_known_zero
+alignment:       4
+tracksRegLiveness: true
+usesBlockArgs:   true
+body:             |
+  ; CHECK-LABEL: name: fold_icmp_block_arg_known_zero
+  ; CHECK: %cmp:_(i1) = G_TRUNC %arg
+  bb.0:
+    liveins: $w0, $w1
+    successors: %bb.1, %bb.2
+
+    %x:_(i32) = COPY $w0
+    %y:_(i32) = COPY $w1
+    %c:_(i1) = G_TRUNC %x
+    %one:_(i32) = G_CONSTANT i32 1
+    %a0:_(i32) = G_AND %x, %one
+    G_SUCC_ARGS %bb.2, %a0(i32)
+    G_BRCOND %c(i1), %bb.1
+    G_BR %bb.2
+
+  bb.1:
+    successors: %bb.2
+
+    %a1:_(i32) = G_AND %y, %one
+    G_SUCC_ARGS %bb.2, %a1(i32)
+    G_BR %bb.2
+
+  bb.2:
+    arguments: %arg:_(i32)
+
+    %zero:_(i32) = G_CONSTANT i32 0
+    %cmp:_(i1) = G_ICMP intpred(ne), %arg(i32), %zero
+    %ext:_(i32) = G_ZEXT %cmp(i1)
+    $w0 = COPY %ext(i32)
+    RET_ReallyLR implicit $w0
+...
+
+# Negative case: one feeder has unknown high bits, so the intersection is not
+# known-zero and the compare must be preserved.
+---
+name:            no_fold_icmp_block_arg_unknown_feeder
+alignment:       4
+tracksRegLiveness: true
+usesBlockArgs:   true
+body:             |
+  ; CHECK-LABEL: name: no_fold_icmp_block_arg_unknown_feeder
+  ; CHECK: %cmp:_(i1) = G_ICMP intpred(ne), %arg
+  bb.0:
+    liveins: $w0, $w1
+    successors: %bb.1, %bb.2
+
+    %x:_(i32) = COPY $w0
+    %y:_(i32) = COPY $w1
+    %c:_(i1) = G_TRUNC %x
+    %one:_(i32) = G_CONSTANT i32 1
+    %a0:_(i32) = G_AND %x, %one
+    G_SUCC_ARGS %bb.2, %a0(i32)
+    G_BRCOND %c(i1), %bb.1
+    G_BR %bb.2
+
+  bb.1:
+    successors: %bb.2
+
+    G_SUCC_ARGS %bb.2, %y(i32)
+    G_BR %bb.2
+
+  bb.2:
+    arguments: %arg:_(i32)
+
+    %zero:_(i32) = G_CONSTANT i32 0
+    %cmp:_(i1) = G_ICMP intpred(ne), %arg(i32), %zero
+    %ext:_(i32) = G_ZEXT %cmp(i1)
+    $w0 = COPY %ext(i32)
+    RET_ReallyLR implicit $w0
+...

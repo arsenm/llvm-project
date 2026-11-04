@@ -114,15 +114,9 @@ static void BuildInstOrderMap(MachineBasicBlock::iterator Start,
   }
 }
 
-bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
-  if (skipFunction(MF.getFunction()))
-    return false;
-
-  MachineRegisterInfo &MRI = MF.getRegInfo();
-  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
-
-  LLVM_DEBUG(dbgs() << "**** Analysing " << MF.getName() << '\n');
-
+template <bool UsesBlockArgs>
+static void shrinkLiveRanges(MachineFunction &MF, MachineRegisterInfo &MRI,
+                             const TargetInstrInfo &TII) {
   InstOrderMap IOM;
   // Map from register to instruction order (value of IOM) where the
   // register is used last. When moving instructions up, we need to
@@ -151,6 +145,8 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
     while (Next != MBB.end()) {
       MachineInstr &MI = *Next;
       Next = MBB.SkipPHIsLabelsAndDebug(++Next);
+      if (UsesBlockArgs && MI.isSuccArgs())
+        continue;
 
       unsigned CurrentOrder = IOM[&MI];
       unsigned Barrier = 0;
@@ -182,6 +178,7 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
 
       const MachineOperand *DefMO = nullptr;
       MachineInstr *Insert = nullptr;
+      bool InsertAtStart = false;
 
       // Number of live-ranges that will be shortened. We do not count
       // live-ranges that are defined by a COPY as it could be coalesced later.
@@ -197,12 +194,14 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
           if (!Reg || MRI.isConstantPhysReg(Reg))
             continue;
           Insert = nullptr;
+          InsertAtStart = false;
           break;
         }
         if (MO.isDef()) {
           // Do not move if there is more than one def.
           if (DefMO) {
             Insert = nullptr;
+            InsertAtStart = false;
             break;
           }
           DefMO = &MO;
@@ -217,8 +216,18 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
           if (!TII.isCopyInstr(DefInstr))
             NumEligibleUse++;
           Insert = FindDominatedInstruction(DefInstr, Insert, IOM);
+        } else if (MachineBasicBlock *ArgMBB =
+                       UsesBlockArgs && MRI.def_empty(Reg)
+                           ? MRI.getBlockArgDef(Reg)
+                           : nullptr;
+                   ArgMBB && MRI.hasOneNonDBGUse(Reg) && DefMO &&
+                   MRI.getRegClass(DefMO->getReg()) == MRI.getRegClass(Reg)) {
+          NumEligibleUse++;
+          if (ArgMBB == &MBB && IOM.contains(&MBB.front()))
+            InsertAtStart = true;
         } else {
           Insert = nullptr;
+          InsertAtStart = false;
           break;
         }
       }
@@ -229,11 +238,24 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
            I = I->getNextNode())
         if (I == BarrierMI) {
           Insert = nullptr;
+          InsertAtStart = false;
           break;
         }
+      if (!Insert && InsertAtStart &&
+          any_of(MI.all_defs(), [&](const MachineOperand &MO) {
+            if (!MO.isDead())
+              return false;
+            auto It = UseMap.find(MO.getReg());
+            return It != UseMap.end() && It->second.second != &MI &&
+                   IOM.contains(It->second.second);
+          }))
+        InsertAtStart = false;
+
       // Move the instruction when # of shrunk live range > 1.
-      if (DefMO && Insert && NumEligibleUse > 1 && Barrier <= IOM[Insert]) {
-        MachineBasicBlock::iterator I = std::next(Insert->getIterator());
+      if (DefMO && (Insert || InsertAtStart) && NumEligibleUse > 1 &&
+          (!Insert || Barrier <= IOM[Insert])) {
+        MachineBasicBlock::iterator I =
+            Insert ? std::next(Insert->getIterator()) : MBB.begin();
         // Skip all the PHI and debug instructions.
         while (I != MBB.end() && (I->isPHI() || I->isDebugOrPseudoInstr()))
           I = std::next(I);
@@ -258,5 +280,20 @@ bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
       }
     }
   }
+}
+
+bool LiveRangeShrink::runOnMachineFunction(MachineFunction &MF) {
+  if (skipFunction(MF.getFunction()))
+    return false;
+
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+
+  LLVM_DEBUG(dbgs() << "**** Analysing " << MF.getName() << '\n');
+
+  if (MF.getProperties().hasUsesBlockArgs())
+    shrinkLiveRanges<true>(MF, MRI, TII);
+  else
+    shrinkLiveRanges<false>(MF, MRI, TII);
   return false;
 }

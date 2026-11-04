@@ -1,0 +1,156 @@
+# RUN: llc -mtriple=x86_64-linux-gnu -run-pass=liveintervals,phi-node-elimination -verify-machineinstrs -o /dev/null %s
+
+# The copy for the landing pad's block argument is placed before the invoke, so
+# it is not the last reader of the forwarded value: the copy for %bb.3 placed
+# later must stay covered by the value's live range.
+
+--- |
+  ; ModuleID = '/tmp/ctm/eh.ll'
+  source_filename = "/tmp/ctm/eh.ll"
+  target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
+  target triple = "x86_64-unknown-linux-gnu"
+  
+  define void @f(i1 %c, ptr %p, ptr %q) personality ptr @__gxx_personality_v0 {
+  entry:
+    br i1 %c, label %a, label %b
+  
+  a:                                                ; preds = %entry
+    %v = load ptr, ptr %p, align 8
+    invoke void @g(ptr null)
+            to label %cont unwind label %lpad
+  
+  b:                                                ; preds = %entry
+    %w = load ptr, ptr %q, align 8
+    invoke void @g(ptr null)
+            to label %cont unwind label %lpad
+  
+  cont:                                             ; preds = %b, %a
+    %x = phi ptr [ %v, %a ], [ %w, %b ]
+    call void @h(ptr %x)
+    ret void
+  
+  lpad:                                             ; preds = %b, %a
+    %y = phi ptr [ %v, %a ], [ %w, %b ]
+    %lp = landingpad { ptr, i32 }
+            cleanup
+    call void @h(ptr %y)
+    %exn.obj = extractvalue { ptr, i32 } %lp, 0
+    call void @_Unwind_Resume(ptr %exn.obj) #0
+    unreachable
+  }
+  
+  declare void @g(ptr)
+  
+  declare void @h(ptr)
+  
+  declare i32 @__gxx_personality_v0(...)
+  
+  declare void @_Unwind_Resume(ptr)
+  
+  attributes #0 = { noreturn }
+...
+---
+name:            f
+alignment:       1
+tracksRegLiveness: true
+noPhis:          false
+isSSA:           true
+noVRegs:         false
+hasFakeUses:     false
+debugInstrRef:   true
+usesBlockArgs:   true
+registers:
+  - { id: 0, class: gr64 }
+  - { id: 1, class: gr64 }
+  - { id: 2, class: gr64 }
+  - { id: 3, class: gr64 }
+  - { id: 4, class: gr32 }
+  - { id: 5, class: gr64 }
+  - { id: 6, class: gr64 }
+  - { id: 7, class: gr8 }
+  - { id: 8, class: gr32 }
+  - { id: 9, class: gr64 }
+  - { id: 10, class: gr32 }
+  - { id: 11, class: gr64 }
+  - { id: 12, class: gr64 }
+  - { id: 13, class: gr64 }
+liveins:
+  - { reg: '$edi', virtual-reg: '%4' }
+  - { reg: '$rsi', virtual-reg: '%5' }
+  - { reg: '$rdx', virtual-reg: '%6' }
+frameInfo:
+  maxAlignment:    1
+  adjustsStack:    true
+  hasCalls:        true
+  framePointerPolicy: none
+machineFunctionInfo:
+  amxProgModel:    None
+body:             |
+  bb.0.entry:
+    successors: %bb.1, %bb.2
+    liveins: $edi, $rsi, $rdx
+  
+    %6:gr64 = COPY $rdx
+    %5:gr64 = COPY $rsi
+    %4:gr32 = COPY $edi
+    %7:gr8 = COPY %4.sub_8bit
+    TEST8ri %7, 1, implicit-def $eflags
+    JCC_1 %bb.2, 4, implicit $eflags
+    JMP_1 %bb.1
+  
+  bb.1.a:
+    successors: %bb.3(0x7ffff800), %bb.4(0x00000800)
+  
+    %0:gr64 = MOV64rm %5, 1, $noreg, 0, $noreg :: (load (s64) from %ir.p)
+    EH_LABEL <mcsymbol .Ltmp1>
+    ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    %10:gr32 = MOV32r0 implicit-def dead $eflags
+    %11:gr64 = SUBREG_TO_REG %10, %subreg.sub_32bit
+    $rdi = COPY %11
+    CALL64pcrel32 target-flags(x86-plt) @g, csr_64, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp
+    ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    EH_LABEL <mcsymbol .Ltmp2>
+    SUCC_ARGS %bb.3, %0
+    SUCC_ARGS %bb.4, %0
+    JMP_1 %bb.3
+  
+  bb.2.b:
+    successors: %bb.3(0x7ffff800), %bb.4(0x00000800)
+  
+    %1:gr64 = MOV64rm %6, 1, $noreg, 0, $noreg :: (load (s64) from %ir.q)
+    EH_LABEL <mcsymbol .Ltmp3>
+    ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    %8:gr32 = MOV32r0 implicit-def dead $eflags
+    %9:gr64 = SUBREG_TO_REG %8, %subreg.sub_32bit
+    $rdi = COPY %9
+    CALL64pcrel32 target-flags(x86-plt) @g, csr_64, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp
+    ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    EH_LABEL <mcsymbol .Ltmp4>
+    SUCC_ARGS %bb.3, %1
+    SUCC_ARGS %bb.4, %1
+    JMP_1 %bb.3
+  
+  bb.3.cont:
+    arguments: %2
+  
+    ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    $rdi = COPY %2:gr64
+    CALL64pcrel32 target-flags(x86-plt) @h, csr_64, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp
+    ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    RET 0
+  
+  bb.4.lpad (landing-pad):
+    liveins: $rax, $rdx
+    arguments: %3
+  
+    EH_LABEL <mcsymbol .Ltmp5>
+    %12:gr64 = COPY $rax
+    ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    $rdi = COPY %3:gr64
+    CALL64pcrel32 target-flags(x86-plt) @h, csr_64, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp
+    ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+    $rdi = COPY %12
+    CALL64pcrel32 target-flags(x86-plt) @_Unwind_Resume, csr_64, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp
+    ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp
+...

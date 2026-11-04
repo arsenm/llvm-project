@@ -256,6 +256,8 @@ namespace {
 
     void InitRegPressure(MachineBasicBlock *BB);
 
+    void UpdateRegPressureForBlockArgs(const MachineBasicBlock &MBB);
+
     SmallDenseMap<unsigned, int> calcRegisterCost(const MachineInstr *MI,
                                                   bool ConsiderSeen,
                                                   bool ConsiderUnseenAsDef);
@@ -744,7 +746,7 @@ void MachineLICMImpl::HoistPostRA(MachineInstr *MI, Register Def,
 
   // Splice the instruction to the preheader.
   MachineBasicBlock *MBB = MI->getParent();
-  Preheader->splice(Preheader->getFirstTerminator(), MBB, MI);
+  Preheader->splice(Preheader->getBlockEndInsertPt(), MBB, MI);
 
   // Since we are moving the instruction out of its basic block, we do not
   // retain its debug location. Doing so would degrade the debugging
@@ -885,6 +887,7 @@ void MachineLICMImpl::HoistOutOfLoop(MachineDomTreeNode *HeaderN,
 
     // Process the block
     GuaranteedToExecute.clear();
+    UpdateRegPressureForBlockArgs(*MBB);
     for (MachineInstr &MI : llvm::make_early_inc_range(*MBB)) {
       unsigned HoistRes = HoistResult::NotHoisted;
       HoistRes = Hoist(&MI, Preheader, CurLoop);
@@ -935,8 +938,20 @@ void MachineLICMImpl::InitRegPressure(MachineBasicBlock *BB) {
       InitRegPressure(*BB->pred_begin());
   }
 
+  UpdateRegPressureForBlockArgs(*BB);
   for (const MachineInstr &MI : *BB)
     UpdateRegPressure(&MI, /*ConsiderUnseenAsDef=*/true);
+}
+
+void MachineLICMImpl::UpdateRegPressureForBlockArgs(
+    const MachineBasicBlock &MBB) {
+  for (Register Arg : MBB.getBlockArgs()) {
+    RegSeen.insert(Arg);
+    const TargetRegisterClass *RC = MRI->getRegClass(Arg);
+    unsigned Weight = TRI->getRegClassWeight(RC).RegWeight;
+    for (const int *PS = TRI->getRegClassPressureSets(RC); *PS != -1; ++PS)
+      RegPressure[*PS] += Weight;
+  }
 }
 
 /// Update estimate of register pressure after the specified instruction.
@@ -961,7 +976,7 @@ SmallDenseMap<unsigned, int>
 MachineLICMImpl::calcRegisterCost(const MachineInstr *MI, bool ConsiderSeen,
                                   bool ConsiderUnseenAsDef) {
   SmallDenseMap<unsigned, int> Cost;
-  if (MI->isImplicitDef())
+  if (MI->isImplicitDef() || MI->isSuccArgs())
     return Cost;
   for (unsigned i = 0, e = MI->getDesc().getNumOperands(); i != e; ++i) {
     const MachineOperand &MO = MI->getOperand(i);
@@ -1152,6 +1167,12 @@ bool MachineLICMImpl::HasLoopPHIUse(const MachineInstr *MI,
           // has multiple predecessors in the loop with different values.
           // For now, approximate by rejecting all exit blocks.
           if (isExitBlock(CurLoop, UseMI.getParent()))
+            return true;
+          continue;
+        }
+        if (UseMI.isSuccArgs()) {
+          MachineBasicBlock *Succ = UseMI.getOperand(0).getMBB();
+          if (CurLoop->contains(Succ) || isExitBlock(CurLoop, Succ))
             return true;
           continue;
         }
@@ -1667,7 +1688,7 @@ unsigned MachineLICMImpl::Hoist(MachineInstr *MI, MachineBasicBlock *Preheader,
 
   if (!HasCSEDone) {
     // Otherwise, splice the instruction to the preheader.
-    Preheader->splice(Preheader->getFirstTerminator(),MI->getParent(),MI);
+    Preheader->splice(Preheader->getBlockEndInsertPt(), MI->getParent(), MI);
 
     // Since we are moving the instruction out of its basic block, we do not
     // retain its debug location. Doing so would degrade the debugging

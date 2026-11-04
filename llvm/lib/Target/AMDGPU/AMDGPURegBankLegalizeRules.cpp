@@ -781,6 +781,12 @@ RegBankLegalizeRules::RegBankLegalizeRules(const GCNSubtarget &_ST,
       .Any({{UniBRC}, {{}, {}, VerifyAllSgprGPHI}})
       .Any({{DivBRC}, {{}, {}, VerifyAllSgprOrVgprGPHI}});
 
+  // G_SUCC_ARGS operand 0 is the successor block (matched as a non-register
+  // '_'), so it cannot be keyed on a def's uniformity like other opcodes. The
+  // SuccArgs applier reconciles each forwarded value to its receiver block
+  // argument's already-assigned bank.
+  addRulesForGOpcs({G_SUCC_ARGS}).Any({{_}, {{}, {}, SuccArgs}});
+
   addRulesForGOpcs({G_EXTRACT_VECTOR_ELT})
       .Any({{UniB32, UniBRC, UniS32}, {{SgprB32}, {SgprBRC, Sgpr32}}})
       .Any({{DivB32, DivBRC, UniS32}, {{VgprB32}, {VgprBRC, Sgpr32}}})

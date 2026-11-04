@@ -1012,11 +1012,9 @@ emitSelectPseudo(MachineInstr &MI, MachineBasicBlock *BB, unsigned Opcode) {
   //  ...
   BB = sinkMBB;
 
-  BuildMI(*BB, BB->begin(), DL, TII.get(CSKY::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(2).getReg())
-      .addMBB(thisMBB)
-      .addReg(MI.getOperand(3).getReg())
-      .addMBB(copyMBB);
+  TII.buildValueMerge(*BB, MI.getOperand(0).getReg(),
+                      {{MI.getOperand(2).getReg(), thisMBB},
+                       {MI.getOperand(3).getReg(), copyMBB}});
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
 

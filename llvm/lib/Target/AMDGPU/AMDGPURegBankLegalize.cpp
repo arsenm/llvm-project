@@ -155,7 +155,8 @@ bool AMDGPURegBankLegalizeCombiner::isLaneMask(Register Reg) {
 std::pair<MachineInstr *, Register>
 AMDGPURegBankLegalizeCombiner::tryMatch(Register Src, unsigned Opcode) {
   MachineInstr *MatchMI = MRI.getVRegDef(Src);
-  if (MatchMI->getOpcode() != Opcode)
+  // A block-argument register has no defining instruction to match.
+  if (!MatchMI || MatchMI->getOpcode() != Opcode)
     return {nullptr, Register()};
   return {MatchMI, MatchMI->getOperand(1).getReg()};
 }
@@ -467,6 +468,11 @@ runRegBankLegalize(MachineFunction &MF,
     if (!RBLHelper.findRuleAndApplyMapping(*MI))
       return false;
   }
+
+  // Uniform S1 block arguments have no PHI to trigger the S1->S32 widening
+  // rule; widen them directly so the S1 cleanup combines below can eliminate
+  // the resulting truncs/anyexts.
+  RBLHelper.widenS1BlockArgs(MF);
 
   // Sgpr S1 clean up combines:
   // - Sgpr S1(S32) to sgpr S1(S32) Copy: anyext + trunc combine.

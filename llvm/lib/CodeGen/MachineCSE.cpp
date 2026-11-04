@@ -396,9 +396,9 @@ bool MachineCSEImpl::PhysRegDefsReach(MachineInstr *CSMI, MachineInstr *MI,
 }
 
 bool MachineCSEImpl::isCSECandidate(MachineInstr *MI) {
-  if (MI->isPosition() || MI->isPHI() || MI->isImplicitDef() || MI->isKill() ||
-      MI->isInlineAsm() || MI->isDebugInstr() || MI->isJumpTableDebugInfo() ||
-      MI->isFakeUse())
+  if (MI->isPosition() || MI->isPHI() || MI->isSuccArgs() ||
+      MI->isImplicitDef() || MI->isKill() || MI->isInlineAsm() ||
+      MI->isDebugInstr() || MI->isJumpTableDebugInfo() || MI->isFakeUse())
     return false;
 
   // Ignore copies.
@@ -446,9 +446,12 @@ bool MachineCSEImpl::isProfitableToCSE(Register CSReg, Register Reg,
   if (CSReg.isVirtual() && Reg.isVirtual()) {
     MayIncreasePressure = false;
     SmallPtrSet<MachineInstr*, 8> CSUses;
+    SmallPtrSet<MachineBasicBlock *, 4> CSSuccArgTargets;
     int NumOfUses = 0;
     for (MachineInstr &MI : MRI->use_nodbg_instructions(CSReg)) {
       CSUses.insert(&MI);
+      if (MI.isSuccArgs())
+        CSSuccArgTargets.insert(MI.getOperand(0).getMBB());
       // Too costly to compute if NumOfUses is very large. Conservatively assume
       // MayIncreasePressure to avoid spending too much time here.
       if (++NumOfUses > CSUsesThreshold) {
@@ -458,7 +461,9 @@ bool MachineCSEImpl::isProfitableToCSE(Register CSReg, Register Reg,
     }
     if (!MayIncreasePressure)
       for (MachineInstr &MI : MRI->use_nodbg_instructions(Reg)) {
-        if (!CSUses.count(&MI)) {
+        if (!CSUses.count(&MI) &&
+            !(MI.isSuccArgs() &&
+              CSSuccArgTargets.count(MI.getOperand(0).getMBB()))) {
           MayIncreasePressure = true;
           break;
         }
@@ -501,6 +506,12 @@ bool MachineCSEImpl::isProfitableToCSE(Register CSReg, Register Reg,
   // it unless the defined value is already used in the BB of the new use.
   bool HasPHI = false;
   for (MachineInstr &UseMI : MRI->use_nodbg_instructions(CSReg)) {
+    if (UseMI.isSuccArgs()) {
+      HasPHI = true;
+      if (UseMI.getOperand(0).getMBB() == MI->getParent())
+        return true;
+      continue;
+    }
     HasPHI |= UseMI.isPHI();
     if (UseMI.getParent() == MI->getParent())
       return true;
@@ -874,7 +885,7 @@ bool MachineCSEImpl::ProcessBlockPRE(MachineDominatorTree *DT,
         if (!isProfitableToCSE(NewReg, VReg, CMBB, &MI))
           continue;
         MachineInstr &NewMI =
-            TII->duplicate(*CMBB, CMBB->getFirstTerminator(), MI);
+            TII->duplicate(*CMBB, CMBB->getBlockEndInsertPt(), MI);
 
         // When hoisting, make sure we don't carry the debug location of
         // the original instruction, as that's not correct and can cause

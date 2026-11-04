@@ -457,6 +457,9 @@ private:
   bool optimizeUncoalescableCopy(MachineInstr &MI,
                                  SmallPtrSetImpl<MachineInstr *> &LocalMIs);
   bool optimizeRecurrence(MachineInstr &PHI);
+  bool optimizeBlockArgRecurrence(MachineBasicBlock &MBB, unsigned ArgIdx);
+  bool optimizeRecurrence(Register Start,
+                          const SmallSet<Register, 2> &TargetRegs);
   bool findNextSource(const TargetRegisterClass *DefRC, unsigned DefSubReg,
                       RegSubRegPair RegSubReg, RewriteMapTy &RewriteMap);
   bool isMoveImmediate(MachineInstr &MI, SmallSet<Register, 4> &ImmDefRegs,
@@ -815,7 +818,8 @@ bool PeepholeOptimizer::optimizeExtInstr(
   // the result of the extension.
   SmallPtrSet<MachineBasicBlock *, 4> ReachedBBs;
   for (MachineInstr &UI : MRI->use_nodbg_instructions(DstReg))
-    ReachedBBs.insert(UI.getParent());
+    ReachedBBs.insert(UI.isSuccArgs() ? UI.getOperand(0).getMBB()
+                                      : UI.getParent());
 
   // Uses that are in the same BB of uses of the result of the instruction.
   SmallVector<MachineOperand *, 8> Uses;
@@ -829,7 +833,7 @@ bool PeepholeOptimizer::optimizeExtInstr(
     if (UseMI == &MI)
       continue;
 
-    if (UseMI->isPHI()) {
+    if (UseMI->isPHI() || UseMI->isSuccArgs()) {
       ExtendLife = false;
       continue;
     }
@@ -891,9 +895,12 @@ bool PeepholeOptimizer::optimizeExtInstr(
     // Look for PHI uses of the extended result, we don't want to extend the
     // liveness of a PHI input. It breaks all kinds of assumptions down
     // stream. A PHI use is expected to be the kill of its source values.
-    for (MachineInstr &UI : MRI->use_nodbg_instructions(DstReg))
+    for (MachineInstr &UI : MRI->use_nodbg_instructions(DstReg)) {
       if (UI.isPHI())
         PHIBBs.insert(UI.getParent());
+      else if (UI.isSuccArgs())
+        PHIBBs.insert(UI.getOperand(0).getMBB());
+    }
 
     const TargetRegisterClass *RC = MRI->getRegClass(SrcReg);
     for (MachineOperand *UseMO : Uses) {
@@ -929,9 +936,17 @@ bool PeepholeOptimizer::optimizeExtInstr(
       }
 
       Register NewVR = MRI->createVirtualRegister(RC);
-      [[maybe_unused]] auto Copy = BuildMI(*UseMBB, UseMI, UseMI->getDebugLoc(),
-                                           TII->get(TargetOpcode::COPY), NewVR)
-                                       .addReg(DstReg, {}, SubIdx);
+      // A SUCC_ARGS use lives in the block's SUCC_ARGS cluster, which must stay
+      // adjacent to the terminators. The COPY is neither, so insert it before
+      // the whole cluster rather than within it. Any other use (including a
+      // terminator) takes the COPY immediately before itself, as before.
+      MachineBasicBlock::iterator InsertPt =
+          UseMI->isSuccArgs() ? UseMBB->getFirstSuccArgs()
+                              : MachineBasicBlock::iterator(UseMI);
+      [[maybe_unused]] auto Copy =
+          BuildMI(*UseMBB, InsertPt, UseMI->getDebugLoc(),
+                  TII->get(TargetOpcode::COPY), NewVR)
+              .addReg(DstReg, {}, SubIdx);
       LLVM_DEBUG(dbgs() << "  Build new copy: " << *Copy
                         << "  Changing: " << *UseMI);
       if (UseSrcSubIdx)
@@ -1730,12 +1745,34 @@ bool PeepholeOptimizer::optimizeRecurrence(MachineInstr &PHI) {
     TargetRegs.insert(MO.getReg());
   }
 
+  return optimizeRecurrence(PHI.getOperand(0).getReg(), TargetRegs);
+}
+
+bool PeepholeOptimizer::optimizeBlockArgRecurrence(MachineBasicBlock &MBB,
+                                                   unsigned ArgIdx) {
+  SmallSet<Register, 2> TargetRegs;
+  for (MachineBasicBlock *Pred : MBB.predecessors()) {
+    MachineInstr *SA = Pred->findSuccArgs(&MBB);
+    if (!SA)
+      return false;
+    MachineOperand &MO = SA->getOperand(ArgIdx + 1);
+    if (!isVirtualRegisterOperand(MO))
+      return false;
+    TargetRegs.insert(MO.getReg());
+  }
+
+  return optimizeRecurrence(MBB.getBlockArg(ArgIdx), TargetRegs);
+}
+
+bool PeepholeOptimizer::optimizeRecurrence(
+    Register Start, const SmallSet<Register, 2> &TargetRegs) {
   bool Changed = false;
   RecurrenceCycle RC;
-  if (findTargetRecurrence(PHI.getOperand(0).getReg(), TargetRegs, RC)) {
+  if (findTargetRecurrence(Start, TargetRegs, RC)) {
     // Commutes operands of instructions in RC if necessary so that the copy to
     // be generated from PHI can be coalesced.
-    LLVM_DEBUG(dbgs() << "Optimize recurrence chain from " << PHI);
+    LLVM_DEBUG(dbgs() << "Optimize recurrence chain from " << printReg(Start)
+                      << '\n');
     for (auto &RI : RC) {
       LLVM_DEBUG(dbgs() << "\tInst: " << *(RI.getMI()));
       auto CP = RI.getCommutePair();
@@ -1818,6 +1855,10 @@ bool PeepholeOptimizer::run(MachineFunction &MF) {
     CopySrcMIs.clear();
 
     bool IsLoopHeader = MLI->isLoopHeader(&MBB);
+    if (IsLoopHeader) {
+      for (unsigned I = 0, E = MBB.getNumBlockArgs(); I != E; ++I)
+        Changed |= optimizeBlockArgRecurrence(MBB, I);
+    }
 
     for (MachineBasicBlock::iterator MII = MBB.begin(), MIE = MBB.end();
          MII != MIE;) {
@@ -1831,7 +1872,7 @@ bool PeepholeOptimizer::run(MachineFunction &MF) {
       if (MI->isDebugInstr())
         continue;
 
-      if (MI->isPosition())
+      if (MI->isPosition() || MI->isSuccArgs())
         continue;
 
       if (IsLoopHeader && MI->isPHI()) {

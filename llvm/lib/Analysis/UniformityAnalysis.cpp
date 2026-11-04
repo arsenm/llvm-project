@@ -121,6 +121,13 @@ bool llvm::GenericUniformityAnalysisImpl<SSAContext>::usesValueFromCycle(
 }
 
 template <>
+bool llvm::GenericUniformityAnalysisImpl<
+    SSAContext>::blockArgUsesValueFromCycle(const Value *Arg,
+                                            CycleRef DefCycle) const {
+  return false;
+}
+
+template <>
 void llvm::GenericUniformityAnalysisImpl<
     SSAContext>::propagateTemporalDivergence(const Instruction &I,
                                              CycleRef DefCycle) {

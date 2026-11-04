@@ -52,6 +52,15 @@ private:
   const TargetInstrInfo *TII = nullptr;
   MachineRegisterInfo *MRI = nullptr;
 
+  /// When the function uses the block-argument representation, joins are
+  /// materialized as block arguments plus SUCC_ARGS forwarders rather than
+  /// machine PHIs, which are illegal in the final IR. \p PendingBlockArgs
+  /// collects block arguments created by the placement algorithm (as
+  /// (block, register) pairs) whose forwarders have not yet been emitted.
+  MachineFunction *MF = nullptr;
+  bool UsesBlockArgs = false;
+  SmallVector<std::pair<MachineBasicBlock *, Register>, 8> PendingBlockArgs;
+
 public:
   /// MachineSSAUpdater constructor.  If InsertedPHIs is specified, it will be
   /// filled in with all PHI Nodes created by rewriting.
@@ -112,6 +121,11 @@ private:
   // for debug values, which cannot modify Codegen.
   Register GetValueAtEndOfBlockInternal(MachineBasicBlock *BB,
                                         bool ExistingValueOnly = false);
+
+  /// Emit the SUCC_ARGS forwarders for any block arguments created since the
+  /// last call, reading each forwarded value from AvailableVals. No-op unless
+  /// the function uses block arguments.
+  void emitPendingBlockArgs();
 };
 
 } // end namespace llvm
