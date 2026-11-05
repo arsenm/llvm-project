@@ -1212,8 +1212,17 @@ AttributeSet Attributor::getAttrSet(const IRPosition &IRP) const {
     break;
   }
 
-  auto Iter = AttrsMap.find(IRP.getAttrListAnchor());
-  AttributeList AL = Iter != AttrsMap.end() ? Iter->second : IRP.getAttrList();
+  // Attributes are only recorded in AttrsMap once they are changed, which
+  // most of the queried positions are not.
+  Value *Anchor = IRP.getAttrListAnchor();
+  AttributeList AL;
+  auto Iter = AttrsMap.empty() ? AttrsMap.end() : AttrsMap.find(Anchor);
+  if (Iter != AttrsMap.end())
+    AL = Iter->second;
+  else if (auto *CB = dyn_cast<CallBase>(Anchor))
+    AL = CB->getAttributes();
+  else
+    AL = cast<Function>(Anchor)->getAttributes();
   return AL.getAttributes(IRP.getAttrIdx());
 }
 
