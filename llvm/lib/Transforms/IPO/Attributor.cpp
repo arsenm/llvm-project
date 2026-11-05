@@ -1223,7 +1223,7 @@ bool Attributor::hasAttr(const IRPosition &IRP,
                          Attribute::AttrKind ImpliedAttributeKind) {
   bool Implied = false;
   bool HasAttr = false;
-  for (const IRPosition &EquivIRP : SubsumingPositionIterator(IRP)) {
+  auto CheckPosition = [&](const IRPosition &EquivIRP) {
     AttributeSet AttrSet = getAttrSet(EquivIRP);
     for (Attribute::AttrKind Kind : AttrKinds) {
       if (AttrSet.hasAttribute(Kind)) {
@@ -1231,15 +1231,19 @@ bool Attributor::hasAttr(const IRPosition &IRP,
         HasAttr = true;
       }
     }
-    if (HasAttr)
-      break;
-    // The first position returned by the SubsumingPositionIterator is
-    // always the position itself. If we ignore subsuming positions we
-    // are done after the first iteration.
-    if (IgnoreSubsumingPositions)
-      break;
+    return HasAttr;
+  };
+
+  // Only compute the subsuming positions if the position itself does not have
+  // the attribute. The first subsuming position is the position itself.
+  if (!CheckPosition(IRP) && !IgnoreSubsumingPositions) {
     Implied = true;
+    SubsumingPositionIterator Positions(IRP);
+    for (const IRPosition &EquivIRP : drop_begin(Positions))
+      if (CheckPosition(EquivIRP))
+        break;
   }
+
   if (!HasAttr) {
     Implied = true;
     SmallVector<Attribute> Attrs;
@@ -1261,18 +1265,23 @@ void Attributor::getAttrs(const IRPosition &IRP,
                           ArrayRef<Attribute::AttrKind> AttrKinds,
                           SmallVectorImpl<Attribute> &Attrs,
                           bool IgnoreSubsumingPositions) {
-  for (const IRPosition &EquivIRP : SubsumingPositionIterator(IRP)) {
+  auto CollectAttrs = [&](const IRPosition &EquivIRP) {
     AttributeSet AttrSet = getAttrSet(EquivIRP);
     for (Attribute::AttrKind Kind : AttrKinds) {
       if (AttrSet.hasAttribute(Kind))
         Attrs.push_back(AttrSet.getAttribute(Kind));
     }
-    // The first position returned by the SubsumingPositionIterator is
-    // always the position itself. If we ignore subsuming positions we
-    // are done after the first iteration.
-    if (IgnoreSubsumingPositions)
-      break;
+  };
+
+  // Only compute the subsuming positions if they are needed. The first
+  // subsuming position is the position itself.
+  CollectAttrs(IRP);
+  if (!IgnoreSubsumingPositions) {
+    SubsumingPositionIterator Positions(IRP);
+    for (const IRPosition &EquivIRP : drop_begin(Positions))
+      CollectAttrs(EquivIRP);
   }
+
   for (Attribute::AttrKind AK : AttrKinds)
     getAttrsFromAssumes(IRP, AK, Attrs);
 }
