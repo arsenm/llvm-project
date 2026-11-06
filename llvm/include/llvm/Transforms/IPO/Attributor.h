@@ -1781,8 +1781,18 @@ struct Attributor {
   /// If a function is exactly defined or it has alwaysinline attribute
   /// and is viable to be inlined, we say it is IPO amendable
   bool isFunctionIPOAmendable(const Function &F) {
-    return F.hasExactDefinition() || InfoCache.InlineableFunctions.count(&F) ||
-           (Configuration.IPOAmendableCB && Configuration.IPOAmendableCB(F));
+    // Functions are not deleted before the manifest stage, and remain IPO
+    // amendable once they are, so remember them until then.
+    bool UseCache =
+        Phase == AttributorPhase::SEEDING || Phase == AttributorPhase::UPDATE;
+    if (UseCache && IPOAmendableFunctions.contains(&F))
+      return true;
+    bool IsIPOAmendable =
+        F.hasExactDefinition() || InfoCache.InlineableFunctions.count(&F) ||
+        (Configuration.IPOAmendableCB && Configuration.IPOAmendableCB(F));
+    if (UseCache && IsIPOAmendable)
+      IPOAmendableFunctions.insert(&F);
+    return IsIPOAmendable;
   }
 
   /// Return whether attributes can participate in fixed-point deduction.
@@ -2567,6 +2577,9 @@ private:
   ///{
   SmallPtrSet<BasicBlock *, 8> ManifestAddedBlocks;
   SmallSetVector<Function *, 8> ToBeDeletedFunctions;
+
+  /// The functions known to be IPO amendable, see isFunctionIPOAmendable.
+  SmallPtrSet<const Function *, 16> IPOAmendableFunctions;
   SmallSetVector<BasicBlock *, 8> ToBeDeletedBlocks;
   SmallSetVector<WeakVH, 8> ToBeDeletedInsts;
   ///}
