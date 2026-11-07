@@ -8565,6 +8565,26 @@ protected:
   BumpPtrAllocator &Allocator;
 };
 
+/// Return the underlying object of \p Ptr if it is the only one
+/// AAUnderlyingObjects would find, which is the case if values are not
+/// simplified and \p Ptr is not based on a phi or select, or nullptr.
+static Value *getOnlyUnderlyingObject(Attributor &A, const Value &Ptr) {
+  if (A.isAllowed<AAPotentialValues>())
+    return nullptr;
+  auto IsSimplified = [&](const Value &V) {
+    return isa<PHINode, SelectInst>(V) ||
+           A.hasSimplificationCallback(IRPosition::value(V));
+  };
+  if (IsSimplified(Ptr))
+    return nullptr;
+  Value *Obj = const_cast<Value *>(getUnderlyingObject(&Ptr));
+  if (isa<AllocaInst, GlobalValue>(Obj))
+    return Obj;
+  if (IsSimplified(*Obj) || getUnderlyingObject(Obj) != Obj)
+    return nullptr;
+  return Obj;
+}
+
 void AAMemoryLocationImpl::categorizePtrValue(
     Attributor &A, const Instruction &I, const Value &Ptr,
     AAMemoryLocation::StateType &State, bool &Changed, unsigned AccessAS) {
@@ -8635,6 +8655,13 @@ void AAMemoryLocationImpl::categorizePtrValue(
 
     return true;
   };
+
+  // Avoid creating abstract attributes for the pointer and its underlying
+  // object if they cannot find other objects.
+  if (Value *Obj = getOnlyUnderlyingObject(A, Ptr)) {
+    Pred(*Obj);
+    return;
+  }
 
   const auto *AA = A.getAAFor<AAUnderlyingObjects>(
       *this, IRPosition::value(Ptr), DepClassTy::OPTIONAL);
