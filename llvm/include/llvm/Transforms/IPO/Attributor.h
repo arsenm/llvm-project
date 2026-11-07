@@ -1685,6 +1685,9 @@ struct Attributor {
   /// Return true if this is a module pass, false otherwise.
   bool isModulePass() const { return Configuration.IsModulePass; }
 
+  /// Return true if liveness is used, see AttributorConfig::UseLiveness.
+  bool usesLiveness() const { return Configuration.UseLiveness; }
+
   /// Return true if we should specialize the call site \b CB for the potential
   /// callee \p Fn.
   bool shouldSpecializeCallSiteForCallee(const AbstractAttribute &AA,

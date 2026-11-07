@@ -10717,13 +10717,33 @@ struct AAInterFnReachabilityFunction
                                         A, *RQI.From, CBInst, RQI.ExclusionSet);
     };
 
+    // A reachable direct call to the target, or to a declaration that may
+    // call back into the module, makes the target reachable. Without liveness,
+    // e.g. for attributor-light, look for these first, as they do not require
+    // looking at other functions. With liveness, the abstract attributes
+    // created while looking at the other functions can improve other results.
+    auto CheckDirectCallBase = [&](Instruction &CBInst) {
+      const Function *Callee = cast<CallBase>(CBInst).getCalledFunction();
+      if (!Callee ||
+          (Callee != RQI.To && (!Callee->isDeclaration() ||
+                                Callee->hasFnAttribute(Attribute::NoCallback))))
+        return true;
+      return IntraFnReachability && !IntraFnReachability->isAssumedReachable(
+                                        A, *RQI.From, CBInst, RQI.ExclusionSet);
+    };
+
     bool UsedExclusionSet = /* conservative */ true;
     bool UsedAssumedInformation = false;
-    if (!A.checkForAllCallLikeInstructions(CheckCallBase, *this,
+    if ((!A.usesLiveness() &&
+         !A.checkForAllCallLikeInstructions(CheckDirectCallBase, *this,
+                                            UsedAssumedInformation,
+                                            /* CheckBBLivenessOnly */ true)) ||
+        !A.checkForAllCallLikeInstructions(CheckCallBase, *this,
                                            UsedAssumedInformation,
-                                           /* CheckBBLivenessOnly */ true))
+                                           /* CheckBBLivenessOnly */ true)) {
       return rememberResult(A, RQITy::Reachable::Yes, RQI, UsedExclusionSet,
                             IsTemporaryRQI);
+    }
 
     return rememberResult(A, RQITy::Reachable::No, RQI, UsedExclusionSet,
                           IsTemporaryRQI);
