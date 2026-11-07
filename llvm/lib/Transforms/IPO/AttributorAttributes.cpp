@@ -8328,7 +8328,8 @@ namespace {
 struct AAMemoryLocationImpl : public AAMemoryLocation {
 
   AAMemoryLocationImpl(const IRPosition &IRP, Attributor &A)
-      : AAMemoryLocation(IRP, A), Allocator(A.Allocator) {
+      : AAMemoryLocation(IRP, A), TrackAccesses(A.tracksMemoryAccesses()),
+        Allocator(A.Allocator) {
     AccessKind2Accesses.fill(nullptr);
   }
 
@@ -8511,6 +8512,13 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
       if (CurMLK & RequestedMLK)
         continue;
 
+      if (!TrackAccesses) {
+        if ((RecordedLocations & CurMLK) &&
+            !Pred(nullptr, nullptr, AccessKinds[Idx], CurMLK))
+          return false;
+        continue;
+      }
+
       if (const AccessSet *Accesses = AccessKind2Accesses[Idx])
         for (const AccessInfo &AI : *Accesses)
           if (!Pred(AI.I, AI.Ptr, AI.Kind, CurMLK))
@@ -8528,6 +8536,12 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
       return NONE;
     // Without any recorded accesses, e.g., for declarations, only the memory
     // effects in the IR are known.
+    if (!TrackAccesses) {
+      if (!RecordedLocations)
+        return AccessKind(getModRef(IRMemoryEffects, MLK));
+      return AccessKinds[llvm::Log2_32(MLK)];
+    }
+
     if (llvm::all_of(AccessKind2Accesses,
                      [](const AccessSet *AS) { return !AS || AS->empty(); }))
       return AccessKind(getModRef(IRMemoryEffects, MLK));
@@ -8593,6 +8607,13 @@ protected:
   std::array<AccessSet *, llvm::ConstantLog2<VALID_STATE>()>
       AccessKind2Accesses;
 
+  /// Whether the accesses are recorded in AccessKind2Accesses. Otherwise only
+  /// the kinds of the accesses to each location are recorded.
+  bool TrackAccesses;
+  std::array<AccessKind, llvm::ConstantLog2<VALID_STATE>()> AccessKinds = {};
+  /// The locations with recorded accesses, which may be of kind NONE.
+  MemoryLocationsKind RecordedLocations = 0;
+
   /// Categorize the pointer arguments of CB that might access memory in
   /// AccessedLoc and update the state and access map accordingly.
   void
@@ -8623,10 +8644,19 @@ protected:
                                  AccessKind AK = READ_WRITE) {
 
     assert(isPowerOf2_32(MLK) && "Expected a single location set!");
-    auto *&Accesses = AccessKind2Accesses[llvm::Log2_32(MLK)];
-    if (!Accesses)
-      Accesses = new (Allocator) AccessSet();
-    Changed |= Accesses->insert(AccessInfo{I, Ptr, AK}).second;
+    if (TrackAccesses) {
+      auto *&Accesses = AccessKind2Accesses[llvm::Log2_32(MLK)];
+      if (!Accesses)
+        Accesses = new (Allocator) AccessSet();
+      Changed |= Accesses->insert(AccessInfo{I, Ptr, AK}).second;
+    } else {
+      AccessKind &Kind = AccessKinds[llvm::Log2_32(MLK)];
+      if (!(RecordedLocations & MLK) || (Kind | AK) != Kind) {
+        RecordedLocations |= MLK;
+        Kind = AccessKind(Kind | AK);
+        Changed = true;
+      }
+    }
     if (MLK == NO_UNKOWN_MEM)
       MLK = NO_LOCATIONS;
     State.removeAssumedBits(MLK);
