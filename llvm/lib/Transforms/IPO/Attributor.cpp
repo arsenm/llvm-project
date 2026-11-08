@@ -3415,7 +3415,7 @@ void Attributor::checkAndQueryIRAttr(const IRPosition &IRP, AttributeSet Attrs,
                                      bool SkipHasAttrCheck) {
   bool IsKnown;
   if (SkipHasAttrCheck || !Attrs.hasAttribute(AK))
-    if (!Configuration.Allowed || Configuration.Allowed->count(&AAType::ID))
+    if (isAllowed<AAType>())
       if (!AA::hasAssumedIRAttr<AK>(*this, nullptr, IRP, DepClassTy::NONE,
                                     IsKnown))
         getOrCreateAAFor<AAType>(IRP);

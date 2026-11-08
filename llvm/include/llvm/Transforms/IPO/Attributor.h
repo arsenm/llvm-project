@@ -1648,7 +1648,7 @@ struct Attributor {
 
   /// Return true if abstract attributes of type \p AAType may be created.
   template <typename AAType> bool isAllowed() const {
-    return !Configuration.Allowed || Configuration.Allowed->count(&AAType::ID);
+    return !Configuration.Allowed || isAllowedID(&AAType::ID);
   }
 
   /// Allows a query AA to request an update if a new query was received.
@@ -2597,6 +2597,22 @@ private:
 
   /// User provided configuration for this Attributor instance.
   const AttributorConfig Configuration;
+
+  /// Return true if \p ID is in the allowed set. The IDs of the abstract
+  /// attributes are adjacent and collide in the hash table of the set, so
+  /// remember the answer for each ID in a direct mapped cache.
+  bool isAllowedID(const char *ID) const {
+    auto &[CachedID, IsAllowed] =
+        AllowedCache[reinterpret_cast<uintptr_t>(ID) % std::size(AllowedCache)];
+    if (CachedID != ID) {
+      CachedID = ID;
+      IsAllowed = Configuration.Allowed->contains(ID);
+    }
+    return IsAllowed;
+  }
+
+  /// The cache for isAllowedID.
+  mutable std::pair<const char *, bool> AllowedCache[64] = {};
 
   friend AADepGraph;
   friend AttributorCallGraph;
