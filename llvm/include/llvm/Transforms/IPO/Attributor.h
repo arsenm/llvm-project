@@ -1420,7 +1420,7 @@ struct AttributorConfig {
   CallGraphUpdater &CGUpdater;
 
   /// If not null, a set limiting the attribute opportunities.
-  DenseSet<const char *> *Allowed = nullptr;
+  const DenseSet<const char *> *Allowed = nullptr;
 
   /// Maximum number of iterations to run until fixpoint.
   std::optional<unsigned> MaxFixpointIterations;

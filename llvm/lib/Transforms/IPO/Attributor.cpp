@@ -4015,7 +4015,9 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
   AttributorConfig AC(CGUpdater);
   AC.IsModulePass = IsModulePass;
   AC.DeleteFns = false;
-  DenseSet<const char *> Allowed(
+  // The allowed abstract attributes are the same for every run, and their
+  // IDs collide in the hash table, so only build the set once.
+  static const DenseSet<const char *> Allowed(
       {&AAWillReturn::ID, &AANoUnwind::ID, &AANoRecurse::ID, &AANoSync::ID,
        &AANoFree::ID, &AANoReturn::ID, &AAMemoryLocation::ID,
        &AAMemoryBehavior::ID, &AAUnderlyingObjects::ID, &AANoCapture::ID,
