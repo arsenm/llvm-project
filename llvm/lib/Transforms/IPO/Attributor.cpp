@@ -1204,17 +1204,12 @@ Attributor::updateAttrMap(const IRPosition &IRP, ArrayRef<DescTy> AttrDescs,
 }
 
 AttributeSet Attributor::getAttrSet(const IRPosition &IRP) const {
-  switch (IRP.getPositionKind()) {
-  case IRPosition::IRP_FLOAT:
-  case IRPosition::IRP_INVALID:
+  auto [Anchor, Idx] = IRP.getAttrListAnchorAndIdx();
+  if (!Anchor)
     return AttributeSet();
-  default:
-    break;
-  }
 
   // Attributes are only recorded in AttrsMap once they are changed, which
   // most of the queried positions are not.
-  Value *Anchor = IRP.getAttrListAnchor();
   AttributeList AL;
   auto Iter = AttrsMap.empty() ? AttrsMap.end() : AttrsMap.find(Anchor);
   if (Iter != AttrsMap.end())
@@ -1223,7 +1218,7 @@ AttributeSet Attributor::getAttrSet(const IRPosition &IRP) const {
     AL = CB->getAttributes();
   else
     AL = cast<Function>(Anchor)->getAttributes();
-  return AL.getAttributes(IRP.getAttrIdx());
+  return AL.getAttributes(Idx);
 }
 
 bool Attributor::hasAttr(const IRPosition &IRP,

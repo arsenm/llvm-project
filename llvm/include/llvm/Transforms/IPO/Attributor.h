@@ -828,6 +828,25 @@ struct IRPosition {
     return getAssociatedFunction();
   }
 
+  /// Return getAttrListAnchor() and getAttrIdx(), or nullptr for floating and
+  /// invalid positions, which have no attributes.
+  std::pair<Value *, unsigned> getAttrListAnchorAndIdx() const {
+    char EncodingBits = getEncodingBits();
+    if (EncodingBits == ENC_CALL_SITE_ARGUMENT_USE) {
+      Use *U = getAsUsePtr();
+      return {U->getUser(), U->getOperandNo() + AttributeList::FirstArgIndex};
+    }
+    Value *V =
+        EncodingBits == ENC_FLOATING_FUNCTION ? nullptr : getAsValuePtr();
+    if (auto *Arg = dyn_cast_if_present<Argument>(V))
+      return {Arg->getParent(), Arg->getArgNo() + AttributeList::FirstArgIndex};
+    if (isa_and_present<Function, CallBase>(V)) {
+      return {V, isReturnPosition(EncodingBits) ? AttributeList::ReturnIndex
+                                                : AttributeList::FunctionIndex};
+    }
+    return {nullptr, 0};
+  }
+
   /// Return the attributes associated with this function or call site scope.
   AttributeList getAttrList() const {
     if (auto *CB = dyn_cast<CallBase>(&getAnchorValue()))
