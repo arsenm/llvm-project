@@ -1144,7 +1144,47 @@ static bool canExitWithoutWrites(const BasicBlock &EntryBB,
   return false;
 }
 
+/// Return true if a use of \p A, possibly through GEPs, may be a write that
+/// getArgumentAccessInfo returns.
+static bool mayWriteThroughArgument(const Argument &A) {
+  SmallVector<const Use *, 8> Worklist;
+  for (const Use &U : A.uses())
+    Worklist.push_back(&U);
+  while (!Worklist.empty()) {
+    const Use *U = Worklist.pop_back_val();
+    const User *UR = U->getUser();
+    if (isa<GEPOperator>(UR)) {
+      for (const Use &GEPU : UR->uses())
+        Worklist.push_back(&GEPU);
+      continue;
+    }
+
+    if (const auto *SI = dyn_cast<StoreInst>(UR)) {
+      if (U == &SI->getOperandUse(1))
+        return true;
+      continue;
+    }
+    if (const auto *MTI = dyn_cast<MemTransferInst>(UR)) {
+      if (U == &MTI->getOperandUse(0))
+        return true;
+      continue;
+    }
+    if (isa<MemSetInst>(UR))
+      return true;
+    if (const auto *CB = dyn_cast<CallBase>(UR)) {
+      if (CB->isArgOperand(U) &&
+          CB->paramHasAttr(CB->getArgOperandNo(U), Attribute::Initializes))
+        return true;
+    }
+  }
+  return false;
+}
+
 static bool inferInitializes(Argument &A, Function &F) {
+  // Collecting the uses is expensive, and most arguments are not written.
+  if (!mayWriteThroughArgument(A))
+    return false;
+
   auto ArgumentUses = collectArgumentUsesPerBlock(A, F);
   // No write anywhere in the function, bail.
   if (!ArgumentUses.HasAnyWrite)
