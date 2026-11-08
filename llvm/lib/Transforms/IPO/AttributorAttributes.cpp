@@ -5913,6 +5913,21 @@ struct AANoCaptureImpl : public AANoCapture {
 
     unsigned ArgNo = CB->getArgOperandNo(&U);
     const IRPosition &CSArgPos = IRPosition::callsite_argument(*CB, ArgNo);
+
+    // If the callee is not deduced, the abstract attributes of the call site
+    // argument and the callee argument are at a pessimistic fixpoint unless the
+    // IR implies no-capture. Without liveness, e.g. for attributor-light, avoid
+    // creating them.
+    if (!A.usesLiveness()) {
+      Argument *Arg = CSArgPos.getAssociatedArgument();
+      if (Arg && !A.isRunOn(Arg->getParent())) {
+        bool IsCaptured =
+            !AANoCapture::isImpliedByIR(A, CSArgPos, Attribute::Captures);
+        return isCapturedIn(State, /* Memory */ IsCaptured,
+                            /* Integer */ IsCaptured, /* Return */ IsCaptured);
+      }
+    }
+
     // If we have a abstract no-capture attribute for the argument we can use
     // it to justify a non-capture attribute here. This allows recursion!
     bool IsKnownNoCapture;
