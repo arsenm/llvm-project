@@ -7932,8 +7932,8 @@ struct AAMemoryBehaviorArgument : AAMemoryBehaviorFloating {
                   {Attribute::InAlloca, Attribute::Preallocated})) {
       removeKnownBits(NO_WRITES);
       removeAssumedBits(NO_WRITES);
+      A.removeAttrs(getIRPosition(), AttrKinds);
     }
-    A.removeAttrs(getIRPosition(), AttrKinds);
     return AAMemoryBehaviorFloating::manifest(A);
   }
 

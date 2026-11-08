@@ -46,8 +46,8 @@ define void @caller(ptr %p, ptr %q) {
 ;
 ; TWICE-LABEL: define void @caller(
 ; TWICE-SAME: ptr nofree noundef nonnull readnone captures(none) dereferenceable(8) [[P:%.*]], ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[Q:%.*]]) #[[ATTR0]] {
-; TWICE-NEXT:    call void @dead_deref_arg(ptr noalias nofree nonnull captures(none) undef, ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[Q]]) #[[ATTR1:[0-9]+]]
-; TWICE-NEXT:    call void @dead_deref_or_null_arg(ptr noalias nofree nonnull captures(none) undef, ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[Q]]) #[[ATTR1]]
+; TWICE-NEXT:    call void @dead_deref_arg(ptr noalias nofree nonnull readnone captures(none) undef, ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[Q]]) #[[ATTR1:[0-9]+]]
+; TWICE-NEXT:    call void @dead_deref_or_null_arg(ptr noalias nofree nonnull readnone captures(none) undef, ptr nofree noundef nonnull writeonly align 4 captures(none) dereferenceable(4) [[Q]]) #[[ATTR1]]
 ; TWICE-NEXT:    store i32 1, ptr [[Q]], align 4
 ; TWICE-NEXT:    ret void
 ;
