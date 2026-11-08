@@ -1536,8 +1536,8 @@ struct Attributor {
     if (!shouldPropagateCallBaseContext(IRP))
       IRP = IRP.stripCallBaseContext();
 
-    if (AAType *AAPtr = lookupAAFor<AAType>(IRP, QueryingAA, DepClass,
-                                            /* AllowInvalidState */ true)) {
+    if (AAType *AAPtr = lookupAllowedAAFor<AAType>(
+            IRP, QueryingAA, DepClass, /* AllowInvalidState */ true)) {
       if (ForceUpdate && Phase == AttributorPhase::UPDATE)
         updateAA(*AAPtr);
       return AAPtr;
@@ -1617,7 +1617,15 @@ struct Attributor {
     // Attributes of a kind that is not allowed are never created.
     if (!isAllowed<AAType>())
       return nullptr;
+    return lookupAllowedAAFor<AAType>(IRP, QueryingAA, DepClass,
+                                      AllowInvalidState);
+  }
 
+  /// lookupAAFor for a kind of attribute that is known to be allowed.
+  template <typename AAType>
+  AAType *lookupAllowedAAFor(const IRPosition &IRP,
+                             const AbstractAttribute *QueryingAA,
+                             DepClassTy DepClass, bool AllowInvalidState) {
     // Lookup the abstract attribute of type AAType. If found, return it after
     // registering a dependence of QueryingAA on the one returned attribute.
     AbstractAttribute *AAPtr = AAMap.lookup({&AAType::ID, IRP});
