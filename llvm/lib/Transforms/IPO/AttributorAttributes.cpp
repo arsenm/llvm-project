@@ -8561,12 +8561,12 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
     bool Changed = false;
     MemoryLocationsKind KnownMLK = getKnown();
     Instruction *I = dyn_cast<Instruction>(&getAssociatedValue());
+    AccessKind InstAK = getAccessKindFromInst(I);
     for (MemoryLocationsKind CurMLK = 1; CurMLK < NO_LOCATIONS; CurMLK *= 2) {
       if (CurMLK & KnownMLK)
         continue;
       AccessKind AK =
-          AccessKind(getAccessKindFromInst(I) &
-                     AccessKind(getModRef(IRMemoryEffects, CurMLK)));
+          AccessKind(InstAK & AccessKind(getModRef(IRMemoryEffects, CurMLK)));
       if (AK != NONE)
         updateStateAndAccessesMap(getState(), CurMLK, I, nullptr, Changed, AK);
     }
@@ -8627,12 +8627,13 @@ protected:
 
   /// Return the access kind as determined by \p I.
   AccessKind getAccessKindFromInst(const Instruction *I) {
-    AccessKind AK = READ_WRITE;
-    if (I) {
-      AK = I->mayReadFromMemory() ? READ : NONE;
-      AK = AccessKind(AK | (I->mayWriteToMemory() ? WRITE : NONE));
-    }
-    return AK;
+    if (!I)
+      return READ_WRITE;
+    // Only compute the memory effects of a call once.
+    if (const auto *CB = dyn_cast<CallBase>(I))
+      return AccessKind(CB->getMemoryEffects().getModRef());
+    AccessKind AK = I->mayReadFromMemory() ? READ : NONE;
+    return AccessKind(AK | (I->mayWriteToMemory() ? WRITE : NONE));
   }
 
   /// Update the state \p State and the AccessKind2Accesses given that \p I is
@@ -8680,7 +8681,7 @@ void AAMemoryLocationImpl::categorizePtrValue(
     Attributor &A, const Instruction &I, const Value &Ptr,
     AAMemoryLocation::StateType &State, bool &Changed, unsigned AccessAS,
     std::optional<AccessKind> AK) {
-  AccessKind Kind = AK.value_or(getAccessKindFromInst(&I));
+  AccessKind Kind = AK ? *AK : getAccessKindFromInst(&I);
   LLVM_DEBUG(dbgs() << "[AAMemoryLocation] Categorize pointer locations for "
                     << Ptr << " ["
                     << getMemoryLocationsAsStr(State.getAssumed()) << "]\n");
@@ -8820,9 +8821,9 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
       return NO_LOCATIONS;
 
     // The kind of the accesses of the call to a single location kind.
+    AccessKind CallAK = getAccessKindFromInst(&I);
     auto GetCallAccessKind = [&](MemoryLocationsKind MLK) {
-      return AccessKind(getAccessKindFromInst(&I) &
-                        CBMemLocationAA->getAccessKind(MLK));
+      return AccessKind(CallAK & CBMemLocationAA->getAccessKind(MLK));
     };
 
     if (CBMemLocationAA->isAssumedInaccessibleMemOnly()) {
@@ -8857,7 +8858,7 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
                             AccessKind Kind, MemoryLocationsKind MLK) {
         updateStateAndAccessesMap(AccessedLocs, MLK, &I,
                                   TrackPtr ? Ptr : nullptr, Changed,
-                                  AccessKind(getAccessKindFromInst(&I) & Kind));
+                                  AccessKind(CallAK & Kind));
         return true;
       };
       if (!CBMemLocationAA->checkForAllAccessesToMemoryKind(
