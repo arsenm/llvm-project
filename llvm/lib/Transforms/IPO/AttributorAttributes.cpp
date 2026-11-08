@@ -3679,6 +3679,17 @@ struct AAIntraFnReachabilityFunction final
                             IsTemporaryRQI);
     }
 
+    // Without liveness and excluded blocks, every block is reachable from the
+    // entry block if it has a successor: the entry dominates the blocks that
+    // are reachable from it, and the unreachable ones are treated as dominated,
+    // see isDominatedByAny. Avoid the exploration of the function then.
+    if (!LivenessAA && ExclusionBlocks.empty() && DT &&
+        FromBB->isEntryBlock()) {
+      return rememberResult(
+          A, succ_empty(FromBB) ? RQITy::Reachable::No : RQITy::Reachable::Yes,
+          RQI, UsedExclusionSet, IsTemporaryRQI);
+    }
+
     // The exploration from FromBB is shared by all queries with the same
     // exclusion set until the liveness of an edge changes.
     const Exploration &E = getExploration(A, FromBB, RQI.ExclusionSet,
