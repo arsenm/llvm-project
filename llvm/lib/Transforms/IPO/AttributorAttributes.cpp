@@ -30,6 +30,7 @@
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/AssumeBundleQueries.h"
 #include "llvm/Analysis/AssumptionCache.h"
+#include "llvm/Analysis/CFG.h"
 #include "llvm/Analysis/CaptureTracking.h"
 #include "llvm/Analysis/CycleAnalysis.h"
 #include "llvm/Analysis/InstructionSimplify.h"
@@ -3279,6 +3280,13 @@ namespace {
 // know if it is bounded or not.
 // Loops with maximum trip count are considered bounded, any other cycle not.
 static bool mayContainUnboundedCycle(Function &F, Attributor &A) {
+  // Finding the backedges is cheaper than computing LoopInfo and SCEV for
+  // functions without cycles.
+  SmallVector<std::pair<const BasicBlock *, const BasicBlock *>> Backedges;
+  FindFunctionBackedges(F, Backedges);
+  if (Backedges.empty())
+    return false;
+
   ScalarEvolution *SE =
       A.getInfoCache().getAnalysisResultForFunction<ScalarEvolutionAnalysis>(F);
   LoopInfo *LI = A.getInfoCache().getAnalysisResultForFunction<LoopAnalysis>(F);
