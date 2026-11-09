@@ -10449,8 +10449,8 @@ struct AANoFPClassCallSiteReturned final
 struct AACallEdgesImpl : public AACallEdges {
   AACallEdgesImpl(const IRPosition &IRP, Attributor &A) : AACallEdges(IRP, A) {}
 
-  const SetVector<Function *> &getOptimisticEdges() const override {
-    return CalledFunctions;
+  ArrayRef<Function *> getOptimisticEdges() const override {
+    return CalledFunctions.getArrayRef();
   }
 
   bool hasUnknownCallee() const override { return HasUnknownCallee; }
@@ -10495,7 +10495,7 @@ protected:
 
 private:
   /// Optimistic set of functions that might be called by this position.
-  SetVector<Function *> CalledFunctions;
+  SmallSetVector<Function *, 4> CalledFunctions;
 
   /// Is there any call with a unknown callee.
   bool HasUnknownCallee = false;

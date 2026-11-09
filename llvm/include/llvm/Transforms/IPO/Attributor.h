@@ -5333,7 +5333,7 @@ struct AACallEdges : public StateWrapper<BooleanState, AbstractAttribute>,
   static bool requiresNonAsmForCallBase() { return false; }
 
   /// Get the optimistic edges.
-  virtual const SetVector<Function *> &getOptimisticEdges() const = 0;
+  virtual ArrayRef<Function *> getOptimisticEdges() const = 0;
 
   /// Is there any call with a unknown callee.
   virtual bool hasUnknownCallee() const = 0;

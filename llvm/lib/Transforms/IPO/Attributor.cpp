@@ -1826,8 +1826,7 @@ bool Attributor::checkForAllCallees(
   if (!CallEdgesAA || CallEdgesAA->hasUnknownCallee())
     return false;
 
-  const auto &Callees = CallEdgesAA->getOptimisticEdges();
-  return Pred(Callees.getArrayRef());
+  return Pred(CallEdgesAA->getOptimisticEdges());
 }
 
 bool canMarkAsVisited(const User *Usr) {
