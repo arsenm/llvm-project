@@ -8343,9 +8343,13 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
 
   void initialize(Attributor &A) override {
     intersectAssumedBits(BEST_STATE);
-    getKnownStateFromValue(A, getIRPosition(), getState());
     SmallVector<Attribute, 2> Attrs;
     A.getAttrs(getIRPosition(), {Attribute::Memory}, Attrs);
+    // Get the attributes again if the known state changed them.
+    if (getKnownStateFromAttrs(A, getIRPosition(), Attrs, getState())) {
+      Attrs.clear();
+      A.getAttrs(getIRPosition(), {Attribute::Memory}, Attrs);
+    }
     for (const Attribute &Attr : Attrs)
       IRMemoryEffects &= Attr.getMemoryEffects();
     AAMemoryLocation::initialize(A);
@@ -8369,10 +8373,11 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
     }
   }
 
-  /// Return the memory behavior information encoded in the IR for \p IRP.
-  static void getKnownStateFromValue(Attributor &A, const IRPosition &IRP,
-                                     BitIntegerState &State,
-                                     bool IgnoreSubsumingPositions = false) {
+  /// Return the memory behavior information encoded in the memory attributes
+  /// \p Attrs of \p IRP. Return true if the attributes of \p IRP changed.
+  static bool getKnownStateFromAttrs(Attributor &A, const IRPosition &IRP,
+                                     ArrayRef<Attribute> Attrs,
+                                     BitIntegerState &State) {
     // For internal functions we ignore `argmemonly` and
     // `inaccessiblememorargmemonly` as we might break it via interprocedural
     // constant propagation. It is unclear if this is the best way but it is
@@ -8386,8 +8391,7 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
     if (AnchorFn && A.isRunOn(*AnchorFn))
       UseArgMemOnly = !AnchorFn->hasLocalLinkage();
 
-    SmallVector<Attribute, 2> Attrs;
-    A.getAttrs(IRP, {Attribute::Memory}, Attrs, IgnoreSubsumingPositions);
+    bool Changed = false;
     for (const Attribute &Attr : Attrs) {
       // TODO: We can map MemoryEffects to Attributor locations more precisely.
       MemoryEffects ME = Attr.getMemoryEffects();
@@ -8409,6 +8413,7 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
                           Attribute::getWithMemoryEffects(
                               IRP.getAnchorValue().getContext(), ME),
                           /*ForceReplace*/ true);
+          Changed = true;
         }
         continue;
       }
@@ -8423,6 +8428,7 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
                           Attribute::getWithMemoryEffects(
                               IRP.getAnchorValue().getContext(), ME),
                           /*ForceReplace*/ true);
+          Changed = true;
         }
         continue;
       }
@@ -8447,6 +8453,7 @@ struct AAMemoryLocationImpl : public AAMemoryLocation {
           ME.getModRef(IRMemLocation::TargetMem1) == ModRefInfo::NoModRef)
         State.addKnownBits(NO_UNKOWN_MEM);
     }
+    return Changed;
   }
 
   void getDeducedAttributes(Attributor &A, LLVMContext &Ctx,
