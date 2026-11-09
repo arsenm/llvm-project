@@ -544,8 +544,13 @@ struct AADepGraph {
 
   /// There is no root node for the dependency graph. But the SCCIterator
   /// requires a single entry point, so we maintain a fake("synthetic") root
-  /// node that depends on every node.
+  /// node that depends on every node. Its edges are only added to dump or view
+  /// the graph.
   AADepGraphNode SyntheticRoot;
+
+  /// The abstract attributes in the graph, in the order of their creation.
+  SmallVector<AbstractAttribute *, 0> AAs;
+
   AADepGraphNode *GetEntryNode() { return &SyntheticRoot; }
 
   iterator begin() { return SyntheticRoot.child_begin(); }
@@ -558,6 +563,10 @@ struct AADepGraph {
 
   /// Print dependency graph
   LLVM_ABI void print();
+
+private:
+  /// Add the edges from the synthetic root to every node.
+  void addSyntheticRootEdges();
 };
 
 /// Helper to describe and deal with positions in the LLVM-IR.
@@ -1668,10 +1677,9 @@ struct Attributor {
     assert(!AAPtr && "Attribute already in map!");
     AAPtr = &AA;
 
-    // Register AA with the synthetic root only before the manifest stage.
+    // Register AA with the dependency graph only before the manifest stage.
     if (isDuringDeduction())
-      DG.SyntheticRoot.Deps.insert(
-          AADepGraphNode::DepTy(&AA, unsigned(DepClassTy::REQUIRED)));
+      DG.AAs.push_back(&AA);
 
     return AA;
   }

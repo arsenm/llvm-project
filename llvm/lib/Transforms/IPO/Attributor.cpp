@@ -2188,8 +2188,7 @@ bool Attributor::checkForAllReadWriteInstructions(
 void Attributor::runTillFixpoint() {
   TimeTraceScope TimeScope("Attributor::runTillFixpoint");
   LLVM_DEBUG(dbgs() << "[Attributor] Identified and initialized "
-                    << DG.SyntheticRoot.Deps.size()
-                    << " abstract attributes.\n");
+                    << DG.AAs.size() << " abstract attributes.\n");
 
   // Now that all abstract attributes are collected and initialized we start
   // the abstract analysis.
@@ -2200,12 +2199,12 @@ void Attributor::runTillFixpoint() {
 
   SmallVector<AbstractAttribute *, 32> ChangedAAs;
   SetVector<AbstractAttribute *> Worklist, InvalidAAs;
-  Worklist.reserve(DG.SyntheticRoot.Deps.size());
-  Worklist.insert_range(DG.SyntheticRoot);
+  Worklist.reserve(DG.AAs.size());
+  Worklist.insert_range(DG.AAs);
 
   do {
     // Remember the size to determine new attributes.
-    size_t NumAAs = DG.SyntheticRoot.Deps.size();
+    size_t NumAAs = DG.AAs.size();
     LLVM_DEBUG(dbgs() << "\n\n[Attributor] #Iteration: " << IterationCounter
                       << ", Worklist size: " << Worklist.size() << "\n");
 
@@ -2272,8 +2271,7 @@ void Attributor::runTillFixpoint() {
 
     // Add attributes to the changed set if they have been created in the last
     // iteration.
-    ChangedAAs.append(DG.SyntheticRoot.begin() + NumAAs,
-                      DG.SyntheticRoot.end());
+    ChangedAAs.append(DG.AAs.begin() + NumAAs, DG.AAs.end());
 
     // Reset the work list and repopulate with the changed abstract attributes.
     // Note that dependent ones are added above.
@@ -2335,13 +2333,12 @@ void Attributor::registerForUpdate(AbstractAttribute &AA) {
 
 ChangeStatus Attributor::manifestAttributes() {
   TimeTraceScope TimeScope("Attributor::manifestAttributes");
-  size_t NumFinalAAs = DG.SyntheticRoot.Deps.size();
+  size_t NumFinalAAs = DG.AAs.size();
 
   unsigned NumManifested = 0;
   unsigned NumAtFixpoint = 0;
   ChangeStatus ManifestChange = ChangeStatus::UNCHANGED;
-  for (auto &DepAA : DG.SyntheticRoot.Deps) {
-    AbstractAttribute *AA = cast<AbstractAttribute>(DepAA.getPointer());
+  for (AbstractAttribute *AA : DG.AAs) {
     AbstractState &State = AA->getState();
 
     // If there is not already a fixpoint reached, we can now take the
@@ -2393,18 +2390,10 @@ ChangeStatus Attributor::manifestAttributes() {
   NumAttributesValidFixpoint += NumAtFixpoint;
 
   (void)NumFinalAAs;
-  if (NumFinalAAs != DG.SyntheticRoot.Deps.size()) {
-    auto DepIt = DG.SyntheticRoot.Deps.begin();
-    for (unsigned u = 0; u < NumFinalAAs; ++u)
-      ++DepIt;
-    for (unsigned u = NumFinalAAs; u < DG.SyntheticRoot.Deps.size();
-         ++u, ++DepIt) {
-      errs() << "Unexpected abstract attribute: "
-             << cast<AbstractAttribute>(DepIt->getPointer()) << " :: "
-             << cast<AbstractAttribute>(DepIt->getPointer())
-                    ->getIRPosition()
-                    .getAssociatedValue()
-             << "\n";
+  if (NumFinalAAs != DG.AAs.size()) {
+    for (AbstractAttribute *AA : drop_begin(DG.AAs, NumFinalAAs)) {
+      errs() << "Unexpected abstract attribute: " << AA << " :: "
+             << AA->getIRPosition().getAssociatedValue() << "\n";
     }
     llvm_unreachable("Expected the final number of abstract attributes to "
                      "remain unchanged!");
@@ -4098,7 +4087,15 @@ static bool runAttributorLightOnFunctions(InformationCache &InfoCache,
   return Changed == ChangeStatus::CHANGED;
 }
 
-void AADepGraph::viewGraph() { llvm::ViewGraph(this, "Dependency Graph"); }
+void AADepGraph::addSyntheticRootEdges() {
+  for (AbstractAttribute *AA : AAs)
+    SyntheticRoot.Deps.insert(DepTy(AA, unsigned(DepClassTy::REQUIRED)));
+}
+
+void AADepGraph::viewGraph() {
+  addSyntheticRootEdges();
+  llvm::ViewGraph(this, "Dependency Graph");
+}
 
 void AADepGraph::dumpGraph() {
   static std::atomic<int> CallTimes;
@@ -4116,15 +4113,17 @@ void AADepGraph::dumpGraph() {
   std::error_code EC;
 
   raw_fd_ostream File(Filename, EC, sys::fs::OF_TextWithCRLF);
-  if (!EC)
+  if (!EC) {
+    addSyntheticRootEdges();
     llvm::WriteGraph(File, this);
+  }
 
   CallTimes++;
 }
 
 void AADepGraph::print() {
-  for (auto DepAA : SyntheticRoot.Deps)
-    cast<AbstractAttribute>(DepAA.getPointer())->printWithDeps(outs());
+  for (AbstractAttribute *AA : AAs)
+    AA->printWithDeps(outs());
 }
 
 PreservedAnalyses AttributorPass::run(Module &M, ModuleAnalysisManager &AM) {
