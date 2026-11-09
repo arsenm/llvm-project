@@ -549,7 +549,7 @@ struct AADepGraph {
   AADepGraphNode SyntheticRoot;
 
   /// The abstract attributes in the graph, in the order of their creation.
-  SmallVector<AbstractAttribute *, 0> AAs;
+  SmallVector<AbstractAttribute *, 64> AAs;
 
   AADepGraphNode *GetEntryNode() { return &SyntheticRoot; }
 

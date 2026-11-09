@@ -2198,7 +2198,8 @@ void Attributor::runTillFixpoint() {
       Configuration.MaxFixpointIterations.value_or(SetFixpointIterations);
 
   SmallVector<AbstractAttribute *, 32> ChangedAAs;
-  SetVector<AbstractAttribute *> Worklist, InvalidAAs;
+  SetVector<AbstractAttribute *> Worklist;
+  SmallSetVector<AbstractAttribute *, 16> InvalidAAs;
   Worklist.reserve(DG.AAs.size());
   Worklist.insert_range(DG.AAs);
 
