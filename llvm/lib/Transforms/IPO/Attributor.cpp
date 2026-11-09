@@ -2200,14 +2200,16 @@ void Attributor::runTillFixpoint() {
   SmallVector<AbstractAttribute *, 32> ChangedAAs;
   SetVector<AbstractAttribute *> Worklist;
   SmallSetVector<AbstractAttribute *, 16> InvalidAAs;
-  Worklist.reserve(DG.AAs.size());
-  Worklist.insert_range(DG.AAs);
+  // The first iteration updates all abstract attributes. They are unique, so
+  // they are not put into the worklist.
+  bool UpdateAllAAs = true;
 
   do {
     // Remember the size to determine new attributes.
     size_t NumAAs = DG.AAs.size();
     LLVM_DEBUG(dbgs() << "\n\n[Attributor] #Iteration: " << IterationCounter
-                      << ", Worklist size: " << Worklist.size() << "\n");
+                      << ", Worklist size: "
+                      << (UpdateAllAAs ? NumAAs : Worklist.size()) << "\n");
 
     // For invalid AAs we can fix dependent AAs that have a required dependence,
     // thereby folding long dependence chains in a single step without the need
@@ -2249,8 +2251,8 @@ void Attributor::runTillFixpoint() {
     }
 
     LLVM_DEBUG(dbgs() << "[Attributor] #Iteration: " << IterationCounter
-                      << ", Worklist+Dependent size: " << Worklist.size()
-                      << "\n");
+                      << ", Worklist+Dependent size: "
+                      << (UpdateAllAAs ? NumAAs : Worklist.size()) << "\n");
 
     // Reset the changed and invalid set.
     ChangedAAs.clear();
@@ -2258,7 +2260,7 @@ void Attributor::runTillFixpoint() {
 
     // Update all abstract attribute in the work list and record the ones that
     // changed.
-    for (AbstractAttribute *AA : Worklist) {
+    auto UpdateWorklistAA = [&](AbstractAttribute *AA) {
       const auto &AAState = AA->getState();
       if (!AAState.isAtFixpoint())
         if (updateAA(*AA) == ChangeStatus::CHANGED)
@@ -2268,6 +2270,15 @@ void Attributor::runTillFixpoint() {
       // without requiring updates.
       if (!AAState.isValidState())
         InvalidAAs.insert(AA);
+    };
+    if (UpdateAllAAs) {
+      // Updates can create new attributes, so don't keep iterators into AAs.
+      for (size_t I = 0; I != NumAAs; ++I)
+        UpdateWorklistAA(DG.AAs[I]);
+      UpdateAllAAs = false;
+    } else {
+      for (AbstractAttribute *AA : Worklist)
+        UpdateWorklistAA(AA);
     }
 
     // Add attributes to the changed set if they have been created in the last
