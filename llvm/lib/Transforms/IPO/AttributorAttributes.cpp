@@ -8653,10 +8653,7 @@ protected:
 
     assert(isPowerOf2_32(MLK) && "Expected a single location set!");
     if (TrackAccesses) {
-      auto *&Accesses = AccessKind2Accesses[llvm::Log2_32(MLK)];
-      if (!Accesses)
-        Accesses = new (Allocator) AccessSet();
-      Changed |= Accesses->insert(AccessInfo{I, Ptr, AK}).second;
+      recordAccess(MLK, I, Ptr, Changed, AK);
     } else {
       AccessKind &Kind = AccessKinds[llvm::Log2_32(MLK)];
       if (!(RecordedLocations & MLK) || (Kind | AK) != Kind) {
@@ -8668,6 +8665,19 @@ protected:
     if (MLK == NO_UNKOWN_MEM)
       MLK = NO_LOCATIONS;
     State.removeAssumedBits(MLK);
+  }
+
+  /// Record the access of \p I with pointer \p Ptr to a \p MLK memory
+  /// location in AccessKind2Accesses. Not inlined to keep the untracked case
+  /// of updateStateAndAccessesMap small.
+  LLVM_ATTRIBUTE_NOINLINE void recordAccess(MemoryLocationsKind MLK,
+                                            const Instruction *I,
+                                            const Value *Ptr, bool &Changed,
+                                            AccessKind AK) {
+    auto *&Accesses = AccessKind2Accesses[llvm::Log2_32(MLK)];
+    if (!Accesses)
+      Accesses = new (Allocator) AccessSet();
+    Changed |= Accesses->insert(AccessInfo{I, Ptr, AK}).second;
   }
 
   /// Determine the underlying locations kinds for \p Ptr, e.g., globals or
