@@ -3426,6 +3426,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
   // simplify it, so there is nothing to do if none of them are allowed.
   bool SeedSimplification = isAllowed<AAValueSimplify>() ||
                             isAllowed<AAPotentialValues>();
+  // Likewise, only look up liveness attributes if they are allowed.
+  bool SeedIsDead = isAllowed<AAIsDead>();
   auto SeedSimplified = [&](const IRPosition &IRP) {
     if (!SeedSimplification && !hasSimplificationCallback(IRP))
       return;
@@ -3458,7 +3460,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
   // Check for dead BasicBlocks in every function.
   // We need dead instruction detection because we do not want to deal with
   // broken IR in which SSA rules do not apply.
-  getOrCreateAAFor<AAIsDead>(FPos);
+  if (SeedIsDead)
+    getOrCreateAAFor<AAIsDead>(FPos);
 
   // Every function might contain instructions that cause "undefined
   // behavior".
@@ -3522,7 +3525,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
       AttributeSet RetAttrs = Attrs.getRetAttrs();
 
       // Every returned value might be dead.
-      getOrCreateAAFor<AAIsDead>(RetPos);
+      if (SeedIsDead)
+        getOrCreateAAFor<AAIsDead>(RetPos);
 
       // Every function might be simplified.
       SeedSimplified(RetPos);
@@ -3568,7 +3572,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
     SeedSimplified(ArgPos);
 
     // Every argument might be dead.
-    getOrCreateAAFor<AAIsDead>(ArgPos);
+    if (SeedIsDead)
+      getOrCreateAAFor<AAIsDead>(ArgPos);
 
     // Every argument might be marked noundef.
     checkAndQueryIRAttr<Attribute::NoUndef, AANoUndef>(ArgPos, ArgAttrs);
@@ -3612,7 +3617,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
 
     // Call sites might be dead if they do not have side effects and no live
     // users. The return value might be dead if there are no live users.
-    getOrCreateAAFor<AAIsDead>(CBInstPos);
+    if (SeedIsDead)
+      getOrCreateAAFor<AAIsDead>(CBInstPos);
 
     Function *Callee = dyn_cast_if_present<Function>(CB.getCalledOperand());
     // TODO: Even if the callee is not known now we might be able to simplify
@@ -3645,7 +3651,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
       AttributeSet CBArgAttrs = CBAttrs.getParamAttrs(I);
 
       // Every call site argument might be dead.
-      getOrCreateAAFor<AAIsDead>(CBArgPos);
+      if (SeedIsDead)
+        getOrCreateAAFor<AAIsDead>(CBArgPos);
 
       // Call site argument might be simplified. We have to go through the
       // Attributor interface though as outside AAs can register custom
@@ -3712,7 +3719,8 @@ void Attributor::identifyDefaultAbstractAttributes(Function &F) {
           IRPosition::value(*LI->getPointerOperand()));
     } else {
       auto &SI = cast<StoreInst>(I);
-      getOrCreateAAFor<AAIsDead>(IRPosition::inst(I));
+      if (SeedIsDead)
+        getOrCreateAAFor<AAIsDead>(IRPosition::inst(I));
       SeedSimplified(IRPosition::value(*SI.getValueOperand()));
       getOrCreateAAFor<AAAlign>(IRPosition::value(*SI.getPointerOperand()));
       getOrCreateAAFor<AAAddressSpace>(
