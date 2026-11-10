@@ -1770,10 +1770,12 @@ struct Attributor {
       return false;
 
     // For now we skip anything in naked and optnone functions.
-    const Function *AnchorFn = IRP.getAnchorScope();
-    if (AnchorFn && (AnchorFn->hasFnAttribute(Attribute::Naked) ||
-                     AnchorFn->hasFnAttribute(Attribute::OptimizeNone)))
-      return false;
+    if (const Function *AnchorFn = IRP.getAnchorScope()) {
+      AttributeList FnAttrs = AnchorFn->getAttributes();
+      if (FnAttrs.hasFnAttr(Attribute::Naked) ||
+          FnAttrs.hasFnAttr(Attribute::OptimizeNone))
+        return false;
+    }
 
     // Avoid too many nested initializations to prevent a stack overflow.
     if (InitializationChainLength > MaxInitializationChainLength)
