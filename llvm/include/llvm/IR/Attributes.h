@@ -27,6 +27,7 @@
 #include "llvm/Support/ModRef.h"
 #include "llvm/Support/PointerLikeTypeTraits.h"
 #include <cassert>
+#include <climits>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -39,6 +40,7 @@ class AttrBuilder;
 class AttributeMask;
 class AttributeImpl;
 class AttributeListImpl;
+class AttributeSet;
 class AttributeSetNode;
 class ConstantRange;
 class ConstantRangeList;
@@ -397,6 +399,60 @@ inline Attribute unwrap(LLVMAttributeRef Attr) {
   return Attribute::fromRawPointer(Attr);
 }
 
+/// A bitset with a bit for each enum attribute kind.
+class AttributeBitSet {
+  uint8_t AvailableAttrs[16] = {};
+  static_assert(Attribute::EndAttrKinds <= sizeof(AvailableAttrs) * CHAR_BIT,
+                "Too many attributes");
+
+public:
+  bool hasAttribute(Attribute::AttrKind Kind) const {
+    return AvailableAttrs[Kind / 8] & (1 << (Kind % 8));
+  }
+
+  void addAttribute(Attribute::AttrKind Kind) {
+    AvailableAttrs[Kind / 8] |= 1 << (Kind % 8);
+  }
+};
+
+/// The enum attributes available in an AttributeSetNode, so that AttributeSet
+/// can query them inline.
+class AttributeSetNodeBase {
+protected:
+  AttributeBitSet AvailableAttrs;
+
+public:
+  bool hasAttribute(Attribute::AttrKind Kind) const {
+    return AvailableAttrs.hasAttribute(Kind);
+  }
+};
+
+/// The attribute sets and enum function attributes of an AttributeListImpl,
+/// so that AttributeList can query them inline. The attribute sets are stored
+/// directly after this, as the trailing objects of the AttributeListImpl.
+class AttributeListImplBase {
+protected:
+  unsigned NumAttrSets = 0; ///< Number of entries in this set.
+  AttributeBitSet AvailableFunctionAttrs;
+  /// Union of enum attributes available at any index.
+  AttributeBitSet AvailableSomewhereAttrs;
+
+public:
+  /// Return true if any index has an enum attribute of the given kind.
+  bool hasAttrSomewhere(Attribute::AttrKind Kind) const {
+    return AvailableSomewhereAttrs.hasAttribute(Kind);
+  }
+  const AttributeSet *getAttrSets() const {
+    return reinterpret_cast<const AttributeSet *>(this + 1);
+  }
+  unsigned getNumAttrSets() const { return NumAttrSets; }
+
+  /// Return true if the function has an enum attribute of the given kind.
+  bool hasFnAttribute(Attribute::AttrKind Kind) const {
+    return AvailableFunctionAttrs.hasAttribute(Kind);
+  }
+};
+
 //===----------------------------------------------------------------------===//
 /// \class
 /// This class holds the attributes for a particular argument, parameter,
@@ -412,10 +468,13 @@ class AttributeSet {
   // removeAttribute for enum attrs.
 
   /// Private implementation pointer.
-  AttributeSetNode *SetNode = nullptr;
+  AttributeSetNodeBase *SetNode = nullptr;
 
 private:
-  explicit AttributeSet(AttributeSetNode *ASN) : SetNode(ASN) {}
+  LLVM_ABI explicit AttributeSet(AttributeSetNode *ASN);
+
+  /// Return the implementation of this set.
+  AttributeSetNode *getNode() const;
 
 public:
   /// AttributeSet is a trivially copyable value type.
@@ -484,7 +543,9 @@ public:
   bool hasAttributes() const { return SetNode != nullptr; }
 
   /// Return true if the attribute exists in this set.
-  LLVM_ABI bool hasAttribute(Attribute::AttrKind Kind) const;
+  bool hasAttribute(Attribute::AttrKind Kind) const {
+    return SetNode && SetNode->hasAttribute(Kind);
+  }
 
   /// Return true if the attribute exists in this set.
   LLVM_ABI bool hasAttribute(StringRef Kind) const;
@@ -576,7 +637,17 @@ private:
 
   /// The attributes that we are managing. This can be null to represent
   /// the empty attributes list.
-  AttributeListImpl *pImpl = nullptr;
+  AttributeListImplBase *pImpl = nullptr;
+
+  /// Return the implementation of this list.
+  AttributeListImpl *getListImpl() const;
+
+  /// Map an attribute index to the index of its set in the list.
+  static unsigned attrIdxToArrayIdx(unsigned Index) { return Index + 1; }
+
+  /// Return the first index with an enum attribute of kind \p Kind, which
+  /// must exist.
+  LLVM_ABI unsigned getAttrSomewhereIndex(Attribute::AttrKind Kind) const;
 
 public:
   /// Create an AttributeList with the specified parameters in it.
@@ -592,7 +663,7 @@ public:
                                     ArrayRef<AttributeSet> ArgAttrs);
 
 private:
-  explicit AttributeList(AttributeListImpl *LI) : pImpl(LI) {}
+  LLVM_ABI explicit AttributeList(AttributeListImpl *LI);
 
   static AttributeList getImpl(LLVMContext &C, ArrayRef<AttributeSet> AttrSets);
 
@@ -902,21 +973,29 @@ public:
   //===--------------------------------------------------------------------===//
 
   /// The attributes for the specified index are returned.
-  LLVM_ABI AttributeSet getAttributes(unsigned Index) const;
+  AttributeSet getAttributes(unsigned Index) const {
+    Index = attrIdxToArrayIdx(Index);
+    if (!pImpl || Index >= pImpl->getNumAttrSets())
+      return {};
+    return pImpl->getAttrSets()[Index];
+  }
 
   /// The attributes for the argument or parameter at the given index are
   /// returned.
-  LLVM_ABI AttributeSet getParamAttrs(unsigned ArgNo) const;
+  AttributeSet getParamAttrs(unsigned ArgNo) const {
+    return getAttributes(ArgNo + FirstArgIndex);
+  }
 
   /// The attributes for the ret value are returned.
-  LLVM_ABI AttributeSet getRetAttrs() const;
+  AttributeSet getRetAttrs() const { return getAttributes(ReturnIndex); }
 
   /// The function attributes are returned.
-  LLVM_ABI AttributeSet getFnAttrs() const;
+  AttributeSet getFnAttrs() const { return getAttributes(FunctionIndex); }
 
   /// Return true if the attribute exists at the given index.
-  LLVM_ABI bool hasAttributeAtIndex(unsigned Index,
-                                    Attribute::AttrKind Kind) const;
+  bool hasAttributeAtIndex(unsigned Index, Attribute::AttrKind Kind) const {
+    return getAttributes(Index).hasAttribute(Kind);
+  }
 
   /// Return true if the attribute exists at the given index.
   LLVM_ABI bool hasAttributeAtIndex(unsigned Index, StringRef Kind) const;
@@ -953,7 +1032,9 @@ public:
   bool hasRetAttrs() const { return hasAttributesAtIndex(ReturnIndex); }
 
   /// Return true if the attribute exists for the function.
-  LLVM_ABI bool hasFnAttr(Attribute::AttrKind Kind) const;
+  bool hasFnAttr(Attribute::AttrKind Kind) const {
+    return pImpl && pImpl->hasFnAttribute(Kind);
+  }
 
   /// Return true if the attribute exists for the function.
   LLVM_ABI bool hasFnAttr(StringRef Kind) const;
@@ -964,12 +1045,20 @@ public:
   /// Return true if the specified attribute is set for at least one
   /// parameter or for the return value. If Index is not nullptr, the index
   /// of a parameter with the specified attribute is provided.
-  LLVM_ABI bool hasAttrSomewhere(Attribute::AttrKind Kind,
-                                 unsigned *Index = nullptr) const;
+  bool hasAttrSomewhere(Attribute::AttrKind Kind,
+                        unsigned *Index = nullptr) const {
+    if (!pImpl || !pImpl->hasAttrSomewhere(Kind))
+      return false;
+    if (Index)
+      *Index = getAttrSomewhereIndex(Kind);
+    return true;
+  }
 
   /// Return the attribute object that exists at the given index.
-  LLVM_ABI Attribute getAttributeAtIndex(unsigned Index,
-                                         Attribute::AttrKind Kind) const;
+  Attribute getAttributeAtIndex(unsigned Index,
+                                Attribute::AttrKind Kind) const {
+    return getAttributes(Index).getAttribute(Kind);
+  }
 
   /// Return the attribute object that exists at the given index.
   LLVM_ABI Attribute getAttributeAtIndex(unsigned Index, StringRef Kind) const;
@@ -1083,7 +1172,9 @@ public:
   LLVM_ABI iterator begin() const;
   LLVM_ABI iterator end() const;
 
-  LLVM_ABI unsigned getNumAttrSets() const;
+  unsigned getNumAttrSets() const {
+    return pImpl ? pImpl->getNumAttrSets() : 0;
+  }
 
   // Implementation of indexes(). Produces iterators that wrap an index. Mostly
   // to hide the awkwardness of unsigned wrapping when iterating over valid

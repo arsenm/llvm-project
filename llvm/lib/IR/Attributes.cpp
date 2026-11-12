@@ -960,6 +960,12 @@ bool AttributeImpl::operator<(const AttributeImpl &AI) const {
 // AttributeSet Definition
 //===----------------------------------------------------------------------===//
 
+AttributeSet::AttributeSet(AttributeSetNode *ASN) : SetNode(ASN) {}
+
+AttributeSetNode *AttributeSet::getNode() const {
+  return static_cast<AttributeSetNode *>(SetNode);
+}
+
 AttributeSet AttributeSet::get(LLVMContext &C, const AttrBuilder &B) {
   return AttributeSet(AttributeSetNode::get(C, B));
 }
@@ -1167,120 +1173,119 @@ AttributeSet::intersectWith(LLVMContext &C, AttributeSet Other) const {
 }
 
 unsigned AttributeSet::getNumAttributes() const {
-  return SetNode ? SetNode->getNumAttributes() : 0;
+  return SetNode ? getNode()->getNumAttributes() : 0;
 }
 
-bool AttributeSet::hasAttribute(Attribute::AttrKind Kind) const {
-  return SetNode ? SetNode->hasAttribute(Kind) : false;
-}
 
 bool AttributeSet::hasAttribute(StringRef Kind) const {
-  return SetNode ? SetNode->hasAttribute(Kind) : false;
+  return SetNode ? getNode()->hasAttribute(Kind) : false;
 }
 
 Attribute AttributeSet::getAttribute(Attribute::AttrKind Kind) const {
-  return SetNode ? SetNode->getAttribute(Kind) : Attribute();
+  return SetNode ? getNode()->getAttribute(Kind) : Attribute();
 }
 
 Attribute AttributeSet::getAttribute(StringRef Kind) const {
-  return SetNode ? SetNode->getAttribute(Kind) : Attribute();
+  return SetNode ? getNode()->getAttribute(Kind) : Attribute();
 }
 
 MaybeAlign AttributeSet::getAlignment() const {
-  return SetNode ? SetNode->getAlignment() : std::nullopt;
+  return SetNode ? getNode()->getAlignment() : std::nullopt;
 }
 
 MaybeAlign AttributeSet::getStackAlignment() const {
-  return SetNode ? SetNode->getStackAlignment() : std::nullopt;
+  return SetNode ? getNode()->getStackAlignment() : std::nullopt;
 }
 
 uint64_t AttributeSet::getDereferenceableBytes() const {
-  return SetNode ? SetNode->getDereferenceableBytes() : 0;
+  return SetNode ? getNode()->getDereferenceableBytes() : 0;
 }
 
 DeadOnReturnInfo AttributeSet::getDeadOnReturnInfo() const {
-  return SetNode ? SetNode->getDeadOnReturnInfo() : DeadOnReturnInfo(0);
+  return SetNode ? getNode()->getDeadOnReturnInfo() : DeadOnReturnInfo(0);
 }
 
 uint64_t AttributeSet::getDereferenceableOrNullBytes() const {
-  return SetNode ? SetNode->getDereferenceableOrNullBytes() : 0;
+  return SetNode ? getNode()->getDereferenceableOrNullBytes() : 0;
 }
 
 Type *AttributeSet::getByRefType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::ByRef) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::ByRef) : nullptr;
 }
 
 Type *AttributeSet::getByValType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::ByVal) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::ByVal) : nullptr;
 }
 
 Type *AttributeSet::getStructRetType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::StructRet) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::StructRet) : nullptr;
 }
 
 Type *AttributeSet::getPreallocatedType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::Preallocated) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::Preallocated)
+                 : nullptr;
 }
 
 Type *AttributeSet::getInAllocaType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::InAlloca) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::InAlloca) : nullptr;
 }
 
 Type *AttributeSet::getElementType() const {
-  return SetNode ? SetNode->getAttributeType(Attribute::ElementType) : nullptr;
+  return SetNode ? getNode()->getAttributeType(Attribute::ElementType)
+                 : nullptr;
 }
 
 std::optional<std::pair<unsigned, std::optional<unsigned>>>
 AttributeSet::getAllocSizeArgs() const {
   if (SetNode)
-    return SetNode->getAllocSizeArgs();
+    return getNode()->getAllocSizeArgs();
   return std::nullopt;
 }
 
 unsigned AttributeSet::getVScaleRangeMin() const {
-  return SetNode ? SetNode->getVScaleRangeMin() : 1;
+  return SetNode ? getNode()->getVScaleRangeMin() : 1;
 }
 
 std::optional<unsigned> AttributeSet::getVScaleRangeMax() const {
-  return SetNode ? SetNode->getVScaleRangeMax() : std::nullopt;
+  return SetNode ? getNode()->getVScaleRangeMax() : std::nullopt;
 }
 
 UWTableKind AttributeSet::getUWTableKind() const {
-  return SetNode ? SetNode->getUWTableKind() : UWTableKind::None;
+  return SetNode ? getNode()->getUWTableKind() : UWTableKind::None;
 }
 
 AllocFnKind AttributeSet::getAllocKind() const {
-  return SetNode ? SetNode->getAllocKind() : AllocFnKind::Unknown;
+  return SetNode ? getNode()->getAllocKind() : AllocFnKind::Unknown;
 }
 
 MemoryEffects AttributeSet::getMemoryEffects() const {
-  return SetNode ? SetNode->getMemoryEffects() : MemoryEffects::unknown();
+  return SetNode ? getNode()->getMemoryEffects() : MemoryEffects::unknown();
 }
 
 CaptureInfo AttributeSet::getCaptureInfo() const {
-  return SetNode ? SetNode->getCaptureInfo() : CaptureInfo::all();
+  return SetNode ? getNode()->getCaptureInfo() : CaptureInfo::all();
 }
 
 FPClassTest AttributeSet::getNoFPClass() const {
-  return SetNode ? SetNode->getNoFPClass() : fcNone;
+  return SetNode ? getNode()->getNoFPClass() : fcNone;
 }
 
 std::string AttributeSet::getAsString(bool InAttrGrp) const {
-  return SetNode ? SetNode->getAsString(InAttrGrp) : "";
+  return SetNode ? getNode()->getAsString(InAttrGrp) : "";
 }
 
 bool AttributeSet::hasParentContext(LLVMContext &C) const {
   assert(hasAttributes() && "empty AttributeSet doesn't refer to any context");
   FoldingSetInsertToken Token;
-  return C.pImpl->AttrsSetNodes.lookup(SetNode->getKey(), Token) == SetNode;
+  return C.pImpl->AttrsSetNodes.lookup(getNode()->getKey(), Token) == SetNode;
 }
 
 AttributeSet::iterator AttributeSet::begin() const {
-  return SetNode ? SetNode->begin() : nullptr;
+  return SetNode ? getNode()->begin() : nullptr;
 }
 
 AttributeSet::iterator AttributeSet::end() const {
-  return SetNode ? SetNode->end() : nullptr;
+  return SetNode ? getNode()->end() : nullptr;
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
@@ -1512,20 +1517,19 @@ std::string AttributeSetNode::getAsString(bool InAttrGrp) const {
 
 /// Map from AttributeList index to the internal array index. Adding one happens
 /// to work, because -1 wraps around to 0.
-static unsigned attrIdxToArrayIdx(unsigned Index) {
-  return Index + 1;
-}
-
-AttributeListImpl::AttributeListImpl(ArrayRef<AttributeSet> Sets)
-    : NumAttrSets(Sets.size()) {
+AttributeListImpl::AttributeListImpl(ArrayRef<AttributeSet> Sets) {
   assert(!Sets.empty() && "pointless AttributeListImpl");
 
   // There's memory after the node where we can store the entries in.
   llvm::copy(Sets, getTrailingObjects());
+  NumAttrSets = Sets.size();
+  assert(getAttrSets() == getTrailingObjects() &&
+         "attribute sets must directly follow AttributeListImplBase");
 
   // Initialize AvailableFunctionAttrs and AvailableSomewhereAttrs
   // summary bitsets.
-  for (const auto &I : Sets[attrIdxToArrayIdx(AttributeList::FunctionIndex)])
+  for (const auto &I :
+       Sets[AttributeList::attrIdxToArrayIdx(AttributeList::FunctionIndex)])
     if (!I.isStringAttribute())
       AvailableFunctionAttrs.addAttribute(I.getKindAsEnum());
 
@@ -1533,23 +1537,6 @@ AttributeListImpl::AttributeListImpl(ArrayRef<AttributeSet> Sets)
     for (const auto &I : Set)
       if (!I.isStringAttribute())
         AvailableSomewhereAttrs.addAttribute(I.getKindAsEnum());
-}
-
-bool AttributeListImpl::hasAttrSomewhere(Attribute::AttrKind Kind,
-                                        unsigned *Index) const {
-  if (!AvailableSomewhereAttrs.hasAttribute(Kind))
-    return false;
-
-  if (Index) {
-    for (unsigned I = 0, E = NumAttrSets; I != E; ++I) {
-      if (begin()[I].hasAttribute(Kind)) {
-        *Index = I - 1;
-        break;
-      }
-    }
-  }
-
-  return true;
 }
 
 
@@ -1562,6 +1549,12 @@ LLVM_DUMP_METHOD void AttributeListImpl::dump() const {
 //===----------------------------------------------------------------------===//
 // AttributeList Construction and Mutation Methods
 //===----------------------------------------------------------------------===//
+
+AttributeList::AttributeList(AttributeListImpl *LI) : pImpl(LI) {}
+
+AttributeListImpl *AttributeList::getListImpl() const {
+  return static_cast<AttributeListImpl *>(pImpl);
+}
 
 AttributeList AttributeList::getImpl(LLVMContext &C,
                                      ArrayRef<AttributeSet> AttrSets) {
@@ -1949,23 +1942,6 @@ AttributeList::intersectWith(LLVMContext &C, AttributeList Other) const {
 // AttributeList Accessor Methods
 //===----------------------------------------------------------------------===//
 
-AttributeSet AttributeList::getParamAttrs(unsigned ArgNo) const {
-  return getAttributes(ArgNo + FirstArgIndex);
-}
-
-AttributeSet AttributeList::getRetAttrs() const {
-  return getAttributes(ReturnIndex);
-}
-
-AttributeSet AttributeList::getFnAttrs() const {
-  return getAttributes(FunctionIndex);
-}
-
-bool AttributeList::hasAttributeAtIndex(unsigned Index,
-                                        Attribute::AttrKind Kind) const {
-  return getAttributes(Index).hasAttribute(Kind);
-}
-
 bool AttributeList::hasAttributeAtIndex(unsigned Index, StringRef Kind) const {
   return getAttributes(Index).hasAttribute(Kind);
 }
@@ -1974,27 +1950,22 @@ bool AttributeList::hasAttributesAtIndex(unsigned Index) const {
   return getAttributes(Index).hasAttributes();
 }
 
-bool AttributeList::hasFnAttr(Attribute::AttrKind Kind) const {
-  return pImpl && pImpl->hasFnAttribute(Kind);
-}
 
 bool AttributeList::hasFnAttr(StringRef Kind) const {
   return hasAttributeAtIndex(AttributeList::FunctionIndex, Kind);
 }
 
-bool AttributeList::hasAttrSomewhere(Attribute::AttrKind Attr,
-                                     unsigned *Index) const {
-  return pImpl && pImpl->hasAttrSomewhere(Attr, Index);
-}
-
-Attribute AttributeList::getAttributeAtIndex(unsigned Index,
-                                             Attribute::AttrKind Kind) const {
-  return getAttributes(Index).getAttribute(Kind);
-}
-
 Attribute AttributeList::getAttributeAtIndex(unsigned Index,
                                              StringRef Kind) const {
   return getAttributes(Index).getAttribute(Kind);
+}
+
+unsigned AttributeList::getAttrSomewhereIndex(Attribute::AttrKind Kind) const {
+  for (unsigned I = 0, E = pImpl->getNumAttrSets(); I != E; ++I) {
+    if (pImpl->getAttrSets()[I].hasAttribute(Kind))
+      return I - 1;
+  }
+  llvm_unreachable("Expected an index with the attribute");
 }
 
 MaybeAlign AttributeList::getRetAlignment() const {
@@ -2094,34 +2065,23 @@ std::string AttributeList::getAsString(unsigned Index, bool InAttrGrp) const {
   return getAttributes(Index).getAsString(InAttrGrp);
 }
 
-AttributeSet AttributeList::getAttributes(unsigned Index) const {
-  Index = attrIdxToArrayIdx(Index);
-  if (!pImpl || Index >= getNumAttrSets())
-    return {};
-  return pImpl->begin()[Index];
-}
-
 bool AttributeList::hasParentContext(LLVMContext &C) const {
   assert(!isEmpty() && "an empty attribute list has no parent context");
   FoldingSetInsertToken Token;
-  return C.pImpl->AttrsLists.lookup(pImpl->getKey(), Token) == pImpl;
+  return C.pImpl->AttrsLists.lookup(getListImpl()->getKey(), Token) == pImpl;
 }
 
 AttributeList::iterator AttributeList::begin() const {
-  return pImpl ? pImpl->begin() : nullptr;
+  return pImpl ? getListImpl()->begin() : nullptr;
 }
 
 AttributeList::iterator AttributeList::end() const {
-  return pImpl ? pImpl->end() : nullptr;
+  return pImpl ? getListImpl()->end() : nullptr;
 }
 
 //===----------------------------------------------------------------------===//
 // AttributeList Introspection Methods
 //===----------------------------------------------------------------------===//
-
-unsigned AttributeList::getNumAttrSets() const {
-  return pImpl ? pImpl->NumAttrSets : 0;
-}
 
 void AttributeList::print(raw_ostream &O) const {
   O << "AttributeList[\n";
