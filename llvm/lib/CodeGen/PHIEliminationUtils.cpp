@@ -47,9 +47,12 @@ llvm::findPHICopyInsertPoint(MachineBasicBlock* MBB, MachineBasicBlock* SuccMBB,
   // Note that, if the successor basic block happens to be an indirect target,
   // and the current block, which may be the successor itself, does not contain
   // any INLINEASM_BR, we may not need any specialized handling.
+  // getBlockEndInsertPt() is the first terminator, except that it steps before
+  // a trailing SUCC_ARGS cluster so the copy does not split the cluster from
+  // the terminators. It is NFC without block arguments.
   bool EHPadSuccessor = SuccMBB->isEHPad();
   if (!EHPadSuccessor && !hasInlineAsmBrToSuccessor(MBB, SuccMBB))
-    return MBB->getFirstTerminator();
+    return MBB->getBlockEndInsertPt();
 
   // Discover any defs in this basic block.
   SmallPtrSet<MachineInstr *, 8> DefsInMBB;

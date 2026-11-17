@@ -1,4 +1,7 @@
 ; RUN: llc -verify-machineinstrs -mcpu=pwr8 -mtriple=powerpc64le-unknown-linux-gnu < %s | FileCheck %s
+; Verify the SUCC_ARGS feeders survive the CR-logical block split (stop after the
+; pass; full codegen would hit an unrelated pre-existing MI-peephole issue).
+; RUN: llc -verify-machineinstrs -mcpu=pwr8 -mtriple=powerpc64le-unknown-linux-gnu -sdag-use-block-args -stop-after=ppc-reduce-cr-ops -o /dev/null < %s
 
 %struct.anon = type { %struct.anon.0, %struct.anon.1 }
 %struct.anon.0 = type { i32 }

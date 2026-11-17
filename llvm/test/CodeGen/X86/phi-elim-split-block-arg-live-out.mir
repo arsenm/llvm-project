@@ -1,0 +1,36 @@
+# RUN: llc -mtriple=x86_64-- -passes='require<live-intervals>,phi-node-elimination,print<live-intervals>' -phi-elim-split-all-critical-edges -filetype=null %s 2>&1 | FileCheck %s
+
+# Splitting the critical edge bb.1 -> bb.2 must not keep %a, bb.2's own block
+# argument, live out of the new block into bb.2.
+
+# CHECK: {{^%[0-9]+}} [112B,224r:0)[272r,336r:0) 0@272r
+
+---
+name: split_edge_into_block_arg_block
+tracksRegLiveness: true
+usesBlockArgs: true
+body: |
+  bb.0:
+    successors: %bb.2
+    liveins: $edi, $esi
+    %0:gr32 = COPY $edi
+    %1:gr32 = COPY $esi
+    SUCC_ARGS %bb.2, %0, %1
+    JMP_1 %bb.2
+
+  bb.1:
+    successors: %bb.2, %bb.3
+    %dec:gr32 = DEC32r %b, implicit-def $eflags
+    SUCC_ARGS %bb.2, %a, %dec
+    JCC_1 %bb.2, 5, implicit $eflags
+    JMP_1 %bb.3
+
+  bb.2:
+    successors: %bb.1
+    arguments: %a:gr32, %b:gr32
+    JMP_1 %bb.1
+
+  bb.3:
+    $eax = COPY %a
+    RET64 implicit $eax
+...

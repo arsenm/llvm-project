@@ -68,6 +68,12 @@ bool SSAContext::isConstantOrUndefValuePhi(const Instruction &Instr) {
   return false;
 }
 
+template <>
+void SSAContext::appendBlockArgs(SmallVectorImpl<const Value *> &args,
+                                 const BasicBlock &block) {
+  // LLVM IR has no block arguments.
+}
+
 template <> bool SSAContext::isAlwaysUniform(const Value *V) {
   return !isa<Instruction>(V) && !isa<Argument>(V);
 }

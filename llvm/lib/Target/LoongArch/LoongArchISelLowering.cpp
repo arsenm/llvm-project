@@ -10162,24 +10162,24 @@ emitSelectPseudo(MachineInstr &MI, MachineBasicBlock *BB,
   // IfFalseMBB just falls through to TailMBB.
   IfFalseMBB->addSuccessor(TailMBB);
 
-  // Create PHIs for all of the select pseudo-instructions.
+  // Create value merges for all of the select pseudo-instructions.
+  SmallVector<std::array<Register, 3>, 4> Merges;
   auto SelectMBBI = MI.getIterator();
   auto SelectEnd = std::next(LastSelectPseudo->getIterator());
-  auto InsertionPoint = TailMBB->begin();
   while (SelectMBBI != SelectEnd) {
     auto Next = std::next(SelectMBBI);
     if (isSelectPseudo(*SelectMBBI)) {
-      // %Result = phi [ %TrueValue, HeadMBB ], [ %FalseValue, IfFalseMBB ]
-      BuildMI(*TailMBB, InsertionPoint, SelectMBBI->getDebugLoc(),
-              TII.get(LoongArch::PHI), SelectMBBI->getOperand(0).getReg())
-          .addReg(SelectMBBI->getOperand(4).getReg())
-          .addMBB(HeadMBB)
-          .addReg(SelectMBBI->getOperand(5).getReg())
-          .addMBB(IfFalseMBB);
+      Merges.push_back({SelectMBBI->getOperand(0).getReg(),
+                        SelectMBBI->getOperand(4).getReg(),
+                        SelectMBBI->getOperand(5).getReg()});
       SelectMBBI->eraseFromParent();
     }
     SelectMBBI = Next;
   }
+
+  // %Result = phi [ %TrueValue, HeadMBB ], [ %FalseValue, IfFalseMBB ]
+  for (auto &M : Merges)
+    TII.buildValueMerge(*TailMBB, M[0], {{M[1], HeadMBB}, {M[2], IfFalseMBB}});
 
   F->getProperties().resetNoPHIs();
   return TailMBB;

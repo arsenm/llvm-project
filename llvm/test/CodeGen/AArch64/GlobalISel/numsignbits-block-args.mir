@@ -1,0 +1,42 @@
+# RUN: llc -mtriple=aarch64 -run-pass=aarch64-prelegalizer-combiner --aarch64prelegalizercombiner-only-enable-rule="redundant_sext_inreg" %s -o - | FileCheck %s
+# REQUIRES: asserts
+
+# The redundant_sext_inreg combine drops a G_SEXT_INREG whose source already has
+# enough sign bits (computeNumSignBits). The source here is a block argument;
+# GISelValueTracking does not look through block args (like a G_PHI), so it
+# conservatively reports one sign bit and the outer G_SEXT_INREG must be kept,
+# even though every forwarded value is itself sign-extended from 8 bits.
+---
+name:            keep_sext_inreg_block_arg
+alignment:       4
+tracksRegLiveness: true
+usesBlockArgs:   true
+body:             |
+  ; CHECK-LABEL: name: keep_sext_inreg_block_arg
+  ; CHECK: G_SEXT_INREG %arg:_, 8
+  bb.0:
+    liveins: $w0, $w1
+    successors: %bb.1, %bb.2
+
+    %x:_(i32) = COPY $w0
+    %y:_(i32) = COPY $w1
+    %c:_(i1) = G_TRUNC %x
+    %e0:_(i32) = G_SEXT_INREG %x, 8
+    G_SUCC_ARGS %bb.2, %e0(i32)
+    G_BRCOND %c(i1), %bb.1
+    G_BR %bb.2
+
+  bb.1:
+    successors: %bb.2
+
+    %e1:_(i32) = G_SEXT_INREG %y, 8
+    G_SUCC_ARGS %bb.2, %e1(i32)
+    G_BR %bb.2
+
+  bb.2:
+    arguments: %arg:_(i32)
+
+    %s:_(i32) = G_SEXT_INREG %arg, 8
+    $w0 = COPY %s(i32)
+    RET_ReallyLR implicit $w0
+...

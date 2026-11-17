@@ -1737,7 +1737,12 @@ bool CombinerHelper::matchOptBrCondByInvertingCond(
 void CombinerHelper::applyOptBrCondByInvertingCond(
     MachineInstr &MI, MachineInstr *&BrCond) const {
   MachineBasicBlock *BrTarget = MI.getOperand(0).getMBB();
-  Builder.setInstrAndDebugLoc(*BrCond);
+  // The inverted condition (constant + xor) is not a terminator, so emit it
+  // before any SUCC_ARGS cluster rather than at the branch, which sits after
+  // the cluster.
+  Builder.setDebugLoc(BrCond->getDebugLoc());
+  Builder.setInsertPt(*BrCond->getParent(),
+                      BrCond->getParent()->getBlockEndInsertPt());
   LLT Ty = MRI.getType(BrCond->getOperand(0).getReg());
   // FIXME: Does int/fp matter for this? If so, we might need to restrict
   // this to i1 only since we might not know for sure what kind of
@@ -2615,6 +2620,8 @@ bool CombinerHelper::matchCombineTruncOfShift(
   LLT DstTy = MRI.getType(DstReg);
 
   MachineInstr *SrcMI = getDefIgnoringCopies(SrcReg, MRI);
+  if (!SrcMI)
+    return false;
   const auto &TL = getTargetLowering();
 
   LLT NewShiftTy;
@@ -3442,7 +3449,7 @@ bool CombinerHelper::matchCombineBuildUnmerge(MachineInstr &MI,
   for (unsigned I = NumUnmerge; I < BuildUseCount; ++I) {
     auto *Undef = getDefIgnoringCopies(BV.getSourceReg(I), MRI);
 
-    if (Undef->getOpcode() != TargetOpcode::G_IMPLICIT_DEF)
+    if (!Undef || Undef->getOpcode() != TargetOpcode::G_IMPLICIT_DEF)
       return false;
   }
 
@@ -8704,8 +8711,7 @@ Register CombinerHelper::simplifyMultipleUseDemandedBits(
          "DemandedBits width must match the register scalar type");
 
   MachineInstr *DefMI = MRI.getVRegDef(R);
-  assert(DefMI && "Expected a definition in generic SSA MIR");
-  if (!isa<GAnd>(DefMI) && !isa<GOr>(DefMI))
+  if (!isa_and_nonnull<GAnd, GOr>(DefMI))
     return Register();
 
   unsigned Opcode = DefMI->getOpcode();
@@ -8756,7 +8762,12 @@ bool CombinerHelper::simplifyDemandedBitsImpl(MachineInstr &MI, unsigned OpNo,
          "DemandedBits width must match the operand scalar type");
 
   MachineInstr *DefMI = MRI.getVRegDef(OpReg);
-  assert(DefMI && "Expected a definition in generic SSA MIR");
+  // A block argument has no defining instruction to simplify.
+  if (!DefMI) {
+    if (VT)
+      Known = VT->getKnownBits(OpReg);
+    return false;
+  }
   // Undemanded bits can still affect poison-generating flags in the user.
   auto DropPoisonFlags = [&]() {
     if (!DoRewrite ||

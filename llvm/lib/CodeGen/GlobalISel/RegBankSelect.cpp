@@ -633,6 +633,14 @@ protected:
                     const RegisterBankInfo::InstructionMapping &InstrMapping,
                     SmallVectorImpl<RepairingPlacement> &RepairPts);
 
+  /// Seed a register bank onto each of \p MBB's block-argument receiver
+  /// registers. Block arguments have no defining instruction, so the normal
+  /// def-driven walk never banks them; instead infer each argument's bank from
+  /// the values its predecessors forward to it (like a copy-like PHI). Any
+  /// mismatch between that seed and a real use is fixed up by ordinary
+  /// repairing when the use is processed.
+  void assignBlockArgBanks(MachineBasicBlock &MBB);
+
 public:
   /// Create a RegBankSelect pass with the specified \p RunningMode.
   RegBankSelectImpl(RegBankSelectMode RunningMode);
@@ -1304,6 +1312,28 @@ bool RegBankSelectImpl::assignInstr(
   return applyMapping(MI, *BestMapping, RepairPts);
 }
 
+void RegBankSelectImpl::assignBlockArgBanks(MachineBasicBlock &MBB) {
+  for (unsigned ArgNo = 0, E = MBB.getNumBlockArgs(); ArgNo != E; ++ArgNo) {
+    Register ArgReg = MBB.getBlockArg(ArgNo);
+    if (RBI->getRegBank(ArgReg, *MRI, *TRI))
+      continue;
+
+    // Infer the bank from a forwarded value that already has one. Under the
+    // RPOT walk every forward-edge predecessor is banked before this block, so
+    // only a not-yet-processed loop back-edge can leave a forwarder unbanked.
+    for (MachineBasicBlock *Pred : MBB.predecessors()) {
+      MachineInstr *SA = Pred->findSuccArgs(&MBB);
+      if (!SA)
+        continue;
+      Register SrcReg = SA->getOperand(ArgNo + 1).getReg();
+      if (const RegisterBank *RB = RBI->getRegBank(SrcReg, *MRI, *TRI)) {
+        MRI->setRegBank(ArgReg, *RB);
+        break;
+      }
+    }
+  }
+}
+
 bool RegBankSelectImpl::assignRegisterBanks(
     MachineFunction &MF,
     function_ref<MachineBlockFrequencyInfo *()> GetCachedMBFI,
@@ -1313,6 +1343,11 @@ bool RegBankSelectImpl::assignRegisterBanks(
   // the best mapping of the current instruction.
   ReversePostOrderTraversal<MachineFunction*> RPOT(&MF);
   for (MachineBasicBlock *MBB : RPOT) {
+    // Block arguments have no defining instruction, so seed their banks from
+    // the values forwarded to them before the def-driven walk below.
+    if (MBB->hasBlockArgs())
+      assignBlockArgBanks(*MBB);
+
     // Set a sensible insertion point so that subsequent calls to
     // MIRBuilder.
     MIRBuilder.setMBB(*MBB);

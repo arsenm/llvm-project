@@ -63,6 +63,13 @@ class LLVM_ABI GISelValueTracking : public GISelChangeObserver {
                            FPClassTest InterestedClasses, KnownFPClass &Known,
                            unsigned Depth);
 
+  /// Compute the known FP class of a block-argument register by intersecting
+  /// the values forwarded to it by each predecessor's SUCC_ARGS, as
+  /// computeKnownFPClass does for a G_PHI.
+  void computeKnownFPClassBlockArg(Register R, const APInt &DemandedElts,
+                                   FPClassTest InterestedClasses,
+                                   KnownFPClass &Known, unsigned Depth);
+
   void computeKnownBits(Register R, KnownBits &Known, const APInt &DemandedElts,
                         unsigned Depth = 0);
 
@@ -90,6 +97,12 @@ public:
 
   void computeKnownBitsImpl(Register R, KnownBits &Known,
                             const APInt &DemandedElts, unsigned Depth = 0);
+
+  /// Compute the known bits of a block-argument register by intersecting the
+  /// values forwarded to it by each predecessor's SUCC_ARGS, as
+  /// computeKnownBits does for a G_PHI.
+  void computeKnownBitsBlockArg(Register R, KnownBits &Known,
+                                const APInt &DemandedElts, unsigned Depth);
 
   unsigned computeNumSignBits(Register R, const APInt &DemandedElts,
                               unsigned Depth = 0);

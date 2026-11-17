@@ -34,6 +34,7 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
@@ -42,6 +43,13 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "function-lowering-info"
+
+static cl::opt<bool> UseBlockArgsOpt(
+    "sdag-use-block-args", cl::Hidden, cl::init(true),
+    cl::desc("Lower PHIs to block arguments instead of machine PHI nodes in "
+             "SelectionDAG"));
+
+bool FunctionLoweringInfo::useBlockArgs() { return UseBlockArgsOpt; }
 
 /// isUsedOutsideOfDefiningBlock - Return true if this instruction is used by
 /// PHI nodes or outside of the basic block that defines it, or used by a
@@ -245,8 +253,9 @@ void FunctionLoweringInfo::set(const Function &fn, MachineFunction &mf,
   }
 
   // Create an initial MachineBasicBlock for each LLVM BasicBlock in F.  This
-  // also creates the initial PHI MachineInstrs, though none of the input
-  // operands are populated.
+  // also creates the initial PHI MachineInstrs (or block arguments, when block
+  // arguments are enabled), though none of the input operands are populated.
+  const bool UseBlockArgs = useBlockArgs();
   MBBMap.resize(Fn->getMaxBlockNumber());
   for (const BasicBlock &BB : *Fn) {
     // Don't create MachineBasicBlocks for imaginary EH pad blocks. These blocks
@@ -311,13 +320,27 @@ void FunctionLoweringInfo::set(const Function &fn, MachineFunction &mf,
       ComputeValueVTs(*TLI, MF->getDataLayout(), PN.getType(), ValueVTs);
       for (EVT VT : ValueVTs) {
         unsigned NumRegisters = TLI->getNumRegisters(Fn->getContext(), VT);
-        const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
-        for (unsigned i = 0; i != NumRegisters; ++i)
-          BuildMI(MBB, DL, TII->get(TargetOpcode::PHI), PHIReg + i);
+        if (UseBlockArgs) {
+          // Represent the PHI as a block argument: the block owns the register
+          // and each predecessor forwards a value to it with a SUCC_ARGS.
+          for (unsigned i = 0; i != NumRegisters; ++i)
+            MBB->addBlockArg(PHIReg + i);
+        } else {
+          const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
+          for (unsigned i = 0; i != NumRegisters; ++i)
+            BuildMI(MBB, DL, TII->get(TargetOpcode::PHI), PHIReg + i);
+        }
         PHIReg += NumRegisters;
       }
     }
   }
+
+  // Mark the whole function as using the block-argument representation whenever
+  // it is enabled, even if no IR PHI produced a block argument. Later passes
+  // and target custom inserters that create value merges rely on the property
+  // to choose block arguments over illegal machine PHIs.
+  if (UseBlockArgs)
+    MF->getProperties().set(MachineFunctionProperties::Property::UsesBlockArgs);
 
   if (isFuncletEHPersonality(Personality)) {
     WinEHFuncInfo &EHInfo = *MF->getWinEHFuncInfo();

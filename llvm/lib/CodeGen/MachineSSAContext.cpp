@@ -25,6 +25,8 @@ using namespace llvm;
 template <>
 void MachineSSAContext::appendBlockDefs(SmallVectorImpl<Register> &defs,
                                         const MachineBasicBlock &block) {
+  // Block arguments are defined by the block itself, at its entry.
+  llvm::append_range(defs, block.getBlockArgs());
   for (auto &instr : block.instrs()) {
     for (auto &op : instr.all_defs())
       defs.push_back(op.getReg());
@@ -52,6 +54,12 @@ const MachineBasicBlock *MachineSSAContext::getDefBlock(Register value) const {
   if (!value)
     return nullptr;
   return F->getRegInfo().getDefBlock(value);
+}
+
+template <>
+void MachineSSAContext::appendBlockArgs(SmallVectorImpl<Register> &args,
+                                        const MachineBasicBlock &block) {
+  llvm::append_range(args, block.getBlockArgs());
 }
 
 static bool isUndef(const MachineInstr &MI) {
@@ -110,10 +118,13 @@ template <> Printable MachineSSAContext::print(Register Value) const {
     Out << printReg(Value, MRI->getTargetRegisterInfo(), 0, MRI);
 
     if (Value) {
-      // Try to print the definition.
+      // Try to print the definition. Block arguments have no defining
+      // instruction, so print a newline to match the MachineInstr printer.
       if (auto *Instr = MRI->getUniqueVRegDef(Value)) {
         Out << ": ";
         Instr->print(Out);
+      } else {
+        Out << '\n';
       }
     }
   });

@@ -486,7 +486,7 @@ std::optional<FPValueAndVReg> llvm::getFConstantVRegValWithLookThrough(
 const ConstantFP *
 llvm::getConstantFPVRegVal(Register VReg, const MachineRegisterInfo &MRI) {
   MachineInstr *MI = MRI.getVRegDef(VReg);
-  if (TargetOpcode::G_FCONSTANT != MI->getOpcode())
+  if (!MI || TargetOpcode::G_FCONSTANT != MI->getOpcode())
     return nullptr;
   return MI->getOperand(1).getFPImm();
 }
@@ -510,7 +510,10 @@ llvm::getDefSrcRegIgnoringCopies(Register Reg, const MachineRegisterInfo &MRI) {
     auto SrcTy = MRI.getType(SrcReg);
     if (!SrcTy.isValid())
       break;
-    DefMI = MRI.getVRegDef(SrcReg);
+    MachineInstr *SrcDef = MRI.getVRegDef(SrcReg);
+    if (!SrcDef)
+      break;
+    DefMI = SrcDef;
     DefSrcReg = SrcReg;
     Opc = DefMI->getOpcode();
   }
@@ -528,7 +531,20 @@ Register llvm::getSrcRegIgnoringCopies(Register Reg,
                                        const MachineRegisterInfo &MRI) {
   std::optional<DefinitionAndSourceRegister> DefSrcReg =
       getDefSrcRegIgnoringCopies(Reg, MRI);
-  return DefSrcReg ? DefSrcReg->Reg : Register();
+  if (!DefSrcReg) {
+    // A block argument has no defining instruction and is its own source.
+    return MRI.isBlockArgDef(Reg) ? Reg : Register();
+  }
+
+  const MachineInstr *DefMI = DefSrcReg->MI;
+  if (DefMI->isCopy() || isPreISelGenericOptimizationHint(DefMI->getOpcode())) {
+    Register SrcReg = DefMI->getOperand(1).getReg();
+    if (SrcReg.isVirtual() && MRI.getType(SrcReg).isValid() &&
+        MRI.isBlockArgDef(SrcReg))
+      return SrcReg;
+  }
+
+  return DefSrcReg->Reg;
 }
 
 void llvm::extractParts(Register Reg, LLT Ty, int NumParts,
@@ -1665,8 +1681,11 @@ bool llvm::isConstantOrConstantVector(const MachineInstr &MI,
 
   const unsigned NumOps = MI.getNumOperands();
   for (unsigned I = 1; I != NumOps; ++I) {
+    // A block-argument element has no defining instruction, so it is not a
+    // constant.
     const MachineInstr *ElementDef = MRI.getVRegDef(MI.getOperand(I).getReg());
-    if (!isConstantScalar(*ElementDef, MRI, AllowFP, AllowOpaqueConstants))
+    if (!ElementDef ||
+        !isConstantScalar(*ElementDef, MRI, AllowFP, AllowOpaqueConstants))
       return false;
   }
 
@@ -1735,6 +1754,9 @@ bool llvm::matchUnaryPredicate(
     bool AllowUndefs) {
 
   const MachineInstr *Def = getDefIgnoringCopies(Reg, MRI);
+  // A block-argument register has no defining instruction to match against.
+  if (!Def)
+    return false;
   if (AllowUndefs && Def->getOpcode() == TargetOpcode::G_IMPLICIT_DEF)
     return Match(nullptr);
 
@@ -1748,6 +1770,8 @@ bool llvm::matchUnaryPredicate(
   for (unsigned I = 1, E = Def->getNumOperands(); I != E; ++I) {
     Register SrcElt = Def->getOperand(I).getReg();
     const MachineInstr *SrcDef = getDefIgnoringCopies(SrcElt, MRI);
+    if (!SrcDef)
+      return false;
     if (AllowUndefs && SrcDef->getOpcode() == TargetOpcode::G_IMPLICIT_DEF) {
       if (!Match(nullptr))
         return false;
@@ -1803,8 +1827,12 @@ void llvm::saveUsesAndErase(MachineInstr &MI, MachineRegisterInfo &MRI,
                             LostDebugLocObserver *LocObserver,
                             SmallInstListTy &DeadInstChain) {
   for (MachineOperand &Op : MI.uses()) {
-    if (Op.isReg() && Op.getReg().isVirtual())
-      DeadInstChain.insert(MRI.getVRegDef(Op.getReg()));
+    if (!Op.isReg() || !Op.getReg().isVirtual())
+      continue;
+    // A block-argument register has no defining instruction that could become
+    // dead, so there is nothing to add to the chain for it.
+    if (MachineInstr *Def = MRI.getVRegDef(Op.getReg()))
+      DeadInstChain.insert(Def);
   }
   LLVM_DEBUG(dbgs() << MI << "Is dead; erasing.\n");
   DeadInstChain.remove(&MI);
@@ -2063,6 +2091,8 @@ static bool isGuaranteedNotToBeUndefOrPoison(Register Reg,
     return false;
 
   MachineInstr *RegDef = MRI.getVRegDef(Reg);
+  if (!RegDef)
+    return false;
 
   switch (RegDef->getOpcode()) {
   case TargetOpcode::G_FREEZE:
@@ -2164,6 +2194,10 @@ APInt llvm::GIConstant::getScalarValue() const {
 std::optional<GIConstant>
 llvm::GIConstant::getConstant(Register Const, const MachineRegisterInfo &MRI) {
   MachineInstr *Constant = getDefIgnoringCopies(Const, MRI);
+  // A block-argument register has no defining instruction and is not a
+  // constant.
+  if (!Constant)
+    return std::nullopt;
 
   if (GSplatVector *Splat = dyn_cast<GSplatVector>(Constant)) {
     std::optional<ValueAndVReg> MayBeConstant =
@@ -2204,6 +2238,10 @@ APFloat llvm::GFConstant::getScalarValue() const {
 std::optional<GFConstant>
 llvm::GFConstant::getConstant(Register Const, const MachineRegisterInfo &MRI) {
   MachineInstr *Constant = getDefIgnoringCopies(Const, MRI);
+  // A block-argument register has no defining instruction and is not a
+  // constant.
+  if (!Constant)
+    return std::nullopt;
 
   if (GSplatVector *Splat = dyn_cast<GSplatVector>(Constant)) {
     std::optional<FPValueAndVReg> MayBeConstant =

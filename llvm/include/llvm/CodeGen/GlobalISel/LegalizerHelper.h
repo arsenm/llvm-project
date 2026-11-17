@@ -22,6 +22,7 @@
 
 #include "llvm/CodeGen/GlobalISel/CallLowering.h"
 #include "llvm/CodeGen/GlobalISel/GISelValueTracking.h"
+#include "llvm/CodeGen/GlobalISel/LegalizerInfo.h"
 #include "llvm/CodeGen/GlobalISel/MachineIRBuilder.h"
 #include "llvm/CodeGen/RuntimeLibcallUtil.h"
 #include "llvm/CodeGen/TargetOpcodes.h"
@@ -119,6 +120,45 @@ public:
 
   /// Legalize an instruction by replacing the value type
   LLVM_ABI LegalizeResult bitcast(MachineInstr &MI, unsigned TypeIdx, LLT Ty);
+
+  /// Widen the block-argument value forwarded at operand \p ArgNo of a
+  /// G_SUCC_ARGS (and its shared successor block argument) to \p WideTy,
+  /// anyext-ing every predecessor's forwarder and truncating back for the
+  /// block's own uses.
+  LLVM_ABI LegalizeResult widenScalarSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                              LLT WideTy);
+
+  /// Widen the element count of the vector block-argument value forwarded at
+  /// operand \p ArgNo of a G_SUCC_ARGS (and its shared successor block
+  /// argument) to \p MoreTy, padding every predecessor's forwarder with undef
+  /// elements and extracting the original sub-vector back for the block's own
+  /// uses.
+  LLVM_ABI LegalizeResult moreElementsSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                               LLT MoreTy);
+
+  /// Split the scalar block-argument value forwarded at operand \p ArgNo of a
+  /// G_SUCC_ARGS into parts of type \p NarrowTy.
+  LLVM_ABI LegalizeResult narrowScalarSuccArgs(MachineInstr &MI, unsigned ArgNo,
+                                               LLT NarrowTy);
+
+  /// Split the vector block-argument value forwarded at operand \p ArgNo of a
+  /// G_SUCC_ARGS into parts of type \p PartTy.
+  LLVM_ABI LegalizeResult fewerElementsSuccArgs(MachineInstr &MI,
+                                                unsigned ArgNo, LLT PartTy);
+
+  /// Shared implementation of narrowScalarSuccArgs / fewerElementsSuccArgs:
+  /// split the block-argument value forwarded at operand \p ArgNo into parts of
+  /// type \p PartTy, rewriting the receiver arg list and predecessor
+  /// forwarders.
+  LLVM_ABI LegalizeResult splitSuccArg(MachineInstr &MI, unsigned ArgNo,
+                                       LLT PartTy);
+
+  /// Legalize a G_SUCC_ARGS by legalizing every forwarded block-argument value.
+  /// Because the type-index model only exposes the first value's type, this
+  /// queries the target per argument and dispatches to the widen / narrow /
+  /// fewer-elements helper above for each, leaving the whole instruction (and
+  /// its successor's block arguments) consistent in one pass.
+  LLVM_ABI LegalizeResult legalizeSuccArgs(MachineInstr &MI);
 
   /// Legalize an instruction by splitting it into simpler parts, hopefully
   /// understood by the target.

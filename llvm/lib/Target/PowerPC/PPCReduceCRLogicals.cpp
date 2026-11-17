@@ -105,6 +105,36 @@ static void addIncomingValuesToPHIs(MachineBasicBlock *Successor,
   }
 }
 
+// After the split, \p NewMBB inherited (via transferSuccessors) \p OrigMBB's
+// edge to \p Successor, but the SUCC_ARGS feeder for that edge stayed behind in
+// \p OrigMBB. If \p Successor has block arguments, clone the feeder into
+// \p NewMBB so both predecessors supply one.
+static void addSuccArgsToNewMBB(MachineBasicBlock *Successor,
+                                MachineBasicBlock *OrigMBB,
+                                MachineBasicBlock *NewMBB) {
+  if (!Successor->hasBlockArgs() || !NewMBB->isSuccessor(Successor))
+    return;
+  const PPCInstrInfo *TII =
+      OrigMBB->getParent()->getSubtarget<PPCSubtarget>().getInstrInfo();
+  auto FindFeeder = [&](MachineBasicBlock *MBB) -> MachineInstr * {
+    for (MachineInstr &MI : MBB->succ_args())
+      if (MI.getOperand(0).getMBB() == Successor)
+        return &MI;
+    return nullptr;
+  };
+  if (FindFeeder(NewMBB))
+    return;
+  MachineInstr *Feeder = FindFeeder(OrigMBB);
+  if (!Feeder)
+    return;
+  MachineInstrBuilder MIB =
+      BuildMI(*NewMBB, NewMBB->getFirstSuccArgs(), Feeder->getDebugLoc(),
+              TII->get(TargetOpcode::SUCC_ARGS))
+          .addMBB(Successor);
+  for (const MachineOperand &MO : llvm::drop_begin(Feeder->operands()))
+    MIB.addReg(MO.getReg(), {}, MO.getSubReg());
+}
+
 namespace {
 struct BlockSplitInfo {
   MachineInstr *OrigBranch;
@@ -249,6 +279,10 @@ static bool splitMBB(BlockSplitInfo &BSI) {
     updatePHIs(Succ, ThisMBB, NewMBB, MRI);
   }
   addIncomingValuesToPHIs(NewBRTarget, ThisMBB, NewMBB, MRI);
+  // NewMBB inherited ThisMBB's original successor edges but not their SUCC_ARGS
+  // feeders, which stayed in ThisMBB. Restore them for block-argument blocks.
+  for (MachineBasicBlock *Succ : NewMBB->successors())
+    addSuccArgsToNewMBB(Succ, ThisMBB, NewMBB);
 
   // Set the call frame size on ThisMBB to the new basic blocks.
   // See https://reviews.llvm.org/D156113.

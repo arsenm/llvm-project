@@ -107,6 +107,12 @@ public:
 
   bool findRuleAndApplyMapping(MachineInstr &MI);
 
+  // Widen uniform (sgpr) S1 block arguments to S32, mirroring the
+  // AextToS32InIncomingBlockGPHI lowering for uniform S1 G_PHI defs. Block
+  // arguments have no defining PHI instruction to trigger that rule, so the
+  // S1->S32 widening must be applied directly to the argument register list.
+  void widenS1BlockArgs(MachineFunction &MF);
+
 private:
   bool executeInWaterfallLoop(MachineIRBuilder &B, const WaterfallInfo &WFI);
 

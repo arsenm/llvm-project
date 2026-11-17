@@ -122,6 +122,16 @@ def G_PHI : GenericInstruction {
   let GISelMatchGenericTypes = 1;
 }
 
+// Generic form of SUCC_ARGS: forwards values along one CFG edge to a successor
+// block's arguments. Operand 0 is the successor MachineBasicBlock, followed by
+// at least one forwarded generic value register; the first anchors the type
+// index and the rest are variadic.
+def G_SUCC_ARGS : GenericInstruction {
+  let OutOperandList = (outs);
+  let InOperandList = (ins unknown:$succ, type0:$val0, variable_ops);
+  let hasSideEffects = false;
+}
+
 def G_FRAME_INDEX : GenericInstruction {
   let OutOperandList = (outs ptype0:$dst);
   let InOperandList = (ins unknown:$src2);

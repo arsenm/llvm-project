@@ -71,7 +71,10 @@ bool RegBankLegalizeHelper::findRuleAndApplyMapping(MachineInstr &MI) {
       return false;
   }
   if (!Mapping->SrcOpMapping.empty()) {
-    B.setInstr(MI);
+    if (MI.isTerminator())
+      B.setInsertPt(*MI.getParent(), MI.getParent()->getBlockEndInsertPt());
+    else
+      B.setInstr(MI);
     if (!applyMappingSrc(MI, OpIdx, Mapping->SrcOpMapping, WFI))
       return false;
   }
@@ -85,6 +88,42 @@ bool RegBankLegalizeHelper::findRuleAndApplyMapping(MachineInstr &MI) {
   }
 
   return true;
+}
+
+void RegBankLegalizeHelper::widenS1BlockArgs(MachineFunction &MF) {
+  // Uniform S1 G_PHI defs are widened to S32 by AextToS32InIncomingBlockGPHI:
+  // the def becomes S32 with a trunc back after the PHIs, and each incoming
+  // value is anyext'd to S32. Block arguments carry the same uniform S1 values
+  // but have no PHI instruction, so apply the equivalent widening directly to
+  // the block-argument list and its predecessors' SUCC_ARGS forwarders.
+  for (MachineBasicBlock &MBB : MF) {
+    if (!MBB.hasBlockArgs())
+      continue;
+
+    for (unsigned ArgNo = 0, E = MBB.getNumBlockArgs(); ArgNo != E; ++ArgNo) {
+      Register Arg = MBB.getBlockArg(ArgNo);
+      if (MRI.getType(Arg) != S1 || MRI.getRegBankOrNull(Arg) != SgprRB)
+        continue;
+
+      // Replace the S1 block-argument register with a fresh S32 register and
+      // materialize the S1 value as a trunc of it at the start of the block.
+      Register WideArg = MRI.createVirtualRegister(SgprRB_I32);
+      B.setInsertPt(MBB, MBB.SkipPHIsAndLabels(MBB.begin()));
+      B.buildTrunc(Arg, WideArg);
+      MBB.setBlockArg(ArgNo, WideArg);
+
+      // Anyext each predecessor's forwarded value to S32.
+      for (MachineBasicBlock *Pred : MBB.predecessors()) {
+        MachineInstr *SA = Pred->findSuccArgs(&MBB);
+        if (!SA)
+          continue;
+        MachineOperand &FwdOp = SA->getOperand(ArgNo + 1);
+        B.setInsertPt(*Pred, Pred->getBlockEndInsertPt());
+        auto Wide = B.buildAnyExt(SgprRB_I32, FwdOp.getReg());
+        FwdOp.setReg(Wide.getReg(0));
+      }
+    }
+  }
 }
 
 bool RegBankLegalizeHelper::executeInWaterfallLoop(MachineIRBuilder &B,
@@ -1733,10 +1772,17 @@ bool RegBankLegalizeHelper::lower(MachineInstr &MI,
     for (unsigned i = 1; i < MI.getNumOperands(); i += 2) {
       Register UseReg = MI.getOperand(i).getReg();
 
-      auto DefMI = MRI.getVRegDef(UseReg)->getIterator();
-      MachineBasicBlock *DefMBB = DefMI->getParent();
-
-      B.setInsertPt(*DefMBB, DefMBB->SkipPHIsAndLabels(std::next(DefMI)));
+      // The incoming value may be a block-argument register, which has no
+      // defining instruction; it is defined at the start of its block. Insert
+      // the extension after that block's PHIs rather than after a def.
+      if (MachineInstr *DefMI = MRI.getVRegDef(UseReg)) {
+        MachineBasicBlock *DefMBB = DefMI->getParent();
+        B.setInsertPt(*DefMBB, DefMBB->SkipPHIsAndLabels(
+                                   std::next(DefMI->getIterator())));
+      } else {
+        MachineBasicBlock *DefMBB = MRI.getDefBlock(UseReg);
+        B.setInsertPt(*DefMBB, DefMBB->SkipPHIsAndLabels(DefMBB->begin()));
+      }
 
       auto NewUse = B.buildAnyExt(SgprRB_I32, UseReg);
       MI.getOperand(i).setReg(NewUse.getReg(0));
@@ -1759,6 +1805,37 @@ bool RegBankLegalizeHelper::lower(MachineInstr &MI,
       const RegisterBank *RB = MRI.getRegBankOrNull(Op.getReg());
       return RB == VgprRB || RB == SgprRB;
     }));
+    return true;
+  }
+  case SuccArgs: {
+    // G_SUCC_ARGS operand 0 is the successor block; operands 1..N forward one
+    // value to each of its block arguments, which already have banks assigned.
+    // Reconcile each forwarded value to its receiver's bank by inserting a copy
+    // when they differ.
+    MachineBasicBlock &SuccMBB = *MI.getOperand(0).getMBB();
+    B.setInsertPt(*MI.getParent(), MI.getParent()->getBlockEndInsertPt());
+    for (unsigned I = 1, E = MI.getNumOperands(); I != E; ++I) {
+      MachineOperand &Op = MI.getOperand(I);
+      Register Reg = Op.getReg();
+      Register Arg = SuccMBB.getBlockArg(I - 1);
+
+      // A receiver with a register class rather than a bank is a lane mask
+      // (assigned by a pre-inst-selected instruction such as SI_IF). Copy the
+      // forwarded value into that lane-mask class.
+      if (const TargetRegisterClass *ArgRC = MRI.getRegClassOrNull(Arg)) {
+        if (MRI.getRegClassOrNull(Reg) == ArgRC)
+          continue;
+        auto Copy = B.buildCopy({ArgRC, MRI.getType(Reg)}, Reg);
+        Op.setReg(Copy.getReg(0));
+        continue;
+      }
+
+      const RegisterBank *ArgRB = MRI.getRegBankOrNull(Arg);
+      if (MRI.getRegBankOrNull(Reg) == ArgRB)
+        continue;
+      auto Copy = B.buildCopy({ArgRB, MRI.getType(Reg)}, Reg);
+      Op.setReg(Copy.getReg(0));
+    }
     return true;
   }
   case ApplyINTRIN_IMAGE: {

@@ -105,7 +105,8 @@ public:
   //   instruction is divergent
   bool isTemporalDivergenceCopy(Register Reg) {
     MachineInstr *MI = MRI.getVRegDef(Reg);
-    if (!MI->isCopy() || MI->getNumImplicitOperands() != 1)
+    // Block-argument registers have no defining instruction.
+    if (!MI || !MI->isCopy() || MI->getNumImplicitOperands() != 1)
       return false;
 
     return MI->implicit_operands().begin()->getReg() == TRI.getExec();
@@ -228,6 +229,17 @@ runRegBankSelect(MachineFunction &MF, function_ref<GISelCSEInfo *()> GetCSEInfo,
   // Virtual registers in def and use operands of already inst-selected
   // instruction have register class.
 
+  // Block-argument receiver registers have no defining instruction, so the
+  // def/use walk below never assigns them a bank. Seed each one from the
+  // uniformity analysis, like any other value.
+  for (MachineBasicBlock &MBB : MF) {
+    for (Register ArgReg : MBB.getBlockArgs()) {
+      if (MRI.getRegBankOrNull(ArgReg) || MRI.getRegClassOrNull(ArgReg))
+        continue;
+      MRI.setRegBank(ArgReg, *RBSHelper.getRegBankToAssign(ArgReg));
+    }
+  }
+
   for (MachineBasicBlock &MBB : MF) {
     for (MachineInstr &MI : MBB) {
       // Vregs in def and use operands of COPY can have either register class
@@ -276,10 +288,20 @@ runRegBankSelect(MachineFunction &MF, function_ref<GISelCSEInfo *()> GetCSEInfo,
         if (!UseReg.isValid())
           continue;
 
-        // Skip case (3).
+        // Skip case (3). A block-argument register has a register class but no
+        // defining instruction; its class comes from pre-inst-selection (e.g. a
+        // lane-mask argument used by SI_IF), so treat it like case (4).
+        MachineInstr *DefMI = MRI.getVRegDef(UseReg);
         if (!MRI.getRegClassOrNull(UseReg) ||
-            MRI.getVRegDef(UseReg)->isPreISelOpcode())
+            (DefMI && DefMI->isPreISelOpcode()))
           continue;
+
+        if (MI.getOpcode() == AMDGPU::G_SUCC_ARGS) {
+          const MachineBasicBlock *Succ = MI.getOperand(0).getMBB();
+          Register Arg = Succ->getBlockArg(UseOP.getOperandNo() - 1);
+          if (MRI.getRegClassOrNull(Arg))
+            continue;
+        }
 
         // Use with register class defined by pre-inst-selected instruction.
         const RegisterBank *RB = RBSHelper.getRegBankToAssign(UseReg);

@@ -81,6 +81,17 @@ public:
 
   bool lowerTemporalDivergence();
   bool lowerTemporalDivergenceI1();
+
+  // Block-argument analogues of the G_PHI lowering hooks, driven by the shared
+  // PhiLoweringHelper::lowerBlockArgs. A divergent i1 block argument has no
+  // defining G_PHI, so it is collected and merged into a lane mask directly
+  // from its predecessors' SUCC_ARGS forwarders.
+  void getBlockArgCandidatesForLowering(
+      SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &Candidates)
+      const override;
+  void collectIncomingValuesFromBlockArg(
+      MachineBasicBlock &MBB, unsigned ArgIdx,
+      SmallVectorImpl<AMDGPU::Incoming> &Incomings) const override;
 };
 
 DivergenceLoweringHelper::DivergenceLoweringHelper(
@@ -139,8 +150,16 @@ void DivergenceLoweringHelper::replaceDstReg(Register NewReg, Register OldReg,
 Register DivergenceLoweringHelper::buildRegCopyToLaneMask(Register Reg) {
   Register LaneMask = AMDGPU::createLaneMaskReg(MRI, LaneMaskRegAttrs);
   MachineInstr *Instr = MRI->getVRegDef(Reg);
-  MachineBasicBlock *MBB = Instr->getParent();
-  B.setInsertPt(*MBB, MBB->SkipPHIsAndLabels(std::next(Instr->getIterator())));
+  if (Instr) {
+    MachineBasicBlock *MBB = Instr->getParent();
+    B.setInsertPt(*MBB,
+                  MBB->SkipPHIsAndLabels(std::next(Instr->getIterator())));
+  } else {
+    // A block-argument register has no defining instruction; it is available
+    // at the start of the block that owns it.
+    MachineBasicBlock *MBB = MRI->getDefBlock(Reg);
+    B.setInsertPt(*MBB, MBB->SkipPHIsAndLabels(MBB->begin()));
+  }
   B.buildCopy(LaneMask, Reg);
   return LaneMask;
 }
@@ -192,7 +211,7 @@ void DivergenceLoweringHelper::buildMergeLaneMasks(
 // class. Insert a copy of Incoming.Reg to new lane mask inside Incoming.Block,
 // Incoming.Reg becomes that new lane mask.
 void DivergenceLoweringHelper::constrainAsLaneMask(AMDGPU::Incoming &In) {
-  B.setInsertPt(*In.Block, In.Block->getFirstTerminator());
+  B.setInsertPt(*In.Block, In.Block->getBlockEndInsertPt());
 
   auto Copy = B.buildCopy(LLT::scalar(1), In.Reg);
   MRI->setRegClass(Copy.getReg(0), ST->getBoolRC());
@@ -272,14 +291,14 @@ bool DivergenceLoweringHelper::lowerTemporalDivergenceI1() {
     for (auto Entry : CInfo.getEntries(Cycle)) {
       for (MachineBasicBlock *Pred : Entry->predecessors()) {
         if (!CInfo.contains(Cycle, Pred)) {
-          B.setInsertPt(*Pred, Pred->getFirstTerminator());
+          B.setInsertPt(*Pred, Pred->getBlockEndInsertPt());
           auto ImplDef = B.buildInstr(AMDGPU::IMPLICIT_DEF, {BoolS1}, {});
           SSAUpdater.AddAvailableValue(Pred, ImplDef.getReg(0));
         }
       }
     }
 
-    buildMergeLaneMasks(*MBB, MBB->getFirstTerminator(), {}, MergedMask,
+    buildMergeLaneMasks(*MBB, MBB->getBlockEndInsertPt(), {}, MergedMask,
                         SSAUpdater.GetValueInMiddleOfBlock(MBB), Reg);
 
     CycleMergedMask.second = MergedMask;
@@ -293,6 +312,36 @@ bool DivergenceLoweringHelper::lowerTemporalDivergenceI1() {
   }
 
   return false;
+}
+
+// Gather divergent i1 block-argument receivers. Record the owning block and the
+// argument register (not the index): removing an argument shifts the indices of
+// later arguments, so the index is looked up at replacement time.
+void DivergenceLoweringHelper::getBlockArgCandidatesForLowering(
+    SmallVectorImpl<std::pair<MachineBasicBlock *, Register>> &Candidates)
+    const {
+  LLT S1 = LLT::scalar(1);
+  for (MachineBasicBlock &MBB : MF) {
+    for (Register Arg : MBB.getBlockArgs()) {
+      if (MRI->getType(Arg) == S1 && MUI->isDivergentAtDef(Arg))
+        Candidates.emplace_back(&MBB, Arg);
+    }
+  }
+}
+
+// Collect the incoming lane-mask values for the block argument at index \p
+// ArgIdx of \p MBB from each predecessor's SUCC_ARGS forwarder. The block
+// argument corresponds positionally to SUCC_ARGS operand ArgIdx + 1 (operand 0
+// is the successor block).
+void DivergenceLoweringHelper::collectIncomingValuesFromBlockArg(
+    MachineBasicBlock &MBB, unsigned ArgIdx,
+    SmallVectorImpl<AMDGPU::Incoming> &Incomings) const {
+  for (MachineBasicBlock *Pred : MBB.predecessors()) {
+    if (MachineInstr *SA = Pred->findSuccArgs(&MBB)) {
+      Register IncomingReg = SA->getOperand(ArgIdx + 1).getReg();
+      Incomings.emplace_back(IncomingReg, Pred, Register());
+    }
+  }
 }
 
 static bool runDivergenceLowering(MachineFunction &MF, MachineDominatorTree &DT,
@@ -316,6 +365,9 @@ static bool runDivergenceLowering(MachineFunction &MF, MachineDominatorTree &DT,
   // could also be handled by lowerPhis but we do it in lowerTempDivergenceI1
   // since in some case lowerPhis does unnecessary lane mask merging.
   Changed |= Helper.lowerPhis();
+  // Divergent i1 block arguments (the block-args analogue of divergent i1 phis)
+  // are lowered the same way, sourcing incoming values from SUCC_ARGS.
+  Changed |= Helper.lowerBlockArgs();
   return Changed;
 }
 

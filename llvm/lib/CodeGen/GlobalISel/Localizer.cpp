@@ -93,6 +93,19 @@ void LocalizerLegacy::getAnalysisUsage(AnalysisUsage &AU) const {
   MachineFunctionPass::getAnalysisUsage(AU);
 }
 
+/// Return the point to insert an instruction that feeds \p UseMI. A SUCC_ARGS
+/// cluster must stay contiguous with the terminators, so anything feeding a
+/// SUCC_ARGS or a terminator goes before the whole cluster.
+static MachineBasicBlock::iterator getInsertPtBefore(MachineInstr &UseMI) {
+  if (UseMI.isSuccArgs() || UseMI.isTerminator()) {
+    MachineBasicBlock &MBB = *UseMI.getParent();
+    MachineBasicBlock::iterator FirstSuccArgs = MBB.getFirstSuccArgs();
+    if (FirstSuccArgs != MBB.getFirstTerminator())
+      return FirstSuccArgs;
+  }
+  return UseMI;
+}
+
 bool LocalizerImpl::isLocalUse(MachineOperand &MOUse, const MachineInstr &Def,
                                MachineBasicBlock *&InsertMBB) {
   MachineInstr &MIUse = *MOUse.getParent();
@@ -170,7 +183,7 @@ bool LocalizerImpl::localizeInterBlock(MachineFunction &MF,
         LocalizedInstrs.insert(LocalizedMI);
         MachineInstr &UseMI = *MOUse.getParent();
         if (MRI->hasOneNonDBGUse(Reg) && !UseMI.isPHI())
-          InsertMBB->insert(UseMI, LocalizedMI);
+          InsertMBB->insert(getInsertPtBefore(UseMI), LocalizedMI);
         else
           InsertMBB->insert(InsertMBB->SkipPHIsAndLabels(InsertMBB->begin()),
                             LocalizedMI);
@@ -223,6 +236,7 @@ bool LocalizerImpl::localizeIntraBlock(LocalizedSetVecT &LocalizedInstrs) {
       while (II != MBB.end() && !Users.count(&*II))
         ++II;
       assert(II != MBB.end() && "Didn't find the user in the MBB");
+      II = getInsertPtBefore(*II);
       LLVM_DEBUG(dbgs() << "Intra-block: moving " << *MI << " before " << *II);
     }
 

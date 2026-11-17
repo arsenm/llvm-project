@@ -138,6 +138,21 @@ bool DeadMachineInstructionElimImpl::eliminateDeadMI(
 
       LivePhysRegs.stepBackward(MI);
     }
+
+    for (unsigned I = MBB->getNumBlockArgs(); I-- != 0;) {
+      Register Arg = MBB->getBlockArg(I);
+      if (!MRI->use_nodbg_empty(Arg))
+        continue;
+
+      LLVM_DEBUG(dbgs() << "DeadMachineInstructionElim: DELETING block arg "
+                        << printReg(Arg) << " of " << printMBBReference(*MBB)
+                        << '\n');
+      MBB->removeBlockArgAndUpdateSuccArgs(I);
+      for (MachineBasicBlock *P : MBB->predecessors())
+        NeedsProcessing.insert(P);
+      AnyChanges = true;
+      ++NumDeletes;
+    }
   }
   LivePhysRegs.clear();
   NeedAnotherIteration = !NeedsProcessing.empty();

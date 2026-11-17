@@ -680,6 +680,11 @@ struct DataDep {
   DataDep(const MachineInstr *DefMI, unsigned DefOp, unsigned UseOp)
     : DefMI(DefMI), DefOp(DefOp), UseOp(UseOp) {}
 
+  /// Create a DataDep from the unique def operand of an SSA form virtual
+  /// register.
+  DataDep(const MachineOperand *DefMO, unsigned UseOp)
+      : DefMI(DefMO->getParent()), DefOp(DefMO->getOperandNo()), UseOp(UseOp) {}
+
   /// Create a DataDep from an SSA form virtual register.
   DataDep(const MachineRegisterInfo *MRI, Register VirtReg, unsigned UseOp)
       : UseOp(UseOp) {
@@ -697,7 +702,8 @@ struct DataDep {
 // Return true if UseMI has any physreg operands.
 static bool getDataDeps(const MachineInstr &UseMI,
                         SmallVectorImpl<DataDep> &Deps,
-                        const MachineRegisterInfo *MRI) {
+                        const MachineRegisterInfo *MRI,
+                        SmallVectorImpl<unsigned> *BlockArgOps = nullptr) {
   // Debug values should not be included in any calculations.
   if (UseMI.isDebugInstr())
     return false;
@@ -713,9 +719,17 @@ static bool getDataDeps(const MachineInstr &UseMI,
       HasPhysRegs = true;
       continue;
     }
+    // A block-argument register is defined by its block, not by an
+    // instruction, so it has no in-trace data dependency (like a live-in).
+    MachineOperand *DefMO = MRI->getOneDef(Reg);
+    if (!DefMO) {
+      if (BlockArgOps && MO.readsReg() && MRI->isBlockArgDef(Reg))
+        BlockArgOps->push_back(MO.getOperandNo());
+      continue;
+    }
     // Collect virtual register reads.
     if (MO.readsReg())
-      Deps.push_back(DataDep(MRI, Reg, MO.getOperandNo()));
+      Deps.push_back(DataDep(DefMO, MO.getOperandNo()));
   }
   return HasPhysRegs;
 }
@@ -734,7 +748,10 @@ static void getPHIDeps(const MachineInstr &UseMI,
   for (unsigned i = 1; i != UseMI.getNumOperands(); i += 2) {
     if (UseMI.getOperand(i + 1).getMBB() == Pred) {
       Register Reg = UseMI.getOperand(i).getReg();
-      Deps.push_back(DataDep(MRI, Reg, i));
+      // A block-argument register is defined by its block, not by an
+      // instruction, so it has no in-trace data dependency (like a live-in).
+      if (MachineOperand *DefMO = MRI->getOneDef(Reg))
+        Deps.push_back(DataDep(DefMO, i));
       return;
     }
   }
@@ -825,11 +842,18 @@ void MachineTraceMetrics::Ensemble::updateDepth(TraceBlockInfo &TBI,
                                                 const MachineInstr &UseMI,
                                                 LiveRegUnitSet &RegUnits) {
   SmallVector<DataDep, 8> Deps;
+  SmallVector<unsigned, 4> BlockArgOps;
   // Collect all data dependencies.
-  if (UseMI.isPHI())
+  if (UseMI.isPHI()) {
     getPHIDeps(UseMI, Deps, TBI.Pred, MTM.MRI);
-  else if (getDataDeps(UseMI, Deps, MTM.MRI))
-    updatePhysDepsDownwards(&UseMI, Deps, RegUnits, MTM.TRI);
+  } else if (!UseMI.isSuccArgs()) {
+    if (getDataDeps(UseMI, Deps, MTM.MRI, &BlockArgOps))
+      updatePhysDepsDownwards(&UseMI, Deps, RegUnits, MTM.TRI);
+    for (unsigned OpIdx : BlockArgOps)
+      if (const MachineOperand *DefMO =
+              getBlockArgSource(UseMI.getOperand(OpIdx).getReg(), TBI))
+        Deps.push_back(DataDep(DefMO, OpIdx));
+  }
 
   // Filter and process dependencies, computing the earliest issue cycle.
   unsigned Cycle = 0;
@@ -858,6 +882,61 @@ void MachineTraceMetrics::Ensemble::updateDepth(TraceBlockInfo &TBI,
   } else {
     LLVM_DEBUG(dbgs() << Cycle << '\t' << UseMI);
   }
+}
+
+const MachineOperand *MachineTraceMetrics::Ensemble::getBlockArgSource(
+    Register Arg, const TraceBlockInfo &TBI) const {
+  const MachineRegisterInfo *MRI = MTM.MRI;
+  for (unsigned Depth = 0; Depth != 8; ++Depth) {
+    const MachineBasicBlock *MBB = MRI->getBlockArgDef(Arg);
+    if (!MBB)
+      return nullptr;
+    const TraceBlockInfo &ArgTBI = BlockInfo[MBB->getNumber()];
+    if (!ArgTBI.Pred || !ArgTBI.isUsefulDominator(TBI))
+      return nullptr;
+    const MachineInstr *SA = ArgTBI.Pred->findSuccArgs(MBB);
+    if (!SA)
+      return nullptr;
+    ArrayRef<Register> Args = MBB->getBlockArgs();
+    unsigned Idx = llvm::find(Args, Arg) - Args.begin();
+    Register Src = SA->getOperand(Idx + 1).getReg();
+    if (!Src.isVirtual())
+      return nullptr;
+    if (const MachineOperand *DefMO = MRI->getOneDef(Src))
+      return DefMO;
+    Arg = Src;
+  }
+  return nullptr;
+}
+
+unsigned
+MachineTraceMetrics::Ensemble::getBlockArgHeight(Register Arg,
+                                                 unsigned Depth) const {
+  const MachineBasicBlock *ArgMBB = MTM.MRI->getBlockArgDef(Arg);
+  SmallPtrSet<const MachineBasicBlock *, 8> TraceBelow;
+  for (const MachineBasicBlock *MBB = ArgMBB; MBB;
+       MBB = BlockInfo[MBB->getNumber()].Succ)
+    if (!TraceBelow.insert(MBB).second)
+      break;
+
+  unsigned Height = 0;
+  for (const MachineInstr &UseMI : MTM.MRI->use_nodbg_instructions(Arg)) {
+    const MachineBasicBlock *UseMBB = UseMI.getParent();
+    if (!TraceBelow.contains(UseMBB))
+      continue;
+    if (!UseMI.isSuccArgs()) {
+      Height = std::max(Height, Cycles.lookup(&UseMI).Height);
+      continue;
+    }
+    const MachineBasicBlock *Succ = UseMI.getOperand(0).getMBB();
+    if (Depth == 8 || BlockInfo[UseMBB->getNumber()].Succ != Succ)
+      continue;
+    for (unsigned I = 1, E = UseMI.getNumOperands(); I != E; ++I)
+      if (UseMI.getOperand(I).getReg() == Arg)
+        Height = std::max(
+            Height, getBlockArgHeight(Succ->getBlockArg(I - 1), Depth + 1));
+  }
+  return Height;
 }
 
 void MachineTraceMetrics::Ensemble::updateDepth(const MachineBasicBlock *MBB,
@@ -1124,6 +1203,22 @@ computeInstrHeights(const MachineBasicBlock *MBB) {
             addLiveIns(Deps.front().DefMI, Deps.front().DefOp, Stack);
         }
       }
+
+      if (const MachineInstr *SA =
+              Succ->hasBlockArgs() ? MBB->findSuccArgs(Succ) : nullptr) {
+        for (unsigned I = 1, E = SA->getNumOperands(); I != E; ++I) {
+          Register Reg = SA->getOperand(I).getReg();
+          const MachineOperand *DefMO =
+              Reg.isVirtual() ? MTM.MRI->getOneDef(Reg) : nullptr;
+          if (!DefMO)
+            continue;
+          unsigned Height =
+              TBI.Succ ? getBlockArgHeight(Succ->getBlockArg(I - 1)) : 0;
+          if (pushDepHeight(DataDep(DefMO, I), *SA, Height, Heights,
+                            MTM.SchedModel, MTM.TII))
+            addLiveIns(DefMO->getParent(), DefMO->getOperandNo(), Stack);
+        }
+      }
     }
 
     // Go through the block backwards.
@@ -1141,7 +1236,8 @@ computeInstrHeights(const MachineBasicBlock *MBB) {
       // Don't process PHI deps. They depend on the specific predecessor, and
       // we'll get them when visiting the predecessor.
       Deps.clear();
-      bool HasPhysRegs = !MI.isPHI() && getDataDeps(MI, Deps, MTM.MRI);
+      bool HasPhysRegs =
+          !MI.isPHI() && !MI.isSuccArgs() && getDataDeps(MI, Deps, MTM.MRI);
 
       // There may also be regunit dependencies to include in the height.
       if (HasPhysRegs)
@@ -1226,6 +1322,27 @@ MachineTraceMetrics::Trace::getPHIDepth(const MachineInstr &PHI) const {
     DepCycle += TE.MTM.SchedModel.computeOperandLatency(Dep.DefMI, Dep.DefOp,
                                                         &PHI, Dep.UseOp);
   return DepCycle;
+}
+
+unsigned
+MachineTraceMetrics::Trace::getSuccArgDepth(const MachineInstr &SuccArgs,
+                                            unsigned OpIdx) const {
+  Register Reg = SuccArgs.getOperand(OpIdx).getReg();
+  const MachineOperand *DefMO = TE.MTM.MRI->getOneDef(Reg);
+  if (!DefMO && TE.MTM.MRI->isBlockArgDef(Reg))
+    DefMO = TE.getBlockArgSource(Reg, TBI);
+  if (!DefMO)
+    return 0;
+  const MachineInstr *DefMI = DefMO->getParent();
+  unsigned DepCycle = getInstrCycles(*DefMI).Depth;
+  if (!DefMI->isTransient())
+    DepCycle += TE.MTM.SchedModel.computeOperandLatency(
+        DefMI, DefMO->getOperandNo(), &SuccArgs, OpIdx);
+  return DepCycle;
+}
+
+unsigned MachineTraceMetrics::Trace::getBlockArgHeight(Register Arg) const {
+  return TE.getBlockArgHeight(Arg);
 }
 
 /// When bottom is set include instructions in current block in estimate.

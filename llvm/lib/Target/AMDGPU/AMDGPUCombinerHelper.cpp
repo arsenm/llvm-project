@@ -101,6 +101,7 @@ static bool hasSourceMods(const MachineInstr &MI) {
   case AMDGPU::G_BUILD_VECTOR:
   case AMDGPU::G_BUILD_VECTOR_TRUNC:
   case AMDGPU::G_PHI:
+  case AMDGPU::G_SUCC_ARGS:
     return false;
   case AMDGPU::G_INTRINSIC:
   case AMDGPU::G_INTRINSIC_CONVERGENT: {
@@ -209,6 +210,9 @@ bool AMDGPUCombinerHelper::matchFoldableFneg(MachineInstr &MI,
                                              MachineInstr *&MatchInfo) const {
   Register Src = MI.getOperand(1).getReg();
   MatchInfo = MRI.getVRegDef(Src);
+  // A block-argument source has no defining instruction to fold into.
+  if (!MatchInfo)
+    return false;
 
   // If the input has multiple uses and we can either fold the negate down, or
   // the other uses cannot, give up. This both prevents unprofitable

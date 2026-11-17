@@ -45,6 +45,41 @@ TEST_F(AArch64GISelMITest, TestKnownBitsCstPHI) {
   EXPECT_EQ(Res.Zero.getZExtValue(), Res2.Zero.getZExtValue());
 }
 
+// Same as TestKnownBitsCstPHI, but the value is a block argument fed by a
+// SUCC_ARGS in each predecessor rather than a PHI.
+TEST_F(AArch64GISelMITest, TestKnownBitsCstBlockArg) {
+  StringRef MIRString = "  bb.10:\n"
+                        "  %10:_(s8) = G_CONSTANT i8 3\n"
+                        "  %11:_(s1) = G_IMPLICIT_DEF\n"
+                        "  SUCC_ARGS %bb.12, %10(s8)\n"
+                        "  G_BRCOND %11(s1), %bb.11\n"
+                        "  G_BR %bb.12\n"
+                        "\n"
+                        "  bb.11:\n"
+                        "  %12:_(s8) = G_CONSTANT i8 2\n"
+                        "  SUCC_ARGS %bb.12, %12(s8)\n"
+                        "  G_BR %bb.12\n"
+                        "\n"
+                        "  bb.12:\n"
+                        "  arguments: %13:_(s8)\n"
+                        "  %14:_(s8) = COPY %13\n";
+  setUp(MIRString);
+  if (!TM)
+    GTEST_SKIP();
+  Register CopyReg = Copies[Copies.size() - 1];
+  MachineInstr *FinalCopy = MRI->getVRegDef(CopyReg);
+  Register SrcReg = FinalCopy->getOperand(1).getReg();
+  Register DstReg = FinalCopy->getOperand(0).getReg();
+  GISelValueTracking Info(*MF);
+  KnownBits Res = Info.getKnownBits(SrcReg);
+  EXPECT_EQ((uint64_t)2, Res.One.getZExtValue());
+  EXPECT_EQ((uint64_t)0xfc, Res.Zero.getZExtValue());
+
+  KnownBits Res2 = Info.getKnownBits(DstReg);
+  EXPECT_EQ(Res.One.getZExtValue(), Res2.One.getZExtValue());
+  EXPECT_EQ(Res.Zero.getZExtValue(), Res2.Zero.getZExtValue());
+}
+
 // Check that we report we know nothing when we hit a
 // non-generic register.
 // Note: this could be improved though!

@@ -198,7 +198,8 @@ public:
     FailsVerification,
     FailedRegAlloc,
     TracksDebugUserValues,
-    LastProperty = TracksDebugUserValues,
+    UsesBlockArgs,
+    LastProperty = UsesBlockArgs,
   };
 
   bool hasProperty(Property P) const {
@@ -233,6 +234,7 @@ public:
   PPACCESSORS(FailsVerification)
   PPACCESSORS(FailedRegAlloc)
   PPACCESSORS(TracksDebugUserValues)
+  PPACCESSORS(UsesBlockArgs)
 
   /// Reset all the properties.
   MachineFunctionProperties &reset() {
@@ -665,6 +667,8 @@ public:
                  DenseMap<Register, DebugInstrOperandPair> &DbgPHICache);
 
   DebugInstrOperandPair salvageCopySSAImpl(MachineInstr &MI);
+
+  unsigned createBlockArgDbgPHI(Register Arg);
 
   /// Finalise any partially emitted debug instructions. These are DBG_INSTR_REF
   /// instructions where we only knew the vreg of the value they use, not the

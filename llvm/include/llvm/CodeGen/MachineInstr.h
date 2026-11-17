@@ -1432,6 +1432,10 @@ public:
     return getOpcode() == TargetOpcode::PHI ||
            getOpcode() == TargetOpcode::G_PHI;
   }
+  bool isSuccArgs() const {
+    return getOpcode() == TargetOpcode::SUCC_ARGS ||
+           getOpcode() == TargetOpcode::G_SUCC_ARGS;
+  }
   bool isKill() const { return getOpcode() == TargetOpcode::KILL; }
   bool isImplicitDef() const { return getOpcode()==TargetOpcode::IMPLICIT_DEF; }
   bool isInlineAsm() const {
@@ -1502,6 +1506,8 @@ public:
     // Copy-like instructions are usually eliminated during register allocation.
     case TargetOpcode::PHI:
     case TargetOpcode::G_PHI:
+    case TargetOpcode::SUCC_ARGS:
+    case TargetOpcode::G_SUCC_ARGS:
     case TargetOpcode::COPY:
     case TargetOpcode::COPY_LANEMASK:
     case TargetOpcode::INSERT_SUBREG:
